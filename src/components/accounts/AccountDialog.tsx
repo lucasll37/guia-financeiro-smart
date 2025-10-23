@@ -69,14 +69,17 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
     if (!formData.is_shared) return true;
     
     const total = splitMembers.reduce((sum, m) => sum + m.percent, 0);
-    if (total !== 100) {
-      setErrors({ split: "A soma dos percentuais deve ser exatamente 100%" });
+    if (total > 100) {
+      setErrors({ split: "A soma dos percentuais não pode exceder 100%" });
       return false;
     }
     
     setErrors({});
     return true;
   };
+
+  const totalPercent = splitMembers.reduce((sum, m) => sum + m.percent, 0);
+  const ownerPercent = 100 - totalPercent;
 
   const handleSubmit = () => {
     if (!formData.name.trim()) {
@@ -86,9 +89,21 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
 
     if (!validateSplit()) return;
 
+    // Calcular percentual remanescente para o criador da conta
+    const totalMembersPercent = splitMembers.reduce((sum, m) => sum + m.percent, 0);
+    const ownerPercent = 100 - totalMembersPercent;
+
+    // Se é conta compartilhada, incluir o criador com o percentual remanescente
+    const finalSplit = formData.is_shared 
+      ? [
+          { email: "owner", percent: ownerPercent }, // "owner" representa o criador
+          ...splitMembers
+        ]
+      : [];
+
     onSave({
       ...formData,
-      default_split: (formData.is_shared ? splitMembers : []) as any,
+      default_split: finalSplit as any,
     });
   };
 
@@ -105,8 +120,6 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
     updated[index] = { ...updated[index], [field]: value };
     setSplitMembers(updated);
   };
-
-  const totalPercent = splitMembers.reduce((sum, m) => sum + m.percent, 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -214,12 +227,30 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
                   </div>
                 ))}
 
+                <div className="flex items-center justify-between text-sm p-3 bg-muted rounded-lg">
+                  <div>
+                    <p className="font-medium">Seu percentual (criador):</p>
+                    <p className="text-xs text-muted-foreground">
+                      Percentual calculado automaticamente
+                    </p>
+                  </div>
+                  <span className={ownerPercent >= 0 ? "text-green-600 font-bold text-lg" : "text-destructive font-bold text-lg"}>
+                    {ownerPercent}%
+                  </span>
+                </div>
+
                 <div className="flex items-center justify-between text-sm">
-                  <span>Total:</span>
-                  <span className={totalPercent === 100 ? "text-green-600 font-medium" : "text-destructive font-medium"}>
+                  <span>Total dos membros:</span>
+                  <span className={totalPercent <= 100 ? "text-muted-foreground font-medium" : "text-destructive font-medium"}>
                     {totalPercent}%
                   </span>
                 </div>
+
+                {totalPercent > 100 && (
+                  <p className="text-sm text-destructive">
+                    A soma dos percentuais dos membros excede 100%
+                  </p>
+                )}
 
                 {errors.split && <p className="text-sm text-destructive">{errors.split}</p>}
               </div>
