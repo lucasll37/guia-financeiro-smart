@@ -14,11 +14,24 @@ import { useInvestments } from "@/hooks/useInvestments";
 import { InvestmentDialog } from "@/components/investments/InvestmentDialog";
 import { InvestmentTable } from "@/components/investments/InvestmentTable";
 import { InvestmentSimulator } from "@/components/investments/InvestmentSimulator";
+import { RequirePlan } from "@/components/subscription/RequirePlan";
 import type { Database } from "@/integrations/supabase/types";
 
 type Investment = Database["public"]["Tables"]["investment_assets"]["Row"];
 
 export default function Investments() {
+  return (
+    <RequirePlan
+      requiredPlan="pro"
+      feature="Módulo de Investimentos"
+      description="Acompanhe sua carteira de investimentos com simulações e projeções de rentabilidade. Disponível apenas no plano Pro com projeções de IA e análises avançadas."
+    >
+      <InvestmentsContent />
+    </RequirePlan>
+  );
+}
+
+function InvestmentsContent() {
   const [selectedAccountId, setSelectedAccountId] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedInvestment, setSelectedInvestment] = useState<Investment | null>(null);

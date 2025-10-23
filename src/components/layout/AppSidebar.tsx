@@ -6,7 +6,8 @@ import {
   Target, 
   TrendingUp, 
   FileText, 
-  Settings 
+  Settings,
+  Sparkles
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
@@ -20,6 +21,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Badge } from "@/components/ui/badge";
+import { useSubscription } from "@/hooks/useSubscription";
 import { t } from "@/lib/i18n";
 
 const menuItems = [
@@ -27,14 +30,15 @@ const menuItems = [
   { title: t("nav.accounts"), url: "/contas", icon: Wallet },
   { title: t("nav.categories"), url: "/categorias", icon: Tag },
   { title: t("nav.transactions"), url: "/lancamentos", icon: ArrowLeftRight },
-  { title: t("nav.goals"), url: "/metas", icon: Target },
-  { title: t("nav.investments"), url: "/investimentos", icon: TrendingUp },
-  { title: t("nav.reports"), url: "/relatorios", icon: FileText },
+  { title: t("nav.goals"), url: "/metas", icon: Target, requiredPlan: "plus" as const },
+  { title: t("nav.investments"), url: "/investimentos", icon: TrendingUp, requiredPlan: "pro" as const },
+  { title: t("nav.reports"), url: "/relatorios", icon: FileText, requiredPlan: "plus" as const },
   { title: t("nav.settings"), url: "/configuracoes", icon: Settings },
 ];
 
 export function AppSidebar() {
   const { state } = useSidebar();
+  const { subscription } = useSubscription();
   const isCollapsed = state === "collapsed";
 
   return (
@@ -56,11 +60,37 @@ export function AppSidebar() {
                       }
                     >
                       <item.icon className="h-4 w-4" />
-                      {!isCollapsed && <span>{item.title}</span>}
+                      {!isCollapsed && (
+                        <span className="flex items-center gap-2">
+                          {item.title}
+                          {item.requiredPlan &&
+                            subscription?.plan === "free" && (
+                              <Badge variant="secondary" className="text-xs">
+                                {item.requiredPlan === "plus" ? "Plus" : "Pro"}
+                              </Badge>
+                            )}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Assinatura">
+                  <NavLink
+                    to="/assinatura"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                        : ""
+                    }
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    {!isCollapsed && <span>Assinatura</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

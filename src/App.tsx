@@ -16,6 +16,9 @@ import Goals from "./pages/Goals";
 import Investments from "./pages/Investments";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import Subscription from "./pages/Subscription";
+import CheckoutSuccess from "./pages/CheckoutSuccess";
+import CheckoutCancel from "./pages/CheckoutCancel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +52,8 @@ const App = () => (
           <AuthProvider>
             <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/checkout/success" element={<CheckoutSuccess />} />
+            <Route path="/checkout/cancel" element={<CheckoutCancel />} />
             <Route
               path="/"
               element={
@@ -66,6 +71,7 @@ const App = () => (
               <Route path="investimentos" element={<Investments />} />
               <Route path="relatorios" element={<Reports />} />
               <Route path="configuracoes" element={<Settings />} />
+              <Route path="assinatura" element={<Subscription />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { GoalDialog } from "@/components/goals/GoalDialog";
+import { RequirePlan } from "@/components/subscription/RequirePlan";
 import { evaluateNotifications } from "@/lib/notificationEvaluator";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -16,6 +17,18 @@ type Goal = Database["public"]["Tables"]["goals"]["Row"];
 type GoalInsert = Database["public"]["Tables"]["goals"]["Insert"];
 
 export default function Goals() {
+  return (
+    <RequirePlan
+      requiredPlan="plus"
+      feature="Metas Financeiras"
+      description="Defina e acompanhe suas metas financeiras com o plano Plus ou Pro. Visualize progresso em tempo real e receba alertas quando estiver próximo de atingir seus objetivos."
+    >
+      <GoalsContent />
+    </RequirePlan>
+  );
+}
+
+function GoalsContent() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { accounts } = useAccounts();
