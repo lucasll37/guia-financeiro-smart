@@ -7,21 +7,8 @@ import {
   GeneratedReport,
 } from "@/components/reports/ReportGenerator";
 import { ReportHistory } from "@/components/reports/ReportHistory";
-import { RequirePlan } from "@/components/subscription/RequirePlan";
 
 export default function Reports() {
-  return (
-    <RequirePlan
-      requiredPlan="plus"
-      feature="Relatórios e Exportações"
-      description="Gere relatórios detalhados em PDF, CSV e Excel. Envie por email e mantenha histórico de relatórios. Disponível nos planos Plus e Pro."
-    >
-      <ReportsContent />
-    </RequirePlan>
-  );
-}
-
-function ReportsContent() {
   const { accounts } = useAccounts();
   const { transactions } = useTransactions();
   const { categories } = useCategories();

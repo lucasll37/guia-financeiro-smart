@@ -7,10 +7,8 @@ import { useBudgets } from "@/hooks/useBudgets";
 import { useGoals } from "@/hooks/useGoals";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useInvestments } from "@/hooks/useInvestments";
-import { useSubscription } from "@/hooks/useSubscription";
 import { DashboardFiltersComponent, DashboardFilters } from "@/components/dashboard/DashboardFilters";
 import { DashboardKPIs } from "@/components/dashboard/DashboardKPIs";
-import { UpgradeBanner } from "@/components/subscription/UpgradeBanner";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -40,7 +38,6 @@ type Transaction = Database["public"]["Tables"]["transactions"]["Row"];
 
 export default function Dashboard() {
   const { toast } = useToast();
-  const { subscription } = useSubscription();
   const [filters, setFilters] = useState<DashboardFilters>({
     dateFrom: startOfMonth(new Date()),
     dateTo: endOfMonth(new Date()),
@@ -184,14 +181,6 @@ export default function Dashboard() {
 
       {accounts && accounts.length > 0 && (
         <>
-          {subscription?.plan === "free" && (
-            <UpgradeBanner
-              title="Desbloqueie Recursos Premium"
-              description="Faça upgrade para Plus ou Pro e tenha acesso a metas, relatórios, investimentos e muito mais."
-              requiredPlan="plus"
-            />
-          )}
-
           <DashboardFiltersComponent
             accounts={accounts}
             filters={filters}

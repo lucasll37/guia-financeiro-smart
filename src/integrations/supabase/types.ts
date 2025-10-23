@@ -382,48 +382,6 @@ export type Database = {
         }
         Relationships: []
       }
-      subscriptions: {
-        Row: {
-          billing_cycle: Database["public"]["Enums"]["billing_cycle"] | null
-          created_at: string
-          current_period_end: string | null
-          id: string
-          plan: Database["public"]["Enums"]["subscription_plan"]
-          status: Database["public"]["Enums"]["subscription_status"]
-          stripe_customer_id: string | null
-          stripe_subscription_id: string | null
-          trial_end: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          billing_cycle?: Database["public"]["Enums"]["billing_cycle"] | null
-          created_at?: string
-          current_period_end?: string | null
-          id?: string
-          plan?: Database["public"]["Enums"]["subscription_plan"]
-          status?: Database["public"]["Enums"]["subscription_status"]
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          trial_end?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          billing_cycle?: Database["public"]["Enums"]["billing_cycle"] | null
-          created_at?: string
-          current_period_end?: string | null
-          id?: string
-          plan?: Database["public"]["Enums"]["subscription_plan"]
-          status?: Database["public"]["Enums"]["subscription_status"]
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          trial_end?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       transactions: {
         Row: {
           account_id: string
@@ -497,19 +455,11 @@ export type Database = {
         Args: { account_uuid: string; user_uuid: string }
         Returns: boolean
       }
-      user_has_plan: {
-        Args: {
-          _required_plan: Database["public"]["Enums"]["subscription_plan"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
     }
     Enums: {
       account_member_role: "owner" | "editor" | "viewer"
       account_type: "pessoal" | "casa" | "empresa" | "conjugal" | "outro"
       audit_action: "create" | "update" | "delete"
-      billing_cycle: "monthly" | "annual"
       category_type: "despesa" | "receita"
       investment_type: "renda_fixa" | "fundo" | "acao" | "outro"
       member_status: "pending" | "accepted" | "rejected"
@@ -519,13 +469,6 @@ export type Database = {
         | "goal"
         | "budget_alert"
         | "system"
-      subscription_plan: "free" | "plus" | "pro"
-      subscription_status:
-        | "trialing"
-        | "active"
-        | "canceled"
-        | "expired"
-        | "incomplete"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -656,7 +599,6 @@ export const Constants = {
       account_member_role: ["owner", "editor", "viewer"],
       account_type: ["pessoal", "casa", "empresa", "conjugal", "outro"],
       audit_action: ["create", "update", "delete"],
-      billing_cycle: ["monthly", "annual"],
       category_type: ["despesa", "receita"],
       investment_type: ["renda_fixa", "fundo", "acao", "outro"],
       member_status: ["pending", "accepted", "rejected"],
@@ -666,14 +608,6 @@ export const Constants = {
         "goal",
         "budget_alert",
         "system",
-      ],
-      subscription_plan: ["free", "plus", "pro"],
-      subscription_status: [
-        "trialing",
-        "active",
-        "canceled",
-        "expired",
-        "incomplete",
       ],
     },
   },
