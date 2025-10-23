@@ -286,6 +286,7 @@ export type Database = {
           created_at: string
           fees: number
           id: string
+          initial_month: string
           monthly_rate: number
           name: string
           type: Database["public"]["Enums"]["investment_type"]
@@ -297,6 +298,7 @@ export type Database = {
           created_at?: string
           fees?: number
           id?: string
+          initial_month?: string
           monthly_rate?: number
           name: string
           type: Database["public"]["Enums"]["investment_type"]
@@ -308,6 +310,7 @@ export type Database = {
           created_at?: string
           fees?: number
           id?: string
+          initial_month?: string
           monthly_rate?: number
           name?: string
           type?: Database["public"]["Enums"]["investment_type"]

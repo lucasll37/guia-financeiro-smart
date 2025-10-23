@@ -30,14 +30,16 @@ export function useMonthlyReturns(investmentId?: string) {
 
   const createReturn = useMutation({
     mutationFn: async (returnData: MonthlyReturnInsert) => {
-      // Get the investment to access its balance and previous returns
+      // Get the investment to access its balance and initial_month
       const { data: investment } = await supabase
         .from("investment_assets")
-        .select("balance")
+        .select("balance, initial_month")
         .eq("id", returnData.investment_id)
         .single();
 
-      // Get the most recent return to calculate balance_after
+      if (!investment) throw new Error("Investment not found");
+
+      // Get the most recent return to calculate next month and balance_after
       const { data: previousReturns } = await supabase
         .from("investment_monthly_returns")
         .select("*")
@@ -45,9 +47,20 @@ export function useMonthlyReturns(investmentId?: string) {
         .order("month", { ascending: false })
         .limit(1);
 
+      // Calculate the next sequential month
+      let nextMonth: string;
+      if (previousReturns && previousReturns.length > 0) {
+        const lastMonth = new Date(previousReturns[0].month);
+        lastMonth.setMonth(lastMonth.getMonth() + 1);
+        nextMonth = lastMonth.toISOString().split('T')[0].slice(0, 7) + '-01';
+      } else {
+        // First return, use initial_month
+        nextMonth = investment.initial_month;
+      }
+
       const previousBalance = previousReturns && previousReturns.length > 0
         ? Number(previousReturns[0].balance_after)
-        : Number(investment?.balance || 0);
+        : Number(investment.balance || 0);
 
       // Calculate balance_after = (previous balance + contribution) * (1 + actual_return%)
       const actualReturnRate = Number(returnData.actual_return) / 100;
@@ -57,6 +70,7 @@ export function useMonthlyReturns(investmentId?: string) {
         .from("investment_monthly_returns")
         .insert({
           ...returnData,
+          month: nextMonth,
           balance_after,
         })
         .select()

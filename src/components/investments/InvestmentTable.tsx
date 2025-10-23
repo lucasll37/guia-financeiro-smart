@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
+import { useInvestmentCurrentValue } from "@/hooks/useInvestmentCurrentValue";
 
 type Investment = Database["public"]["Tables"]["investment_assets"]["Row"];
 
@@ -27,13 +28,21 @@ const investmentTypes = {
   outro: "Outro",
 };
 
-export function InvestmentTable({
-  investments,
+function InvestmentRow({
+  investment,
   onEdit,
   onDelete,
   onSelectForReturns,
-  selectedInvestmentId,
-}: InvestmentTableProps) {
+  isSelected,
+}: {
+  investment: Investment;
+  onEdit: (investment: Investment) => void;
+  onDelete: (id: string) => void;
+  onSelectForReturns?: (investment: Investment) => void;
+  isSelected: boolean;
+}) {
+  const { data: currentValue, isLoading } = useInvestmentCurrentValue(investment.id);
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -41,12 +50,56 @@ export function InvestmentTable({
     }).format(value);
   };
 
-  const calculateCurrentValue = (investment: Investment) => {
-    // Valor atual = saldo inicial (que já está atualizado no último balance_after registrado)
-    return Number(investment.balance);
-  };
+  return (
+    <TableRow
+      className={`${onSelectForReturns ? "cursor-pointer hover:bg-muted/50" : ""} ${isSelected ? "bg-accent" : ""}`}
+      onClick={() => onSelectForReturns?.(investment)}
+    >
+      <TableCell className="font-medium">{investment.name}</TableCell>
+      <TableCell>
+        {investmentTypes[investment.type as keyof typeof investmentTypes]}
+      </TableCell>
+      <TableCell className="text-right">
+        {formatCurrency(Number(investment.balance))}
+      </TableCell>
+      <TableCell className="text-right font-medium">
+        {isLoading ? "..." : formatCurrency(currentValue || 0)}
+      </TableCell>
+      <TableCell className="text-right">
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(investment);
+            }}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(investment.id);
+            }}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+}
 
-
+export function InvestmentTable({
+  investments,
+  onEdit,
+  onDelete,
+  onSelectForReturns,
+  selectedInvestmentId,
+}: InvestmentTableProps) {
   return (
     <div className="rounded-md border">
       <Table>
@@ -68,46 +121,14 @@ export function InvestmentTable({
             </TableRow>
           ) : (
             investments.map((investment) => (
-              <TableRow 
+              <InvestmentRow
                 key={investment.id}
-                className={`${onSelectForReturns ? "cursor-pointer hover:bg-muted/50" : ""} ${selectedInvestmentId === investment.id ? "bg-accent" : ""}`}
-                onClick={() => onSelectForReturns?.(investment)}
-              >
-                <TableCell className="font-medium">{investment.name}</TableCell>
-                <TableCell>
-                  {investmentTypes[investment.type as keyof typeof investmentTypes]}
-                </TableCell>
-                <TableCell className="text-right">
-                  {formatCurrency(Number(investment.balance))}
-                </TableCell>
-                <TableCell className="text-right font-medium">
-                  {formatCurrency(calculateCurrentValue(investment))}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEdit(investment);
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(investment.id);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+                investment={investment}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onSelectForReturns={onSelectForReturns}
+                isSelected={selectedInvestmentId === investment.id}
+              />
             ))
           )}
         </TableBody>

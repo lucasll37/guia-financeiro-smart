@@ -21,16 +21,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
 import type { Database } from "@/integrations/supabase/types";
 
 type MonthlyReturn = Database["public"]["Tables"]["investment_monthly_returns"]["Row"];
 
 const returnSchema = z.object({
-  month: z.string().min(1, "Mês é obrigatório"),
   actual_return: z.number(),
   inflation_rate: z.number(),
-  contribution: z.number(),
+  contribution: z.number().min(0, "Aporte deve ser positivo"),
   notes: z.string().optional(),
 });
 
@@ -54,7 +52,6 @@ export function MonthlyReturnsDialog({
   const form = useForm<ReturnFormData>({
     resolver: zodResolver(returnSchema),
     defaultValues: {
-      month: format(new Date(), "yyyy-MM"),
       actual_return: 0,
       inflation_rate: 0,
       contribution: 0,
@@ -65,7 +62,6 @@ export function MonthlyReturnsDialog({
   useEffect(() => {
     if (monthlyReturn) {
       form.reset({
-        month: format(new Date(monthlyReturn.month), "yyyy-MM"),
         actual_return: Number(monthlyReturn.actual_return),
         inflation_rate: Number(monthlyReturn.inflation_rate),
         contribution: Number(monthlyReturn.contribution),
@@ -73,7 +69,6 @@ export function MonthlyReturnsDialog({
       });
     } else {
       form.reset({
-        month: "",
         actual_return: 0,
         inflation_rate: 0,
         contribution: 0,
@@ -83,27 +78,17 @@ export function MonthlyReturnsDialog({
   }, [monthlyReturn, form, open]);
 
   const handleSubmit = (data: ReturnFormData) => {
-    // Convert month string (yyyy-MM) to date (first day of month)
-    const monthDate = `${data.month}-01`;
-    
-    // Calculate balance_after automatically
-    // balance_after = previous balance + actual_return + contribution
-    // For now, we'll need to get the previous balance from the last return
-    // This will be handled in the parent component or backend
-    
     if (monthlyReturn) {
-      onSubmit({ 
-        id: monthlyReturn.id, 
-        month: monthDate,
+      onSubmit({
+        id: monthlyReturn.id,
         actual_return: data.actual_return,
         inflation_rate: data.inflation_rate,
         contribution: data.contribution,
         notes: data.notes || null,
       });
     } else {
-      onSubmit({ 
+      onSubmit({
         investment_id: investmentId,
-        month: monthDate,
         actual_return: data.actual_return,
         inflation_rate: data.inflation_rate,
         contribution: data.contribution,
@@ -130,27 +115,14 @@ export function MonthlyReturnsDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="month"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mês/Ano</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="month" 
-                      {...field} 
-                      disabled={!!monthlyReturn}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    {monthlyReturn ? "O mês não pode ser alterado" : "Selecione o mês do rendimento"}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+            {monthlyReturn && (
+              <div className="p-3 bg-muted rounded-md">
+                <p className="text-sm text-muted-foreground">
+                  Mês de referência: {new Date(monthlyReturn.month).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                </p>
+              </div>
+            )}
+            
             <FormField
               control={form.control}
               name="actual_return"

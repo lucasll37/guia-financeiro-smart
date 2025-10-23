@@ -35,6 +35,7 @@ const investmentSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   type: z.enum(["renda_fixa", "fundo", "acao", "outro"]),
   balance: z.number().min(0, "Saldo deve ser positivo"),
+  initial_month: z.string().min(1, "Mês inicial é obrigatório"),
 });
 
 type InvestmentFormData = z.infer<typeof investmentSchema>;
@@ -67,6 +68,7 @@ export function InvestmentDialog({
       name: "",
       type: "renda_fixa",
       balance: 0,
+      initial_month: new Date().toISOString().slice(0, 7),
     },
   });
 
@@ -76,12 +78,14 @@ export function InvestmentDialog({
         name: investment.name,
         type: investment.type as any,
         balance: Number(investment.balance),
+        initial_month: investment.initial_month?.slice(0, 7) || new Date().toISOString().slice(0, 7),
       });
     } else {
       form.reset({
         name: "",
         type: "renda_fixa",
         balance: 0,
+        initial_month: new Date().toISOString().slice(0, 7),
       });
     }
   }, [investment, form]);
@@ -156,7 +160,7 @@ export function InvestmentDialog({
               name="balance"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Saldo Atual</FormLabel>
+                  <FormLabel>Saldo Inicial</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -167,7 +171,27 @@ export function InvestmentDialog({
                     />
                   </FormControl>
                   <FormDescription>
-                    O rendimento será registrado mensalmente através dos lançamentos
+                    Valor inicial do investimento
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="initial_month"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Mês Inicial</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="month"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Mês de início do investimento. Os rendimentos mensais serão registrados sequencialmente a partir deste mês.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
