@@ -50,13 +50,13 @@ export async function seedCategories(accountId: string) {
     { name: "Outros (acessórios, brinquedos, hotel, dog walker)", type: "despesa" as const, color: "#ec4899", parent_id: "Animal de Estimação" },
     
     // Saúde
-    { name: "Saúde", type: "despesa" as const, color: "#10b981", parent_id: null },
-    { name: "Plano de saúde", type: "despesa" as const, color: "#10b981", parent_id: "Saúde" },
-    { name: "Medicamentos", type: "despesa" as const, color: "#10b981", parent_id: "Saúde" },
-    { name: "Dentista", type: "despesa" as const, color: "#10b981", parent_id: "Saúde" },
-    { name: "Terapia / Psicólogo / Acupuntura", type: "despesa" as const, color: "#10b981", parent_id: "Saúde" },
-    { name: "Médicos/Exames fora do plano de saúde", type: "despesa" as const, color: "#10b981", parent_id: "Saúde" },
-    { name: "Academia / Tratamento Estético", type: "despesa" as const, color: "#10b981", parent_id: "Saúde" },
+    { name: "Saúde", type: "despesa" as const, color: "#14b8a6", parent_id: null },
+    { name: "Plano de saúde", type: "despesa" as const, color: "#14b8a6", parent_id: "Saúde" },
+    { name: "Medicamentos", type: "despesa" as const, color: "#14b8a6", parent_id: "Saúde" },
+    { name: "Dentista", type: "despesa" as const, color: "#14b8a6", parent_id: "Saúde" },
+    { name: "Terapia / Psicólogo / Acupuntura", type: "despesa" as const, color: "#14b8a6", parent_id: "Saúde" },
+    { name: "Médicos/Exames fora do plano de saúde", type: "despesa" as const, color: "#14b8a6", parent_id: "Saúde" },
+    { name: "Academia / Tratamento Estético", type: "despesa" as const, color: "#14b8a6", parent_id: "Saúde" },
     
     // Transporte
     { name: "Transporte", type: "despesa" as const, color: "#3b82f6", parent_id: null },
@@ -96,10 +96,15 @@ export async function seedCategories(accountId: string) {
     { name: "Imposto de Renda a Pagar", type: "despesa" as const, color: "#6366f1", parent_id: "Serviços Financeiros" },
   ];
 
-  // First pass: create all categories without parent_id
+  // Separar categorias principais e subcategorias
+  const parentCategories = categories.filter(cat => cat.parent_id === null);
+  const childCategories = categories.filter(cat => cat.parent_id !== null);
+  
+  // Mapa para armazenar IDs das categorias criadas
   const createdCategories = new Map<string, string>();
   
-  for (const cat of categories) {
+  // Primeiro: criar todas as categorias principais
+  for (const cat of parentCategories) {
     const { data, error } = await supabase
       .from("categories")
       .insert({
@@ -117,17 +122,25 @@ export async function seedCategories(accountId: string) {
     }
   }
 
-  // Second pass: update parent relationships
-  for (const cat of categories) {
-    if (cat.parent_id) {
-      const categoryId = createdCategories.get(cat.name);
-      const parentId = createdCategories.get(cat.parent_id);
+  // Segundo: criar todas as subcategorias com parent_id correto
+  for (const cat of childCategories) {
+    const parentId = createdCategories.get(cat.parent_id!);
+    
+    if (parentId) {
+      const { data, error } = await supabase
+        .from("categories")
+        .insert({
+          account_id: accountId,
+          name: cat.name,
+          type: cat.type,
+          color: cat.color,
+          parent_id: parentId,
+        })
+        .select()
+        .single();
 
-      if (categoryId && parentId) {
-        await supabase
-          .from("categories")
-          .update({ parent_id: parentId })
-          .eq("id", categoryId);
+      if (!error && data) {
+        createdCategories.set(cat.name, data.id);
       }
     }
   }
