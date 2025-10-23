@@ -14,6 +14,350 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_members: {
+        Row: {
+          account_id: string
+          created_at: string
+          id: string
+          invited_by: string
+          role: Database["public"]["Enums"]["account_member_role"]
+          status: Database["public"]["Enums"]["member_status"]
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          id?: string
+          invited_by: string
+          role?: Database["public"]["Enums"]["account_member_role"]
+          status?: Database["public"]["Enums"]["member_status"]
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          id?: string
+          invited_by?: string
+          role?: Database["public"]["Enums"]["account_member_role"]
+          status?: Database["public"]["Enums"]["member_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_members_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_members_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accounts: {
+        Row: {
+          created_at: string
+          currency: string
+          default_split: Json | null
+          id: string
+          is_shared: boolean
+          name: string
+          owner_id: string
+          type: Database["public"]["Enums"]["account_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          default_split?: Json | null
+          id?: string
+          is_shared?: boolean
+          name: string
+          owner_id: string
+          type?: Database["public"]["Enums"]["account_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          default_split?: Json | null
+          id?: string
+          is_shared?: boolean
+          name?: string
+          owner_id?: string
+          type?: Database["public"]["Enums"]["account_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_logs: {
+        Row: {
+          action: Database["public"]["Enums"]["audit_action"]
+          created_at: string
+          diff: Json | null
+          entity: string
+          entity_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["audit_action"]
+          created_at?: string
+          diff?: Json | null
+          entity: string
+          entity_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["audit_action"]
+          created_at?: string
+          diff?: Json | null
+          entity?: string
+          entity_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budgets: {
+        Row: {
+          account_id: string
+          amount_planned: number
+          category_id: string
+          created_at: string
+          id: string
+          period: string
+        }
+        Insert: {
+          account_id: string
+          amount_planned: number
+          category_id: string
+          created_at?: string
+          id?: string
+          period: string
+        }
+        Update: {
+          account_id?: string
+          amount_planned?: number
+          category_id?: string
+          created_at?: string
+          id?: string
+          period?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budgets_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      categories: {
+        Row: {
+          account_id: string
+          color: string
+          created_at: string
+          id: string
+          name: string
+          parent_id: string | null
+          type: Database["public"]["Enums"]["category_type"]
+        }
+        Insert: {
+          account_id: string
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+          parent_id?: string | null
+          type: Database["public"]["Enums"]["category_type"]
+        }
+        Update: {
+          account_id?: string
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          parent_id?: string | null
+          type?: Database["public"]["Enums"]["category_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goals: {
+        Row: {
+          account_id: string
+          created_at: string
+          current_amount: number
+          deadline: string | null
+          id: string
+          name: string
+          target_amount: number
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          current_amount?: number
+          deadline?: string | null
+          id?: string
+          name: string
+          target_amount: number
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          current_amount?: number
+          deadline?: string | null
+          id?: string
+          name?: string
+          target_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goals_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investment_assets: {
+        Row: {
+          account_id: string
+          balance: number
+          created_at: string
+          fees: number
+          id: string
+          monthly_rate: number
+          name: string
+          type: Database["public"]["Enums"]["investment_type"]
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          balance?: number
+          created_at?: string
+          fees?: number
+          id?: string
+          monthly_rate?: number
+          name: string
+          type: Database["public"]["Enums"]["investment_type"]
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          balance?: number
+          created_at?: string
+          fees?: number
+          id?: string
+          monthly_rate?: number
+          name?: string
+          type?: Database["public"]["Enums"]["investment_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investment_assets_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          metadata: Json | null
+          read: boolean
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          read?: boolean
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          read?: boolean
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -38,15 +382,93 @@ export type Database = {
         }
         Relationships: []
       }
+      transactions: {
+        Row: {
+          account_id: string
+          amount: number
+          category_id: string
+          created_at: string
+          created_by: string
+          date: string
+          description: string
+          id: string
+          is_recurring: boolean
+          split_override: Json | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          category_id: string
+          created_at?: string
+          created_by: string
+          date: string
+          description: string
+          id?: string
+          is_recurring?: boolean
+          split_override?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          category_id?: string
+          created_at?: string
+          created_by?: string
+          date?: string
+          description?: string
+          id?: string
+          is_recurring?: boolean
+          split_override?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      user_has_account_access: {
+        Args: { account_uuid: string; user_uuid: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      account_member_role: "owner" | "editor" | "viewer"
+      account_type: "pessoal" | "casa" | "empresa" | "conjugal" | "outro"
+      audit_action: "create" | "update" | "delete"
+      category_type: "despesa" | "receita"
+      investment_type: "renda_fixa" | "fundo" | "acao" | "outro"
+      member_status: "pending" | "accepted" | "rejected"
+      notification_type:
+        | "invite"
+        | "transaction"
+        | "goal"
+        | "budget_alert"
+        | "system"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -173,6 +595,20 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      account_member_role: ["owner", "editor", "viewer"],
+      account_type: ["pessoal", "casa", "empresa", "conjugal", "outro"],
+      audit_action: ["create", "update", "delete"],
+      category_type: ["despesa", "receita"],
+      investment_type: ["renda_fixa", "fundo", "acao", "outro"],
+      member_status: ["pending", "accepted", "rejected"],
+      notification_type: [
+        "invite",
+        "transaction",
+        "goal",
+        "budget_alert",
+        "system",
+      ],
+    },
   },
 } as const
