@@ -21,7 +21,7 @@ interface AccountDialogProps {
 }
 
 interface SplitMember {
-  user_id: string;
+  email: string;
   percent: number;
 }
 
@@ -93,7 +93,7 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
   };
 
   const addSplitMember = () => {
-    setSplitMembers([...splitMembers, { user_id: "", percent: 0 }]);
+    setSplitMembers([...splitMembers, { email: "", percent: 0 }]);
   };
 
   const removeSplitMember = (index: number) => {
@@ -187,9 +187,10 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
                   <div key={index} className="flex gap-2">
                     <div className="flex-1">
                       <Input
-                        placeholder="ID do usuário"
-                        value={member.user_id}
-                        onChange={(e) => updateSplitMember(index, "user_id", e.target.value)}
+                        type="email"
+                        placeholder="Email do usuário"
+                        value={member.email}
+                        onChange={(e) => updateSplitMember(index, "email", e.target.value)}
                       />
                     </div>
                     <div className="w-32">
