@@ -1,21 +1,87 @@
-import { EmptyState } from "@/components/EmptyState";
-import { FileText } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useAccounts } from "@/hooks/useAccounts";
+import { useTransactions } from "@/hooks/useTransactions";
+import { useCategories } from "@/hooks/useCategories";
+import {
+  ReportGenerator,
+  GeneratedReport,
+} from "@/components/reports/ReportGenerator";
+import { ReportHistory } from "@/components/reports/ReportHistory";
 
 export default function Reports() {
+  const { accounts } = useAccounts();
+  const { transactions } = useTransactions();
+  const { categories } = useCategories();
+  const [reportHistory, setReportHistory] = useState<GeneratedReport[]>([]);
+
+  // Load report history from localStorage
+  useEffect(() => {
+    const savedReports = localStorage.getItem("report-history");
+    if (savedReports) {
+      const parsed = JSON.parse(savedReports);
+      // Convert date strings back to Date objects
+      const reportsWithDates = parsed.map((r: any) => ({
+        ...r,
+        generatedAt: new Date(r.generatedAt),
+      }));
+      setReportHistory(reportsWithDates);
+    }
+  }, []);
+
+  // Save report history to localStorage
+  const saveReportHistory = (reports: GeneratedReport[]) => {
+    localStorage.setItem("report-history", JSON.stringify(reports));
+    setReportHistory(reports);
+  };
+
+  const handleReportGenerated = (report: GeneratedReport) => {
+    const updatedHistory = [report, ...reportHistory];
+    saveReportHistory(updatedHistory);
+  };
+
+  const handleReportDeleted = (reportId: string) => {
+    const updatedHistory = reportHistory.filter((r) => r.id !== reportId);
+    saveReportHistory(updatedHistory);
+  };
+
+  const hasData =
+    accounts && accounts.length > 0 && transactions && transactions.length > 0;
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Relatórios</h1>
         <p className="text-muted-foreground">
-          Analise suas finanças com relatórios detalhados
+          Gere e exporte relatórios financeiros detalhados
         </p>
       </div>
 
-      <EmptyState
-        icon={FileText}
-        title="Nenhum dado para relatório"
-        description="Comece a registrar suas transações para gerar relatórios financeiros completos."
-      />
+      {!hasData ? (
+        <div className="text-center py-12 text-muted-foreground">
+          <p className="mb-2">
+            Comece a registrar suas transações para gerar relatórios financeiros
+            completos.
+          </p>
+          <p className="text-sm">
+            Configure suas contas e adicione lançamentos para visualizar dados
+            aqui.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <ReportGenerator
+            accounts={accounts}
+            transactions={transactions}
+            categories={categories || []}
+            onReportGenerated={handleReportGenerated}
+          />
+
+          <ReportHistory
+            reports={reportHistory}
+            onReportDeleted={handleReportDeleted}
+          />
+        </div>
+      )}
     </div>
   );
 }
