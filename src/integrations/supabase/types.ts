@@ -496,6 +496,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_notification: {
+        Args: {
+          _message: string
+          _metadata?: Json
+          _type: Database["public"]["Enums"]["notification_type"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
       user_has_account_access: {
         Args: { account_uuid: string; user_uuid: string }
         Returns: boolean
