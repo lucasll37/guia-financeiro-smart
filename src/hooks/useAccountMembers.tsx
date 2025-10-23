@@ -98,7 +98,7 @@ export function useAccountMembers(accountId?: string) {
         .update({ status })
         .eq("id", id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
