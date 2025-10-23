@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useCategories } from "@/hooks/useCategories";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useTransactions } from "@/hooks/useTransactions";
-import { CategoryTable } from "@/components/categories/CategoryTable";
+import { CategoryTree } from "@/components/categories/CategoryTree";
 import { CategoryDialog } from "@/components/categories/CategoryDialog";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
@@ -129,10 +129,11 @@ export default function Categories() {
       ) : isLoading ? (
         <p className="text-muted-foreground">Carregando categorias...</p>
       ) : (
-        <CategoryTable
+        <CategoryTree
           categories={categories || []}
           onEdit={handleEditCategory}
           onDelete={handleDeleteCategory}
+          onAddChild={handleAddChild}
         />
       )}
 
