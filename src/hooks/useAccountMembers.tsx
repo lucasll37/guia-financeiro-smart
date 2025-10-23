@@ -35,14 +35,30 @@ export function useAccountMembers(accountId?: string) {
       const { data, error } = await supabase
         .from("account_members")
         .insert(member)
-        .select()
+        .select("*, account:accounts!account_members_account_id_fkey(name)")
         .single();
 
       if (error) throw error;
+
+      // Criar notificação para o usuário convidado
+      const accountName = (data.account as any)?.name || "conta";
+      await supabase.from("notifications").insert({
+        user_id: member.user_id,
+        type: "invite",
+        message: `Você foi convidado para "${accountName}"`,
+        metadata: {
+          account_id: member.account_id,
+          account_name: accountName,
+          invite_id: data.id,
+          invited_by: member.invited_by,
+        },
+      });
+
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["account_members"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
       toast({
         title: "Convite enviado",
         description: "O convite foi enviado com sucesso",
@@ -123,6 +139,7 @@ export function useAccountMembers(accountId?: string) {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["account_members"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
       toast({
         title: variables.status === "accepted" ? "Convite aceito" : "Convite recusado",
         description: `Você ${variables.status === "accepted" ? "aceitou" : "recusou"} o convite`,
