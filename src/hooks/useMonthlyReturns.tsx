@@ -50,12 +50,14 @@ export function useMonthlyReturns(investmentId?: string) {
       // Calculate the next sequential month
       let nextMonth: string;
       if (previousReturns && previousReturns.length > 0) {
-        const lastMonth = new Date(previousReturns[0].month);
+        const lastMonth = new Date(previousReturns[0].month + 'T00:00:00');
         lastMonth.setMonth(lastMonth.getMonth() + 1);
-        nextMonth = lastMonth.toISOString().split('T')[0].slice(0, 7) + '-01';
+        nextMonth = lastMonth.toISOString().split('T')[0];
       } else {
-        // First return, use initial_month
-        nextMonth = investment.initial_month;
+        // First return, use initial_month from investment
+        // Ensure it's in YYYY-MM-DD format
+        const initialDate = investment.initial_month;
+        nextMonth = initialDate.includes('-01') ? initialDate : `${initialDate}-01`;
       }
 
       const previousBalance = previousReturns && previousReturns.length > 0
