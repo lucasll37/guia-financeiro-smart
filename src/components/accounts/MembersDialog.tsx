@@ -6,9 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { UserPlus, Mail, Trash2 } from "lucide-react";
+import { UserPlus, Mail, Trash2, Crown } from "lucide-react";
 import { useAccountMembers } from "@/hooks/useAccountMembers";
 import { useAuditLogs } from "@/hooks/useAuditLogs";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
@@ -34,37 +36,77 @@ const statusLabels: Record<string, string> = {
 
 export function MembersDialog({ open, onOpenChange, account, currentUserId }: MembersDialogProps) {
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteUserId, setInviteUserId] = useState("");
   const [inviteRole, setInviteRole] = useState<"editor" | "viewer">("viewer");
+  const [isInviting, setIsInviting] = useState(false);
 
   const { members, isLoading, inviteMember, updateMemberRole, removeMember } = useAccountMembers(account?.id);
   const { logAction } = useAuditLogs();
+  const { toast } = useToast();
 
   const handleInvite = async () => {
-    if (!account || (!inviteEmail && !inviteUserId)) return;
+    if (!account || !inviteEmail) return;
 
-    // Para simplificar, vamos assumir que o user_id é fornecido
-    // Em produção, você buscaria o usuário pelo email
-    const userId = inviteUserId || inviteEmail;
+    setIsInviting(true);
+    try {
+      // Buscar usuário pelo email
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, name")
+        .eq("id", inviteEmail)
+        .maybeSingle();
 
-    await inviteMember.mutateAsync({
-      account_id: account.id,
-      user_id: userId,
-      role: inviteRole,
-      invited_by: currentUserId,
-      status: "pending",
-    });
+      if (profileError) throw profileError;
+      
+      if (!profile) {
+        toast({
+          title: "Usuário não encontrado",
+          description: "Não foi possível encontrar um usuário com este email",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    logAction.mutate({
-      entity: "account_members",
-      entity_id: account.id,
-      action: "create",
-      diff: { role: inviteRole, invited_user: userId } as any,
-    });
+      // Criar convite
+      const newMember = await inviteMember.mutateAsync({
+        account_id: account.id,
+        user_id: profile.id,
+        role: inviteRole,
+        invited_by: currentUserId,
+        status: "pending",
+      });
 
-    setInviteEmail("");
-    setInviteUserId("");
-    setInviteRole("viewer");
+      // Criar notificação para o usuário convidado
+      await supabase.from("notifications").insert({
+        user_id: profile.id,
+        type: "invite",
+        message: `Você foi convidado para participar da conta "${account.name}"`,
+        metadata: {
+          invite_id: newMember.id,
+          account_id: account.id,
+          account_name: account.name,
+          invited_by: currentUserId,
+          role: inviteRole,
+        },
+      });
+
+      logAction.mutate({
+        entity: "account_members",
+        entity_id: account.id,
+        action: "create",
+        diff: { role: inviteRole, invited_user: profile.id } as any,
+      });
+
+      setInviteEmail("");
+      setInviteRole("viewer");
+    } catch (error: any) {
+      toast({
+        title: "Erro ao enviar convite",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsInviting(false);
+    }
   };
 
   const handleRemoveMember = async (memberId: string) => {
@@ -93,6 +135,66 @@ export function MembersDialog({ open, onOpenChange, account, currentUserId }: Me
     });
   };
 
+  const handleTransferOwnership = async (newOwnerId: string, memberName: string) => {
+    if (!account) return;
+
+    if (!confirm(`Tem certeza que deseja transferir a propriedade da conta para ${memberName}?`)) return;
+
+    try {
+      // Atualizar o dono da conta
+      const { error: accountError } = await supabase
+        .from("accounts")
+        .update({ owner_id: newOwnerId })
+        .eq("id", account.id);
+
+      if (accountError) throw accountError;
+
+      // Criar notificação para o novo dono
+      await supabase.from("notifications").insert({
+        user_id: newOwnerId,
+        type: "invite",
+        message: `Você agora é o proprietário da conta "${account.name}"`,
+        metadata: {
+          account_id: account.id,
+          account_name: account.name,
+          transferred_by: currentUserId,
+        },
+      });
+
+      // Criar notificação para o antigo dono confirmando transferência
+      await supabase.from("notifications").insert({
+        user_id: currentUserId,
+        type: "system",
+        message: `Você transferiu a propriedade da conta "${account.name}" para ${memberName}`,
+        metadata: {
+          account_id: account.id,
+          account_name: account.name,
+          new_owner: newOwnerId,
+        },
+      });
+
+      toast({
+        title: "Propriedade transferida",
+        description: "A propriedade da conta foi transferida com sucesso",
+      });
+
+      logAction.mutate({
+        entity: "accounts",
+        entity_id: account.id,
+        action: "update",
+        diff: { transferred_to: newOwnerId } as any,
+      });
+
+      onOpenChange(false);
+    } catch (error: any) {
+      toast({
+        title: "Erro ao transferir propriedade",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -110,29 +212,20 @@ export function MembersDialog({ open, onOpenChange, account, currentUserId }: Me
 
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="invite-email">E-mail</Label>
+                <Label htmlFor="invite-email">E-mail do Usuário</Label>
                 <div className="flex gap-2">
                   <Mail className="h-5 w-5 mt-2 text-muted-foreground" />
                   <Input
                     id="invite-email"
-                    type="email"
-                    placeholder="email@exemplo.com"
+                    type="text"
+                    placeholder="ID do usuário (UUID)"
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                   />
                 </div>
-              </div>
-
-              <div className="text-center text-sm text-muted-foreground">ou</div>
-
-              <div className="space-y-2">
-                <Label htmlFor="invite-userid">ID do Usuário</Label>
-                <Input
-                  id="invite-userid"
-                  placeholder="UUID do usuário"
-                  value={inviteUserId}
-                  onChange={(e) => setInviteUserId(e.target.value)}
-                />
+                <p className="text-xs text-muted-foreground">
+                  Insira o ID do usuário que deseja convidar
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -150,10 +243,10 @@ export function MembersDialog({ open, onOpenChange, account, currentUserId }: Me
 
               <Button
                 onClick={handleInvite}
-                disabled={(!inviteEmail && !inviteUserId) || inviteMember.isPending}
+                disabled={!inviteEmail || isInviting}
                 className="w-full"
               >
-                Enviar Convite
+                {isInviting ? "Enviando..." : "Enviar Convite"}
               </Button>
             </div>
           </div>
@@ -187,29 +280,42 @@ export function MembersDialog({ open, onOpenChange, account, currentUserId }: Me
                         {statusLabels[member.status]}
                       </Badge>
 
-                      <Select
-                        value={member.role}
-                        onValueChange={(value: any) => handleUpdateRole(member.id, value)}
-                        disabled={member.role === "owner"}
-                      >
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="owner">Proprietário</SelectItem>
-                          <SelectItem value="editor">Editor</SelectItem>
-                          <SelectItem value="viewer">Visualizador</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      {account?.owner_id === currentUserId && member.status === "accepted" && (
+                        <>
+                          <Select
+                            value={member.role}
+                            onValueChange={(value: any) => handleUpdateRole(member.id, value)}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="editor">Editor</SelectItem>
+                              <SelectItem value="viewer">Visualizador</SelectItem>
+                            </SelectContent>
+                          </Select>
 
-                      {member.role !== "owner" && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleRemoveMember(member.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            title="Transferir propriedade"
+                            onClick={() => handleTransferOwnership(member.user_id, (member.user as any)?.name || "Usuário")}
+                          >
+                            <Crown className="h-4 w-4" />
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveMember(member.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+
+                      {account?.owner_id !== currentUserId && (
+                        <Badge variant="outline">{roleLabels[member.role]}</Badge>
                       )}
                     </div>
                   </div>

@@ -86,15 +86,39 @@ export function useAccountMembers(accountId?: string) {
   });
 
   const respondToInvite = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: "accepted" | "rejected" }) => {
+    mutationFn: async ({ id, status, accountId, invitedBy }: { 
+      id: string; 
+      status: "accepted" | "rejected";
+      accountId: string;
+      invitedBy: string;
+    }) => {
       const { data, error } = await supabase
         .from("account_members")
         .update({ status })
         .eq("id", id)
-        .select()
+        .select("*, account:accounts!account_members_account_id_fkey(name)")
         .single();
 
       if (error) throw error;
+
+      // Criar notificação para quem enviou o convite
+      const accountName = (data.account as any)?.name || "conta";
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      await supabase.from("notifications").insert({
+        user_id: invitedBy,
+        type: "invite",
+        message: status === "accepted" 
+          ? `Seu convite para "${accountName}" foi aceito`
+          : `Seu convite para "${accountName}" foi recusado`,
+        metadata: {
+          account_id: accountId,
+          account_name: accountName,
+          responded_by: user?.id,
+          status,
+        },
+      });
+
       return data;
     },
     onSuccess: (_, variables) => {
