@@ -47,17 +47,21 @@ export function useMonthlyReturns(investmentId?: string) {
         .order("month", { ascending: false })
         .limit(1);
 
-      // Calculate the next sequential month
+      // Calculate the next sequential month (string-based to avoid timezone issues)
       let nextMonth: string;
       if (previousReturns && previousReturns.length > 0) {
-        const lastMonth = new Date(previousReturns[0].month + 'T00:00:00');
-        lastMonth.setMonth(lastMonth.getMonth() + 1);
-        nextMonth = lastMonth.toISOString().split('T')[0];
+        const monthStr = String(previousReturns[0].month); // e.g., "2025-01-01"
+        const [y, m] = monthStr.split('-');
+        let year = parseInt(y, 10);
+        let month = parseInt(m, 10) + 1; // next month
+        if (month > 12) { month = 1; year += 1; }
+        nextMonth = `${year}-${String(month).padStart(2, '0')}-01`;
       } else {
         // First return, use initial_month from investment
-        // Ensure it's in YYYY-MM-DD format
-        const initialDate = investment.initial_month;
-        nextMonth = initialDate.includes('-01') ? initialDate : `${initialDate}-01`;
+        // Normalize to YYYY-MM-01
+        const base = String(investment.initial_month);
+        const [y2, m2] = base.split('-');
+        nextMonth = `${y2}-${m2}-01`;
       }
 
       const previousBalance = previousReturns && previousReturns.length > 0

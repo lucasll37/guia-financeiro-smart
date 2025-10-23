@@ -118,7 +118,7 @@ export function MonthlyReturnsDialog({
             {monthlyReturn && (
               <div className="p-3 bg-muted rounded-md">
                 <p className="text-sm text-muted-foreground">
-                  Mês de referência: {new Date(monthlyReturn.month).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                  {(() => { const [y, m] = String(monthlyReturn.month).split('-'); const d = new Date(Number(y), Number(m)-1, 1); return `Mês de referência: ${d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`; })()}
                 </p>
               </div>
             )}

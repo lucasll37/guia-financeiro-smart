@@ -41,6 +41,12 @@ export function MonthlyReturnsTable({
     return `${(value * 100).toFixed(2)}%`;
   };
 
+  const formatMonthLabel = (dateStr: string) => {
+    const [y, m] = String(dateStr).split('-');
+    const d = new Date(Number(y), Number(m) - 1, 1);
+    return format(d, "MMMM 'de' yyyy", { locale: ptBR });
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -75,9 +81,7 @@ export function MonthlyReturnsTable({
                 returns.map((returnData) => (
                   <TableRow key={returnData.id}>
                     <TableCell className="font-medium">
-                      {format(new Date(returnData.month), "MMMM 'de' yyyy", {
-                        locale: ptBR,
-                      })}
+                      {formatMonthLabel(returnData.month)}
                     </TableCell>
                     <TableCell className="text-right">
                       <span
