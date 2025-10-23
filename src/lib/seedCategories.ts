@@ -4,7 +4,7 @@ export async function seedCategories(accountId: string) {
   const categories = [
     // RECEITAS - PRIMEIRA CATEGORIA
     { name: "Receita", type: "receita" as const, color: "#10b981", parent_id: null },
-    { name: "Salário / Adiantamento", type: "receita" as const, color: "#10b981", parent_id: "Receita" },
+    { name: "Salário  / Adiantamento", type: "receita" as const, color: "#10b981", parent_id: "Receita" },
     { name: "Férias", type: "receita" as const, color: "#10b981", parent_id: "Receita" },
     { name: "13º salário", type: "receita" as const, color: "#10b981", parent_id: "Receita" },
     { name: "Aposentadoria", type: "receita" as const, color: "#10b981", parent_id: "Receita" },
@@ -15,17 +15,17 @@ export async function seedCategories(accountId: string) {
     // Alimentação
     { name: "Alimentação", type: "despesa" as const, color: "#22c55e", parent_id: null },
     { name: "Supermercado", type: "despesa" as const, color: "#22c55e", parent_id: "Alimentação" },
-    { name: "Feira / Sacolão", type: "despesa" as const, color: "#22c55e", parent_id: "Alimentação" },
+    { name: "Feira  / Sacolão", type: "despesa" as const, color: "#22c55e", parent_id: "Alimentação" },
     { name: "Padaria", type: "despesa" as const, color: "#22c55e", parent_id: "Alimentação" },
     { name: "Refeição fora de casa", type: "despesa" as const, color: "#22c55e", parent_id: "Alimentação" },
     { name: "Outros (café, água, sorvetes, etc)", type: "despesa" as const, color: "#22c55e", parent_id: "Alimentação" },
     
     // Moradia
     { name: "Moradia", type: "despesa" as const, color: "#f59e0b", parent_id: null },
-    { name: "Prestação / Aluguel de imóvel", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
+    { name: "Prestação /Aluguel de imóvel", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
     { name: "Condomínio", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
     { name: "Consumo de água", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
-    { name: "Serviço de limpeza (diarista ou mensalista)", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
+    { name: "Serviço de limpeza( diarista ou mensalista)", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
     { name: "Energia Elétrica", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
     { name: "Gás", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
     { name: "IPTU", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
@@ -37,7 +37,7 @@ export async function seedCategories(accountId: string) {
     
     // Educação
     { name: "Educação", type: "despesa" as const, color: "#8b5cf6", parent_id: null },
-    { name: "Matrícula Escolar / Mensalidade", type: "despesa" as const, color: "#8b5cf6", parent_id: "Educação" },
+    { name: "Matricula Escolar/ Mensalidade", type: "despesa" as const, color: "#8b5cf6", parent_id: "Educação" },
     { name: "Material Escolar", type: "despesa" as const, color: "#8b5cf6", parent_id: "Educação" },
     { name: "Outros cursos", type: "despesa" as const, color: "#8b5cf6", parent_id: "Educação" },
     { name: "Transporte escolar", type: "despesa" as const, color: "#8b5cf6", parent_id: "Educação" },
@@ -54,8 +54,8 @@ export async function seedCategories(accountId: string) {
     { name: "Plano de saúde", type: "despesa" as const, color: "#14b8a6", parent_id: "Saúde" },
     { name: "Medicamentos", type: "despesa" as const, color: "#14b8a6", parent_id: "Saúde" },
     { name: "Dentista", type: "despesa" as const, color: "#14b8a6", parent_id: "Saúde" },
-    { name: "Terapia / Psicólogo / Acupuntura", type: "despesa" as const, color: "#14b8a6", parent_id: "Saúde" },
-    { name: "Médicos / Exames fora do plano de saúde", type: "despesa" as const, color: "#14b8a6", parent_id: "Saúde" },
+    { name: "Terapia / Psicólogo  / Acupuntura", type: "despesa" as const, color: "#14b8a6", parent_id: "Saúde" },
+    { name: "Médicos/Exames fora do plano de saúde", type: "despesa" as const, color: "#14b8a6", parent_id: "Saúde" },
     { name: "Academia / Tratamento Estético", type: "despesa" as const, color: "#14b8a6", parent_id: "Saúde" },
     
     // Transporte
@@ -88,7 +88,7 @@ export async function seedCategories(accountId: string) {
     // Serviços Financeiros
     { name: "Serviços Financeiros", type: "despesa" as const, color: "#6366f1", parent_id: null },
     { name: "Empréstimos", type: "despesa" as const, color: "#6366f1", parent_id: "Serviços Financeiros" },
-    { name: "Seguros (vida / residencial)", type: "despesa" as const, color: "#6366f1", parent_id: "Serviços Financeiros" },
+    { name: "Seguros (vida/residencial)", type: "despesa" as const, color: "#6366f1", parent_id: "Serviços Financeiros" },
     { name: "Previdência privada", type: "despesa" as const, color: "#6366f1", parent_id: "Serviços Financeiros" },
     { name: "Juros Cheque Especial", type: "despesa" as const, color: "#6366f1", parent_id: "Serviços Financeiros" },
     { name: "Tarifas bancárias", type: "despesa" as const, color: "#6366f1", parent_id: "Serviços Financeiros" },
