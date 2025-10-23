@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { EmptyState } from "@/components/EmptyState";
 import { TrendingUp, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,15 @@ export default function Investments() {
     updateReturn,
     deleteReturn,
   } = useMonthlyReturns(selectedInvestmentForReturns?.id);
+
+  const monthlyReturnsByInvestment = useMemo(() => {
+    if (!selectedInvestmentForReturns || !returns) {
+      return {};
+    }
+    return {
+      [selectedInvestmentForReturns.id]: returns,
+    };
+  }, [selectedInvestmentForReturns, returns]);
 
   const handleSubmit = (data: any) => {
     if (selectedInvestment) {
@@ -165,16 +174,21 @@ export default function Investments() {
               </p>
             </div>
           ) : (
-            <MonthlyReturnsTable
-              returns={returns || []}
-              onEdit={handleEditReturn}
-              onDelete={handleDeleteReturn}
-              onNew={handleNewReturn}
-              investmentName={selectedInvestmentForReturns.name}
-            />
+            <>
+              <MonthlyReturnsTable
+                returns={returns || []}
+                onEdit={handleEditReturn}
+                onDelete={handleDeleteReturn}
+                onNew={handleNewReturn}
+                investmentName={selectedInvestmentForReturns.name}
+              />
+              
+              <InvestmentSimulator 
+                investments={[selectedInvestmentForReturns]} 
+                monthlyReturnsByInvestment={monthlyReturnsByInvestment}
+              />
+            </>
           )}
-          
-          <InvestmentSimulator investments={investments} />
         </div>
       )}
 

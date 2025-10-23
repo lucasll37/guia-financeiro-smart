@@ -10,9 +10,11 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContain
 import type { Database } from "@/integrations/supabase/types";
 
 type Investment = Database["public"]["Tables"]["investment_assets"]["Row"];
+type MonthlyReturn = Database["public"]["Tables"]["investment_monthly_returns"]["Row"];
 
 interface InvestmentSimulatorProps {
   investments: Investment[];
+  monthlyReturnsByInvestment: Record<string, MonthlyReturn[]>;
 }
 
 interface ProjectionData {
@@ -20,7 +22,7 @@ interface ProjectionData {
   [key: string]: number;
 }
 
-export function InvestmentSimulator({ investments }: InvestmentSimulatorProps) {
+export function InvestmentSimulator({ investments, monthlyReturnsByInvestment }: InvestmentSimulatorProps) {
   const projections = useMemo(() => {
     const periods = [3, 6, 12];
     const results: Record<number, ProjectionData[]> = {};
@@ -28,18 +30,40 @@ export function InvestmentSimulator({ investments }: InvestmentSimulatorProps) {
     periods.forEach((months) => {
       const data: ProjectionData[] = [];
 
+      // Get the maximum number of historical months across all investments
+      const maxHistoricalMonths = Math.max(
+        ...investments.map((inv) => monthlyReturnsByInvestment[inv.id]?.length || 0),
+        0
+      );
+
       for (let i = 0; i <= months; i++) {
         const monthData: ProjectionData = { month: i };
         
         investments.forEach((inv) => {
-          const balance = Number(inv.balance);
-          const rate = Number(inv.monthly_rate);
-          const fees = Number(inv.fees);
-          const netRate = rate - fees;
+          const returns = monthlyReturnsByInvestment[inv.id] || [];
           
-          // Compound interest: balance * (1 + netRate)^n
-          const futureValue = balance * Math.pow(1 + netRate, i);
-          monthData[inv.name] = futureValue;
+          if (i < returns.length) {
+            // Use historical data
+            monthData[inv.name] = Number(returns[returns.length - 1 - i]?.balance_after || inv.balance);
+          } else {
+            // Project future based on average return rate from historical data
+            if (returns.length > 0) {
+              const avgReturn = returns.reduce((sum, ret) => {
+                const returnRate = Number(ret.actual_return) / Number(ret.balance_after);
+                return sum + returnRate;
+              }, 0) / returns.length;
+              
+              const lastBalance = returns.length > 0 
+                ? Number(returns[0].balance_after) 
+                : Number(inv.balance);
+              
+              const monthsToProject = i - returns.length + 1;
+              monthData[inv.name] = lastBalance * Math.pow(1 + avgReturn, monthsToProject);
+            } else {
+              // No historical data, use current balance
+              monthData[inv.name] = Number(inv.balance);
+            }
+          }
         });
 
         data.push(monthData);
@@ -49,24 +73,8 @@ export function InvestmentSimulator({ investments }: InvestmentSimulatorProps) {
     });
 
     return results;
-  }, [investments]);
+  }, [investments, monthlyReturnsByInvestment]);
 
-  const comparisonData = useMemo(() => {
-    return investments.map((inv) => {
-      const balance = Number(inv.balance);
-      const rate = Number(inv.monthly_rate);
-      const fees = Number(inv.fees);
-      const netRate = rate - fees;
-
-      return {
-        name: inv.name,
-        current: balance,
-        projected3m: balance * Math.pow(1 + netRate, 3),
-        projected6m: balance * Math.pow(1 + netRate, 6),
-        projected12m: balance * Math.pow(1 + netRate, 12),
-      };
-    });
-  }, [investments]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
