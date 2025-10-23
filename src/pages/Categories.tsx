@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useCategories } from "@/hooks/useCategories";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useTransactions } from "@/hooks/useTransactions";
-import { CategoryTree } from "@/components/categories/CategoryTree";
+import { CategoryTable } from "@/components/categories/CategoryTable";
 import { CategoryDialog } from "@/components/categories/CategoryDialog";
 import { seedCategories } from "@/lib/seedCategories";
 import { useToast } from "@/hooks/use-toast";
@@ -167,11 +167,10 @@ export default function Categories() {
       ) : isLoading ? (
         <p className="text-muted-foreground">Carregando categorias...</p>
       ) : (
-        <CategoryTree
+        <CategoryTable
           categories={categories || []}
           onEdit={handleEditCategory}
           onDelete={handleDeleteCategory}
-          onAddChild={handleAddChild}
         />
       )}
 

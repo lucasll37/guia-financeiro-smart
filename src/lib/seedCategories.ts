@@ -2,37 +2,88 @@ import { supabase } from "@/integrations/supabase/client";
 
 export async function seedCategories(accountId: string) {
   const categories = [
-    // Despesas
-    { name: "Alimentação", type: "despesa" as const, color: "#ef4444", parent_id: null },
-    { name: "Restaurantes", type: "despesa" as const, color: "#f87171", parent_id: "Alimentação" },
-    { name: "Supermercado", type: "despesa" as const, color: "#dc2626", parent_id: "Alimentação" },
+    // Alimentação
+    { name: "Alimentação", type: "despesa" as const, color: "#22c55e", parent_id: null },
+    { name: "Supermercado", type: "despesa" as const, color: "#22c55e", parent_id: "Alimentação" },
+    { name: "Feira / Sacolão", type: "despesa" as const, color: "#22c55e", parent_id: "Alimentação" },
+    { name: "Padaria", type: "despesa" as const, color: "#22c55e", parent_id: "Alimentação" },
+    { name: "Refeição fora de casa", type: "despesa" as const, color: "#22c55e", parent_id: "Alimentação" },
+    { name: "Outros (café, água, sorvetes, etc)", type: "despesa" as const, color: "#22c55e", parent_id: "Alimentação" },
     
+    // Moradia
     { name: "Moradia", type: "despesa" as const, color: "#f59e0b", parent_id: null },
-    { name: "Aluguel", type: "despesa" as const, color: "#fb923c", parent_id: "Moradia" },
-    { name: "Condomínio", type: "despesa" as const, color: "#f97316", parent_id: "Moradia" },
-    { name: "Manutenção", type: "despesa" as const, color: "#ea580c", parent_id: "Moradia" },
+    { name: "Prestação /Aluguel de imóvel", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
+    { name: "Condomínio", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
+    { name: "Consumo de água", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
+    { name: "Serviço de limpeza( diarista ou mensalista)", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
+    { name: "Energia Elétrica", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
+    { name: "Gás", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
+    { name: "IPTU", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
+    { name: "Decoração da casa", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
+    { name: "Manutenção / Reforma da casa", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
+    { name: "Celular", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
+    { name: "Telefone fixo", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
+    { name: "Internet / TV a cabo", type: "despesa" as const, color: "#f59e0b", parent_id: "Moradia" },
     
-    { name: "Transporte", type: "despesa" as const, color: "#3b82f6", parent_id: null },
-    { name: "Combustível", type: "despesa" as const, color: "#60a5fa", parent_id: "Transporte" },
-    { name: "Transporte Público", type: "despesa" as const, color: "#2563eb", parent_id: "Transporte" },
-    { name: "Manutenção Veículo", type: "despesa" as const, color: "#1d4ed8", parent_id: "Transporte" },
-    
-    { name: "Saúde", type: "despesa" as const, color: "#10b981", parent_id: null },
-    { name: "Medicamentos", type: "despesa" as const, color: "#34d399", parent_id: "Saúde" },
-    { name: "Consultas", type: "despesa" as const, color: "#059669", parent_id: "Saúde" },
-    { name: "Plano de Saúde", type: "despesa" as const, color: "#047857", parent_id: "Saúde" },
-    
+    // Educação
     { name: "Educação", type: "despesa" as const, color: "#8b5cf6", parent_id: null },
-    { name: "Lazer", type: "despesa" as const, color: "#ec4899", parent_id: null },
-    { name: "Vestuário", type: "despesa" as const, color: "#06b6d4", parent_id: null },
+    { name: "Matricula Escolar/ Mensalidade", type: "despesa" as const, color: "#8b5cf6", parent_id: "Educação" },
+    { name: "Material Escolar", type: "despesa" as const, color: "#8b5cf6", parent_id: "Educação" },
+    { name: "Outros cursos", type: "despesa" as const, color: "#8b5cf6", parent_id: "Educação" },
+    { name: "Transporte escolar", type: "despesa" as const, color: "#8b5cf6", parent_id: "Educação" },
     
-    // Receitas
-    { name: "Salário", type: "receita" as const, color: "#22c55e", parent_id: null },
-    { name: "Freelance", type: "receita" as const, color: "#84cc16", parent_id: null },
-    { name: "Investimentos", type: "receita" as const, color: "#14b8a6", parent_id: null },
-    { name: "Dividendos", type: "receita" as const, color: "#10b981", parent_id: "Investimentos" },
-    { name: "Juros", type: "receita" as const, color: "#059669", parent_id: "Investimentos" },
-    { name: "Outros", type: "receita" as const, color: "#6366f1", parent_id: null },
+    // Animal de Estimação
+    { name: "Animal de Estimação", type: "despesa" as const, color: "#ec4899", parent_id: null },
+    { name: "Ração", type: "despesa" as const, color: "#ec4899", parent_id: "Animal de Estimação" },
+    { name: "Banho / Tosa", type: "despesa" as const, color: "#ec4899", parent_id: "Animal de Estimação" },
+    { name: "Veterinário / medicamento", type: "despesa" as const, color: "#ec4899", parent_id: "Animal de Estimação" },
+    { name: "Outros (acessórios, brinquedos, hotel, dog walker)", type: "despesa" as const, color: "#ec4899", parent_id: "Animal de Estimação" },
+    
+    // Saúde
+    { name: "Saúde", type: "despesa" as const, color: "#10b981", parent_id: null },
+    { name: "Plano de saúde", type: "despesa" as const, color: "#10b981", parent_id: "Saúde" },
+    { name: "Medicamentos", type: "despesa" as const, color: "#10b981", parent_id: "Saúde" },
+    { name: "Dentista", type: "despesa" as const, color: "#10b981", parent_id: "Saúde" },
+    { name: "Terapia / Psicólogo / Acupuntura", type: "despesa" as const, color: "#10b981", parent_id: "Saúde" },
+    { name: "Médicos/Exames fora do plano de saúde", type: "despesa" as const, color: "#10b981", parent_id: "Saúde" },
+    { name: "Academia / Tratamento Estético", type: "despesa" as const, color: "#10b981", parent_id: "Saúde" },
+    
+    // Transporte
+    { name: "Transporte", type: "despesa" as const, color: "#3b82f6", parent_id: null },
+    { name: "Ônibus / Metrô", type: "despesa" as const, color: "#3b82f6", parent_id: "Transporte" },
+    { name: "Taxi", type: "despesa" as const, color: "#3b82f6", parent_id: "Transporte" },
+    { name: "Combustível", type: "despesa" as const, color: "#3b82f6", parent_id: "Transporte" },
+    { name: "Estacionamento", type: "despesa" as const, color: "#3b82f6", parent_id: "Transporte" },
+    { name: "Seguro Auto", type: "despesa" as const, color: "#3b82f6", parent_id: "Transporte" },
+    { name: "Manutenção / Lavagem / Troca de óleo", type: "despesa" as const, color: "#3b82f6", parent_id: "Transporte" },
+    { name: "Licenciamento", type: "despesa" as const, color: "#3b82f6", parent_id: "Transporte" },
+    { name: "Pedágio", type: "despesa" as const, color: "#3b82f6", parent_id: "Transporte" },
+    { name: "IPVA", type: "despesa" as const, color: "#3b82f6", parent_id: "Transporte" },
+    
+    // Pessoais
+    { name: "Pessoais", type: "despesa" as const, color: "#06b6d4", parent_id: null },
+    { name: "Vestuário / Calçados / Acessórios", type: "despesa" as const, color: "#06b6d4", parent_id: "Pessoais" },
+    { name: "Cabeleireiro / Manicure / Higiene pessoal", type: "despesa" as const, color: "#06b6d4", parent_id: "Pessoais" },
+    { name: "Presentes", type: "despesa" as const, color: "#06b6d4", parent_id: "Pessoais" },
+    { name: "Outros", type: "despesa" as const, color: "#06b6d4", parent_id: "Pessoais" },
+    
+    // Lazer
+    { name: "Lazer", type: "despesa" as const, color: "#f43f5e", parent_id: null },
+    { name: "Cinema / Teatro / Shows", type: "despesa" as const, color: "#f43f5e", parent_id: "Lazer" },
+    { name: "Livros / Revistas / Cd´s", type: "despesa" as const, color: "#f43f5e", parent_id: "Lazer" },
+    { name: "Clube / Parques / Casa Noturna", type: "despesa" as const, color: "#f43f5e", parent_id: "Lazer" },
+    { name: "Viagens", type: "despesa" as const, color: "#f43f5e", parent_id: "Lazer" },
+    { name: "Restaurantes / Bares / Festas", type: "despesa" as const, color: "#f43f5e", parent_id: "Lazer" },
+    
+    // Serviços Financeiros
+    { name: "Serviços Financeiros", type: "despesa" as const, color: "#6366f1", parent_id: null },
+    { name: "Empréstimos", type: "despesa" as const, color: "#6366f1", parent_id: "Serviços Financeiros" },
+    { name: "Seguros (vida/residencial)", type: "despesa" as const, color: "#6366f1", parent_id: "Serviços Financeiros" },
+    { name: "Previdência privada", type: "despesa" as const, color: "#6366f1", parent_id: "Serviços Financeiros" },
+    { name: "Juros Cheque Especial", type: "despesa" as const, color: "#6366f1", parent_id: "Serviços Financeiros" },
+    { name: "Tarifas bancárias", type: "despesa" as const, color: "#6366f1", parent_id: "Serviços Financeiros" },
+    { name: "Financiamento de veículo", type: "despesa" as const, color: "#6366f1", parent_id: "Serviços Financeiros" },
+    { name: "Imposto de Renda a Pagar", type: "despesa" as const, color: "#6366f1", parent_id: "Serviços Financeiros" },
   ];
 
   // First pass: create all categories without parent_id
