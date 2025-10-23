@@ -257,71 +257,116 @@ export function MembersDialog({ open, onOpenChange, account, currentUserId }: Me
 
           {/* Members List */}
           <div className="space-y-4">
-            <h3 className="font-medium">Membros Atuais</h3>
+            <h3 className="font-medium">Membros da Conta</h3>
+
+            {/* Owner Section */}
+            {account && (
+              <div className="p-3 border rounded-lg bg-primary/5">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <Crown className="h-4 w-4 text-primary" />
+                      <p className="font-medium">Proprietário</p>
+                      {(() => {
+                        const defaultSplit = (account.default_split || []) as Array<{ email: string; percent: number }>;
+                        const ownerSplit = defaultSplit.find((s) => s.email === "owner");
+                        const percentage = ownerSplit?.percent || 0;
+                        return percentage > 0 && (
+                          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+                            {percentage}%
+                          </span>
+                        );
+                      })()}
+                    </div>
+                    <p className="text-sm text-muted-foreground">Você</p>
+                  </div>
+                  <Badge variant="default">Proprietário</Badge>
+                </div>
+              </div>
+            )}
+
+            <h4 className="font-medium text-sm text-muted-foreground">Membros Convidados</h4>
 
             {isLoading ? (
               <p className="text-sm text-muted-foreground">Carregando...</p>
             ) : members && members.length > 0 ? (
               <div className="space-y-3">
-                {members.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between p-3 border rounded-lg"
-                  >
-                    <div className="flex-1">
-                      <p className="font-medium">
-                        {(member.user as any)?.name || "Usuário"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {(member.user as any)?.email || member.user_id}
-                      </p>
+                {members.map((member) => {
+                  // Encontrar o percentual do membro no default_split
+                  const memberEmail = (member.user as any)?.email;
+                  const defaultSplit = (account.default_split || []) as Array<{ email: string; percent: number }>;
+                  const splitMember = defaultSplit.find(
+                    (s) => s.email === memberEmail
+                  );
+                  const percentage = splitMember?.percent || 0;
+
+                  return (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">
+                            {(member.user as any)?.name || "Usuário"}
+                          </p>
+                          {percentage > 0 && (
+                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+                              {percentage}%
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {memberEmail || member.user_id}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <Badge variant={member.status === "accepted" ? "default" : "secondary"}>
+                          {statusLabels[member.status]}
+                        </Badge>
+
+                        {account?.owner_id === currentUserId && member.status === "accepted" && (
+                          <>
+                            <Select
+                              value={member.role}
+                              onValueChange={(value: any) => handleUpdateRole(member.id, value)}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="editor">Editor</SelectItem>
+                                <SelectItem value="viewer">Visualizador</SelectItem>
+                              </SelectContent>
+                            </Select>
+
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              title="Transferir propriedade"
+                              onClick={() => handleTransferOwnership(member.user_id, (member.user as any)?.name || "Usuário")}
+                            >
+                              <Crown className="h-4 w-4" />
+                            </Button>
+
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleRemoveMember(member.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+
+                        {account?.owner_id !== currentUserId && (
+                          <Badge variant="outline">{roleLabels[member.role]}</Badge>
+                        )}
+                      </div>
                     </div>
-
-                    <div className="flex items-center gap-3">
-                      <Badge variant={member.status === "accepted" ? "default" : "secondary"}>
-                        {statusLabels[member.status]}
-                      </Badge>
-
-                      {account?.owner_id === currentUserId && member.status === "accepted" && (
-                        <>
-                          <Select
-                            value={member.role}
-                            onValueChange={(value: any) => handleUpdateRole(member.id, value)}
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="editor">Editor</SelectItem>
-                              <SelectItem value="viewer">Visualizador</SelectItem>
-                            </SelectContent>
-                          </Select>
-
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            title="Transferir propriedade"
-                            onClick={() => handleTransferOwnership(member.user_id, (member.user as any)?.name || "Usuário")}
-                          >
-                            <Crown className="h-4 w-4" />
-                          </Button>
-
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleRemoveMember(member.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
-
-                      {account?.owner_id !== currentUserId && (
-                        <Badge variant="outline">{roleLabels[member.role]}</Badge>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">Nenhum membro adicional</p>
