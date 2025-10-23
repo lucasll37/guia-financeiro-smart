@@ -35,25 +35,10 @@ export function useAccountMembers(accountId?: string) {
       const { data, error } = await supabase
         .from("account_members")
         .insert(member)
-        .select("*, account:accounts!account_members_account_id_fkey(name)")
+        .select()
         .single();
 
       if (error) throw error;
-
-      // Criar notificação para o usuário convidado
-      const accountName = (data.account as any)?.name || "conta";
-      await supabase.from("notifications").insert({
-        user_id: member.user_id,
-        type: "invite",
-        message: `Você foi convidado para "${accountName}"`,
-        metadata: {
-          account_id: member.account_id,
-          account_name: accountName,
-          invite_id: data.id,
-          invited_by: member.invited_by,
-        },
-      });
-
       return data;
     },
     onSuccess: () => {
@@ -112,29 +97,10 @@ export function useAccountMembers(accountId?: string) {
         .from("account_members")
         .update({ status })
         .eq("id", id)
-        .select("*, account:accounts!account_members_account_id_fkey(name)")
+        .select()
         .single();
 
       if (error) throw error;
-
-      // Criar notificação para quem enviou o convite
-      const accountName = (data.account as any)?.name || "conta";
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      await supabase.from("notifications").insert({
-        user_id: invitedBy,
-        type: "invite",
-        message: status === "accepted" 
-          ? `Seu convite para "${accountName}" foi aceito`
-          : `Seu convite para "${accountName}" foi recusado`,
-        metadata: {
-          account_id: accountId,
-          account_name: accountName,
-          responded_by: user?.id,
-          status,
-        },
-      });
-
       return data;
     },
     onSuccess: (_, variables) => {
