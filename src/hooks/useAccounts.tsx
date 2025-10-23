@@ -81,20 +81,64 @@ export function useAccounts() {
 
   const deleteAccount = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("accounts").delete().eq("id", id);
+      const { error } = await supabase
+        .from("accounts")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", id);
 
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["deleted-accounts"] });
       toast({
         title: "Conta excluída",
-        description: "Sua conta foi excluída com sucesso",
+        description: "Sua conta foi marcada para exclusão. Você pode restaurá-la em até 7 dias.",
       });
     },
     onError: (error: Error) => {
       toast({
         title: "Erro ao excluir conta",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const { data: deletedAccounts } = useQuery({
+    queryKey: ["deleted-accounts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("accounts")
+        .select("*")
+        .not("deleted_at", "is", null)
+        .gte("deleted_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+        .order("deleted_at", { ascending: false });
+
+      if (error) throw error;
+      return data as Account[];
+    },
+  });
+
+  const restoreAccount = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc("restore_account", {
+        account_id: id,
+      });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["deleted-accounts"] });
+      toast({
+        title: "Conta restaurada",
+        description: "Sua conta foi restaurada com sucesso",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao restaurar conta",
         description: error.message,
         variant: "destructive",
       });
@@ -107,5 +151,7 @@ export function useAccounts() {
     createAccount,
     updateAccount,
     deleteAccount,
+    deletedAccounts,
+    restoreAccount,
   };
 }

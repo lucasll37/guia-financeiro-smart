@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, RotateCcw } from "lucide-react";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuditLogs } from "@/hooks/useAuditLogs";
@@ -14,7 +14,15 @@ type AccountInsert = Database["public"]["Tables"]["accounts"]["Insert"];
 
 export default function Accounts() {
   const { user } = useAuth();
-  const { accounts, isLoading, createAccount, updateAccount, deleteAccount } = useAccounts();
+  const {
+    accounts,
+    isLoading,
+    createAccount,
+    updateAccount,
+    deleteAccount,
+    deletedAccounts,
+    restoreAccount,
+  } = useAccounts();
   const { logAction } = useAuditLogs();
 
   const [accountDialogOpen, setAccountDialogOpen] = useState(false);
@@ -126,6 +134,50 @@ export default function Accounts() {
         account={selectedAccount}
         currentUserId={user.id}
       />
+
+      {deletedAccounts && deletedAccounts.length > 0 && (
+        <div className="mt-8 space-y-4">
+          <div>
+            <h2 className="text-xl font-semibold">Contas Excluídas</h2>
+            <p className="text-sm text-muted-foreground">
+              Contas excluídas que podem ser restauradas em até 7 dias
+            </p>
+          </div>
+          <div className="border rounded-lg">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b bg-muted/50">
+                  <th className="px-4 py-3 text-left text-sm font-medium">Nome</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">Tipo</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">Excluída em</th>
+                  <th className="px-4 py-3 text-right text-sm font-medium">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {deletedAccounts.map((account) => (
+                  <tr key={account.id} className="border-b last:border-0">
+                    <td className="px-4 py-3">{account.name}</td>
+                    <td className="px-4 py-3 capitalize">{account.type}</td>
+                    <td className="px-4 py-3">
+                      {account.deleted_at ? new Date(account.deleted_at).toLocaleDateString('pt-BR') : '-'}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => restoreAccount.mutate(account.id)}
+                      >
+                        <RotateCcw className="h-4 w-4 mr-2" />
+                        Restaurar
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

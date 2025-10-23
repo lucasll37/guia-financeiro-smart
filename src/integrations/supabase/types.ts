@@ -71,6 +71,7 @@ export type Database = {
           created_at: string
           currency: string
           default_split: Json | null
+          deleted_at: string | null
           id: string
           is_shared: boolean
           name: string
@@ -82,6 +83,7 @@ export type Database = {
           created_at?: string
           currency?: string
           default_split?: Json | null
+          deleted_at?: string | null
           id?: string
           is_shared?: boolean
           name: string
@@ -93,6 +95,7 @@ export type Database = {
           created_at?: string
           currency?: string
           default_split?: Json | null
+          deleted_at?: string | null
           id?: string
           is_shared?: boolean
           name?: string
@@ -496,6 +499,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_deleted_accounts: { Args: never; Returns: undefined }
       create_notification: {
         Args: {
           _message: string
@@ -505,6 +509,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      restore_account: { Args: { account_id: string }; Returns: undefined }
       user_has_account_access: {
         Args: { account_uuid: string; user_uuid: string }
         Returns: boolean
