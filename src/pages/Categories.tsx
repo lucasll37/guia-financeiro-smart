@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Download } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCategories } from "@/hooks/useCategories";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useTransactions } from "@/hooks/useTransactions";
 import { CategoryTable } from "@/components/categories/CategoryTable";
 import { CategoryDialog } from "@/components/categories/CategoryDialog";
-import { seedCategories } from "@/lib/seedCategories";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -93,37 +92,6 @@ export default function Categories() {
     await deleteCategory.mutateAsync(id);
   };
 
-  const handleSeedCategories = async () => {
-    if (!selectedAccountId) {
-      toast({
-        title: "Selecione uma conta",
-        description: "Você precisa selecionar uma conta primeiro",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (categories && categories.length > 0) {
-      if (!confirm("Já existem categorias nesta conta. Deseja adicionar as categorias padrão mesmo assim?")) {
-        return;
-      }
-    }
-
-    try {
-      const count = await seedCategories(selectedAccountId);
-      toast({
-        title: "Categorias criadas",
-        description: `${count} categorias foram adicionadas com sucesso`,
-      });
-    } catch (error: any) {
-      toast({
-        title: "Erro ao criar categorias",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -133,16 +101,10 @@ export default function Categories() {
             Organize seus lançamentos em categorias
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleSeedCategories}>
-            <Download className="h-4 w-4 mr-2" />
-            Categorias Padrão
-          </Button>
-          <Button onClick={handleCreateCategory}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nova Categoria
-          </Button>
-        </div>
+        <Button onClick={handleCreateCategory}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nova Categoria
+        </Button>
       </div>
 
       <div className="w-64">

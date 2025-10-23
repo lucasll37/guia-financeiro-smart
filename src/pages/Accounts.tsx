@@ -7,6 +7,7 @@ import { useAuditLogs } from "@/hooks/useAuditLogs";
 import { AccountsTable } from "@/components/accounts/AccountsTable";
 import { AccountDialog } from "@/components/accounts/AccountDialog";
 import { MembersDialog } from "@/components/accounts/MembersDialog";
+import { seedCategories } from "@/lib/seedCategories";
 import type { Database } from "@/integrations/supabase/types";
 
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
@@ -59,6 +60,13 @@ export default function Accounts() {
           action: "create",
           diff: accountData as any,
         });
+        
+        // Criar categorias padrão automaticamente
+        try {
+          await seedCategories(newAccount.id);
+        } catch (error) {
+          console.error("Erro ao criar categorias padrão:", error);
+        }
       }
     }
     
