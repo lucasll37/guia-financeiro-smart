@@ -81,6 +81,7 @@ export function useMonthlyReturns(investmentId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["monthly-returns"] });
+      queryClient.invalidateQueries({ queryKey: ["investment-current-value"] });
       toast({
         title: "Rendimento registrado",
         description: "O rendimento mensal foi registrado com sucesso",
@@ -150,6 +151,7 @@ export function useMonthlyReturns(investmentId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["monthly-returns"] });
+      queryClient.invalidateQueries({ queryKey: ["investment-current-value"] });
       toast({
         title: "Rendimento atualizado",
         description: "O rendimento mensal foi atualizado com sucesso",
@@ -175,6 +177,7 @@ export function useMonthlyReturns(investmentId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["monthly-returns"] });
+      queryClient.invalidateQueries({ queryKey: ["investment-current-value"] });
       toast({
         title: "Rendimento excluído",
         description: "O rendimento mensal foi excluído com sucesso",

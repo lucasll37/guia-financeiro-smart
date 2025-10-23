@@ -87,7 +87,7 @@ export function MonthlyReturnsTable({
                             : "text-red-600"
                         }
                       >
-                        {formatCurrency(Number(returnData.actual_return))}
+                        {Number(returnData.actual_return).toFixed(2)}%
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
