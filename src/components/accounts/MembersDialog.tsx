@@ -48,12 +48,12 @@ export function MembersDialog({ open, onOpenChange, account, currentUserId }: Me
 
     setIsInviting(true);
     try {
-      // Buscar usuário pelo email
-      const { data: profiles, error: profileError } = await supabase
+      // Buscar usuário pelo email (tipagem flexível até o types ser atualizado)
+      const { data: profiles, error: profileError } = await (supabase
         .from("profiles")
-        .select("id, name, email")
-        .ilike("email", inviteEmail)
-        .limit(1);
+        .select("id, name, email" as any)
+        .ilike("email" as any, inviteEmail)
+        .limit(1)) as any;
 
       if (profileError) throw profileError;
       
