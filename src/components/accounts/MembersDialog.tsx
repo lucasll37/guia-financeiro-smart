@@ -49,15 +49,15 @@ export function MembersDialog({ open, onOpenChange, account, currentUserId }: Me
     setIsInviting(true);
     try {
       // Buscar usuário pelo email
-      const { data: profile, error: profileError } = await supabase
+      const { data: profiles, error: profileError } = await supabase
         .from("profiles")
-        .select("id, name")
-        .eq("id", inviteEmail)
-        .maybeSingle();
+        .select("id, name, email")
+        .ilike("email", inviteEmail)
+        .limit(1);
 
       if (profileError) throw profileError;
       
-      if (!profile) {
+      if (!profiles || profiles.length === 0) {
         toast({
           title: "Usuário não encontrado",
           description: "Não foi possível encontrar um usuário com este email",
@@ -65,6 +65,8 @@ export function MembersDialog({ open, onOpenChange, account, currentUserId }: Me
         });
         return;
       }
+
+      const profile = profiles[0];
 
       // Criar convite
       const newMember = await inviteMember.mutateAsync({
@@ -217,14 +219,14 @@ export function MembersDialog({ open, onOpenChange, account, currentUserId }: Me
                   <Mail className="h-5 w-5 mt-2 text-muted-foreground" />
                   <Input
                     id="invite-email"
-                    type="text"
-                    placeholder="ID do usuário (UUID)"
+                    type="email"
+                    placeholder="email@exemplo.com"
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Insira o ID do usuário que deseja convidar
+                  Insira o e-mail do usuário que deseja convidar
                 </p>
               </div>
 
