@@ -23,6 +23,9 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "react-router-dom";
 import { t } from "@/lib/i18n";
+import { NotificationPanel } from "@/components/notifications/NotificationPanel";
+import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
+import { useState } from "react";
 
 const routeLabels: Record<string, string> = {
   "/dashboard": t("nav.dashboard"),
@@ -39,6 +42,7 @@ export const Header = () => {
   const { user, signOut } = useAuth();
   const location = useLocation();
   const currentRoute = routeLabels[location.pathname] || "Dashboard";
+  const [preferencesOpen, setPreferencesOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
@@ -66,6 +70,20 @@ export const Header = () => {
               className="pl-10"
             />
           </div>
+
+          {user && (
+            <>
+              <NotificationPanel
+                userId={user.id}
+                onOpenPreferences={() => setPreferencesOpen(true)}
+              />
+              <NotificationPreferences
+                open={preferencesOpen}
+                onOpenChange={setPreferencesOpen}
+                userId={user.id}
+              />
+            </>
+          )}
 
           <ThemeToggle />
 
