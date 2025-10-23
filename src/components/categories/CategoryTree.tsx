@@ -53,7 +53,7 @@ function CategoryNode({ category, categoryMap, level, onEdit, onDelete, onAddChi
           style={{ backgroundColor: category.color }}
         />
 
-        <span className="flex-1 font-medium">{category.name}</span>
+        <span className={`flex-1 ${level === 0 ? 'font-semibold' : ''}`}>{category.name}</span>
 
         <Badge variant={category.type === "despesa" ? "destructive" : "default"}>
           {category.type === "despesa" ? "Despesa" : "Receita"}

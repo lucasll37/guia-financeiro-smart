@@ -2,6 +2,16 @@ import { supabase } from "@/integrations/supabase/client";
 
 export async function seedCategories(accountId: string) {
   const categories = [
+    // RECEITAS
+    { name: "Receita", type: "receita" as const, color: "#10b981", parent_id: null },
+    { name: "Salário / Adiantamento", type: "receita" as const, color: "#10b981", parent_id: "Receita" },
+    { name: "Férias", type: "receita" as const, color: "#10b981", parent_id: "Receita" },
+    { name: "13º salário", type: "receita" as const, color: "#10b981", parent_id: "Receita" },
+    { name: "Aposentadoria", type: "receita" as const, color: "#10b981", parent_id: "Receita" },
+    { name: "Receita extra (aluguel, restituição IR)", type: "receita" as const, color: "#10b981", parent_id: "Receita" },
+    { name: "Outras Receitas", type: "receita" as const, color: "#10b981", parent_id: "Receita" },
+    
+    // DESPESAS
     // Alimentação
     { name: "Alimentação", type: "despesa" as const, color: "#22c55e", parent_id: null },
     { name: "Supermercado", type: "despesa" as const, color: "#22c55e", parent_id: "Alimentação" },
