@@ -170,6 +170,7 @@ export default function Investments() {
             onEdit={handleEdit}
             onDelete={handleDelete}
             onSelectForReturns={handleViewReturns}
+            selectedInvestmentId={selectedInvestmentForReturns?.id}
           />
           
           {!selectedInvestmentForReturns ? (

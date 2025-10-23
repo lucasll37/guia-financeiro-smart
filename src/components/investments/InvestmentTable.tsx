@@ -17,6 +17,7 @@ interface InvestmentTableProps {
   onEdit: (investment: Investment) => void;
   onDelete: (id: string) => void;
   onSelectForReturns?: (investment: Investment) => void;
+  selectedInvestmentId?: string;
 }
 
 const investmentTypes = {
@@ -31,6 +32,7 @@ export function InvestmentTable({
   onEdit,
   onDelete,
   onSelectForReturns,
+  selectedInvestmentId,
 }: InvestmentTableProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -68,7 +70,7 @@ export function InvestmentTable({
             investments.map((investment) => (
               <TableRow 
                 key={investment.id}
-                className={onSelectForReturns ? "cursor-pointer hover:bg-muted/50" : ""}
+                className={`${onSelectForReturns ? "cursor-pointer hover:bg-muted/50" : ""} ${selectedInvestmentId === investment.id ? "bg-accent" : ""}`}
                 onClick={() => onSelectForReturns?.(investment)}
               >
                 <TableCell className="font-medium">{investment.name}</TableCell>
