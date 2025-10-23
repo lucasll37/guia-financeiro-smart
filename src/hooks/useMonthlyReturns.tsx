@@ -49,8 +49,9 @@ export function useMonthlyReturns(investmentId?: string) {
         ? Number(previousReturns[0].balance_after)
         : Number(investment?.balance || 0);
 
-      // Calculate balance_after = previous balance + actual_return + contribution
-      const balance_after = previousBalance + Number(returnData.actual_return) + Number(returnData.contribution);
+      // Calculate balance_after = (previous balance + contribution) * (1 + actual_return%)
+      const actualReturnRate = Number(returnData.actual_return) / 100;
+      const balance_after = (previousBalance + Number(returnData.contribution)) * (1 + actualReturnRate);
 
       const { data, error } = await supabase
         .from("investment_monthly_returns")
@@ -116,7 +117,8 @@ export function useMonthlyReturns(investmentId?: string) {
       if (updates.actual_return !== undefined || updates.contribution !== undefined) {
         const actual_return = updates.actual_return ?? 0;
         const contribution = updates.contribution ?? 0;
-        balance_after = previousBalance + Number(actual_return) + Number(contribution);
+        const actualReturnRate = Number(actual_return) / 100;
+        balance_after = (previousBalance + Number(contribution)) * (1 + actualReturnRate);
       }
 
       const { data, error } = await supabase

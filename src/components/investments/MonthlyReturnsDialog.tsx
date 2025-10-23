@@ -73,14 +73,14 @@ export function MonthlyReturnsDialog({
       });
     } else {
       form.reset({
-        month: format(new Date(), "yyyy-MM"),
+        month: "",
         actual_return: 0,
         inflation_rate: 0,
         contribution: 0,
         notes: "",
       });
     }
-  }, [monthlyReturn, form]);
+  }, [monthlyReturn, form, open]);
 
   const handleSubmit = (data: ReturnFormData) => {
     // Convert month string (yyyy-MM) to date (first day of month)
@@ -137,8 +137,15 @@ export function MonthlyReturnsDialog({
                 <FormItem>
                   <FormLabel>Mês/Ano</FormLabel>
                   <FormControl>
-                    <Input type="month" {...field} />
+                    <Input 
+                      type="month" 
+                      {...field} 
+                      disabled={!!monthlyReturn}
+                    />
                   </FormControl>
+                  <FormDescription>
+                    {monthlyReturn ? "O mês não pode ser alterado" : "Selecione o mês do rendimento"}
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -149,7 +156,7 @@ export function MonthlyReturnsDialog({
               name="actual_return"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Rendimento</FormLabel>
+                  <FormLabel>Rendimento (%)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -159,7 +166,7 @@ export function MonthlyReturnsDialog({
                       onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
                   </FormControl>
-                  <FormDescription>Valor do rendimento no período</FormDescription>
+                  <FormDescription>Percentual de rendimento no período</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
