@@ -91,10 +91,16 @@ export function InvestmentDialog({
   }, [investment, form]);
 
   const handleSubmit = (data: InvestmentFormData) => {
+    // Convert YYYY-MM to YYYY-MM-01 for PostgreSQL date format
+    const formattedData = {
+      ...data,
+      initial_month: `${data.initial_month}-01`,
+    };
+    
     if (investment) {
-      onSubmit({ id: investment.id, ...data });
+      onSubmit({ id: investment.id, ...formattedData });
     } else {
-      onSubmit({ ...data, account_id: accountId });
+      onSubmit({ ...formattedData, account_id: accountId });
     }
     onOpenChange(false);
     form.reset();
