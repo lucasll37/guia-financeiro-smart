@@ -96,39 +96,92 @@ export async function seedCategories(accountId: string) {
     { name: "Imposto de Renda a Pagar", type: "despesa" as const, color: "#6366f1", parent_id: "Serviços Financeiros" },
   ];
 
-  // Separar categorias principais e subcategorias
-  const parentCategories = categories.filter(cat => cat.parent_id === null);
-  const childCategories = categories.filter(cat => cat.parent_id !== null);
-  
-  // Mapa para armazenar IDs das categorias criadas
-  const createdCategories = new Map<string, string>();
-  
-  // Primeiro: criar todas as categorias principais
-  for (const cat of parentCategories) {
-    const { data, error } = await supabase
-      .from("categories")
-      .insert({
-        account_id: accountId,
-        name: cat.name,
-        type: cat.type,
-        color: cat.color,
-        parent_id: null,
-      })
-      .select()
-      .single();
+  // Construir mapa de existentes e garantir criação idempotente
+  const buildKey = (name: string, parentId: string | null) =>
+    `${name}__${parentId ?? 'root'}`;
 
-    if (!error && data) {
-      createdCategories.set(cat.name, data.id);
+  const { data: existing, error: existingError } = await supabase
+    .from('categories')
+    .select('id, name, parent_id')
+    .eq('account_id', accountId);
+
+  const byKey = new Map<string, string>();
+  if (!existingError && existing) {
+    for (const row of existing) {
+      byKey.set(buildKey(row.name as string, (row as any).parent_id as string | null), row.id as string);
     }
   }
 
-  // Segundo: criar todas as subcategorias com parent_id correto
-  for (const cat of childCategories) {
-    const parentId = createdCategories.get(cat.parent_id!);
-    
-    if (parentId) {
+  const parentCategories = categories.filter(c => c.parent_id === null);
+  const childCategories = categories.filter(c => c.parent_id !== null);
+
+  let createdCount = 0;
+
+  // Garantir pais
+  for (const cat of parentCategories) {
+    const key = buildKey(cat.name, null);
+    if (!byKey.has(key)) {
       const { data, error } = await supabase
-        .from("categories")
+        .from('categories')
+        .insert({
+          account_id: accountId,
+          name: cat.name,
+          type: cat.type,
+          color: cat.color,
+          parent_id: null,
+        })
+        .select('id')
+        .single();
+      if (!error && data) {
+        byKey.set(key, data.id);
+        createdCount++;
+      } else {
+        console.error('Erro criando categoria pai', cat.name, error);
+      }
+    }
+  }
+
+  // Garantir filhos
+  for (const cat of childCategories) {
+    const parentKey = buildKey(cat.parent_id as string, null);
+    let parentId = byKey.get(parentKey);
+
+    if (!parentId) {
+      // Fallback: tenta criar o pai agora caso não exista
+      const parentSpec = parentCategories.find(p => p.name === cat.parent_id);
+      if (parentSpec) {
+        const parentSpecKey = buildKey(parentSpec.name, null);
+        if (!byKey.has(parentSpecKey)) {
+          const { data: pData, error: pErr } = await supabase
+            .from('categories')
+            .insert({
+              account_id: accountId,
+              name: parentSpec.name,
+              type: parentSpec.type,
+              color: parentSpec.color,
+              parent_id: null,
+            })
+            .select('id')
+            .single();
+          if (!pErr && pData) {
+            byKey.set(parentSpecKey, pData.id);
+            parentId = pData.id;
+          } else {
+            console.error('Erro criando pai no fallback', parentSpec.name, pErr);
+            continue;
+          }
+        } else {
+          parentId = byKey.get(parentSpecKey)!;
+        }
+      }
+    }
+
+    if (!parentId) continue;
+
+    const childKey = buildKey(cat.name, parentId);
+    if (!byKey.has(childKey)) {
+      const { data, error } = await supabase
+        .from('categories')
         .insert({
           account_id: accountId,
           name: cat.name,
@@ -136,14 +189,16 @@ export async function seedCategories(accountId: string) {
           color: cat.color,
           parent_id: parentId,
         })
-        .select()
+        .select('id')
         .single();
-
       if (!error && data) {
-        createdCategories.set(cat.name, data.id);
+        byKey.set(childKey, data.id);
+        createdCount++;
+      } else {
+        console.error('Erro criando subcategoria', cat.name, error);
       }
     }
   }
 
-  return createdCategories.size;
+  return createdCount;
 }
