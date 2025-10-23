@@ -39,6 +39,11 @@ export function InvestmentTable({
     }).format(value);
   };
 
+  const calculateCurrentValue = (investment: Investment) => {
+    // Valor atual = saldo inicial (que já está atualizado no último balance_after registrado)
+    return Number(investment.balance);
+  };
+
 
   return (
     <div className="rounded-md border">
@@ -47,14 +52,15 @@ export function InvestmentTable({
           <TableRow>
             <TableHead>Nome</TableHead>
             <TableHead>Tipo</TableHead>
-            <TableHead className="text-right">Saldo</TableHead>
+            <TableHead className="text-right">Saldo Inicial</TableHead>
+            <TableHead className="text-right">Valor Atual</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {investments.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="text-center text-muted-foreground">
+              <TableCell colSpan={5} className="text-center text-muted-foreground">
                 Nenhum investimento encontrado
               </TableCell>
             </TableRow>
@@ -71,6 +77,9 @@ export function InvestmentTable({
                 </TableCell>
                 <TableCell className="text-right">
                   {formatCurrency(Number(investment.balance))}
+                </TableCell>
+                <TableCell className="text-right font-medium">
+                  {formatCurrency(calculateCurrentValue(investment))}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">

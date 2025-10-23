@@ -23,56 +23,49 @@ interface ProjectionData {
 }
 
 export function InvestmentSimulator({ investments, monthlyReturnsByInvestment }: InvestmentSimulatorProps) {
-  const projections = useMemo(() => {
-    const periods = [3, 6, 12];
-    const results: Record<number, ProjectionData[]> = {};
+  const historicalData = useMemo(() => {
+    if (investments.length === 0) return [];
 
-    periods.forEach((months) => {
-      const data: ProjectionData[] = [];
+    const inv = investments[0];
+    const returns = monthlyReturnsByInvestment[inv.id] || [];
+    
+    if (returns.length === 0) return [];
 
-      // Get the maximum number of historical months across all investments
-      const maxHistoricalMonths = Math.max(
-        ...investments.map((inv) => monthlyReturnsByInvestment[inv.id]?.length || 0),
-        0
-      );
+    // Ordenar por mês (mais antigo primeiro)
+    const sortedReturns = [...returns].sort((a, b) => 
+      new Date(a.month).getTime() - new Date(b.month).getTime()
+    );
 
-      for (let i = 0; i <= months; i++) {
-        const monthData: ProjectionData = { month: i };
-        
-        investments.forEach((inv) => {
-          const returns = monthlyReturnsByInvestment[inv.id] || [];
-          
-          if (i < returns.length) {
-            // Use historical data
-            monthData[inv.name] = Number(returns[returns.length - 1 - i]?.balance_after || inv.balance);
-          } else {
-            // Project future based on average return rate from historical data
-            if (returns.length > 0) {
-              const avgReturn = returns.reduce((sum, ret) => {
-                const returnRate = Number(ret.actual_return) / Number(ret.balance_after);
-                return sum + returnRate;
-              }, 0) / returns.length;
-              
-              const lastBalance = returns.length > 0 
-                ? Number(returns[0].balance_after) 
-                : Number(inv.balance);
-              
-              const monthsToProject = i - returns.length + 1;
-              monthData[inv.name] = lastBalance * Math.pow(1 + avgReturn, monthsToProject);
-            } else {
-              // No historical data, use current balance
-              monthData[inv.name] = Number(inv.balance);
-            }
-          }
-        });
-
-        data.push(monthData);
-      }
-
-      results[months] = data;
+    // Criar série histórica com saldo inicial
+    const data: ProjectionData[] = [];
+    
+    // Adicionar ponto inicial (saldo inicial do investimento)
+    data.push({
+      month: 0,
+      [inv.name]: Number(inv.balance),
+      valorPresente: Number(inv.balance),
     });
 
-    return results;
+    // Adicionar cada mês histórico
+    sortedReturns.forEach((ret, index) => {
+      const balanceAfter = Number(ret.balance_after);
+      const inflationRate = Number(ret.inflation_rate) / 100;
+      
+      // Calcular valor presente descontando a inflação acumulada
+      let valorPresente = balanceAfter;
+      for (let i = index; i >= 0; i--) {
+        const pastInflation = Number(sortedReturns[i].inflation_rate) / 100;
+        valorPresente = valorPresente / (1 + pastInflation);
+      }
+
+      data.push({
+        month: index + 1,
+        [inv.name]: balanceAfter,
+        valorPresente: valorPresente,
+      });
+    });
+
+    return data;
   }, [investments, monthlyReturnsByInvestment]);
 
 
@@ -111,66 +104,64 @@ export function InvestmentSimulator({ investments, monthlyReturnsByInvestment }:
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Projeção de Evolução</CardTitle>
+        <CardTitle>Evolução da Série Histórica</CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="12">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
-            <TabsTrigger value="3">3 meses</TabsTrigger>
-            <TabsTrigger value="6">6 meses</TabsTrigger>
-            <TabsTrigger value="12">12 meses</TabsTrigger>
-          </TabsList>
-
-          {[3, 6, 12].map((period) => (
-            <TabsContent key={period} value={period.toString()}>
-              <div className="h-[400px] mt-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={projections[period]}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="month" 
-                      label={{ value: 'Meses', position: 'insideBottom', offset: -5 }}
-                    />
-                    <YAxis 
-                      tickFormatter={(value) => formatCurrency(value)}
-                    />
-                    <ChartTooltip
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          return (
-                            <div className="rounded-lg border bg-background p-2 shadow-sm">
-                              <div className="font-medium mb-1">
-                                Mês {payload[0].payload.month}
-                              </div>
-                              {payload.map((entry: any, index: number) => (
-                                <div key={index} className="flex justify-between gap-4 text-sm">
-                                  <span style={{ color: entry.color }}>{entry.name}:</span>
-                                  <span className="font-medium">{formatCurrency(entry.value)}</span>
-                                </div>
-                              ))}
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    <Legend />
-                    {investments.map((inv, idx) => (
-                      <Line
-                        key={inv.id}
-                        type="monotone"
-                        dataKey={inv.name}
-                        stroke={colors[idx % colors.length]}
-                        strokeWidth={2}
-                        dot={false}
-                      />
-                    ))}
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+        <div className="h-[400px] mt-4">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={historicalData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis 
+                dataKey="month" 
+                label={{ value: 'Meses', position: 'insideBottom', offset: -5 }}
+              />
+              <YAxis 
+                tickFormatter={(value) => formatCurrency(value)}
+              />
+              <ChartTooltip
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="rounded-lg border bg-background p-2 shadow-sm">
+                        <div className="font-medium mb-1">
+                          Mês {payload[0].payload.month}
+                        </div>
+                        {payload.map((entry: any, index: number) => (
+                          <div key={index} className="flex justify-between gap-4 text-sm">
+                            <span style={{ color: entry.color }}>{entry.name}:</span>
+                            <span className="font-medium">{formatCurrency(entry.value)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Legend />
+              {investments.map((inv, idx) => (
+                <Line
+                  key={inv.id}
+                  type="monotone"
+                  dataKey={inv.name}
+                  stroke={colors[idx % colors.length]}
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                  name={inv.name}
+                />
+              ))}
+              <Line
+                type="monotone"
+                dataKey="valorPresente"
+                stroke="#6b7280"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={{ r: 3 }}
+                name="Valor Presente"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   );

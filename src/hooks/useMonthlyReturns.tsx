@@ -30,9 +30,34 @@ export function useMonthlyReturns(investmentId?: string) {
 
   const createReturn = useMutation({
     mutationFn: async (returnData: MonthlyReturnInsert) => {
+      // Get the investment to access its balance and previous returns
+      const { data: investment } = await supabase
+        .from("investment_assets")
+        .select("balance")
+        .eq("id", returnData.investment_id)
+        .single();
+
+      // Get the most recent return to calculate balance_after
+      const { data: previousReturns } = await supabase
+        .from("investment_monthly_returns")
+        .select("*")
+        .eq("investment_id", returnData.investment_id)
+        .order("month", { ascending: false })
+        .limit(1);
+
+      const previousBalance = previousReturns && previousReturns.length > 0
+        ? Number(previousReturns[0].balance_after)
+        : Number(investment?.balance || 0);
+
+      // Calculate balance_after = previous balance + actual_return + contribution
+      const balance_after = previousBalance + Number(returnData.actual_return) + Number(returnData.contribution);
+
       const { data, error } = await supabase
         .from("investment_monthly_returns")
-        .insert(returnData)
+        .insert({
+          ...returnData,
+          balance_after,
+        })
         .select()
         .single();
 
@@ -57,9 +82,49 @@ export function useMonthlyReturns(investmentId?: string) {
 
   const updateReturn = useMutation({
     mutationFn: async ({ id, ...updates }: MonthlyReturnUpdate & { id: string }) => {
+      // Get all returns for this investment up to the current month
+      const { data: currentReturn } = await supabase
+        .from("investment_monthly_returns")
+        .select("investment_id, month")
+        .eq("id", id)
+        .single();
+
+      if (!currentReturn) throw new Error("Return not found");
+
+      // Get previous returns
+      const { data: previousReturns } = await supabase
+        .from("investment_monthly_returns")
+        .select("*")
+        .eq("investment_id", currentReturn.investment_id)
+        .lt("month", currentReturn.month)
+        .order("month", { ascending: false })
+        .limit(1);
+
+      // Get investment balance
+      const { data: investment } = await supabase
+        .from("investment_assets")
+        .select("balance")
+        .eq("id", currentReturn.investment_id)
+        .single();
+
+      const previousBalance = previousReturns && previousReturns.length > 0
+        ? Number(previousReturns[0].balance_after)
+        : Number(investment?.balance || 0);
+
+      // Calculate new balance_after if actual_return or contribution changed
+      let balance_after = updates.balance_after;
+      if (updates.actual_return !== undefined || updates.contribution !== undefined) {
+        const actual_return = updates.actual_return ?? 0;
+        const contribution = updates.contribution ?? 0;
+        balance_after = previousBalance + Number(actual_return) + Number(contribution);
+      }
+
       const { data, error } = await supabase
         .from("investment_monthly_returns")
-        .update(updates)
+        .update({
+          ...updates,
+          balance_after,
+        })
         .eq("id", id)
         .select()
         .single();

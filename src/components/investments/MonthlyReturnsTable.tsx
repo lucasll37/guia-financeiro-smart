@@ -57,6 +57,8 @@ export function MonthlyReturnsTable({
               <TableRow>
                 <TableHead>Mês/Ano</TableHead>
                 <TableHead className="text-right">Rendimento</TableHead>
+                <TableHead className="text-right">Inflação (%)</TableHead>
+                <TableHead className="text-right">Aporte</TableHead>
                 <TableHead className="text-right">Saldo Final</TableHead>
                 <TableHead>Observações</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
@@ -65,7 +67,7 @@ export function MonthlyReturnsTable({
             <TableBody>
               {returns.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground">
                     Nenhum rendimento registrado
                   </TableCell>
                 </TableRow>
@@ -85,10 +87,24 @@ export function MonthlyReturnsTable({
                             : "text-red-600"
                         }
                       >
-                        {formatPercentage(Number(returnData.actual_return))}
+                        {formatCurrency(Number(returnData.actual_return))}
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
+                      {Number(returnData.inflation_rate).toFixed(2)}%
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <span
+                        className={
+                          Number(returnData.contribution) < 0
+                            ? "text-red-600"
+                            : ""
+                        }
+                      >
+                        {formatCurrency(Number(returnData.contribution))}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right font-medium">
                       {formatCurrency(Number(returnData.balance_after))}
                     </TableCell>
                     <TableCell className="max-w-xs truncate">

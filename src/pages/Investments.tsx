@@ -81,7 +81,12 @@ export default function Investments() {
   };
 
   const handleViewReturns = (investment: Investment) => {
-    setSelectedInvestmentForReturns(investment);
+    // Toggle: se clicar no mesmo investimento, fecha
+    if (selectedInvestmentForReturns?.id === investment.id) {
+      setSelectedInvestmentForReturns(null);
+    } else {
+      setSelectedInvestmentForReturns(investment);
+    }
   };
 
   const handleSubmitReturn = (data: any) => {

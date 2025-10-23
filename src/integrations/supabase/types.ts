@@ -327,8 +327,10 @@ export type Database = {
         Row: {
           actual_return: number
           balance_after: number
+          contribution: number
           created_at: string
           id: string
+          inflation_rate: number
           investment_id: string
           month: string
           notes: string | null
@@ -337,8 +339,10 @@ export type Database = {
         Insert: {
           actual_return?: number
           balance_after?: number
+          contribution?: number
           created_at?: string
           id?: string
+          inflation_rate?: number
           investment_id: string
           month: string
           notes?: string | null
@@ -347,8 +351,10 @@ export type Database = {
         Update: {
           actual_return?: number
           balance_after?: number
+          contribution?: number
           created_at?: string
           id?: string
+          inflation_rate?: number
           investment_id?: string
           month?: string
           notes?: string | null

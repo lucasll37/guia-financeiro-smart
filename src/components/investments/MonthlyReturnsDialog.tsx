@@ -29,7 +29,8 @@ type MonthlyReturn = Database["public"]["Tables"]["investment_monthly_returns"][
 const returnSchema = z.object({
   month: z.string().min(1, "Mês é obrigatório"),
   actual_return: z.number(),
-  balance_after: z.number().min(0, "Saldo deve ser positivo"),
+  inflation_rate: z.number(),
+  contribution: z.number(),
   notes: z.string().optional(),
 });
 
@@ -55,7 +56,8 @@ export function MonthlyReturnsDialog({
     defaultValues: {
       month: format(new Date(), "yyyy-MM"),
       actual_return: 0,
-      balance_after: 0,
+      inflation_rate: 0,
+      contribution: 0,
       notes: "",
     },
   });
@@ -65,14 +67,16 @@ export function MonthlyReturnsDialog({
       form.reset({
         month: format(new Date(monthlyReturn.month), "yyyy-MM"),
         actual_return: Number(monthlyReturn.actual_return),
-        balance_after: Number(monthlyReturn.balance_after),
+        inflation_rate: Number(monthlyReturn.inflation_rate),
+        contribution: Number(monthlyReturn.contribution),
         notes: monthlyReturn.notes || "",
       });
     } else {
       form.reset({
         month: format(new Date(), "yyyy-MM"),
         actual_return: 0,
-        balance_after: 0,
+        inflation_rate: 0,
+        contribution: 0,
         notes: "",
       });
     }
@@ -82,12 +86,18 @@ export function MonthlyReturnsDialog({
     // Convert month string (yyyy-MM) to date (first day of month)
     const monthDate = `${data.month}-01`;
     
+    // Calculate balance_after automatically
+    // balance_after = previous balance + actual_return + contribution
+    // For now, we'll need to get the previous balance from the last return
+    // This will be handled in the parent component or backend
+    
     if (monthlyReturn) {
       onSubmit({ 
         id: monthlyReturn.id, 
         month: monthDate,
         actual_return: data.actual_return,
-        balance_after: data.balance_after,
+        inflation_rate: data.inflation_rate,
+        contribution: data.contribution,
         notes: data.notes || null,
       });
     } else {
@@ -95,7 +105,8 @@ export function MonthlyReturnsDialog({
         investment_id: investmentId,
         month: monthDate,
         actual_return: data.actual_return,
-        balance_after: data.balance_after,
+        inflation_rate: data.inflation_rate,
+        contribution: data.contribution,
         notes: data.notes || null,
       });
     }
@@ -138,30 +149,7 @@ export function MonthlyReturnsDialog({
               name="actual_return"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Rendimento Real (%)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.0001"
-                      placeholder="0.01 = 1%"
-                      {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Valor entre -1 e 1 (ex: 0.01 = 1%, -0.02 = -2%)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="balance_after"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Saldo após Rendimento</FormLabel>
+                  <FormLabel>Rendimento</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -171,6 +159,51 @@ export function MonthlyReturnsDialog({
                       onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
                   </FormControl>
+                  <FormDescription>Valor do rendimento no período</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="inflation_rate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Inflação Mensal (%)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00"
+                      {...field}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    />
+                  </FormControl>
+                  <FormDescription>Taxa de inflação do período</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="contribution"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Aporte</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00"
+                      {...field}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Valor aportado (ou retirado se negativo) no fim do mês
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
