@@ -16,6 +16,7 @@ interface InvestmentTableProps {
   investments: Investment[];
   onEdit: (investment: Investment) => void;
   onDelete: (id: string) => void;
+  onSelectForReturns?: (investment: Investment) => void;
 }
 
 const investmentTypes = {
@@ -29,6 +30,7 @@ export function InvestmentTable({
   investments,
   onEdit,
   onDelete,
+  onSelectForReturns,
 }: InvestmentTableProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -73,7 +75,11 @@ export function InvestmentTable({
             </TableRow>
           ) : (
             investments.map((investment) => (
-              <TableRow key={investment.id}>
+              <TableRow 
+                key={investment.id}
+                className={onSelectForReturns ? "cursor-pointer hover:bg-muted/50" : ""}
+                onClick={() => onSelectForReturns?.(investment)}
+              >
                 <TableCell className="font-medium">{investment.name}</TableCell>
                 <TableCell>
                   {investmentTypes[investment.type as keyof typeof investmentTypes]}
@@ -100,14 +106,20 @@ export function InvestmentTable({
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => onEdit(investment)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEdit(investment);
+                      }}
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => onDelete(investment.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(investment.id);
+                      }}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

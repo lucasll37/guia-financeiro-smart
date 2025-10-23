@@ -11,17 +11,24 @@ import {
 } from "@/components/ui/select";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useInvestments } from "@/hooks/useInvestments";
+import { useMonthlyReturns } from "@/hooks/useMonthlyReturns";
 import { InvestmentDialog } from "@/components/investments/InvestmentDialog";
 import { InvestmentTable } from "@/components/investments/InvestmentTable";
 import { InvestmentSimulator } from "@/components/investments/InvestmentSimulator";
+import { MonthlyReturnsDialog } from "@/components/investments/MonthlyReturnsDialog";
+import { MonthlyReturnsTable } from "@/components/investments/MonthlyReturnsTable";
 import type { Database } from "@/integrations/supabase/types";
 
 type Investment = Database["public"]["Tables"]["investment_assets"]["Row"];
+type MonthlyReturn = Database["public"]["Tables"]["investment_monthly_returns"]["Row"];
 
 export default function Investments() {
   const [selectedAccountId, setSelectedAccountId] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedInvestment, setSelectedInvestment] = useState<Investment | null>(null);
+  const [returnsDialogOpen, setReturnsDialogOpen] = useState(false);
+  const [selectedReturn, setSelectedReturn] = useState<MonthlyReturn | null>(null);
+  const [selectedInvestmentForReturns, setSelectedInvestmentForReturns] = useState<Investment | null>(null);
 
   const { accounts } = useAccounts();
   const {
@@ -31,6 +38,14 @@ export default function Investments() {
     updateInvestment,
     deleteInvestment,
   } = useInvestments(selectedAccountId || undefined);
+
+  const {
+    returns,
+    isLoading: isLoadingReturns,
+    createReturn,
+    updateReturn,
+    deleteReturn,
+  } = useMonthlyReturns(selectedInvestmentForReturns?.id);
 
   const handleSubmit = (data: any) => {
     if (selectedInvestment) {
@@ -54,6 +69,34 @@ export default function Investments() {
   const handleNewInvestment = () => {
     setSelectedInvestment(null);
     setDialogOpen(true);
+  };
+
+  const handleViewReturns = (investment: Investment) => {
+    setSelectedInvestmentForReturns(investment);
+  };
+
+  const handleSubmitReturn = (data: any) => {
+    if (selectedReturn) {
+      updateReturn.mutate(data);
+    } else {
+      createReturn.mutate(data);
+    }
+  };
+
+  const handleEditReturn = (returnData: MonthlyReturn) => {
+    setSelectedReturn(returnData);
+    setReturnsDialogOpen(true);
+  };
+
+  const handleDeleteReturn = (id: string) => {
+    if (confirm("Tem certeza que deseja excluir este rendimento?")) {
+      deleteReturn.mutate(id);
+    }
+  };
+
+  const handleNewReturn = () => {
+    setSelectedReturn(null);
+    setReturnsDialogOpen(true);
   };
 
   return (
@@ -112,7 +155,25 @@ export default function Investments() {
             investments={investments}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onSelectForReturns={handleViewReturns}
           />
+          
+          {!selectedInvestmentForReturns ? (
+            <div className="text-center py-8 border rounded-lg">
+              <p className="text-muted-foreground">
+                Selecione um investimento da tabela acima para gerenciar os rendimentos mensais
+              </p>
+            </div>
+          ) : (
+            <MonthlyReturnsTable
+              returns={returns || []}
+              onEdit={handleEditReturn}
+              onDelete={handleDeleteReturn}
+              onNew={handleNewReturn}
+              investmentName={selectedInvestmentForReturns.name}
+            />
+          )}
+          
           <InvestmentSimulator investments={investments} />
         </div>
       )}
@@ -123,6 +184,14 @@ export default function Investments() {
         investment={selectedInvestment}
         accountId={selectedAccountId}
         onSubmit={handleSubmit}
+      />
+
+      <MonthlyReturnsDialog
+        open={returnsDialogOpen}
+        onOpenChange={setReturnsDialogOpen}
+        monthlyReturn={selectedReturn}
+        investmentId={selectedInvestmentForReturns?.id || ""}
+        onSubmit={handleSubmitReturn}
       />
     </div>
   );

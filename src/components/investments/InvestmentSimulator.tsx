@@ -101,111 +101,69 @@ export function InvestmentSimulator({ investments }: InvestmentSimulatorProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Projeção de Evolução</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="12">
-            <TabsList className="grid w-full max-w-md grid-cols-3">
-              <TabsTrigger value="3">3 meses</TabsTrigger>
-              <TabsTrigger value="6">6 meses</TabsTrigger>
-              <TabsTrigger value="12">12 meses</TabsTrigger>
-            </TabsList>
+    <Card>
+      <CardHeader>
+        <CardTitle>Projeção de Evolução</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="12">
+          <TabsList className="grid w-full max-w-md grid-cols-3">
+            <TabsTrigger value="3">3 meses</TabsTrigger>
+            <TabsTrigger value="6">6 meses</TabsTrigger>
+            <TabsTrigger value="12">12 meses</TabsTrigger>
+          </TabsList>
 
-            {[3, 6, 12].map((period) => (
-              <TabsContent key={period} value={period.toString()}>
-                <div className="h-[400px] mt-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={projections[period]}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="month" 
-                        label={{ value: 'Meses', position: 'insideBottom', offset: -5 }}
-                      />
-                      <YAxis 
-                        tickFormatter={(value) => formatCurrency(value)}
-                      />
-                      <ChartTooltip
-                        content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
-                            return (
-                              <div className="rounded-lg border bg-background p-2 shadow-sm">
-                                <div className="font-medium mb-1">
-                                  Mês {payload[0].payload.month}
-                                </div>
-                                {payload.map((entry: any, index: number) => (
-                                  <div key={index} className="flex justify-between gap-4 text-sm">
-                                    <span style={{ color: entry.color }}>{entry.name}:</span>
-                                    <span className="font-medium">{formatCurrency(entry.value)}</span>
-                                  </div>
-                                ))}
+          {[3, 6, 12].map((period) => (
+            <TabsContent key={period} value={period.toString()}>
+              <div className="h-[400px] mt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={projections[period]}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="month" 
+                      label={{ value: 'Meses', position: 'insideBottom', offset: -5 }}
+                    />
+                    <YAxis 
+                      tickFormatter={(value) => formatCurrency(value)}
+                    />
+                    <ChartTooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="rounded-lg border bg-background p-2 shadow-sm">
+                              <div className="font-medium mb-1">
+                                Mês {payload[0].payload.month}
                               </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <Legend />
-                      {investments.map((inv, idx) => (
-                        <Line
-                          key={inv.id}
-                          type="monotone"
-                          dataKey={inv.name}
-                          stroke={colors[idx % colors.length]}
-                          strokeWidth={2}
-                          dot={false}
-                        />
-                      ))}
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </TabsContent>
-            ))}
-          </Tabs>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Comparação de Ativos</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={comparisonData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis tickFormatter={(value) => formatCurrency(value)} />
-                <ChartTooltip
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="rounded-lg border bg-background p-2 shadow-sm">
-                          <div className="font-medium mb-1">{payload[0].payload.name}</div>
-                          {payload.map((entry: any, index: number) => (
-                            <div key={index} className="flex justify-between gap-4 text-sm">
-                              <span style={{ color: entry.color }}>{entry.name}:</span>
-                              <span className="font-medium">{formatCurrency(entry.value)}</span>
+                              {payload.map((entry: any, index: number) => (
+                                <div key={index} className="flex justify-between gap-4 text-sm">
+                                  <span style={{ color: entry.color }}>{entry.name}:</span>
+                                  <span className="font-medium">{formatCurrency(entry.value)}</span>
+                                </div>
+                              ))}
                             </div>
-                          ))}
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Legend />
-                <Bar dataKey="current" fill={colors[0]} name="Atual" />
-                <Bar dataKey="projected3m" fill={colors[1]} name="3 meses" />
-                <Bar dataKey="projected6m" fill={colors[2]} name="6 meses" />
-                <Bar dataKey="projected12m" fill={colors[3]} name="12 meses" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Legend />
+                    {investments.map((inv, idx) => (
+                      <Line
+                        key={inv.id}
+                        type="monotone"
+                        dataKey={inv.name}
+                        stroke={colors[idx % colors.length]}
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </TabsContent>
+          ))}
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 }

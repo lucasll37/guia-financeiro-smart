@@ -323,6 +323,47 @@ export type Database = {
           },
         ]
       }
+      investment_monthly_returns: {
+        Row: {
+          actual_return: number
+          balance_after: number
+          created_at: string
+          id: string
+          investment_id: string
+          month: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          actual_return?: number
+          balance_after?: number
+          created_at?: string
+          id?: string
+          investment_id: string
+          month: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actual_return?: number
+          balance_after?: number
+          created_at?: string
+          id?: string
+          investment_id?: string
+          month?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investment_monthly_returns_investment_id_fkey"
+            columns: ["investment_id"]
+            isOneToOne: false
+            referencedRelation: "investment_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
