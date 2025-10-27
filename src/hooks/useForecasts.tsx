@@ -7,7 +7,7 @@ type Forecast = Database["public"]["Tables"]["account_period_forecasts"]["Row"];
 type ForecastInsert = Database["public"]["Tables"]["account_period_forecasts"]["Insert"];
 type ForecastUpdate = Database["public"]["Tables"]["account_period_forecasts"]["Update"];
 
-export function useForecasts(accountId?: string) {
+export function useForecasts(accountId?: string | null) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -16,7 +16,7 @@ export function useForecasts(accountId?: string) {
     queryFn: async () => {
       let query = supabase
         .from("account_period_forecasts")
-        .select("*, categories(name, type, color)")
+        .select("*, categories(name, type, color), accounts(name)")
         .order("period_start", { ascending: false });
 
       if (accountId) {
@@ -28,7 +28,6 @@ export function useForecasts(accountId?: string) {
       if (error) throw error;
       return data;
     },
-    enabled: !!accountId,
   });
 
   const createForecast = useMutation({

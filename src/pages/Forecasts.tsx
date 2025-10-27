@@ -31,7 +31,7 @@ export default function Forecasts() {
 
   const { categories } = useCategories(selectedAccountId !== "all" ? selectedAccountId : undefined);
   const { forecasts, isLoading, createForecast, updateForecast, deleteForecast, copyForecast } = useForecasts(
-    selectedAccountId !== "all" ? selectedAccountId : undefined
+    selectedAccountId !== "all" ? selectedAccountId : null
   );
 
   // Generate month options (6 months before and after current month)
@@ -153,17 +153,14 @@ export default function Forecasts() {
         </Select>
       </div>
 
-      {selectedAccountId === "all" ? (
-        <div className="text-center py-12 text-muted-foreground">
-          Selecione uma conta para visualizar e gerenciar previsões
-        </div>
-      ) : isLoading ? (
+      {isLoading ? (
         <p className="text-muted-foreground">Carregando previsões...</p>
       ) : (
         <ForecastsTable
           forecasts={filteredForecasts}
           onEdit={handleEditForecast}
           onDelete={handleDeleteForecast}
+          showAccountName={selectedAccountId === "all"}
         />
       )}
 

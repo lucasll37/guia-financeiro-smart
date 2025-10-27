@@ -13,9 +13,10 @@ interface ForecastsTableProps {
   forecasts: any[];
   onEdit: (forecast: any) => void;
   onDelete: (id: string) => void;
+  showAccountName?: boolean;
 }
 
-export function ForecastsTable({ forecasts, onEdit, onDelete }: ForecastsTableProps) {
+export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }: ForecastsTableProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -36,6 +37,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete }: ForecastsTablePr
       <Table>
         <TableHeader>
           <TableRow>
+            {showAccountName && <TableHead>Conta</TableHead>}
             <TableHead>Categoria</TableHead>
             <TableHead className="text-right">Valor Previsto</TableHead>
             <TableHead>Observações</TableHead>
@@ -45,6 +47,11 @@ export function ForecastsTable({ forecasts, onEdit, onDelete }: ForecastsTablePr
         <TableBody>
           {forecasts.map((forecast) => (
             <TableRow key={forecast.id}>
+              {showAccountName && (
+                <TableCell className="font-medium">
+                  {(forecast.accounts as any)?.name || "Sem conta"}
+                </TableCell>
+              )}
               <TableCell>
                 <div className="flex items-center gap-2">
                   <div
