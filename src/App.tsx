@@ -12,6 +12,8 @@ import Dashboard from "./pages/Dashboard";
 import Accounts from "./pages/Accounts";
 import Categories from "./pages/Categories";
 import Transactions from "./pages/Transactions";
+import Forecasts from "./pages/Forecasts";
+import Analysis from "./pages/Analysis";
 import Goals from "./pages/Goals";
 import Investments from "./pages/Investments";
 import Reports from "./pages/Reports";
@@ -62,6 +64,8 @@ const App = () => (
               <Route path="contas" element={<Accounts />} />
               <Route path="categorias" element={<Categories />} />
               <Route path="lancamentos" element={<Transactions />} />
+              <Route path="previsoes" element={<Forecasts />} />
+              <Route path="analise" element={<Analysis />} />
               <Route path="metas" element={<Goals />} />
               <Route path="investimentos" element={<Investments />} />
               <Route path="relatorios" element={<Reports />} />
