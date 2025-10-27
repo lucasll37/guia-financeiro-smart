@@ -26,17 +26,17 @@ import {
 import { t } from "@/lib/i18n";
 
 const menuItems = [
-  { title: t("nav.dashboard"), url: "/dashboard", icon: LayoutDashboard },
-  { title: t("nav.accounts"), url: "/contas", icon: Wallet },
-  { title: t("nav.categories"), url: "/categorias", icon: Tag },
-  { title: t("nav.transactions"), url: "/lancamentos", icon: ArrowLeftRight },
-  { title: "Cartões", url: "/cartoes", icon: CreditCard },
-  { title: "Previsões", url: "/previsoes", icon: CalendarClock },
-  { title: "Análise", url: "/analise", icon: BarChart3 },
-  { title: t("nav.goals"), url: "/metas", icon: Target },
-  { title: t("nav.investments"), url: "/investimentos", icon: TrendingUp },
-  { title: t("nav.reports"), url: "/relatorios", icon: FileText },
-  { title: "Admin", url: "/admin", icon: ShieldCheck },
+  { title: t("nav.dashboard"), url: "/app/dashboard", icon: LayoutDashboard },
+  { title: t("nav.accounts"), url: "/app/contas", icon: Wallet },
+  { title: t("nav.categories"), url: "/app/categorias", icon: Tag },
+  { title: t("nav.transactions"), url: "/app/lancamentos", icon: ArrowLeftRight },
+  { title: "Cartões", url: "/app/cartoes", icon: CreditCard },
+  { title: "Previsões", url: "/app/previsoes", icon: CalendarClock },
+  { title: "Análise", url: "/app/analise", icon: BarChart3 },
+  { title: t("nav.goals"), url: "/app/metas", icon: Target },
+  { title: t("nav.investments"), url: "/app/investimentos", icon: TrendingUp },
+  { title: t("nav.reports"), url: "/app/relatorios", icon: FileText },
+  { title: "Admin", url: "/app/admin", icon: ShieldCheck },
 ];
 
 export function AppSidebar() {

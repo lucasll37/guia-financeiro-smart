@@ -30,14 +30,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const routeLabels: Record<string, string> = {
-  "/dashboard": t("nav.dashboard"),
-  "/contas": t("nav.accounts"),
-  "/categorias": t("nav.categories"),
-  "/lancamentos": t("nav.transactions"),
-  "/metas": t("nav.goals"),
-  "/investimentos": t("nav.investments"),
-  "/relatorios": t("nav.reports"),
-  "/configuracoes": t("nav.settings"),
+  "/app/dashboard": t("nav.dashboard"),
+  "/app/contas": t("nav.accounts"),
+  "/app/categorias": t("nav.categories"),
+  "/app/lancamentos": t("nav.transactions"),
+  "/app/metas": t("nav.goals"),
+  "/app/investimentos": t("nav.investments"),
+  "/app/relatorios": t("nav.reports"),
+  "/app/configuracoes": t("nav.settings"),
 };
 
 export const Header = () => {
@@ -89,7 +89,7 @@ export const Header = () => {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/dashboard">Home</BreadcrumbLink>
+              <BreadcrumbLink href="/app/dashboard">Home</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -158,9 +158,9 @@ export const Header = () => {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/conta")}>Minha Conta</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/configuracoes")}>Configurações</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/planos")}>
+              <DropdownMenuItem onClick={() => navigate("/app/conta")}>Minha Conta</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/app/configuracoes")}>Configurações</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/app/planos")}>
                 {plan === "pro" ? "Planos e Pagamento" : "Upgrade para Pro"}
               </DropdownMenuItem>
               <DropdownMenuSeparator />

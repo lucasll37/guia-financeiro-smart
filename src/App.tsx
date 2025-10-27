@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageMeta } from "@/components/seo/PageMeta";
 import Auth from "./pages/Auth";
+import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Accounts from "./pages/Accounts";
 import Categories from "./pages/Categories";
@@ -54,33 +55,34 @@ const App = () => (
           <PageMeta />
           <AuthProvider>
             <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="contas" element={<Accounts />} />
-              <Route path="categorias" element={<Categories />} />
-              <Route path="lancamentos" element={<Transactions />} />
-              <Route path="cartoes" element={<CreditCards />} />
-              <Route path="previsoes" element={<Forecasts />} />
-              <Route path="analise" element={<Analysis />} />
-              <Route path="metas" element={<Goals />} />
-              <Route path="investimentos" element={<Investments />} />
-              <Route path="relatorios" element={<Reports />} />
-              <Route path="configuracoes" element={<Settings />} />
-              <Route path="conta" element={<Conta />} />
-              <Route path="planos" element={<Planos />} />
-              <Route path="admin" element={<Admin />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route
+                path="/app"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<Navigate to="/app/dashboard" replace />} />
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="contas" element={<Accounts />} />
+                <Route path="categorias" element={<Categories />} />
+                <Route path="lancamentos" element={<Transactions />} />
+                <Route path="cartoes" element={<CreditCards />} />
+                <Route path="previsoes" element={<Forecasts />} />
+                <Route path="analise" element={<Analysis />} />
+                <Route path="metas" element={<Goals />} />
+                <Route path="investimentos" element={<Investments />} />
+                <Route path="relatorios" element={<Reports />} />
+                <Route path="configuracoes" element={<Settings />} />
+                <Route path="conta" element={<Conta />} />
+                <Route path="planos" element={<Planos />} />
+                <Route path="admin" element={<Admin />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
