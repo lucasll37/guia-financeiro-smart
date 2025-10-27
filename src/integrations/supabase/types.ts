@@ -292,6 +292,47 @@ export type Database = {
           },
         ]
       }
+      credit_cards: {
+        Row: {
+          account_id: string
+          closing_day: number
+          created_at: string
+          credit_limit: number | null
+          due_day: number
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          closing_day: number
+          created_at?: string
+          credit_limit?: number | null
+          due_day: number
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          closing_day?: number
+          created_at?: string
+          credit_limit?: number | null
+          due_day?: number
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_cards_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goals: {
         Row: {
           account_id: string
@@ -541,10 +582,12 @@ export type Database = {
           category_id: string
           created_at: string
           created_by: string
+          credit_card_id: string | null
           date: string
           description: string
           id: string
           is_recurring: boolean
+          payment_month: string | null
           split_override: Json | null
           updated_at: string
         }
@@ -554,10 +597,12 @@ export type Database = {
           category_id: string
           created_at?: string
           created_by: string
+          credit_card_id?: string | null
           date: string
           description: string
           id?: string
           is_recurring?: boolean
+          payment_month?: string | null
           split_override?: Json | null
           updated_at?: string
         }
@@ -567,10 +612,12 @@ export type Database = {
           category_id?: string
           created_at?: string
           created_by?: string
+          credit_card_id?: string | null
           date?: string
           description?: string
           id?: string
           is_recurring?: boolean
+          payment_month?: string | null
           split_override?: Json | null
           updated_at?: string
         }
@@ -594,6 +641,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_credit_card_id_fkey"
+            columns: ["credit_card_id"]
+            isOneToOne: false
+            referencedRelation: "credit_cards"
             referencedColumns: ["id"]
           },
         ]

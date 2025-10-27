@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Plus, Trash2 } from "lucide-react";
+import { format, addMonths, startOfMonth } from "date-fns";
 import type { Database } from "@/integrations/supabase/types";
+import { useCreditCards } from "@/hooks/useCreditCards";
 
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
 type Category = Database["public"]["Tables"]["categories"]["Row"];
@@ -47,7 +49,11 @@ export function TransactionDialog({
     is_recurring: false,
     split_override: null,
     created_by: currentUserId,
+    credit_card_id: null,
+    payment_month: null,
   });
+
+  const { creditCards } = useCreditCards();
 
   const [useCustomSplit, setUseCustomSplit] = useState(false);
   const [splitMembers, setSplitMembers] = useState<SplitMember[]>([]);
@@ -64,6 +70,8 @@ export function TransactionDialog({
         is_recurring: transaction.is_recurring,
         split_override: transaction.split_override,
         created_by: transaction.created_by,
+        credit_card_id: transaction.credit_card_id || null,
+        payment_month: transaction.payment_month || null,
       });
       
       if (transaction.split_override) {
@@ -80,12 +88,41 @@ export function TransactionDialog({
         is_recurring: false,
         split_override: null,
         created_by: currentUserId,
+        credit_card_id: null,
+        payment_month: null,
       });
       setUseCustomSplit(false);
       setSplitMembers([]);
     }
     setErrors({});
   }, [transaction, currentUserId, open]);
+
+  // Calcular mês de pagamento automaticamente quando selecionar cartão ou mudar data
+  useEffect(() => {
+    if (formData.credit_card_id && formData.date) {
+      const card = creditCards?.find(c => c.id === formData.credit_card_id);
+      if (card) {
+        const transactionDate = new Date(formData.date);
+        const transactionDay = transactionDate.getDate();
+        
+        // Se a compra foi depois do fechamento, vai para fatura do próximo mês
+        let paymentMonth = startOfMonth(transactionDate);
+        if (transactionDay > card.closing_day) {
+          paymentMonth = addMonths(paymentMonth, 1);
+        }
+        
+        setFormData(prev => ({
+          ...prev,
+          payment_month: format(paymentMonth, "yyyy-MM-dd"),
+        }));
+      }
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        payment_month: null,
+      }));
+    }
+  }, [formData.credit_card_id, formData.date, creditCards]);
 
   const selectedAccount = accounts.find((a) => a.id === formData.account_id);
   const isShared = selectedAccount?.is_shared || false;
@@ -135,6 +172,7 @@ export function TransactionDialog({
   const totalPercent = splitMembers.reduce((sum, m) => sum + m.percent, 0);
 
   const filteredCategories = categories.filter((c) => c.account_id === formData.account_id);
+  const filteredCreditCards = creditCards?.filter((c) => c.account_id === formData.account_id) || [];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -229,6 +267,44 @@ export function TransactionDialog({
             />
             {errors.description && <p className="text-sm text-destructive">{errors.description}</p>}
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="credit_card">Cartão de Crédito (Opcional)</Label>
+            <Select
+              value={formData.credit_card_id || "none"}
+              onValueChange={(value) => 
+                setFormData({ ...formData, credit_card_id: value === "none" ? null : value })
+              }
+              disabled={!formData.account_id}
+            >
+              <SelectTrigger id="credit_card">
+                <SelectValue placeholder="Selecione o cartão" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Sem cartão</SelectItem>
+                {filteredCreditCards.map((card) => (
+                  <SelectItem key={card.id} value={card.id}>
+                    {card.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {formData.credit_card_id && (
+            <div className="space-y-2">
+              <Label htmlFor="payment_month">Mês de Pagamento</Label>
+              <Input
+                id="payment_month"
+                type="month"
+                value={formData.payment_month ? format(new Date(formData.payment_month), "yyyy-MM") : ""}
+                onChange={(e) => setFormData({ ...formData, payment_month: e.target.value + "-01" })}
+              />
+              <p className="text-xs text-muted-foreground">
+                Calculado automaticamente. Ajuste se necessário.
+              </p>
+            </div>
+          )}
 
           <div className="flex items-center space-x-2">
             <Switch

@@ -16,6 +16,7 @@ import Forecasts from "./pages/Forecasts";
 import Analysis from "./pages/Analysis";
 import Goals from "./pages/Goals";
 import Investments from "./pages/Investments";
+import CreditCards from "./pages/CreditCards";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -64,6 +65,7 @@ const App = () => (
               <Route path="contas" element={<Accounts />} />
               <Route path="categorias" element={<Categories />} />
               <Route path="lancamentos" element={<Transactions />} />
+              <Route path="cartoes" element={<CreditCards />} />
               <Route path="previsoes" element={<Forecasts />} />
               <Route path="analise" element={<Analysis />} />
               <Route path="metas" element={<Goals />} />
