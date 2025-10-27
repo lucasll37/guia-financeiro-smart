@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2, MoveHorizontal } from "lucide-react";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,13 +33,19 @@ export default function Transactions() {
   const { accounts } = useAccounts();
   const { logAction } = useAuditLogs();
 
+  const currentMonth = format(new Date(), "yyyy-MM");
+  const currentMonthStart = format(startOfMonth(new Date()), "yyyy-MM-dd");
+  const currentMonthEnd = format(endOfMonth(new Date()), "yyyy-MM-dd");
+
   const [filters, setFilters] = useState({
     accountId: "all",
     categoryId: "all",
     type: "all",
-    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0],
-    endDate: new Date().toISOString().split("T")[0],
+    startDate: currentMonthStart,
+    endDate: currentMonthEnd,
     search: "",
+    viewMode: "monthly" as "monthly" | "custom",
+    selectedMonth: currentMonth,
   });
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -217,8 +224,6 @@ export default function Transactions() {
     setBulkActionDialog(null);
   };
 
-  const currentMonth = new Date().toISOString().substring(0, 7);
-
   if (!user) return null;
 
   return (
@@ -302,7 +307,7 @@ export default function Transactions() {
             <BudgetProjection
               accountId={filters.accountId}
               transactions={filteredTransactions}
-              currentMonth={currentMonth}
+              currentMonth={filters.selectedMonth}
             />
           )}
         </div>
