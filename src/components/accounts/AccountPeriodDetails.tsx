@@ -53,11 +53,20 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
   // Para transações de cartão, usar payment_month; para outras, usar date
   const periodTransactions = useMemo(() => {
     if (!transactions) return [];
+    
+    // Identificar o mês de referência do período (formato YYYY-MM)
+    // Usamos o mês que contém o periodEnd, pois é quando o período "fecha"
+    const periodMonth = format(periodEnd, "yyyy-MM");
+    
     return transactions.filter(t => {
-      const compareDate = t.credit_card_id && t.payment_month 
-        ? new Date(t.payment_month)
-        : new Date(t.date);
-      return compareDate >= periodStart && compareDate <= periodEnd;
+      if (t.credit_card_id && t.payment_month) {
+        // Para transações de cartão, comparar diretamente o payment_month com o periodMonth
+        return t.payment_month === periodMonth;
+      } else {
+        // Para transações normais, usar a data da transação
+        const txDate = new Date(t.date);
+        return txDate >= periodStart && txDate <= periodEnd;
+      }
     });
   }, [transactions, periodStart, periodEnd]);
 
@@ -101,9 +110,10 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
           }
         });
         
+        // Filtrar meses que correspondem ao período atual
+        const periodMonth = format(periodEnd, "yyyy-MM");
         const monthsInPeriod = Array.from(byMonth.entries()).filter(([month]) => {
-          const monthDate = new Date(month);
-          return monthDate >= periodStart && monthDate <= periodEnd;
+          return month === periodMonth;
         });
         
         const totalSpent = monthsInPeriod.reduce((sum, [, txs]) => 
