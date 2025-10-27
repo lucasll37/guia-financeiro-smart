@@ -22,79 +22,48 @@ const Home = () => {
   const features = [
     {
       icon: Wallet,
-      title: "Controle de Contas",
-      description: "Gerencie múltiplas contas bancárias e acompanhe saldos em tempo real"
+      title: "Contas Compartilhadas",
+      description: "Organize finanças conjugais, despesas de casa compartilhada ou mesadas em um só lugar"
     },
     {
       icon: CreditCard,
-      title: "Cartões de Crédito",
-      description: "Controle faturas, limites e vencimentos de todos seus cartões"
+      title: "Gestão de Cartões",
+      description: "Registre e controle faturas, limites e vencimentos manualmente"
     },
     {
       icon: PieChart,
-      title: "Categorização Inteligente",
-      description: "Organize despesas e receitas com categorias personalizáveis"
+      title: "Categorias Personalizadas",
+      description: "Crie suas próprias categorias e organize despesas do seu jeito"
     },
     {
       icon: TrendingUp,
-      title: "Investimentos",
-      description: "Acompanhe rentabilidade e evolução dos seus investimentos"
+      title: "Controle de Investimentos",
+      description: "Registre seus investimentos e acompanhe a evolução do patrimônio"
     },
     {
       icon: Target,
-      title: "Metas Financeiras",
-      description: "Defina objetivos e acompanhe progresso automaticamente"
+      title: "Metas Compartilhadas",
+      description: "Defina objetivos financeiros individuais ou em conjunto com outras pessoas"
     },
     {
       icon: BarChart3,
-      title: "Análises e Relatórios",
-      description: "Visualize insights detalhados sobre suas finanças"
+      title: "Relatórios Visuais",
+      description: "Visualize gráficos e análises para entender melhor seus gastos"
     }
   ];
 
-  const plans = [
+  const benefits = [
     {
-      name: "Free",
-      price: "Grátis",
-      description: "Ideal para começar",
-      features: [
-        "Até 2 contas bancárias",
-        "Categorias básicas",
-        "Lançamentos ilimitados",
-        "Relatórios mensais",
-        "Suporte por email"
-      ],
-      highlighted: false
+      title: "Controle Manual Completo",
+      description: "Registre transações, investimentos e metas no seu ritmo, sem integrações automáticas"
     },
     {
-      name: "Plus",
-      price: "R$ 19,90/mês",
-      description: "Para quem quer mais controle",
-      features: [
-        "Contas ilimitadas",
-        "Categorias personalizadas",
-        "Múltiplos cartões de crédito",
-        "Metas financeiras",
-        "Análises avançadas",
-        "Relatórios personalizados",
-        "Suporte prioritário"
-      ],
-      highlighted: true
+      title: "Compartilhamento Seguro",
+      description: "Convide parceiros, familiares ou amigos para gerenciar finanças juntos"
     },
     {
-      name: "Pro",
-      price: "R$ 39,90/mês",
-      description: "Controle total das finanças",
-      features: [
-        "Tudo do Plus",
-        "Controle de investimentos",
-        "Projeções financeiras",
-        "Dashboard de admin",
-        "Exportação avançada",
-        "API de integração",
-        "Suporte dedicado 24/7"
-      ],
-      highlighted: false
+      title: "Privacidade Total",
+      description: "Seus dados ficam protegidos, sem acessos a contas bancárias ou investimentos"
     }
   ];
 
@@ -105,7 +74,7 @@ const Home = () => {
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <Wallet className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">FinanceApp</span>
+            <span className="text-xl font-bold">Prospera</span>
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
@@ -128,12 +97,12 @@ const Home = () => {
           </Badge>
           
           <h1 className="text-4xl font-bold tracking-tight sm:text-6xl bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
-            Organize suas finanças de forma simples e inteligente
+            Organize suas finanças pessoais ou compartilhadas
           </h1>
           
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Controle contas, cartões, investimentos e metas financeiras em um só lugar. 
-            Visualize onde seu dinheiro está indo e tome decisões mais inteligentes.
+            Registre transações, controle cartões, acompanhe investimentos e defina metas.
+            Perfeito para casais, famílias e grupos que dividem despesas.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
@@ -170,10 +139,10 @@ const Home = () => {
         <div className="mx-auto max-w-6xl space-y-12">
           <div className="text-center space-y-4">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Tudo que você precisa para controlar suas finanças
+              Funcionalidades pensadas para você
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Ferramentas poderosas e intuitivas para você ter total controle do seu dinheiro
+              Organize suas finanças manualmente com total flexibilidade e privacidade
             </p>
           </div>
 
@@ -194,72 +163,21 @@ const Home = () => {
               </Card>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="container py-24">
-        <div className="mx-auto max-w-6xl space-y-12">
-          <div className="text-center space-y-4">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Escolha o plano ideal para você
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Comece grátis e evolua conforme suas necessidades
-            </p>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-3">
-            {plans.map((plan, index) => (
-              <Card 
-                key={index} 
-                className={`relative ${
-                  plan.highlighted 
-                    ? 'border-primary shadow-xl scale-105' 
-                    : 'border-primary/10 hover:border-primary/30'
-                } transition-all`}
-              >
-                {plan.highlighted && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-primary text-primary-foreground">
-                      Mais Popular
-                    </Badge>
-                  </div>
-                )}
-                
-                <CardHeader className="text-center pb-8 pt-8">
-                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                  <CardDescription className="text-base pt-2">
-                    {plan.description}
-                  </CardDescription>
-                  <div className="pt-4">
-                    <div className="text-4xl font-bold">{plan.price}</div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="space-y-6">
-                  <ul className="space-y-3">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-start gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-success shrink-0 mt-0.5" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  <Button 
-                    className="w-full" 
-                    variant={plan.highlighted ? "default" : "outline"}
-                    onClick={() => navigate("/auth")}
-                  >
-                    {plan.name === "Free" ? "Começar Grátis" : "Assinar Agora"}
-                  </Button>
-                </CardContent>
-              </Card>
+          <div className="mt-16 grid gap-6 md:grid-cols-3">
+            {benefits.map((benefit, index) => (
+              <div key={index} className="text-center space-y-2">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-success/10 text-success mb-2">
+                  <CheckCircle2 className="h-6 w-6" />
+                </div>
+                <h3 className="font-semibold text-lg">{benefit.title}</h3>
+                <p className="text-sm text-muted-foreground">{benefit.description}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
+
 
       {/* CTA Section */}
       <section className="container py-24 bg-gradient-to-br from-primary/5 via-primary/10 to-accent/5">
@@ -283,13 +201,13 @@ const Home = () => {
       <footer className="border-t bg-background/95">
         <div className="container py-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
               <Wallet className="h-5 w-5 text-primary" />
-              <span className="font-semibold">FinanceApp</span>
+              <span className="font-semibold">Prospera</span>
             </div>
             
             <div className="text-sm text-muted-foreground">
-              © 2024 FinanceApp. Todos os direitos reservados.
+              © {new Date().getFullYear()} Prospera. Todos os direitos reservados.
             </div>
 
             <Button variant="link" onClick={() => navigate("/auth")}>
