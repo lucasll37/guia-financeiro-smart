@@ -72,20 +72,27 @@ export function UserGrowthChart() {
   const newUsersToday = userData?.[userData.length - 1]?.novos || 0;
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="overflow-hidden border-primary/10 shadow-lg hover:shadow-xl transition-shadow duration-300">
+      <CardHeader className="bg-gradient-to-br from-primary/5 via-primary/3 to-background pb-4">
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
+          <div className="space-y-1">
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <TrendingUp className="h-5 w-5 text-primary" />
+              </div>
               Evolução de Usuários
             </CardTitle>
-            <CardDescription>
-              Últimos {days} dias • Total: {totalUsers} usuários • Hoje: +{newUsersToday}
+            <CardDescription className="text-base">
+              <span className="font-semibold text-foreground">{totalUsers}</span> usuários totais
+              {newUsersToday > 0 && (
+                <span className="ml-2 text-green-600 dark:text-green-400">
+                  +{newUsersToday} hoje
+                </span>
+              )}
             </CardDescription>
           </div>
           <Select value={days.toString()} onValueChange={(value) => setDays(Number(value))}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-[140px] border-primary/20 hover:border-primary/40 transition-colors">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -100,32 +107,52 @@ export function UserGrowthChart() {
           </Select>
         </div>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+      <CardContent className="pt-6">
+        <ResponsiveContainer width="100%" height={320}>
           <AreaChart data={userData}>
             <defs>
               <linearGradient id="colorUsuarios" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
+                <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.05} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+            <CartesianGrid 
+              strokeDasharray="3 3" 
+              className="stroke-muted/30" 
+              vertical={false}
+            />
             <XAxis
               dataKey="date"
               className="text-xs"
-              tick={{ fill: "hsl(var(--muted-foreground))" }}
+              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+              axisLine={{ stroke: "hsl(var(--border))" }}
+              tickLine={false}
+              dy={10}
             />
             <YAxis
               className="text-xs"
-              tick={{ fill: "hsl(var(--muted-foreground))" }}
+              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+              dx={-10}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "hsl(var(--card))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: "var(--radius)",
+                backgroundColor: "hsl(var(--popover))",
+                border: "1px solid hsl(var(--primary)/0.2)",
+                borderRadius: "8px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
               }}
-              labelStyle={{ color: "hsl(var(--foreground))" }}
+              labelStyle={{ 
+                color: "hsl(var(--foreground))",
+                fontWeight: 600,
+                marginBottom: "4px"
+              }}
+              itemStyle={{ 
+                color: "hsl(var(--primary))",
+                fontSize: "14px"
+              }}
             />
             <Area
               type="monotone"
@@ -133,7 +160,11 @@ export function UserGrowthChart() {
               stroke="hsl(var(--primary))"
               fillOpacity={1}
               fill="url(#colorUsuarios)"
-              strokeWidth={2}
+              strokeWidth={3}
+              dot={false}
+              activeDot={{ r: 6, fill: "hsl(var(--primary))", stroke: "white", strokeWidth: 2 }}
+              animationDuration={1000}
+              animationBegin={0}
             />
           </AreaChart>
         </ResponsiveContainer>

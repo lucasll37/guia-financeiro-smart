@@ -69,20 +69,25 @@ export function AccessActivityChart() {
   const avgDailyAccesses = Math.round(totalAccesses / (accessData?.length || 1));
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="overflow-hidden border-primary/10 shadow-lg hover:shadow-xl transition-shadow duration-300">
+      <CardHeader className="bg-gradient-to-br from-primary/5 via-primary/3 to-background pb-4">
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
+          <div className="space-y-1">
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Activity className="h-5 w-5 text-primary" />
+              </div>
               Evolução de Acessos
             </CardTitle>
-            <CardDescription>
-              Últimos {days} dias • Total: {totalAccesses} acessos • Média diária: {avgDailyAccesses}
+            <CardDescription className="text-base">
+              <span className="font-semibold text-foreground">{totalAccesses}</span> acessos totais
+              <span className="ml-2 text-muted-foreground">
+                • {avgDailyAccesses}/dia
+              </span>
             </CardDescription>
           </div>
           <Select value={days.toString()} onValueChange={(value) => setDays(Number(value))}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-[140px] border-primary/20 hover:border-primary/40 transition-colors">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -97,33 +102,61 @@ export function AccessActivityChart() {
           </Select>
         </div>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+      <CardContent className="pt-6">
+        <ResponsiveContainer width="100%" height={320}>
           <BarChart data={accessData}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+            <defs>
+              <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={1} />
+                <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.6} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid 
+              strokeDasharray="3 3" 
+              className="stroke-muted/30" 
+              vertical={false}
+            />
             <XAxis
               dataKey="date"
               className="text-xs"
-              tick={{ fill: "hsl(var(--muted-foreground))" }}
+              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+              axisLine={{ stroke: "hsl(var(--border))" }}
+              tickLine={false}
+              dy={10}
             />
             <YAxis
               className="text-xs"
-              tick={{ fill: "hsl(var(--muted-foreground))" }}
+              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+              dx={-10}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "hsl(var(--card))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: "var(--radius)",
+                backgroundColor: "hsl(var(--popover))",
+                border: "1px solid hsl(var(--primary)/0.2)",
+                borderRadius: "8px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
               }}
-              labelStyle={{ color: "hsl(var(--foreground))" }}
+              labelStyle={{ 
+                color: "hsl(var(--foreground))",
+                fontWeight: 600,
+                marginBottom: "4px"
+              }}
+              itemStyle={{ 
+                color: "hsl(var(--primary))",
+                fontSize: "14px"
+              }}
+              cursor={{ fill: "hsl(var(--primary)/0.1)" }}
             />
-            <Legend />
             <Bar
               dataKey="acessos"
-              fill="hsl(var(--primary))"
-              radius={[4, 4, 0, 0]}
+              fill="url(#barGradient)"
+              radius={[6, 6, 0, 0]}
               name="Acessos"
+              maxBarSize={60}
+              animationDuration={1000}
+              animationBegin={0}
             />
           </BarChart>
         </ResponsiveContainer>

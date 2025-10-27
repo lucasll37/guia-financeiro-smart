@@ -74,12 +74,14 @@ export function StatsOverview() {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
-          <Card key={i}>
+          <Card key={i} className="overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Carregando...</CardTitle>
+              <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+              <div className="h-4 w-4 bg-muted animate-pulse rounded" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">-</div>
+              <div className="h-8 w-16 bg-muted animate-pulse rounded mb-2" />
+              <div className="h-3 w-32 bg-muted animate-pulse rounded" />
             </CardContent>
           </Card>
         ))}
@@ -89,17 +91,39 @@ export function StatsOverview() {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {cards.map((card) => {
+      {cards.map((card, index) => {
         const Icon = card.icon;
+        const gradients = [
+          "from-blue-500/10 to-blue-500/5",
+          "from-green-500/10 to-green-500/5",
+          "from-purple-500/10 to-purple-500/5",
+          "from-amber-500/10 to-amber-500/5",
+        ];
+        const iconColors = [
+          "text-blue-600 dark:text-blue-400",
+          "text-green-600 dark:text-green-400",
+          "text-purple-600 dark:text-purple-400",
+          "text-amber-600 dark:text-amber-400",
+        ];
+        
         return (
-          <Card key={card.title}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-              <Icon className="h-4 w-4 text-muted-foreground" />
+          <Card 
+            key={card.title} 
+            className="overflow-hidden border-primary/10 hover:border-primary/20 transition-all duration-300 hover:shadow-lg group"
+          >
+            <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-2 bg-gradient-to-br ${gradients[index]} transition-all duration-300`}>
+              <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                {card.title}
+              </CardTitle>
+              <div className="p-2 rounded-lg bg-background/50 backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
+                <Icon className={`h-4 w-4 ${iconColors[index]}`} />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{card.value}</div>
-              <p className="text-xs text-muted-foreground">{card.description}</p>
+            <CardContent className="pt-4">
+              <div className="text-3xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+                {card.value.toLocaleString('pt-BR')}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">{card.description}</p>
             </CardContent>
           </Card>
         );
