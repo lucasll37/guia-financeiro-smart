@@ -109,7 +109,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
     // Adicionar previsões
     if (forecasts && categories) {
       forecasts
-        .filter(f => f.period_start === format(periodStart, "yyyy-MM-dd"))
+        .filter(f => f.period_end === format(periodEnd, "yyyy-MM-dd"))
         .forEach(f => {
           const category = categories.find(c => c.id === f.category_id);
           const isIncome = category?.type === "receita";
