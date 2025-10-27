@@ -1,7 +1,9 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Copy } from "lucide-react";
+import { Plus, Copy, CalendarIcon } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useCategories } from "@/hooks/useCategories";
 import { useForecasts } from "@/hooks/useForecasts";
@@ -9,6 +11,7 @@ import { ForecastsTable } from "@/components/forecasts/ForecastsTable";
 import { ForecastDialog } from "@/components/forecasts/ForecastDialog";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,25 +31,45 @@ export default function Forecasts() {
   const [selectedForecast, setSelectedForecast] = useState<any>(null);
   const [copyDialogOpen, setCopyDialogOpen] = useState(false);
   const [copyTargetMonth, setCopyTargetMonth] = useState<string>("");
+  const [periodMode, setPeriodMode] = useState<"default" | "custom">("default");
+  const [customStartDate, setCustomStartDate] = useState<Date | undefined>(undefined);
+  const [customEndDate, setCustomEndDate] = useState<Date | undefined>(undefined);
 
   const { categories } = useCategories(selectedAccountId !== "all" ? selectedAccountId : undefined);
   const { forecasts, isLoading, createForecast, updateForecast, deleteForecast, copyForecast } = useForecasts(
     selectedAccountId !== "all" ? selectedAccountId : null
   );
 
-  // Generate month options (6 months before and after current month)
+  // Generate month options based on period mode
   const monthOptions = useMemo(() => {
     const options = [];
-    const current = new Date();
-    for (let i = -6; i <= 6; i++) {
-      const date = new Date(current.getFullYear(), current.getMonth() + i, 1);
-      options.push({
-        value: format(date, "yyyy-MM"),
-        label: format(date, "MMMM 'de' yyyy", { locale: ptBR }),
-      });
+    
+    if (periodMode === "custom" && customStartDate && customEndDate) {
+      const start = startOfMonth(customStartDate);
+      const end = startOfMonth(customEndDate);
+      let current = start;
+      
+      while (current <= end) {
+        options.push({
+          value: format(current, "yyyy-MM"),
+          label: format(current, "MMMM 'de' yyyy", { locale: ptBR }),
+        });
+        current = new Date(current.getFullYear(), current.getMonth() + 1, 1);
+      }
+    } else {
+      // Default: 6 months before and after current month
+      const current = new Date();
+      for (let i = -6; i <= 6; i++) {
+        const date = new Date(current.getFullYear(), current.getMonth() + i, 1);
+        options.push({
+          value: format(date, "yyyy-MM"),
+          label: format(date, "MMMM 'de' yyyy", { locale: ptBR }),
+        });
+      }
     }
+    
     return options;
-  }, []);
+  }, [periodMode, customStartDate, customEndDate]);
 
   // Filter forecasts by selected month
   const filteredForecasts = useMemo(() => {
@@ -124,33 +147,111 @@ export default function Forecasts() {
         </div>
       </div>
 
-      <div className="flex gap-4">
-        <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
-          <SelectTrigger className="w-[250px]">
-            <SelectValue placeholder="Selecione a conta" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas as contas</SelectItem>
-            {accounts?.map((account) => (
-              <SelectItem key={account.id} value={account.id}>
-                {account.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="flex flex-col gap-4">
+        <div className="flex gap-4 items-center">
+          <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
+            <SelectTrigger className="w-[250px]">
+              <SelectValue placeholder="Selecione a conta" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as contas</SelectItem>
+              {accounts?.map((account) => (
+                <SelectItem key={account.id} value={account.id}>
+                  {account.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-          <SelectTrigger className="w-[250px]">
-            <SelectValue placeholder="Selecione o mês" />
-          </SelectTrigger>
-          <SelectContent>
-            {monthOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <Select value={periodMode} onValueChange={(value: "default" | "custom") => setPeriodMode(value)}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Modo de período" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="default">Padrão (6 meses)</SelectItem>
+              <SelectItem value="custom">Personalizado</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {periodMode === "custom" ? (
+          <div className="flex gap-4 items-center">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-[250px] justify-start text-left font-normal",
+                    !customStartDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {customStartDate ? format(customStartDate, "PPP", { locale: ptBR }) : "Data inicial"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={customStartDate}
+                  onSelect={setCustomStartDate}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-[250px] justify-start text-left font-normal",
+                    !customEndDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {customEndDate ? format(customEndDate, "PPP", { locale: ptBR }) : "Data final"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={customEndDate}
+                  onSelect={setCustomEndDate}
+                  disabled={(date) => customStartDate ? date < customStartDate : false}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <SelectTrigger className="w-[250px]">
+                <SelectValue placeholder="Selecione o mês" />
+              </SelectTrigger>
+              <SelectContent>
+                {monthOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : (
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <SelectTrigger className="w-[250px]">
+              <SelectValue placeholder="Selecione o mês" />
+            </SelectTrigger>
+            <SelectContent>
+              {monthOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       {isLoading ? (
