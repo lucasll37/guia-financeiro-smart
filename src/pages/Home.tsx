@@ -205,6 +205,73 @@ const Home = () => {
       </section>
 
 
+      {/* Testimonials Section */}
+      <section className="container py-24">
+        <div className="mx-auto max-w-6xl space-y-12">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              O que nossos usuários dizem
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Veja como o Prospera tem ajudado pessoas a organizarem suas finanças
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            <Card className="border-primary/10">
+              <CardContent className="pt-6 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
+                    MC
+                  </div>
+                  <div>
+                    <p className="font-semibold">Mariana Costa</p>
+                    <p className="text-sm text-muted-foreground">São Paulo, SP</p>
+                  </div>
+                </div>
+                <p className="text-muted-foreground">
+                  "Finalmente consegui organizar as finanças com meu marido! O compartilhamento de contas facilitou muito nossa vida."
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-primary/10">
+              <CardContent className="pt-6 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
+                    RS
+                  </div>
+                  <div>
+                    <p className="font-semibold">Ricardo Santos</p>
+                    <p className="text-sm text-muted-foreground">Rio de Janeiro, RJ</p>
+                  </div>
+                </div>
+                <p className="text-muted-foreground">
+                  "Excelente para acompanhar investimentos! Consigo ver a evolução do meu patrimônio de forma clara e simples."
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-primary/10">
+              <CardContent className="pt-6 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
+                    JO
+                  </div>
+                  <div>
+                    <p className="font-semibold">Juliana Oliveira</p>
+                    <p className="text-sm text-muted-foreground">Belo Horizonte, MG</p>
+                  </div>
+                </div>
+                <p className="text-muted-foreground">
+                  "Controlar os cartões de crédito ficou muito mais fácil. Não perco mais nenhum vencimento!"
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section ref={ctaSection.ref} className="container py-24 bg-gradient-to-br from-primary/10 via-primary/5 to-accent/5 rounded-3xl my-12">
         <div className={`mx-auto max-w-3xl text-center space-y-8 transition-all duration-700 ${
