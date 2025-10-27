@@ -84,10 +84,10 @@ const Home = () => {
             <span className="text-xl font-bold">Prospera</span>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => navigate("/auth")}>
+            <Button variant="ghost" onClick={() => navigate("/auth?tab=login")}>
               Entrar
             </Button>
-            <Button onClick={() => navigate("/auth")}>
+            <Button onClick={() => navigate("/auth?tab=signup")}>
               Começar Grátis
             </Button>
           </div>
@@ -112,7 +112,7 @@ const Home = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Button size="lg" onClick={() => navigate("/auth")} className="gap-2">
+            <Button size="lg" onClick={() => navigate("/auth?tab=signup")} className="gap-2">
               Começar Agora
               <ArrowRight className="h-4 w-4" />
             </Button>
@@ -228,7 +228,7 @@ const Home = () => {
           <div className={`flex flex-col sm:flex-row gap-4 justify-center pt-4 transition-all duration-700 delay-700 ${
             ctaSection.isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
           }`}>
-            <Button size="lg" onClick={() => navigate("/auth")} className="gap-2 shadow-lg hover:scale-110 transition-transform duration-300">
+            <Button size="lg" onClick={() => navigate("/auth?tab=signup")} className="gap-2 shadow-lg hover:scale-110 transition-transform duration-300">
               Criar Conta Grátis
               <ArrowRight className="h-4 w-4" />
             </Button>
@@ -249,7 +249,7 @@ const Home = () => {
               © {new Date().getFullYear()} Prospera. Todos os direitos reservados.
             </div>
 
-            <Button variant="link" onClick={() => navigate("/auth")}>
+            <Button variant="link" onClick={() => navigate("/auth?tab=login")}>
               Já tem uma conta? Entrar
             </Button>
           </div>
