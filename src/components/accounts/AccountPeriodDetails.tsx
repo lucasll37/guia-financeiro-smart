@@ -228,32 +228,34 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   return (
                     <>
                       <TableRow key={categoryId} className={hasMultipleTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
-                        <TableCell onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
+                        <TableCell onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined} className="w-[300px]">
                           <div className="flex items-center gap-2">
-                            {hasMultipleTransactions && (
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-6 w-6 p-0"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleCategoryExpansion(categoryId);
-                                }}
-                              >
-                                {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
-                              </Button>
-                            )}
+                            <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                              {hasMultipleTransactions && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-6 w-6 p-0"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleCategoryExpansion(categoryId);
+                                  }}
+                                >
+                                  {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
+                                </Button>
+                              )}
+                            </div>
                             <div 
-                              className="w-3 h-3 rounded-full" 
+                              className="w-3 h-3 rounded-full flex-shrink-0" 
                               style={{ backgroundColor: data.categoryColor }}
                             />
-                            {data.categoryName}
+                            <span className="truncate">{data.categoryName}</span>
                             {hasMultipleTransactions && (
-                              <span className="text-xs text-muted-foreground">({data.transactions.length})</span>
+                              <span className="text-xs text-muted-foreground flex-shrink-0">({data.transactions.length})</span>
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right w-[140px]">
                           <Input
                             type="number"
                             step="0.01"
@@ -262,13 +264,13 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                             className="w-32 ml-auto text-right"
                           />
                         </TableCell>
-                        <TableCell className="text-right font-medium">
+                        <TableCell className="text-right font-medium w-[140px]">
                           {formatCurrency(data.actual)}
                         </TableCell>
-                        <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <TableCell className={`text-right w-[140px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {formatCurrency(Math.abs(difference))}
                         </TableCell>
-                        <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <TableCell className={`text-right w-[120px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {percentage !== "-" ? `${percentage}%` : "-"}
                         </TableCell>
                       </TableRow>
@@ -336,32 +338,34 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   return (
                     <>
                       <TableRow key={categoryId} className={hasMultipleTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
-                        <TableCell onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
+                        <TableCell onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined} className="w-[300px]">
                           <div className="flex items-center gap-2">
-                            {hasMultipleTransactions && (
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-6 w-6 p-0"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleCategoryExpansion(categoryId);
-                                }}
-                              >
-                                {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
-                              </Button>
-                            )}
+                            <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                              {hasMultipleTransactions && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-6 w-6 p-0"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleCategoryExpansion(categoryId);
+                                  }}
+                                >
+                                  {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
+                                </Button>
+                              )}
+                            </div>
                             <div 
-                              className="w-3 h-3 rounded-full" 
+                              className="w-3 h-3 rounded-full flex-shrink-0" 
                               style={{ backgroundColor: data.categoryColor }}
                             />
-                            {data.categoryName}
+                            <span className="truncate">{data.categoryName}</span>
                             {hasMultipleTransactions && (
-                              <span className="text-xs text-muted-foreground">({data.transactions.length})</span>
+                              <span className="text-xs text-muted-foreground flex-shrink-0">({data.transactions.length})</span>
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right w-[140px]">
                           <Input
                             type="number"
                             step="0.01"
@@ -370,13 +374,13 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                             className="w-32 ml-auto text-right"
                           />
                         </TableCell>
-                        <TableCell className="text-right font-medium">
+                        <TableCell className="text-right font-medium w-[140px]">
                           {formatCurrency(data.actual)}
                         </TableCell>
-                        <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <TableCell className={`text-right w-[140px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {formatCurrency(Math.abs(difference))}
                         </TableCell>
-                        <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <TableCell className={`text-right w-[120px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {percentage !== "-" ? `${percentage}%` : "-"}
                         </TableCell>
                       </TableRow>
