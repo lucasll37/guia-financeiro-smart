@@ -56,42 +56,62 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
     });
   }, [transactions, periodStart, periodEnd]);
 
-  // Agrupar por categoria
-  const categoryTotals = useMemo(() => {
-    const totals: Record<string, { actual: number; forecasted: number; categoryName: string; categoryColor: string }> = {};
+  // Agrupar por categoria e tipo
+  const { incomeTotals, expenseTotals, totalIncome, totalExpense } = useMemo(() => {
+    const incomeCategories: Record<string, { actual: number; forecasted: number; categoryName: string; categoryColor: string; categoryId: string }> = {};
+    const expenseCategories: Record<string, { actual: number; forecasted: number; categoryName: string; categoryColor: string; categoryId: string }> = {};
     
     // Calcular valores reais
     periodTransactions.forEach(t => {
+      const isIncome = t.categories?.type === "receita";
+      const totals = isIncome ? incomeCategories : expenseCategories;
+      
       if (!totals[t.category_id]) {
         totals[t.category_id] = { 
           actual: 0, 
           forecasted: 0,
           categoryName: t.categories?.name || "Sem categoria",
-          categoryColor: t.categories?.color || "#6366f1"
+          categoryColor: t.categories?.color || "#6366f1",
+          categoryId: t.category_id
         };
       }
       totals[t.category_id].actual += Number(t.amount);
     });
 
     // Adicionar previsões
-    if (forecasts) {
+    if (forecasts && categories) {
       forecasts
         .filter(f => f.period_start === format(periodStart, "yyyy-MM-dd"))
         .forEach(f => {
+          const category = categories.find(c => c.id === f.category_id);
+          const isIncome = category?.type === "receita";
+          const totals = isIncome ? incomeCategories : expenseCategories;
+          
           if (!totals[f.category_id]) {
             totals[f.category_id] = { 
               actual: 0, 
               forecasted: 0,
               categoryName: (f.categories as any)?.name || "Sem categoria",
-              categoryColor: (f.categories as any)?.color || "#6366f1"
+              categoryColor: (f.categories as any)?.color || "#6366f1",
+              categoryId: f.category_id
             };
           }
           totals[f.category_id].forecasted = Number(f.forecasted_amount);
         });
     }
 
-    return totals;
-  }, [periodTransactions, forecasts, periodStart]);
+    const incomeTotal = Object.values(incomeCategories).reduce((sum, cat) => sum + cat.actual, 0);
+    const expenseTotal = Object.values(expenseCategories).reduce((sum, cat) => sum + cat.actual, 0);
+
+    return {
+      incomeTotals: incomeCategories,
+      expenseTotals: expenseCategories,
+      totalIncome: incomeTotal,
+      totalExpense: expenseTotal,
+    };
+  }, [periodTransactions, forecasts, periodStart, categories]);
+
+  const balance = totalIncome - totalExpense;
 
   // Gerar lista de períodos disponíveis para copiar
   const availablePeriods = useMemo(() => {
@@ -200,57 +220,151 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
         </div>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Categoria</TableHead>
-            <TableHead className="text-right">Previsto</TableHead>
-            <TableHead className="text-right">Realizado</TableHead>
-            <TableHead className="text-right">Diferença</TableHead>
-            <TableHead className="text-right">% Variação</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {Object.entries(categoryTotals).map(([categoryId, data]) => {
-            const difference = data.actual - data.forecasted;
-            const percentage = data.forecasted !== 0 
-              ? ((difference / data.forecasted) * 100).toFixed(1)
-              : "-";
+      <div className="space-y-4">
+        {/* Receitas */}
+        {Object.keys(incomeTotals).length > 0 && (
+          <div className="border rounded-lg overflow-hidden">
+            <div className="bg-green-50 dark:bg-green-950/20 px-4 py-2 border-b">
+              <h3 className="font-semibold text-green-700 dark:text-green-400">Receitas</h3>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Categoria</TableHead>
+                  <TableHead className="text-right">Previsto</TableHead>
+                  <TableHead className="text-right">Realizado</TableHead>
+                  <TableHead className="text-right">Diferença</TableHead>
+                  <TableHead className="text-right">% Variação</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Object.entries(incomeTotals).map(([categoryId, data]) => {
+                  const difference = data.actual - data.forecasted;
+                  const percentage = data.forecasted !== 0 
+                    ? ((difference / data.forecasted) * 100).toFixed(1)
+                    : "-";
 
-            return (
-              <TableRow key={categoryId}>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: data.categoryColor }}
-                    />
-                    {data.categoryName}
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={data.forecasted || ""}
-                    onChange={(e) => handleForecastChange(categoryId, e.target.value)}
-                    className="w-32 ml-auto text-right"
-                  />
-                </TableCell>
-                <TableCell className="text-right font-medium">
-                  {formatCurrency(data.actual)}
-                </TableCell>
-                <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatCurrency(Math.abs(difference))}
-                </TableCell>
-                <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {percentage !== "-" ? `${percentage}%` : "-"}
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+                  return (
+                    <TableRow key={categoryId}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className="w-3 h-3 rounded-full" 
+                            style={{ backgroundColor: data.categoryColor }}
+                          />
+                          {data.categoryName}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={data.forecasted || ""}
+                          onChange={(e) => handleForecastChange(categoryId, e.target.value)}
+                          className="w-32 ml-auto text-right"
+                        />
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        {formatCurrency(data.actual)}
+                      </TableCell>
+                      <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {formatCurrency(Math.abs(difference))}
+                      </TableCell>
+                      <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {percentage !== "-" ? `${percentage}%` : "-"}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                <TableRow className="bg-green-50/50 dark:bg-green-950/10 font-semibold">
+                  <TableCell>Total de Receitas</TableCell>
+                  <TableCell colSpan={4} className="text-right text-green-600">
+                    {formatCurrency(totalIncome)}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        )}
+
+        {/* Despesas */}
+        {Object.keys(expenseTotals).length > 0 && (
+          <div className="border rounded-lg overflow-hidden">
+            <div className="bg-red-50 dark:bg-red-950/20 px-4 py-2 border-b">
+              <h3 className="font-semibold text-red-700 dark:text-red-400">Despesas</h3>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Categoria</TableHead>
+                  <TableHead className="text-right">Previsto</TableHead>
+                  <TableHead className="text-right">Realizado</TableHead>
+                  <TableHead className="text-right">Diferença</TableHead>
+                  <TableHead className="text-right">% Variação</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Object.entries(expenseTotals).map(([categoryId, data]) => {
+                  const difference = data.actual - data.forecasted;
+                  const percentage = data.forecasted !== 0 
+                    ? ((difference / data.forecasted) * 100).toFixed(1)
+                    : "-";
+
+                  return (
+                    <TableRow key={categoryId}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className="w-3 h-3 rounded-full" 
+                            style={{ backgroundColor: data.categoryColor }}
+                          />
+                          {data.categoryName}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={data.forecasted || ""}
+                          onChange={(e) => handleForecastChange(categoryId, e.target.value)}
+                          className="w-32 ml-auto text-right"
+                        />
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        {formatCurrency(data.actual)}
+                      </TableCell>
+                      <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {formatCurrency(Math.abs(difference))}
+                      </TableCell>
+                      <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {percentage !== "-" ? `${percentage}%` : "-"}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                <TableRow className="bg-red-50/50 dark:bg-red-950/10 font-semibold">
+                  <TableCell>Total de Despesas</TableCell>
+                  <TableCell colSpan={4} className="text-right text-destructive">
+                    {formatCurrency(totalExpense)}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        )}
+
+        {/* Saldo */}
+        <div className="border rounded-lg bg-muted/50">
+          <div className="px-4 py-3">
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-semibold">Saldo do Período:</span>
+              <span className={`text-xl font-bold ${balance >= 0 ? "text-green-600" : "text-destructive"}`}>
+                {formatCurrency(balance)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
