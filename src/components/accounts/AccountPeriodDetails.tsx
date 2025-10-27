@@ -38,15 +38,15 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
   const closingDay = account.closing_day || 1;
   const [currentDate, setCurrentDate] = useState(new Date());
   const [copyFromPeriod, setCopyFromPeriod] = useState<string>("");
-  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   
-  const toggleCardExpansion = (cardKey: string) => {
-    setExpandedCards(prev => {
+  const toggleCategoryExpansion = (categoryKey: string) => {
+    setExpandedCategories(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(cardKey)) {
-        newSet.delete(cardKey);
+      if (newSet.has(categoryKey)) {
+        newSet.delete(categoryKey);
       } else {
-        newSet.add(cardKey);
+        newSet.add(categoryKey);
       }
       return newSet;
     });
@@ -85,15 +85,12 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
   }, [transactions, periodStart, periodEnd]);
 
   // Agrupar por categoria e tipo
-  const { incomeTotals, expenseTotals, totalIncome, totalExpense, cardTransactionsMap } = useMemo(() => {
-    const incomeCategories: Record<string, { actual: number; forecasted: number; categoryName: string; categoryColor: string; categoryId: string; isCard?: boolean }> = {};
-    const expenseCategories: Record<string, { actual: number; forecasted: number; categoryName: string; categoryColor: string; categoryId: string; isCard?: boolean }> = {};
-    const cardTxMap = new Map<string, Array<{ month: string; transactions: any[] }>>();
+  const { incomeTotals, expenseTotals, totalIncome, totalExpense, categoryTransactionsMap } = useMemo(() => {
+    const incomeCategories: Record<string, { actual: number; forecasted: number; categoryName: string; categoryColor: string; categoryId: string; transactions: any[] }> = {};
+    const expenseCategories: Record<string, { actual: number; forecasted: number; categoryName: string; categoryColor: string; categoryId: string; transactions: any[] }> = {};
     
-    // Calcular valores reais (excluindo transações de cartão de crédito)
+    // Calcular valores reais e armazenar transações por categoria
     periodTransactions.forEach(t => {
-      if (t.credit_card_id) return; // Pular transações de cartão, serão agrupadas separadamente
-      
       const isIncome = t.categories?.type === "receita";
       const totals = isIncome ? incomeCategories : expenseCategories;
       
@@ -103,68 +100,13 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
           forecasted: 0,
           categoryName: t.categories?.name || "Sem categoria",
           categoryColor: t.categories?.color || "#6366f1",
-          categoryId: t.category_id
+          categoryId: t.category_id,
+          transactions: []
         };
       }
       totals[t.category_id].actual += Number(t.amount);
+      totals[t.category_id].transactions.push(t);
     });
-
-    // Adicionar totais de cartões de crédito como categorias especiais
-    if (creditCards && transactions) {
-      creditCards.forEach(card => {
-        const allCardTransactions = transactions.filter(t => t.credit_card_id === card.id);
-        
-        const byMonth = new Map<string, typeof allCardTransactions>();
-        allCardTransactions.forEach(t => {
-          if (t.payment_month) {
-            const key = format(new Date(t.payment_month as string), "yyyy-MM");
-            if (!byMonth.has(key)) {
-              byMonth.set(key, []);
-            }
-            byMonth.get(key)!.push(t);
-          }
-        });
-        
-        // Filtrar meses que correspondem ao período atual
-        const periodMonth = format(periodEnd, "yyyy-MM");
-        const monthsInPeriod = Array.from(byMonth.entries()).filter(([month]) => {
-          return month === periodMonth;
-        });
-        
-        const totalSpent = monthsInPeriod.reduce((sum, [, txs]) => 
-          sum + txs.reduce((s, t) => s + Number(t.amount), 0), 0
-        );
-        
-        if (totalSpent > 0) {
-          const cardKey = `card_${card.id}`;
-          
-          // Buscar previsão para cartão
-          const cardForecasts = forecasts?.filter(f => {
-            const category = categories?.find(c => c.id === f.category_id);
-            return category?.name.toLowerCase().includes(card.name.toLowerCase()) &&
-                   f.period_start === format(periodStart, "yyyy-MM-dd");
-          }) || [];
-          
-          const totalForecast = cardForecasts.reduce((sum, f) => sum + Number(f.forecasted_amount), 0);
-          
-          expenseCategories[cardKey] = {
-            actual: totalSpent,
-            forecasted: totalForecast,
-            categoryName: `Despesas - Cartão ${card.name}`,
-            categoryColor: "#3b82f6", // Cor azul para cartões
-            categoryId: cardKey,
-            isCard: true
-          };
-          
-          // Armazenar transações agrupadas por mês para este cartão
-          const monthlyData = monthsInPeriod.map(([month, txs]) => ({
-            month,
-            transactions: txs
-          }));
-          cardTxMap.set(cardKey, monthlyData);
-        }
-      });
-    }
 
     // Adicionar previsões
     if (forecasts && categories) {
@@ -181,7 +123,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
               forecasted: 0,
               categoryName: (f.categories as any)?.name || "Sem categoria",
               categoryColor: (f.categories as any)?.color || "#6366f1",
-              categoryId: f.category_id
+              categoryId: f.category_id,
+              transactions: []
             };
           }
           totals[f.category_id].forecasted = Number(f.forecasted_amount);
@@ -196,9 +139,9 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
       expenseTotals: expenseCategories,
       totalIncome: incomeTotal,
       totalExpense: expenseTotal,
-      cardTransactionsMap: cardTxMap,
+      categoryTransactionsMap: new Map(Object.entries({ ...incomeCategories, ...expenseCategories }).map(([k, v]) => [k, v.transactions])),
     };
-  }, [periodTransactions, forecasts, periodStart, categories, creditCards, transactions, periodEnd]);
+  }, [periodTransactions, forecasts, periodStart, categories]);
 
   const balance = totalIncome - totalExpense;
 
@@ -225,10 +168,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
     setCurrentDate(prev => addMonths(prev, 1));
   };
 
-  const handleForecastChange = async (categoryId: string, value: string, isCard: boolean = false) => {
-    // Se for um cartão, não permitir edição de previsão aqui
-    if (isCard) return;
-    
+  const handleForecastChange = async (categoryId: string, value: string) => {
     const amount = parseFloat(value) || 0;
     const periodStartStr = format(periodStart, "yyyy-MM-dd");
     const periodEndStr = format(periodEnd, "yyyy-MM-dd");
@@ -335,37 +275,79 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   const percentage = data.forecasted !== 0 
                     ? ((difference / data.forecasted) * 100).toFixed(1)
                     : "-";
+                  const hasMultipleTransactions = data.transactions.length > 1;
+                  const isExpanded = expandedCategories.has(categoryId);
 
                   return (
-                    <TableRow key={categoryId}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded-full" 
-                            style={{ backgroundColor: data.categoryColor }}
+                    <>
+                      <TableRow key={categoryId} className={hasMultipleTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
+                        <TableCell onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
+                          <div className="flex items-center gap-2">
+                            {hasMultipleTransactions && (
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-6 w-6 p-0"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleCategoryExpansion(categoryId);
+                                }}
+                              >
+                                {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
+                              </Button>
+                            )}
+                            <div 
+                              className="w-3 h-3 rounded-full" 
+                              style={{ backgroundColor: data.categoryColor }}
+                            />
+                            {data.categoryName}
+                            {hasMultipleTransactions && (
+                              <span className="text-xs text-muted-foreground">({data.transactions.length})</span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={data.forecasted || ""}
+                            onChange={(e) => handleForecastChange(categoryId, e.target.value)}
+                            className="w-32 ml-auto text-right"
                           />
-                          {data.categoryName}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={data.forecasted || ""}
-                          onChange={(e) => handleForecastChange(categoryId, e.target.value)}
-                          className="w-32 ml-auto text-right"
-                        />
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {formatCurrency(data.actual)}
-                      </TableCell>
-                      <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(Math.abs(difference))}
-                      </TableCell>
-                      <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {percentage !== "-" ? `${percentage}%` : "-"}
-                      </TableCell>
-                    </TableRow>
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          {formatCurrency(data.actual)}
+                        </TableCell>
+                        <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {formatCurrency(Math.abs(difference))}
+                        </TableCell>
+                        <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {percentage !== "-" ? `${percentage}%` : "-"}
+                        </TableCell>
+                      </TableRow>
+                      
+                      {/* Subtabela de transações */}
+                      {hasMultipleTransactions && isExpanded && (
+                        <TableRow>
+                          <TableCell colSpan={5} className="bg-muted/30 p-0">
+                            <div className="p-4 space-y-1">
+                              {data.transactions.map(t => (
+                                <div key={t.id} className="flex justify-between text-sm py-1 px-2 hover:bg-background rounded">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-muted-foreground text-xs">{format(new Date(t.date), "dd/MM")}</span>
+                                    <span>{t.description}</span>
+                                    {t.credit_card_id && t.credit_cards && (
+                                      <span className="text-xs text-muted-foreground">({t.credit_cards.name})</span>
+                                    )}
+                                  </div>
+                                  <span className="font-medium">{formatCurrency(Number(t.amount))}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </>
                   );
                 })}
                 <TableRow className="bg-green-50/50 dark:bg-green-950/10 font-semibold">
@@ -401,21 +383,23 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   const percentage = data.forecasted !== 0 
                     ? ((difference / data.forecasted) * 100).toFixed(1)
                     : "-";
-                  
-                  const isExpanded = expandedCards.has(categoryId);
-                  const cardTransactions = data.isCard ? cardTransactionsMap.get(categoryId) : null;
+                  const hasMultipleTransactions = data.transactions.length > 1;
+                  const isExpanded = expandedCategories.has(categoryId);
 
                   return (
                     <>
-                      <TableRow key={categoryId} className={data.isCard ? "cursor-pointer hover:bg-muted/50" : ""}>
-                        <TableCell>
+                      <TableRow key={categoryId} className={hasMultipleTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
+                        <TableCell onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
                           <div className="flex items-center gap-2">
-                            {data.isCard && (
+                            {hasMultipleTransactions && (
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
                                 className="h-6 w-6 p-0"
-                                onClick={() => toggleCardExpansion(categoryId)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleCategoryExpansion(categoryId);
+                                }}
                               >
                                 {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
                               </Button>
@@ -425,6 +409,9 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                               style={{ backgroundColor: data.categoryColor }}
                             />
                             {data.categoryName}
+                            {hasMultipleTransactions && (
+                              <span className="text-xs text-muted-foreground">({data.transactions.length})</span>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
@@ -432,9 +419,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                             type="number"
                             step="0.01"
                             value={data.forecasted || ""}
-                            onChange={(e) => handleForecastChange(categoryId, e.target.value, data.isCard)}
+                            onChange={(e) => handleForecastChange(categoryId, e.target.value)}
                             className="w-32 ml-auto text-right"
-                            disabled={data.isCard}
                           />
                         </TableCell>
                         <TableCell className="text-right font-medium">
@@ -448,33 +434,23 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                         </TableCell>
                       </TableRow>
                       
-                      {/* Subtabela de transações do cartão */}
-                      {data.isCard && isExpanded && cardTransactions && (
+                      {/* Subtabela de transações */}
+                      {hasMultipleTransactions && isExpanded && (
                         <TableRow>
                           <TableCell colSpan={5} className="bg-muted/30 p-0">
-                            <div className="p-4 space-y-3">
-                              {cardTransactions.map(({ month, transactions }) => {
-                                const monthTotal = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
-                                return (
-                                  <div key={month} className="space-y-2">
-                                    <div className="flex justify-between items-center font-medium text-sm border-b pb-1">
-                                      <span>Fatura {format(new Date(month + "-01"), "MMMM/yyyy", { locale: ptBR })}</span>
-                                      <span className="text-destructive">{formatCurrency(monthTotal)}</span>
-                                    </div>
-                                    <div className="space-y-1">
-                                      {transactions.map(t => (
-                                        <div key={t.id} className="flex justify-between text-sm py-1 px-2 hover:bg-background rounded">
-                                          <div className="flex items-center gap-2">
-                                            <span className="text-muted-foreground text-xs">{format(new Date(t.date), "dd/MM")}</span>
-                                            <span>{t.description}</span>
-                                          </div>
-                                          <span className="font-medium">{formatCurrency(Number(t.amount))}</span>
-                                        </div>
-                                      ))}
-                                    </div>
+                            <div className="p-4 space-y-1">
+                              {data.transactions.map(t => (
+                                <div key={t.id} className="flex justify-between text-sm py-1 px-2 hover:bg-background rounded">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-muted-foreground text-xs">{format(new Date(t.date), "dd/MM")}</span>
+                                    <span>{t.description}</span>
+                                    {t.credit_card_id && t.credit_cards && (
+                                      <span className="text-xs text-muted-foreground">({t.credit_cards.name})</span>
+                                    )}
                                   </div>
-                                );
-                              })}
+                                  <span className="font-medium">{formatCurrency(Number(t.amount))}</span>
+                                </div>
+                              ))}
                             </div>
                           </TableCell>
                         </TableRow>
