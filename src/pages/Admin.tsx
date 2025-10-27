@@ -28,7 +28,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart } from "lucide-react";
+import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { z } from "zod";
 import { UserGrowthChart } from "@/components/admin/UserGrowthChart";
 import { AccessActivityChart } from "@/components/admin/AccessActivityChart";
@@ -50,11 +50,25 @@ const couponSchema = z.object({
 
 const ITEMS_PER_PAGE = 10;
 
+interface UserFilters {
+  search: string;
+  plan: string;
+  sortBy: "name" | "email" | "created_at" | "updated_at";
+  sortOrder: "asc" | "desc";
+}
+
 export default function Admin() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [userFilters, setUserFilters] = useState<UserFilters>({
+    search: "",
+    plan: "all",
+    sortBy: "created_at",
+    sortOrder: "desc",
+  });
   const [couponForm, setCouponForm] = useState({
     code: "",
     discount_percent: 10,
@@ -66,19 +80,44 @@ export default function Admin() {
 
   // Fetch all users with profiles and subscriptions
   const { data: usersData, isLoading: usersLoading } = useQuery({
-    queryKey: ["admin-users", page],
+    queryKey: ["admin-users", page, itemsPerPage, userFilters],
     queryFn: async () => {
-      const from = (page - 1) * ITEMS_PER_PAGE;
-      const to = from + ITEMS_PER_PAGE - 1;
+      const from = (page - 1) * itemsPerPage;
+      const to = from + itemsPerPage - 1;
 
-      const { data: profiles, error, count } = await supabase
+      let query = supabase
         .from("profiles")
-        .select("*, subscriptions(*)", { count: "exact" })
-        .range(from, to)
-        .order("created_at", { ascending: false });
+        .select("*, subscriptions(*)", { count: "exact" });
+
+      // Apply search filter
+      if (userFilters.search) {
+        query = query.or(
+          `name.ilike.%${userFilters.search}%,email.ilike.%${userFilters.search}%`
+        );
+      }
+
+      // Apply sorting
+      query = query.order(userFilters.sortBy, { ascending: userFilters.sortOrder === "asc" });
+
+      // Apply pagination
+      query = query.range(from, to);
+
+      const { data: profiles, error, count } = await query;
 
       if (error) throw error;
-      return { profiles: profiles || [], total: count || 0 };
+
+      // Filter by plan if needed (client-side since subscriptions is a join)
+      let filteredProfiles = profiles || [];
+      if (userFilters.plan !== "all" && filteredProfiles.length > 0) {
+        filteredProfiles = filteredProfiles.filter((profile) => {
+          const subscription = Array.isArray(profile.subscriptions)
+            ? profile.subscriptions[0]
+            : profile.subscriptions;
+          return subscription?.plan === userFilters.plan;
+        });
+      }
+
+      return { profiles: filteredProfiles, total: count || 0 };
     },
   });
 
@@ -182,7 +221,19 @@ export default function Admin() {
     createCoupon.mutate(couponForm);
   };
 
-  const totalPages = Math.ceil((usersData?.total || 0) / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil((usersData?.total || 0) / itemsPerPage);
+
+  const handleSort = (column: UserFilters["sortBy"]) => {
+    if (userFilters.sortBy === column) {
+      setUserFilters({
+        ...userFilters,
+        sortOrder: userFilters.sortOrder === "asc" ? "desc" : "asc",
+      });
+    } else {
+      setUserFilters({ ...userFilters, sortBy: column, sortOrder: "asc" });
+    }
+    setPage(1);
+  };
 
   return (
     <div className="container max-w-7xl py-8">
@@ -213,6 +264,66 @@ export default function Admin() {
 
         {/* Users Tab */}
         <TabsContent value="users" className="space-y-4">
+          {/* Filters */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Filtros e Busca</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="search">Buscar por nome ou email</Label>
+                  <Input
+                    id="search"
+                    placeholder="Digite para buscar..."
+                    value={userFilters.search}
+                    onChange={(e) => {
+                      setUserFilters({ ...userFilters, search: e.target.value });
+                      setPage(1);
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="plan">Filtrar por plano</Label>
+                  <select
+                    id="plan"
+                    value={userFilters.plan}
+                    onChange={(e) => {
+                      setUserFilters({ ...userFilters, plan: e.target.value });
+                      setPage(1);
+                    }}
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="all">Todos os planos</option>
+                    <option value="free">Free</option>
+                    <option value="plus">Plus</option>
+                    <option value="pro">Pro</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="itemsPerPage">Itens por página</Label>
+                  <select
+                    id="itemsPerPage"
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                      setItemsPerPage(Number(e.target.value));
+                      setPage(1);
+                    }}
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                  </select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Usuários Registrados</CardTitle>
@@ -222,15 +333,92 @@ export default function Admin() {
             </CardHeader>
             <CardContent>
               {usersLoading ? (
-                <p>Carregando...</p>
-              ) : (
+                <p className="text-center py-8">Carregando...</p>
+              ) : usersData?.profiles && usersData.profiles.length > 0 ? (
                 <>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Nome/Email</TableHead>
-                        <TableHead>Data de Inscrição</TableHead>
-                        <TableHead>Último Acesso</TableHead>
+                        <TableHead>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2"
+                            onClick={() => handleSort("name")}
+                          >
+                            Nome
+                            {userFilters.sortBy === "name" && (
+                              userFilters.sortOrder === "asc" ? (
+                                <ArrowUp className="ml-2 h-4 w-4" />
+                              ) : (
+                                <ArrowDown className="ml-2 h-4 w-4" />
+                              )
+                            )}
+                            {userFilters.sortBy !== "name" && (
+                              <ArrowUpDown className="ml-2 h-4 w-4" />
+                            )}
+                          </Button>
+                        </TableHead>
+                        <TableHead>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2"
+                            onClick={() => handleSort("email")}
+                          >
+                            Email
+                            {userFilters.sortBy === "email" && (
+                              userFilters.sortOrder === "asc" ? (
+                                <ArrowUp className="ml-2 h-4 w-4" />
+                              ) : (
+                                <ArrowDown className="ml-2 h-4 w-4" />
+                              )
+                            )}
+                            {userFilters.sortBy !== "email" && (
+                              <ArrowUpDown className="ml-2 h-4 w-4" />
+                            )}
+                          </Button>
+                        </TableHead>
+                        <TableHead>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2"
+                            onClick={() => handleSort("created_at")}
+                          >
+                            Data de Inscrição
+                            {userFilters.sortBy === "created_at" && (
+                              userFilters.sortOrder === "asc" ? (
+                                <ArrowUp className="ml-2 h-4 w-4" />
+                              ) : (
+                                <ArrowDown className="ml-2 h-4 w-4" />
+                              )
+                            )}
+                            {userFilters.sortBy !== "created_at" && (
+                              <ArrowUpDown className="ml-2 h-4 w-4" />
+                            )}
+                          </Button>
+                        </TableHead>
+                        <TableHead>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2"
+                            onClick={() => handleSort("updated_at")}
+                          >
+                            Último Acesso
+                            {userFilters.sortBy === "updated_at" && (
+                              userFilters.sortOrder === "asc" ? (
+                                <ArrowUp className="ml-2 h-4 w-4" />
+                              ) : (
+                                <ArrowDown className="ml-2 h-4 w-4" />
+                              )
+                            )}
+                            {userFilters.sortBy !== "updated_at" && (
+                              <ArrowUpDown className="ml-2 h-4 w-4" />
+                            )}
+                          </Button>
+                        </TableHead>
                         <TableHead>Plano</TableHead>
                         <TableHead>Desde</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
@@ -244,11 +432,11 @@ export default function Admin() {
                         
                         return (
                           <TableRow key={profile.id}>
-                            <TableCell>
-                              <div>
-                                <div className="font-medium">{profile.name || "Sem nome"}</div>
-                                <div className="text-sm text-muted-foreground">{profile.email}</div>
-                              </div>
+                            <TableCell className="font-medium">
+                              {profile.name || "Sem nome"}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {profile.email || "-"}
                             </TableCell>
                             <TableCell>
                               {profile.created_at
@@ -288,7 +476,9 @@ export default function Admin() {
                   {/* Pagination */}
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-muted-foreground">
-                      Página {page} de {totalPages}
+                      Mostrando {Math.min((page - 1) * itemsPerPage + 1, usersData?.total || 0)} a{" "}
+                      {Math.min(page * itemsPerPage, usersData?.total || 0)} de {usersData?.total || 0}{" "}
+                      usuários
                     </p>
                     <div className="flex gap-2">
                       <Button
@@ -299,17 +489,24 @@ export default function Admin() {
                       >
                         <ChevronLeft className="h-4 w-4" />
                       </Button>
+                      <span className="flex items-center px-4 text-sm">
+                        Página {page} de {totalPages || 1}
+                      </span>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                        disabled={page === totalPages}
+                        disabled={page === totalPages || totalPages === 0}
                       >
                         <ChevronRight className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
                 </>
+              ) : (
+                <p className="text-center py-8 text-muted-foreground">
+                  Nenhum usuário encontrado com os filtros aplicados
+                </p>
               )}
             </CardContent>
           </Card>
