@@ -3,9 +3,8 @@ import { format, addMonths, startOfMonth, endOfMonth, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, Copy, ChevronDown, ChevronRight as ChevronRightIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronRight as ChevronRightIcon } from "lucide-react";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useCategories } from "@/hooks/useCategories";
 import { useForecasts } from "@/hooks/useForecasts";
@@ -37,7 +36,6 @@ function calculatePeriod(date: Date, closingDay: number) {
 export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
   const closingDay = account.closing_day || 1;
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [copyFromPeriod, setCopyFromPeriod] = useState<string>("");
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   
   const toggleCategoryExpansion = (categoryKey: string) => {
@@ -59,7 +57,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
 
   const { transactions } = useTransactions(account.id);
   const { categories } = useCategories(account.id);
-  const { forecasts, createForecast, updateForecast, copyForecast } = useForecasts(account.id);
+  const { forecasts, createForecast, updateForecast } = useForecasts(account.id);
   const { creditCards } = useCreditCards(account.id);
 
   // Filtrar transações do período atual
@@ -145,21 +143,6 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
 
   const balance = totalIncome - totalExpense;
 
-  // Gerar lista de períodos disponíveis para copiar
-  const availablePeriods = useMemo(() => {
-    const periods = [];
-    let date = addMonths(currentDate, -6);
-    for (let i = 0; i < 12; i++) {
-      const { periodStart: ps } = calculatePeriod(date, closingDay);
-      periods.push({
-        value: format(ps, "yyyy-MM-dd"),
-        label: format(ps, "MMMM 'de' yyyy", { locale: ptBR })
-      });
-      date = addMonths(date, 1);
-    }
-    return periods;
-  }, [currentDate, closingDay]);
-
   const handlePreviousPeriod = () => {
     setCurrentDate(prev => addMonths(prev, -1));
   };
@@ -193,19 +176,6 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
     }
   };
 
-  const handleCopyFromPeriod = async () => {
-    if (!copyFromPeriod) return;
-    
-    const { periodStart: targetStart, periodEnd: targetEnd } = calculatePeriod(currentDate, closingDay);
-    
-    await copyForecast.mutateAsync({
-      sourcePeriodStart: copyFromPeriod,
-      targetPeriodStart: format(targetStart, "yyyy-MM-dd"),
-      targetPeriodEnd: format(targetEnd, "yyyy-MM-dd"),
-      accountId: account.id,
-    });
-  };
-
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -225,29 +195,6 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
           </div>
           <Button variant="outline" size="icon" onClick={handleNextPeriod}>
             <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Select value={copyFromPeriod} onValueChange={setCopyFromPeriod}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Copiar de..." />
-            </SelectTrigger>
-            <SelectContent>
-              {availablePeriods.map(period => (
-                <SelectItem key={period.value} value={period.value}>
-                  {period.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={handleCopyFromPeriod}
-            disabled={!copyFromPeriod}
-          >
-            <Copy className="h-4 w-4" />
           </Button>
         </div>
       </div>
