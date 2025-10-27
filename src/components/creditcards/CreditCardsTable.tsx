@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, ChevronDown, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { Edit, Trash2, ChevronDown, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { useState, useMemo } from "react";
 import type { Database } from "@/integrations/supabase/types";
 
 type CreditCard = Database["public"]["Tables"]["credit_cards"]["Row"];
@@ -27,6 +27,8 @@ export function CreditCardsTable({
   onDelete,
 }: CreditCardsTableProps) {
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+  const [sortField, setSortField] = useState<'name' | 'total' | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const toggleCard = (id: string) => {
     setExpandedCards(prev => {
@@ -38,6 +40,20 @@ export function CreditCardsTable({
       }
       return newSet;
     });
+  };
+
+  const handleSort = (field: 'name' | 'total') => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const renderSortIcon = (field: 'name' | 'total') => {
+    if (sortField !== field) return <ArrowUpDown className="h-4 w-4 ml-1" />;
+    return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 ml-1" /> : <ArrowDown className="h-4 w-4 ml-1" />;
   };
 
   const formatCurrency = (amount: number | null) => {
@@ -74,29 +90,55 @@ export function CreditCardsTable({
     return Array.from(byMonth.entries()).sort((a, b) => a[0].localeCompare(b[0]));
   };
 
+  const sortedCreditCards = useMemo(() => {
+    if (!sortField) return creditCards;
+    
+    return [...creditCards].sort((a, b) => {
+      let comparison = 0;
+      
+      if (sortField === 'name') {
+        comparison = a.name.localeCompare(b.name);
+      } else if (sortField === 'total') {
+        comparison = getCardTotal(a.id) - getCardTotal(b.id);
+      }
+      
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+  }, [creditCards, sortField, sortDirection, transactions]);
+
   return (
     <div className="border rounded-lg">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-12"></TableHead>
-            <TableHead>Nome</TableHead>
+            <TableHead>
+              <Button variant="ghost" size="sm" onClick={() => handleSort('name')} className="flex items-center gap-1 p-0 h-auto font-medium">
+                Nome
+                {renderSortIcon('name')}
+              </Button>
+            </TableHead>
             <TableHead className="text-center">Fechamento</TableHead>
             <TableHead className="text-center">Vencimento</TableHead>
             <TableHead className="text-right">Limite</TableHead>
-            <TableHead className="text-right">A Pagar</TableHead>
+            <TableHead className="text-right">
+              <Button variant="ghost" size="sm" onClick={() => handleSort('total')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
+                A Pagar
+                {renderSortIcon('total')}
+              </Button>
+            </TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {creditCards.length === 0 ? (
+          {sortedCreditCards.length === 0 ? (
             <TableRow>
               <TableCell colSpan={7} className="text-center text-muted-foreground">
                 Nenhum cartão cadastrado
               </TableCell>
             </TableRow>
           ) : (
-            creditCards.map((card) => {
+            sortedCreditCards.map((card) => {
               const isExpanded = expandedCards.has(card.id);
               const monthlyTransactions = getTransactionsByMonth(card.id);
               const totalToPay = getCardTotal(card.id);

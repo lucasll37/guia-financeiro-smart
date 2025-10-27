@@ -1,5 +1,6 @@
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -19,11 +20,44 @@ interface CategoryTableProps {
 }
 
 export function CategoryTable({ categories, onEdit, onDelete }: CategoryTableProps) {
-  // Organizar categorias por hierarquia
-  const parentCategories = categories.filter((cat) => !cat.parent_id);
+  const [sortField, setSortField] = useState<'name' | 'type' | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const handleSort = (field: 'name' | 'type') => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const renderSortIcon = (field: 'name' | 'type') => {
+    if (sortField !== field) return <ArrowUpDown className="h-4 w-4 ml-1" />;
+    return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 ml-1" /> : <ArrowDown className="h-4 w-4 ml-1" />;
+  };
+
+  // Organizar categorias por hierarquia com ordenação
+  const sortedCategories = useMemo(() => {
+    if (!sortField) return categories;
+    
+    return [...categories].sort((a, b) => {
+      let comparison = 0;
+      
+      if (sortField === 'name') {
+        comparison = a.name.localeCompare(b.name);
+      } else if (sortField === 'type') {
+        comparison = a.type.localeCompare(b.type);
+      }
+      
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+  }, [categories, sortField, sortDirection]);
+
+  const parentCategories = sortedCategories.filter((cat) => !cat.parent_id);
   const childrenMap = new Map<string, Category[]>();
 
-  categories.forEach((cat) => {
+  sortedCategories.forEach((cat) => {
     if (cat.parent_id) {
       const existing = childrenMap.get(cat.parent_id) || [];
       childrenMap.set(cat.parent_id, [...existing, cat]);
@@ -45,8 +79,18 @@ export function CategoryTable({ categories, onEdit, onDelete }: CategoryTablePro
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50">
-            <TableHead className="font-semibold">Categoria</TableHead>
-            <TableHead className="font-semibold">Tipo</TableHead>
+            <TableHead className="font-semibold">
+              <Button variant="ghost" size="sm" onClick={() => handleSort('name')} className="flex items-center gap-1 p-0 h-auto font-semibold">
+                Categoria
+                {renderSortIcon('name')}
+              </Button>
+            </TableHead>
+            <TableHead className="font-semibold">
+              <Button variant="ghost" size="sm" onClick={() => handleSort('type')} className="flex items-center gap-1 p-0 h-auto font-semibold">
+                Tipo
+                {renderSortIcon('type')}
+              </Button>
+            </TableHead>
             <TableHead className="font-semibold w-[100px]">Cor</TableHead>
             <TableHead className="text-right font-semibold w-[120px]">Ações</TableHead>
           </TableRow>

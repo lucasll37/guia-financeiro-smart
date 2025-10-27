@@ -8,9 +8,10 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useState, useMemo } from "react";
 import type { Database } from "@/integrations/supabase/types";
 
 type MonthlyReturn = Database["public"]["Tables"]["investment_monthly_returns"]["Row"];
@@ -30,6 +31,42 @@ export function MonthlyReturnsTable({
   onNew,
   investmentName,
 }: MonthlyReturnsTableProps) {
+  const [sortField, setSortField] = useState<'month' | 'return' | 'contribution' | 'balance' | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  const handleSort = (field: 'month' | 'return' | 'contribution' | 'balance') => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+
+  const renderSortIcon = (field: 'month' | 'return' | 'contribution' | 'balance') => {
+    if (sortField !== field) return <ArrowUpDown className="h-4 w-4 ml-1" />;
+    return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 ml-1" /> : <ArrowDown className="h-4 w-4 ml-1" />;
+  };
+
+  const sortedReturns = useMemo(() => {
+    if (!sortField) return returns;
+    
+    return [...returns].sort((a, b) => {
+      let comparison = 0;
+      
+      if (sortField === 'month') {
+        comparison = a.month.localeCompare(b.month);
+      } else if (sortField === 'return') {
+        comparison = Number(a.actual_return) - Number(b.actual_return);
+      } else if (sortField === 'contribution') {
+        comparison = Number(a.contribution) - Number(b.contribution);
+      } else if (sortField === 'balance') {
+        comparison = Number(a.balance_after) - Number(b.balance_after);
+      }
+      
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+  }, [returns, sortField, sortDirection]);
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -61,24 +98,44 @@ export function MonthlyReturnsTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Mês/Ano</TableHead>
-                <TableHead className="text-right">Rendimento</TableHead>
+                <TableHead>
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('month')} className="flex items-center gap-1 p-0 h-auto font-medium">
+                    Mês/Ano
+                    {renderSortIcon('month')}
+                  </Button>
+                </TableHead>
+                <TableHead className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('return')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
+                    Rendimento
+                    {renderSortIcon('return')}
+                  </Button>
+                </TableHead>
                 <TableHead className="text-right">Inflação (%)</TableHead>
-                <TableHead className="text-right">Aporte</TableHead>
-                <TableHead className="text-right">Saldo Final</TableHead>
+                <TableHead className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('contribution')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
+                    Aporte
+                    {renderSortIcon('contribution')}
+                  </Button>
+                </TableHead>
+                <TableHead className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('balance')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
+                    Saldo Final
+                    {renderSortIcon('balance')}
+                  </Button>
+                </TableHead>
                 <TableHead>Observações</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {returns.length === 0 ? (
+              {sortedReturns.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center text-muted-foreground">
                     Nenhum rendimento registrado
                   </TableCell>
                 </TableRow>
               ) : (
-                returns.map((returnData) => (
+                sortedReturns.map((returnData) => (
                   <TableRow key={returnData.id}>
                     <TableCell className="font-medium">
                       {formatMonthLabel(returnData.month)}

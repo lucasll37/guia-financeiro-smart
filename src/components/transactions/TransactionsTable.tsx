@@ -2,10 +2,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Repeat, CreditCard } from "lucide-react";
+import { Edit, Trash2, Repeat, CreditCard, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import type { Database } from "@/integrations/supabase/types";
 
@@ -35,6 +35,22 @@ export function TransactionsTable({
   onDelete,
 }: TransactionsTableProps) {
   const allSelected = transactions.length > 0 && selectedIds.length === transactions.length;
+  const [sortField, setSortField] = useState<'date' | 'description' | 'amount' | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  const handleSort = (field: 'date' | 'description' | 'amount') => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+
+  const renderSortIcon = (field: 'date' | 'description' | 'amount') => {
+    if (sortField !== field) return <ArrowUpDown className="h-4 w-4 ml-1" />;
+    return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 ml-1" /> : <ArrowDown className="h-4 w-4 ml-1" />;
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -43,21 +59,39 @@ export function TransactionsTable({
     }).format(amount);
   };
 
-  // Separar transações por tipo
+  // Separar e ordenar transações por tipo
   const { incomeTransactions, expenseTransactions, totalIncome, totalExpense } = useMemo(() => {
     const income = transactions.filter((t) => t.categories?.type === "receita");
     const expense = transactions.filter((t) => t.categories?.type === "despesa");
+    
+    const sortTransactions = (txs: Transaction[]) => {
+      if (!sortField) return txs;
+      
+      return [...txs].sort((a, b) => {
+        let comparison = 0;
+        
+        if (sortField === 'date') {
+          comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+        } else if (sortField === 'description') {
+          comparison = a.description.localeCompare(b.description);
+        } else if (sortField === 'amount') {
+          comparison = a.amount - b.amount;
+        }
+        
+        return sortDirection === 'asc' ? comparison : -comparison;
+      });
+    };
     
     const incomeTotal = income.reduce((sum, t) => sum + t.amount, 0);
     const expenseTotal = expense.reduce((sum, t) => sum + t.amount, 0);
     
     return {
-      incomeTransactions: income,
-      expenseTransactions: expense,
+      incomeTransactions: sortTransactions(income),
+      expenseTransactions: sortTransactions(expense),
       totalIncome: incomeTotal,
       totalExpense: expenseTotal,
     };
-  }, [transactions]);
+  }, [transactions, sortField, sortDirection]);
 
   const balance = totalIncome - totalExpense;
 
@@ -179,10 +213,25 @@ export function TransactionsTable({
                     }}
                   />
                 </TableHead>
-                <TableHead>Data</TableHead>
-                <TableHead>Descrição</TableHead>
+                <TableHead>
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('date')} className="flex items-center gap-1 p-0 h-auto font-medium">
+                    Data
+                    {renderSortIcon('date')}
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('description')} className="flex items-center gap-1 p-0 h-auto font-medium">
+                    Descrição
+                    {renderSortIcon('description')}
+                  </Button>
+                </TableHead>
                 <TableHead>Categoria</TableHead>
-                <TableHead className="text-right">Valor</TableHead>
+                <TableHead className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
+                    Valor
+                    {renderSortIcon('amount')}
+                  </Button>
+                </TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -219,10 +268,25 @@ export function TransactionsTable({
                     }}
                   />
                 </TableHead>
-                <TableHead>Data</TableHead>
-                <TableHead>Descrição</TableHead>
+                <TableHead>
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('date')} className="flex items-center gap-1 p-0 h-auto font-medium">
+                    Data
+                    {renderSortIcon('date')}
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('description')} className="flex items-center gap-1 p-0 h-auto font-medium">
+                    Descrição
+                    {renderSortIcon('description')}
+                  </Button>
+                </TableHead>
                 <TableHead>Categoria</TableHead>
-                <TableHead className="text-right">Valor</TableHead>
+                <TableHead className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
+                    Valor
+                    {renderSortIcon('amount')}
+                  </Button>
+                </TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
