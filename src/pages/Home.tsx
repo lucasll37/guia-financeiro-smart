@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { 
   TrendingUp, 
   Wallet, 
@@ -18,6 +19,9 @@ import {
 
 const Home = () => {
   const navigate = useNavigate();
+  const featuresSection = useScrollAnimation(0.1);
+  const benefitsSection = useScrollAnimation(0.1);
+  const ctaSection = useScrollAnimation(0.1);
 
   const features = [
     {
@@ -137,9 +141,11 @@ const Home = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="container py-24 bg-muted/30">
+      <section ref={featuresSection.ref} id="features" className="container py-24 bg-muted/30">
         <div className="mx-auto max-w-6xl space-y-12">
-          <div className="text-center space-y-4">
+          <div className={`text-center space-y-4 transition-all duration-700 ${
+            featuresSection.isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          }`}>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
               Funcionalidades pensadas para você
             </h2>
@@ -150,7 +156,15 @@ const Home = () => {
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {features.map((feature, index) => (
-              <Card key={index} className="border-primary/10 hover:border-primary/30 transition-all hover:shadow-lg group">
+              <Card 
+                key={index} 
+                className={`border-primary/10 hover:border-primary/30 transition-all duration-500 hover:shadow-lg hover:-translate-y-2 group ${
+                  featuresSection.isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                }`}
+                style={{ 
+                  transitionDelay: featuresSection.isVisible ? `${index * 100}ms` : "0ms"
+                }}
+              >
                 <CardHeader>
                   <div className="flex items-center gap-4">
                     <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
@@ -166,9 +180,17 @@ const Home = () => {
             ))}
           </div>
 
-          <div className="mt-16 grid gap-8 md:grid-cols-3">
+          <div ref={benefitsSection.ref} className="mt-16 grid gap-8 md:grid-cols-3">
             {benefits.map((benefit, index) => (
-              <Card key={index} className="text-center border-primary/10 hover:border-primary/20 transition-all hover:shadow-lg">
+              <Card 
+                key={index} 
+                className={`text-center border-primary/10 hover:border-primary/20 transition-all duration-500 hover:shadow-lg hover:-translate-y-2 hover:scale-105 ${
+                  benefitsSection.isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                }`}
+                style={{ 
+                  transitionDelay: benefitsSection.isVisible ? `${index * 150}ms` : "0ms"
+                }}
+              >
                 <CardContent className="pt-6 space-y-3">
                   <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 text-primary mb-2">
                     <benefit.icon className="h-7 w-7" />
@@ -184,19 +206,29 @@ const Home = () => {
 
 
       {/* CTA Section */}
-      <section className="container py-24 bg-gradient-to-br from-primary/10 via-primary/5 to-accent/5 rounded-3xl my-12">
-        <div className="mx-auto max-w-3xl text-center space-y-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
+      <section ref={ctaSection.ref} className="container py-24 bg-gradient-to-br from-primary/10 via-primary/5 to-accent/5 rounded-3xl my-12">
+        <div className={`mx-auto max-w-3xl text-center space-y-8 transition-all duration-700 ${
+          ctaSection.isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+        }`}>
+          <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4 transition-all duration-700 delay-200 ${
+            ctaSection.isVisible ? "opacity-100 scale-100 animate-pulse" : "opacity-0 scale-50"
+          }`}>
             <TrendingUp className="h-8 w-8" />
           </div>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className={`text-3xl font-bold tracking-tight sm:text-4xl transition-all duration-700 delay-300 ${
+            ctaSection.isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+          }`}>
             Comece agora a organizar suas finanças
           </h2>
-          <p className="text-xl text-muted-foreground">
+          <p className={`text-xl text-muted-foreground transition-all duration-700 delay-500 ${
+            ctaSection.isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+          }`}>
             Cadastre-se gratuitamente e tenha controle total do seu dinheiro em minutos
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Button size="lg" onClick={() => navigate("/auth")} className="gap-2 shadow-lg">
+          <div className={`flex flex-col sm:flex-row gap-4 justify-center pt-4 transition-all duration-700 delay-700 ${
+            ctaSection.isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+          }`}>
+            <Button size="lg" onClick={() => navigate("/auth")} className="gap-2 shadow-lg hover:scale-110 transition-transform duration-300">
               Criar Conta Grátis
               <ArrowRight className="h-4 w-4" />
             </Button>
