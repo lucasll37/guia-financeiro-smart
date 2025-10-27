@@ -44,7 +44,7 @@ export const Header = () => {
   const { user, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const currentRoute = routeLabels[location.pathname] || "Dashboard";
+  const currentRoute = routeLabels[location.pathname] || "Painel";
   const [preferencesOpen, setPreferencesOpen] = useState(false);
 
   const { data: profile } = useQuery({

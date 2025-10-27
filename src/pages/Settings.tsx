@@ -27,7 +27,7 @@ export default function Settings() {
             <CardHeader>
               <CardTitle>Tema</CardTitle>
               <CardDescription>
-                Personalize o tema do dashboard
+                Personalize o tema do painel
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

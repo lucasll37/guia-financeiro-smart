@@ -77,7 +77,7 @@ export function BudgetProjection({ accountId, transactions, currentMonth }: Budg
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Target className="h-5 w-5" />
-            Orçado vs Realizado - {currentMonth}
+            Provisto vs Realizado - {currentMonth}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -125,7 +125,7 @@ export function BudgetProjection({ accountId, transactions, currentMonth }: Budg
                     {item.percentage > 100 ? (
                       <span className="flex items-center gap-1">
                         <TrendingUp className="h-3 w-3" />
-                        {item.percentage.toFixed(0)}% (acima do orçado)
+                        {item.percentage.toFixed(0)}% (acima do provisto)
                       </span>
                     ) : (
                       <span>{item.percentage.toFixed(0)}%</span>

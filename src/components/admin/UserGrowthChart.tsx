@@ -5,18 +5,22 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { format, subDays, eachDayOfInterval } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { TrendingUp } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 
 export function UserGrowthChart() {
+  const [days, setDays] = useState(30);
+
   const { data: userData, isLoading } = useQuery({
-    queryKey: ["admin-user-growth"],
+    queryKey: ["admin-user-growth", days],
     queryFn: async () => {
-      // Get user registrations for the last 30 days
-      const thirtyDaysAgo = subDays(new Date(), 30);
+      // Get user registrations for the selected period
+      const daysAgo = subDays(new Date(), days);
       
       const { data, error } = await supabase
         .from("profiles")
         .select("created_at")
-        .gte("created_at", thirtyDaysAgo.toISOString())
+        .gte("created_at", daysAgo.toISOString())
         .order("created_at", { ascending: true });
 
       if (error) throw error;
@@ -25,8 +29,8 @@ export function UserGrowthChart() {
       const dateMap = new Map<string, number>();
       
       // Initialize all dates with 0
-      const days = eachDayOfInterval({ start: thirtyDaysAgo, end: new Date() });
-      days.forEach(day => {
+      const daysInterval = eachDayOfInterval({ start: daysAgo, end: new Date() });
+      daysInterval.forEach(day => {
         dateMap.set(format(day, "yyyy-MM-dd"), 0);
       });
 
@@ -70,13 +74,31 @@ export function UserGrowthChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5" />
-          Evolução de Usuários
-        </CardTitle>
-        <CardDescription>
-          Últimos 30 dias • Total: {totalUsers} usuários • Hoje: +{newUsersToday}
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Evolução de Usuários
+            </CardTitle>
+            <CardDescription>
+              Últimos {days} dias • Total: {totalUsers} usuários • Hoje: +{newUsersToday}
+            </CardDescription>
+          </div>
+          <Select value={days.toString()} onValueChange={(value) => setDays(Number(value))}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">7 dias</SelectItem>
+              <SelectItem value="15">15 dias</SelectItem>
+              <SelectItem value="30">30 dias</SelectItem>
+              <SelectItem value="60">60 dias</SelectItem>
+              <SelectItem value="90">90 dias</SelectItem>
+              <SelectItem value="180">180 dias</SelectItem>
+              <SelectItem value="365">1 ano</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>

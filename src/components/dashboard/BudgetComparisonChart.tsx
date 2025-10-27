@@ -76,7 +76,7 @@ export function BudgetComparisonChart({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Orçado vs Realizado</CardTitle>
+          <CardTitle>Provisto vs Realizado</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center text-muted-foreground">
@@ -90,7 +90,7 @@ export function BudgetComparisonChart({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Orçado vs Realizado</CardTitle>
+        <CardTitle>Provisto vs Realizado</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">

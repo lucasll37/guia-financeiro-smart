@@ -37,7 +37,7 @@ import { StatsOverview } from "@/components/admin/StatsOverview";
 const couponSchema = z.object({
   code: z.string().trim().min(3, "Código deve ter no mínimo 3 caracteres").max(50, "Código muito longo"),
   discount_percent: z.number().min(1, "Desconto deve ser entre 1 e 100").max(100, "Desconto deve ser entre 1 e 100"),
-  quantity: z.number().int().min(1, "Quantidade deve ser no mínimo 1"),
+  quantity: z.number().int().min(-1, "Quantidade inválida"),
   valid_until: z.string().min(1, "Data de validade é obrigatória"),
 });
 
@@ -53,6 +53,7 @@ export default function Admin() {
     discount_percent: 10,
     quantity: 1,
     valid_until: "",
+    isInfinite: false,
   });
 
   // Fetch all users with profiles and subscriptions
@@ -106,7 +107,7 @@ export default function Admin() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-coupons"] });
       toast({ title: "Cupom criado com sucesso!" });
-      setCouponForm({ code: "", discount_percent: 10, quantity: 1, valid_until: "" });
+      setCouponForm({ code: "", discount_percent: 10, quantity: 1, valid_until: "", isInfinite: false });
     },
     onError: (error: any) => {
       toast({
@@ -348,11 +349,30 @@ export default function Admin() {
                     id="quantity"
                     type="number"
                     min="1"
-                    value={couponForm.quantity}
+                    value={couponForm.isInfinite ? "" : couponForm.quantity}
+                    disabled={couponForm.isInfinite}
                     onChange={(e) =>
                       setCouponForm({ ...couponForm, quantity: parseInt(e.target.value) || 1 })
                     }
                   />
+                  <div className="flex items-center space-x-2 mt-2">
+                    <input
+                      type="checkbox"
+                      id="isInfinite"
+                      checked={couponForm.isInfinite}
+                      onChange={(e) =>
+                        setCouponForm({
+                          ...couponForm,
+                          isInfinite: e.target.checked,
+                          quantity: e.target.checked ? -1 : 1,
+                        })
+                      }
+                      className="h-4 w-4"
+                    />
+                    <Label htmlFor="isInfinite" className="cursor-pointer text-sm">
+                      Quantidade infinita
+                    </Label>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -398,7 +418,9 @@ export default function Admin() {
                         <TableCell className="font-mono font-bold">{coupon.code}</TableCell>
                         <TableCell>{coupon.discount_percent}%</TableCell>
                         <TableCell>
-                          {coupon.used_count}/{coupon.quantity}
+                          {coupon.quantity === -1 
+                            ? `${coupon.used_count}/∞` 
+                            : `${coupon.used_count}/${coupon.quantity}`}
                         </TableCell>
                         <TableCell>
                           {format(new Date(coupon.valid_until), "dd/MM/yyyy HH:mm", { locale: ptBR })}

@@ -9,10 +9,10 @@ interface PageMetaData {
 
 const pageMetadata: Record<string, PageMetaData> = {
   "/": {
-    title: "Dashboard - Gestão Financeira Pessoal",
+    title: "Painel - Gestão Financeira Pessoal",
     description:
       "Visualize seus KPIs financeiros, fluxo de caixa, metas e alertas em tempo real",
-    keywords: "dashboard, finanças pessoais, controle financeiro, KPIs",
+    keywords: "painel, finanças pessoais, controle financeiro, KPIs",
   },
   "/contas": {
     title: "Contas - Gestão Financeira Pessoal",
