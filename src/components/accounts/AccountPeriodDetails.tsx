@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChevronLeft, ChevronRight, ChevronDown, ChevronRight as ChevronRightIcon } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useCategories } from "@/hooks/useCategories";
 import { useForecasts } from "@/hooks/useForecasts";
@@ -218,7 +219,10 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
               </TableHeader>
               <TableBody>
                 {Object.entries(incomeTotals).map(([categoryId, data]) => {
-                  const difference = data.actual - data.forecasted;
+                  const difference = data.forecasted - data.actual;
+                  const completion = data.forecasted > 0 
+                    ? Math.min(100, Math.max(0, (data.actual / data.forecasted) * 100)) 
+                    : 0;
                   const percentage = data.forecasted !== 0 
                     ? ((difference / data.forecasted) * 100).toFixed(1)
                     : "-";
@@ -270,9 +274,14 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                         <TableCell className={`text-right w-[140px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {formatCurrency(Math.abs(difference))}
                         </TableCell>
-                        <TableCell className={`text-right w-[120px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {percentage !== "-" ? `${percentage}%` : "-"}
-                        </TableCell>
+                          <TableCell className="text-right w-[120px]">
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1">
+                                <Progress value={completion} className="h-2" />
+                              </div>
+                              <span className="w-12 text-right text-xs text-muted-foreground">{Math.round(completion)}%</span>
+                            </div>
+                          </TableCell>
                       </TableRow>
                       
                       {/* Subtabela de transações */}
@@ -328,10 +337,13 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
               </TableHeader>
               <TableBody>
                 {Object.entries(expenseTotals).map(([categoryId, data]) => {
-                  const difference = data.actual - data.forecasted;
-                  const percentage = data.forecasted !== 0 
-                    ? ((difference / data.forecasted) * 100).toFixed(1)
-                    : "-";
+                    const difference = data.forecasted - data.actual;
+                    const completion = data.forecasted > 0 
+                      ? Math.min(100, Math.max(0, (data.actual / data.forecasted) * 100)) 
+                      : 0;
+                    const percentage = data.forecasted !== 0 
+                      ? ((difference / data.forecasted) * 100).toFixed(1)
+                      : "-";
                   const hasMultipleTransactions = data.transactions.length > 1;
                   const isExpanded = expandedCategories.has(categoryId);
 
@@ -380,8 +392,13 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                         <TableCell className={`text-right w-[140px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {formatCurrency(Math.abs(difference))}
                         </TableCell>
-                        <TableCell className={`text-right w-[120px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {percentage !== "-" ? `${percentage}%` : "-"}
+                        <TableCell className="text-right w-[120px]">
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1">
+                              <Progress value={completion} className="h-2" />
+                            </div>
+                            <span className="w-12 text-right text-xs text-muted-foreground">{Math.round(completion)}%</span>
+                          </div>
                         </TableCell>
                       </TableRow>
                       
