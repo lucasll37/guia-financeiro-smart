@@ -22,7 +22,6 @@ import { useToast } from "@/hooks/use-toast";
 import { TransactionFilters } from "@/components/transactions/TransactionFilters";
 import { TransactionsTable } from "@/components/transactions/TransactionsTable";
 import { TransactionDialog } from "@/components/transactions/TransactionDialog";
-import { BudgetProjection } from "@/components/transactions/BudgetProjection";
 import type { Database } from "@/integrations/supabase/types";
 
 type TransactionInsert = Database["public"]["Tables"]["transactions"]["Insert"];
@@ -248,69 +247,57 @@ export default function Transactions() {
         onFilterChange={setFilters}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-4">
-          {selectedIds.length > 0 && (
-            <div className="flex items-center gap-2 p-4 border rounded-lg bg-muted">
-              <span className="text-sm">{selectedIds.length} selecionado(s)</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setBulkActionDialog("category")}
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Alterar Categoria
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setBulkActionDialog("account")}
-              >
-                <MoveHorizontal className="h-4 w-4 mr-2" />
-                Mover Conta
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setBulkActionDialog("delete")}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Excluir
-              </Button>
-            </div>
-          )}
+      <div className="space-y-4">
+        {selectedIds.length > 0 && (
+          <div className="flex items-center gap-2 p-4 border rounded-lg bg-muted">
+            <span className="text-sm">{selectedIds.length} selecionado(s)</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setBulkActionDialog("category")}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Alterar Categoria
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setBulkActionDialog("account")}
+            >
+              <MoveHorizontal className="h-4 w-4 mr-2" />
+              Mover Conta
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setBulkActionDialog("delete")}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Excluir
+            </Button>
+          </div>
+        )}
 
-          {isLoading ? (
-            <p className="text-muted-foreground">Carregando lançamentos...</p>
-          ) : (
-            <TransactionsTable
-              transactions={filteredTransactions}
-              selectedIds={selectedIds}
-              onSelectAll={(selected) => {
-                setSelectedIds(selected ? filteredTransactions.map((t) => t.id) : []);
-              }}
-              onSelectOne={(id, selected) => {
-                setSelectedIds(
-                  selected
-                    ? [...selectedIds, id]
-                    : selectedIds.filter((sid) => sid !== id)
-                );
-              }}
-              onEdit={handleEditTransaction}
-              onDelete={handleDeleteTransaction}
-            />
-          )}
-        </div>
-
-        <div className="lg:col-span-1">
-          {filters.accountId !== "all" && (
-            <BudgetProjection
-              accountId={filters.accountId}
-              transactions={filteredTransactions}
-              currentMonth={filters.selectedMonth}
-            />
-          )}
-        </div>
+        {isLoading ? (
+          <p className="text-muted-foreground">Carregando lançamentos...</p>
+        ) : (
+          <TransactionsTable
+            transactions={filteredTransactions}
+            selectedIds={selectedIds}
+            onSelectAll={(selected) => {
+              setSelectedIds(selected ? filteredTransactions.map((t) => t.id) : []);
+            }}
+            onSelectOne={(id, selected) => {
+              setSelectedIds(
+                selected
+                  ? [...selectedIds, id]
+                  : selectedIds.filter((sid) => sid !== id)
+              );
+            }}
+            onEdit={handleEditTransaction}
+            onDelete={handleDeleteTransaction}
+          />
+        )}
       </div>
 
       <TransactionDialog
