@@ -688,6 +688,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -702,6 +723,13 @@ export type Database = {
           _user_id: string
         }
         Returns: undefined
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       restore_account: { Args: { account_id: string }; Returns: undefined }
       user_has_account_access: {
@@ -719,6 +747,7 @@ export type Database = {
     Enums: {
       account_member_role: "owner" | "editor" | "viewer"
       account_type: "pessoal" | "casa" | "empresa" | "conjugal" | "outro"
+      app_role: "admin" | "user"
       audit_action: "create" | "update" | "delete"
       billing_cycle: "monthly" | "annual"
       category_type: "despesa" | "receita"
@@ -866,6 +895,7 @@ export const Constants = {
     Enums: {
       account_member_role: ["owner", "editor", "viewer"],
       account_type: ["pessoal", "casa", "empresa", "conjugal", "outro"],
+      app_role: ["admin", "user"],
       audit_action: ["create", "update", "delete"],
       billing_cycle: ["monthly", "annual"],
       category_type: ["despesa", "receita"],
