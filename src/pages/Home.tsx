@@ -95,8 +95,8 @@ const Home = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="container py-24 md:py-32">
-        <div className="mx-auto max-w-3xl text-center space-y-8">
+      <section className="container py-32 md:py-48 lg:py-56 min-h-[90vh] flex items-center">
+        <div className="mx-auto max-w-3xl text-center space-y-8 w-full">
           <Badge variant="secondary" className="px-4 py-1">
             <Zap className="h-3 w-3 mr-1" />
             Controle Total das Suas Finanças
