@@ -28,7 +28,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown, Bell, Send } from "lucide-react";
 import { z } from "zod";
 import { UserGrowthChart } from "@/components/admin/UserGrowthChart";
 import { AccessActivityChart } from "@/components/admin/AccessActivityChart";
@@ -76,6 +76,11 @@ export default function Admin() {
     valid_until: "",
     isInfinite: false,
     noExpiry: false,
+  });
+  const [notificationForm, setNotificationForm] = useState({
+    targetGroup: "all",
+    type: "system" as "budget_alert" | "goal" | "invite" | "system" | "transaction",
+    message: "",
   });
 
   // Fetch all users with profiles and subscriptions
@@ -208,6 +213,64 @@ export default function Admin() {
     },
   });
 
+  // Send bulk notifications mutation
+  const sendBulkNotifications = useMutation({
+    mutationFn: async (data: typeof notificationForm) => {
+      // Get users based on target group
+      let query = supabase
+        .from("profiles")
+        .select("id, subscriptions(plan)");
+
+      const { data: profiles, error: fetchError } = await query;
+      if (fetchError) throw fetchError;
+
+      // Filter by plan
+      let targetUsers = profiles || [];
+      if (data.targetGroup !== "all") {
+        targetUsers = targetUsers.filter((profile) => {
+          const subscription = Array.isArray(profile.subscriptions)
+            ? profile.subscriptions[0]
+            : profile.subscriptions;
+          return subscription?.plan === data.targetGroup;
+        });
+      }
+
+      // Create notifications for all target users
+      const notifications = targetUsers.map((profile) => ({
+        user_id: profile.id,
+        type: data.type,
+        message: data.message,
+        read: false,
+      }));
+
+      const { error: insertError } = await supabase
+        .from("notifications")
+        .insert(notifications);
+
+      if (insertError) throw insertError;
+
+      return targetUsers.length;
+    },
+    onSuccess: (count) => {
+      toast({
+        title: "Notificações enviadas!",
+        description: `${count} usuário(s) notificado(s) com sucesso.`,
+      });
+      setNotificationForm({
+        targetGroup: "all",
+        type: "system",
+        message: "",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao enviar notificações",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCreateCoupon = () => {
     const validation = couponSchema.safeParse(couponForm);
     if (!validation.success) {
@@ -250,6 +313,7 @@ export default function Admin() {
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="users">Usuários</TabsTrigger>
           <TabsTrigger value="coupons">Cupons</TabsTrigger>
+          <TabsTrigger value="notifications">Notificações</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -672,6 +736,108 @@ export default function Admin() {
               ) : (
                 <p className="text-center text-muted-foreground py-8">Nenhum cupom criado ainda</p>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Notifications Tab */}
+        <TabsContent value="notifications" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Notificações em Massa
+              </CardTitle>
+              <CardDescription>
+                Envie notificações para grupos específicos de usuários
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="targetGroup">Grupo Alvo</Label>
+                  <select
+                    id="targetGroup"
+                    value={notificationForm.targetGroup}
+                    onChange={(e) =>
+                      setNotificationForm({
+                        ...notificationForm,
+                        targetGroup: e.target.value,
+                      })
+                    }
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="all">Todos os usuários</option>
+                    <option value="free">Plano Free</option>
+                    <option value="plus">Plano Plus</option>
+                    <option value="pro">Plano Pro</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="notificationType">Tipo de Notificação</Label>
+                  <select
+                    id="notificationType"
+                    value={notificationForm.type}
+                    onChange={(e) =>
+                      setNotificationForm({
+                        ...notificationForm,
+                        type: e.target.value as any,
+                      })
+                    }
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="system">Sistema</option>
+                    <option value="budget_alert">Alerta de Orçamento</option>
+                    <option value="goal">Meta</option>
+                    <option value="transaction">Transação</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="notificationMessage">Mensagem</Label>
+                <textarea
+                  id="notificationMessage"
+                  placeholder="Digite a mensagem da notificação..."
+                  value={notificationForm.message}
+                  onChange={(e) =>
+                    setNotificationForm({
+                      ...notificationForm,
+                      message: e.target.value,
+                    })
+                  }
+                  className="w-full min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm"
+                />
+              </div>
+
+              <Button
+                onClick={() => sendBulkNotifications.mutate(notificationForm)}
+                disabled={
+                  !notificationForm.message.trim() ||
+                  sendBulkNotifications.isPending
+                }
+                className="w-full"
+              >
+                <Send className="mr-2 h-4 w-4" />
+                {sendBulkNotifications.isPending
+                  ? "Enviando..."
+                  : "Enviar Notificações"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Dicas de Uso</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>• Selecione o grupo de usuários que receberá a notificação</li>
+                <li>• Escolha o tipo apropriado para categorizar a mensagem</li>
+                <li>• Escreva mensagens claras e objetivas</li>
+                <li>• As notificações aparecerão no painel de cada usuário</li>
+              </ul>
             </CardContent>
           </Card>
         </TabsContent>
