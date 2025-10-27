@@ -9,6 +9,9 @@ import { ChevronLeft, ChevronRight, Copy } from "lucide-react";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useCategories } from "@/hooks/useCategories";
 import { useForecasts } from "@/hooks/useForecasts";
+import { useCreditCards } from "@/hooks/useCreditCards";
+import { Progress } from "@/components/ui/progress";
+import { CreditCard } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
@@ -46,13 +49,17 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
   const { transactions } = useTransactions(account.id);
   const { categories } = useCategories(account.id);
   const { forecasts, createForecast, updateForecast, copyForecast } = useForecasts(account.id);
+  const { creditCards } = useCreditCards(account.id);
 
   // Filtrar transações do período atual
+  // Para transações de cartão, usar payment_month; para outras, usar date
   const periodTransactions = useMemo(() => {
     if (!transactions) return [];
     return transactions.filter(t => {
-      const tDate = new Date(t.date);
-      return tDate >= periodStart && tDate <= periodEnd;
+      const compareDate = t.credit_card_id && t.payment_month 
+        ? new Date(t.payment_month)
+        : new Date(t.date);
+      return compareDate >= periodStart && compareDate <= periodEnd;
     });
   }, [transactions, periodStart, periodEnd]);
 
@@ -112,6 +119,32 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
   }, [periodTransactions, forecasts, periodStart, categories]);
 
   const balance = totalIncome - totalExpense;
+
+  // Agrupar gastos por cartão de crédito no período
+  const creditCardTotals = useMemo(() => {
+    if (!creditCards || !periodTransactions) return [];
+    
+    return creditCards.map(card => {
+      const cardTransactions = periodTransactions.filter(t => t.credit_card_id === card.id);
+      const totalSpent = cardTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
+      
+      // Buscar previsão para cartão (assumindo categoria "Cartão de Crédito" ou similar)
+      const cardForecasts = forecasts?.filter(f => {
+        const category = categories?.find(c => c.id === f.category_id);
+        return category?.name.toLowerCase().includes(card.name.toLowerCase()) &&
+               f.period_start === format(periodStart, "yyyy-MM-dd");
+      }) || [];
+      
+      const totalForecast = cardForecasts.reduce((sum, f) => sum + Number(f.forecasted_amount), 0);
+      
+      return {
+        card,
+        totalSpent,
+        totalForecast,
+        percentage: totalForecast > 0 ? (totalSpent / totalForecast) * 100 : 0
+      };
+    });
+  }, [creditCards, periodTransactions, forecasts, categories, periodStart]);
 
   // Gerar lista de períodos disponíveis para copiar
   const availablePeriods = useMemo(() => {
@@ -221,6 +254,42 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
       </div>
 
       <div className="space-y-4">
+        {/* Cartões de Crédito */}
+        {creditCardTotals.length > 0 && creditCardTotals.some(c => c.totalSpent > 0) && (
+          <div className="border rounded-lg overflow-hidden">
+            <div className="bg-blue-50 dark:bg-blue-950/20 px-4 py-2 border-b">
+              <h3 className="font-semibold text-blue-700 dark:text-blue-400 flex items-center gap-2">
+                <CreditCard className="h-4 w-4" />
+                Cartões de Crédito - Período
+              </h3>
+            </div>
+            <div className="p-4 space-y-4">
+              {creditCardTotals.filter(c => c.totalSpent > 0).map(({ card, totalSpent, totalForecast, percentage }) => (
+                <div key={card.id} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{card.name}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {formatCurrency(totalSpent)}
+                      {totalForecast > 0 && ` / ${formatCurrency(totalForecast)}`}
+                    </span>
+                  </div>
+                  {totalForecast > 0 && (
+                    <div className="space-y-1">
+                      <Progress 
+                        value={Math.min(percentage, 100)} 
+                        className="h-2"
+                      />
+                      <p className="text-xs text-muted-foreground text-right">
+                        {percentage.toFixed(1)}% comprometido
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Receitas */}
         {Object.keys(incomeTotals).length > 0 && (
           <div className="border rounded-lg overflow-hidden">

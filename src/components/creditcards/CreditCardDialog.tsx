@@ -56,6 +56,7 @@ export function CreditCardDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
+    onOpenChange(false);
   };
 
   return (

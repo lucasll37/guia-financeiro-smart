@@ -153,6 +153,7 @@ export function TransactionDialog({
       ...formData,
       split_override: isShared && useCustomSplit ? (splitMembers as any) : null,
     });
+    onOpenChange(false);
   };
 
   const addSplitMember = () => {

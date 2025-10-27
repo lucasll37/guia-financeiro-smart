@@ -6,6 +6,7 @@ import { Edit, Trash2, Repeat, ChevronDown, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
 import { CreditCardInvoiceDetails } from "./CreditCardInvoiceDetails";
+
 import type { Database } from "@/integrations/supabase/types";
 
 type Transaction = Database["public"]["Tables"]["transactions"]["Row"] & {
