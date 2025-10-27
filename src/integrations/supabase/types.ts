@@ -66,8 +66,60 @@ export type Database = {
           },
         ]
       }
+      account_period_forecasts: {
+        Row: {
+          account_id: string
+          category_id: string
+          created_at: string
+          forecasted_amount: number
+          id: string
+          notes: string | null
+          period_end: string
+          period_start: string
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          category_id: string
+          created_at?: string
+          forecasted_amount?: number
+          id?: string
+          notes?: string | null
+          period_end: string
+          period_start: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          category_id?: string
+          created_at?: string
+          forecasted_amount?: number
+          id?: string
+          notes?: string | null
+          period_end?: string
+          period_start?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_period_forecasts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_period_forecasts_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accounts: {
         Row: {
+          closing_day: number | null
           created_at: string
           currency: string
           default_split: Json | null
@@ -80,6 +132,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          closing_day?: number | null
           created_at?: string
           currency?: string
           default_split?: Json | null
@@ -92,6 +145,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          closing_day?: number | null
           created_at?: string
           currency?: string
           default_split?: Json | null
