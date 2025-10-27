@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, Copy } from "lucide-react";
+import { ChevronLeft, ChevronRight, Copy, ChevronDown, ChevronRight as ChevronRightIcon } from "lucide-react";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useCategories } from "@/hooks/useCategories";
 import { useForecasts } from "@/hooks/useForecasts";
@@ -38,6 +38,19 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
   const closingDay = account.closing_day || 1;
   const [currentDate, setCurrentDate] = useState(new Date());
   const [copyFromPeriod, setCopyFromPeriod] = useState<string>("");
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+  
+  const toggleCardExpansion = (cardKey: string) => {
+    setExpandedCards(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(cardKey)) {
+        newSet.delete(cardKey);
+      } else {
+        newSet.add(cardKey);
+      }
+      return newSet;
+    });
+  };
   
   const { periodStart, periodEnd } = useMemo(() => 
     calculatePeriod(currentDate, closingDay), 
@@ -72,9 +85,10 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
   }, [transactions, periodStart, periodEnd]);
 
   // Agrupar por categoria e tipo
-  const { incomeTotals, expenseTotals, totalIncome, totalExpense } = useMemo(() => {
+  const { incomeTotals, expenseTotals, totalIncome, totalExpense, cardTransactionsMap } = useMemo(() => {
     const incomeCategories: Record<string, { actual: number; forecasted: number; categoryName: string; categoryColor: string; categoryId: string; isCard?: boolean }> = {};
     const expenseCategories: Record<string, { actual: number; forecasted: number; categoryName: string; categoryColor: string; categoryId: string; isCard?: boolean }> = {};
+    const cardTxMap = new Map<string, Array<{ month: string; transactions: any[] }>>();
     
     // Calcular valores reais (excluindo transações de cartão de crédito)
     periodTransactions.forEach(t => {
@@ -141,6 +155,13 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
             categoryId: cardKey,
             isCard: true
           };
+          
+          // Armazenar transações agrupadas por mês para este cartão
+          const monthlyData = monthsInPeriod.map(([month, txs]) => ({
+            month,
+            transactions: txs
+          }));
+          cardTxMap.set(cardKey, monthlyData);
         }
       });
     }
@@ -175,8 +196,9 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
       expenseTotals: expenseCategories,
       totalIncome: incomeTotal,
       totalExpense: expenseTotal,
+      cardTransactionsMap: cardTxMap,
     };
-  }, [periodTransactions, forecasts, periodStart, categories, creditCards, transactions]);
+  }, [periodTransactions, forecasts, periodStart, categories, creditCards, transactions, periodEnd]);
 
   const balance = totalIncome - totalExpense;
 
@@ -379,38 +401,85 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   const percentage = data.forecasted !== 0 
                     ? ((difference / data.forecasted) * 100).toFixed(1)
                     : "-";
+                  
+                  const isExpanded = expandedCards.has(categoryId);
+                  const cardTransactions = data.isCard ? cardTransactionsMap.get(categoryId) : null;
 
                   return (
-                    <TableRow key={categoryId}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded-full" 
-                            style={{ backgroundColor: data.categoryColor }}
+                    <>
+                      <TableRow key={categoryId} className={data.isCard ? "cursor-pointer hover:bg-muted/50" : ""}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {data.isCard && (
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-6 w-6 p-0"
+                                onClick={() => toggleCardExpansion(categoryId)}
+                              >
+                                {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
+                              </Button>
+                            )}
+                            <div 
+                              className="w-3 h-3 rounded-full" 
+                              style={{ backgroundColor: data.categoryColor }}
+                            />
+                            {data.categoryName}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={data.forecasted || ""}
+                            onChange={(e) => handleForecastChange(categoryId, e.target.value, data.isCard)}
+                            className="w-32 ml-auto text-right"
+                            disabled={data.isCard}
                           />
-                          {data.categoryName}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={data.forecasted || ""}
-                          onChange={(e) => handleForecastChange(categoryId, e.target.value, data.isCard)}
-                          className="w-32 ml-auto text-right"
-                          disabled={data.isCard}
-                        />
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {formatCurrency(data.actual)}
-                      </TableCell>
-                      <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(Math.abs(difference))}
-                      </TableCell>
-                      <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {percentage !== "-" ? `${percentage}%` : "-"}
-                      </TableCell>
-                    </TableRow>
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          {formatCurrency(data.actual)}
+                        </TableCell>
+                        <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {formatCurrency(Math.abs(difference))}
+                        </TableCell>
+                        <TableCell className={`text-right ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {percentage !== "-" ? `${percentage}%` : "-"}
+                        </TableCell>
+                      </TableRow>
+                      
+                      {/* Subtabela de transações do cartão */}
+                      {data.isCard && isExpanded && cardTransactions && (
+                        <TableRow>
+                          <TableCell colSpan={5} className="bg-muted/30 p-0">
+                            <div className="p-4 space-y-3">
+                              {cardTransactions.map(({ month, transactions }) => {
+                                const monthTotal = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
+                                return (
+                                  <div key={month} className="space-y-2">
+                                    <div className="flex justify-between items-center font-medium text-sm border-b pb-1">
+                                      <span>Fatura {format(new Date(month + "-01"), "MMMM/yyyy", { locale: ptBR })}</span>
+                                      <span className="text-destructive">{formatCurrency(monthTotal)}</span>
+                                    </div>
+                                    <div className="space-y-1">
+                                      {transactions.map(t => (
+                                        <div key={t.id} className="flex justify-between text-sm py-1 px-2 hover:bg-background rounded">
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-muted-foreground text-xs">{format(new Date(t.date), "dd/MM")}</span>
+                                            <span>{t.description}</span>
+                                          </div>
+                                          <span className="font-medium">{formatCurrency(Number(t.amount))}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </>
                   );
                 })}
                 <TableRow className="bg-red-50/50 dark:bg-red-950/10 font-semibold">
