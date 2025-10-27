@@ -9,49 +9,49 @@ interface PageMetaData {
 
 const pageMetadata: Record<string, PageMetaData> = {
   "/": {
-    title: "Painel - Gestão Financeira Pessoal",
+    title: "Prospera! - Painel",
     description:
       "Visualize seus KPIs financeiros, fluxo de caixa, metas e alertas em tempo real",
     keywords: "painel, finanças pessoais, controle financeiro, KPIs",
   },
   "/contas": {
-    title: "Contas - Gestão Financeira Pessoal",
+    title: "Prospera! - Contas",
     description:
       "Gerencie suas contas bancárias, cartões e investimentos em um só lugar",
     keywords: "contas bancárias, gestão de contas, finanças",
   },
   "/categorias": {
-    title: "Categorias - Gestão Financeira Pessoal",
+    title: "Prospera! - Categorias",
     description:
       "Organize suas despesas e receitas com categorias hierárquicas personalizadas",
     keywords: "categorias, organização financeira, despesas, receitas",
   },
   "/lancamentos": {
-    title: "Lançamentos - Gestão Financeira Pessoal",
+    title: "Prospera! - Lançamentos",
     description:
       "Registre e acompanhe todas as suas transações financeiras com filtros avançados",
     keywords: "lançamentos, transações, despesas, receitas, controle financeiro",
   },
   "/metas": {
-    title: "Metas - Gestão Financeira Pessoal",
+    title: "Prospera! - Metas",
     description:
       "Defina e acompanhe suas metas financeiras com progresso em tempo real",
     keywords: "metas financeiras, objetivos, planejamento financeiro",
   },
   "/investimentos": {
-    title: "Investimentos - Gestão Financeira Pessoal",
+    title: "Prospera! - Investimentos",
     description:
       "Acompanhe sua carteira de investimentos com simulações e projeções de rentabilidade",
     keywords: "investimentos, carteira, rentabilidade, simulador",
   },
   "/relatorios": {
-    title: "Relatórios - Gestão Financeira Pessoal",
+    title: "Prospera! - Relatórios",
     description:
       "Gere relatórios detalhados em PDF, CSV e Excel com exportação e envio por email",
     keywords: "relatórios financeiros, exportação, PDF, Excel, análise financeira",
   },
   "/configuracoes": {
-    title: "Configurações - Gestão Financeira Pessoal",
+    title: "Prospera! - Configurações",
     description:
       "Personalize sua experiência com preferências de idioma, moeda, tema e formato de data",
     keywords: "configurações, preferências, personalização",
