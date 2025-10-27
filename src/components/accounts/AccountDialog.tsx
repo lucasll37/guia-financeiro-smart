@@ -33,6 +33,7 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
     currency: "BRL",
     is_shared: false,
     default_split: [],
+    closing_day: 1,
   });
 
   const [splitMembers, setSplitMembers] = useState<SplitMember[]>([]);
@@ -47,6 +48,7 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
         currency: account.currency,
         is_shared: account.is_shared,
         default_split: account.default_split,
+        closing_day: account.closing_day || 1,
       });
       
       const splits = (account.default_split as any) || [];
@@ -59,6 +61,7 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
         currency: "BRL",
         is_shared: false,
         default_split: [],
+        closing_day: 1,
       });
       setSplitMembers([]);
     }
@@ -168,6 +171,21 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
                 onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="closing_day">Dia de Viragem (1-10)</Label>
+            <Input
+              id="closing_day"
+              type="number"
+              min={1}
+              max={10}
+              value={formData.closing_day || 1}
+              onChange={(e) => setFormData({ ...formData, closing_day: Math.min(10, Math.max(1, Number(e.target.value))) })}
+            />
+            <p className="text-xs text-muted-foreground">
+              Dia do mês em que o período de controle se renova (1 a 10)
+            </p>
           </div>
 
           <div className="flex items-center space-x-2">
