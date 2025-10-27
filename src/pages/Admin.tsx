@@ -38,8 +38,15 @@ const couponSchema = z.object({
   code: z.string().trim().min(3, "Código deve ter no mínimo 3 caracteres").max(50, "Código muito longo"),
   discount_percent: z.number().min(1, "Desconto deve ser entre 1 e 100").max(100, "Desconto deve ser entre 1 e 100"),
   quantity: z.number().int().min(-1, "Quantidade inválida"),
-  valid_until: z.string().min(1, "Data de validade é obrigatória"),
-});
+  valid_until: z.string().optional(),
+  noExpiry: z.boolean().optional(),
+}).refine(
+  (data) => data.noExpiry || (data.valid_until && data.valid_until.length > 0),
+  {
+    message: "Data de validade é obrigatória quando 'Sem validade' não está marcado",
+    path: ["valid_until"],
+  }
+);
 
 const ITEMS_PER_PAGE = 10;
 
@@ -54,6 +61,7 @@ export default function Admin() {
     quantity: 1,
     valid_until: "",
     isInfinite: false,
+    noExpiry: false,
   });
 
   // Fetch all users with profiles and subscriptions
@@ -98,7 +106,7 @@ export default function Admin() {
         code: data.code.toUpperCase(),
         discount_percent: data.discount_percent,
         quantity: data.quantity,
-        valid_until: data.valid_until,
+        valid_until: data.noExpiry ? null : data.valid_until,
         created_by: user.id,
       });
 
@@ -107,7 +115,7 @@ export default function Admin() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-coupons"] });
       toast({ title: "Cupom criado com sucesso!" });
-      setCouponForm({ code: "", discount_percent: 10, quantity: 1, valid_until: "", isInfinite: false });
+      setCouponForm({ code: "", discount_percent: 10, quantity: 1, valid_until: "", isInfinite: false, noExpiry: false });
     },
     onError: (error: any) => {
       toast({
@@ -370,7 +378,7 @@ export default function Admin() {
                       className="h-4 w-4"
                     />
                     <Label htmlFor="isInfinite" className="cursor-pointer text-sm">
-                      Quantidade infinita
+                      Quantidade ilimitada
                     </Label>
                   </div>
                 </div>
@@ -380,9 +388,28 @@ export default function Admin() {
                   <Input
                     id="valid_until"
                     type="datetime-local"
-                    value={couponForm.valid_until}
+                    value={couponForm.noExpiry ? "" : couponForm.valid_until}
+                    disabled={couponForm.noExpiry}
                     onChange={(e) => setCouponForm({ ...couponForm, valid_until: e.target.value })}
                   />
+                  <div className="flex items-center space-x-2 mt-2">
+                    <input
+                      type="checkbox"
+                      id="noExpiry"
+                      checked={couponForm.noExpiry}
+                      onChange={(e) =>
+                        setCouponForm({
+                          ...couponForm,
+                          noExpiry: e.target.checked,
+                          valid_until: e.target.checked ? "" : couponForm.valid_until,
+                        })
+                      }
+                      className="h-4 w-4"
+                    />
+                    <Label htmlFor="noExpiry" className="cursor-pointer text-sm">
+                      Sem validade
+                    </Label>
+                  </div>
                 </div>
               </div>
 
@@ -423,7 +450,9 @@ export default function Admin() {
                             : `${coupon.used_count}/${coupon.quantity}`}
                         </TableCell>
                         <TableCell>
-                          {format(new Date(coupon.valid_until), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                          {coupon.valid_until 
+                            ? format(new Date(coupon.valid_until), "dd/MM/yyyy HH:mm", { locale: ptBR })
+                            : "Sem validade"}
                         </TableCell>
                         <TableCell>
                           <Badge variant={coupon.active ? "default" : "secondary"}>

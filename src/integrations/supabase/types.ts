@@ -302,7 +302,7 @@ export type Database = {
           id: string
           quantity: number
           used_count: number
-          valid_until: string
+          valid_until: string | null
         }
         Insert: {
           active?: boolean
@@ -313,7 +313,7 @@ export type Database = {
           id?: string
           quantity: number
           used_count?: number
-          valid_until: string
+          valid_until?: string | null
         }
         Update: {
           active?: boolean
@@ -324,7 +324,7 @@ export type Database = {
           id?: string
           quantity?: number
           used_count?: number
-          valid_until?: string
+          valid_until?: string | null
         }
         Relationships: []
       }
