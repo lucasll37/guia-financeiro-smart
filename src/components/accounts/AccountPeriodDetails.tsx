@@ -60,8 +60,9 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
     
     return transactions.filter(t => {
       if (t.credit_card_id && t.payment_month) {
-        // Para transações de cartão, comparar diretamente o payment_month com o periodMonth
-        return t.payment_month === periodMonth;
+        // Para transações de cartão, comparar payment_month normalizado (YYYY-MM)
+        const pm = format(new Date(t.payment_month as string), "yyyy-MM");
+        return pm === periodMonth;
       } else {
         // Para transações normais, usar a data da transação
         const txDate = new Date(t.date);
@@ -102,7 +103,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
         const byMonth = new Map<string, typeof allCardTransactions>();
         allCardTransactions.forEach(t => {
           if (t.payment_month) {
-            const key = t.payment_month;
+            const key = format(new Date(t.payment_month as string), "yyyy-MM");
             if (!byMonth.has(key)) {
               byMonth.set(key, []);
             }
