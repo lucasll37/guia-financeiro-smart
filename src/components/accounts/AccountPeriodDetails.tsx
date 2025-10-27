@@ -135,15 +135,15 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
 
   // Agrupar gastos por cartão de crédito no período
   const creditCardTotals = useMemo(() => {
-    if (!creditCards || !periodTransactions) return [];
+    if (!creditCards || !transactions) return [];
     
     return creditCards.map(card => {
-      const cardTransactions = periodTransactions.filter(t => t.credit_card_id === card.id);
-      const totalSpent = cardTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
+      // Pegar TODAS as transações do cartão (não apenas do período)
+      const allCardTransactions = transactions.filter(t => t.credit_card_id === card.id);
       
       // Agrupar transações por mês de faturamento
-      const byMonth = new Map<string, typeof cardTransactions>();
-      cardTransactions.forEach(t => {
+      const byMonth = new Map<string, typeof allCardTransactions>();
+      allCardTransactions.forEach(t => {
         if (t.payment_month) {
           const key = t.payment_month;
           if (!byMonth.has(key)) {
@@ -153,7 +153,17 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
         }
       });
       
-      // Buscar previsão para cartão (assumindo categoria "Cartão de Crédito" ou similar)
+      // Filtrar apenas os meses que estão no período atual
+      const monthsInPeriod = Array.from(byMonth.entries()).filter(([month]) => {
+        const monthDate = new Date(month);
+        return monthDate >= periodStart && monthDate <= periodEnd;
+      });
+      
+      const totalSpent = monthsInPeriod.reduce((sum, [, txs]) => 
+        sum + txs.reduce((s, t) => s + Number(t.amount), 0), 0
+      );
+      
+      // Buscar previsão para cartão
       const cardForecasts = forecasts?.filter(f => {
         const category = categories?.find(c => c.id === f.category_id);
         return category?.name.toLowerCase().includes(card.name.toLowerCase()) &&
@@ -167,10 +177,10 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
         totalSpent,
         totalForecast,
         percentage: totalForecast > 0 ? (totalSpent / totalForecast) * 100 : 0,
-        transactionsByMonth: Array.from(byMonth.entries()).sort((a, b) => a[0].localeCompare(b[0])),
+        transactionsByMonth: monthsInPeriod.sort((a, b) => a[0].localeCompare(b[0])),
       };
-    });
-  }, [creditCards, periodTransactions, forecasts, categories, periodStart]);
+    }).filter(c => c.totalSpent > 0); // Filtrar apenas cartões com gastos
+  }, [creditCards, transactions, forecasts, categories, periodStart, periodEnd]);
 
   // Gerar lista de períodos disponíveis para copiar
   const availablePeriods = useMemo(() => {
@@ -281,7 +291,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
 
       <div className="space-y-4">
         {/* Cartões de Crédito */}
-        {creditCardTotals.length > 0 && creditCardTotals.some(c => c.totalSpent > 0) && (
+        {creditCardTotals.length > 0 && (
           <div className="border rounded-lg overflow-hidden">
             <div className="bg-blue-50 dark:bg-blue-950/20 px-4 py-2 border-b">
               <h3 className="font-semibold text-blue-700 dark:text-blue-400 flex items-center gap-2">
@@ -290,25 +300,32 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
               </h3>
             </div>
             <div className="p-4 space-y-4">
-              {creditCardTotals.filter(c => c.totalSpent > 0).map(({ card, totalSpent, totalForecast, percentage, transactionsByMonth }) => {
+              {creditCardTotals.map(({ card, totalSpent, totalForecast, percentage, transactionsByMonth }) => {
                 const isExpanded = expandedCards.has(card.id);
                 
                 return (
-                  <div key={card.id} className="space-y-2 border rounded-lg p-3">
+                  <div key={card.id} className="space-y-2 border rounded-lg p-3 bg-background">
                     <div 
                       className="cursor-pointer"
                       onClick={() => toggleCard(card.id)}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="icon" className="h-6 w-6">
+                          <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
                             {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
                           </Button>
                           <span className="font-medium">{card.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            ({transactionsByMonth.length} {transactionsByMonth.length === 1 ? 'fatura' : 'faturas'})
+                          </span>
                         </div>
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-sm font-semibold text-destructive">
                           {formatCurrency(totalSpent)}
-                          {totalForecast > 0 && ` / ${formatCurrency(totalForecast)}`}
+                          {totalForecast > 0 && (
+                            <span className="text-muted-foreground font-normal ml-1">
+                              / {formatCurrency(totalForecast)}
+                            </span>
+                          )}
                         </span>
                       </div>
                       {totalForecast > 0 && (
@@ -325,27 +342,27 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                     </div>
                     
                     {isExpanded && transactionsByMonth.length > 0 && (
-                      <div className="mt-4 space-y-3 pl-8 border-t pt-3">
+                      <div className="mt-4 space-y-3 pl-2 border-t pt-3">
                         {transactionsByMonth.map(([month, txs]) => {
                           const monthTotal = txs.reduce((sum, t) => sum + Number(t.amount), 0);
                           return (
-                            <div key={month} className="space-y-2">
+                            <div key={month} className="space-y-2 border-l-2 border-blue-200 dark:border-blue-800 pl-3">
                               <div className="flex justify-between items-center">
                                 <h5 className="font-medium text-sm">
-                                  Fatura {format(new Date(month), "MM/yyyy", { locale: ptBR })}
+                                  Fatura {format(new Date(month + "-01"), "MMMM/yyyy", { locale: ptBR })}
                                 </h5>
                                 <span className="font-semibold text-destructive text-sm">
                                   {formatCurrency(monthTotal)}
                                 </span>
                               </div>
-                              <div className="space-y-1">
+                              <div className="space-y-1 text-xs">
                                 {txs.map(t => (
-                                  <div key={t.id} className="flex justify-between text-xs text-muted-foreground">
+                                  <div key={t.id} className="flex justify-between py-1 hover:bg-muted/50 px-2 rounded">
                                     <div className="flex items-center gap-2">
-                                      <span>{format(new Date(t.date), "dd/MM")}</span>
+                                      <span className="text-muted-foreground">{format(new Date(t.date), "dd/MM")}</span>
                                       <span>{t.description}</span>
                                     </div>
-                                    <span>{formatCurrency(t.amount)}</span>
+                                    <span className="font-medium">{formatCurrency(Number(t.amount))}</span>
                                   </div>
                                 ))}
                               </div>
