@@ -2,10 +2,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Repeat, ChevronDown, ChevronRight } from "lucide-react";
+import { Edit, Trash2, Repeat, CreditCard } from "lucide-react";
 import { format } from "date-fns";
-import { useMemo, useState } from "react";
-import { CreditCardInvoiceDetails } from "./CreditCardInvoiceDetails";
+import { ptBR } from "date-fns/locale";
+import { useMemo } from "react";
 
 import type { Database } from "@/integrations/supabase/types";
 
@@ -35,19 +35,6 @@ export function TransactionsTable({
   onDelete,
 }: TransactionsTableProps) {
   const allSelected = transactions.length > 0 && selectedIds.length === transactions.length;
-  const [expandedInvoices, setExpandedInvoices] = useState<Set<string>>(new Set());
-
-  const toggleInvoice = (key: string) => {
-    setExpandedInvoices(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(key)) {
-        newSet.delete(key);
-      } else {
-        newSet.add(key);
-      }
-      return newSet;
-    });
-  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -56,22 +43,10 @@ export function TransactionsTable({
     }).format(amount);
   };
 
-  // Agrupar transações por tipo e agrupar faturas de cartão
-  const { incomeTransactions, expenseTransactions, creditCardInvoices, totalIncome, totalExpense } = useMemo(() => {
-    const income = transactions.filter((t) => t.categories?.type === "receita" && !t.credit_card_id);
-    const expense = transactions.filter((t) => t.categories?.type === "despesa" && !t.credit_card_id);
-    
-    // Agrupar lançamentos de cartão por payment_month e credit_card_id
-    const cardTransactions = transactions.filter((t) => t.credit_card_id);
-    const invoicesMap = new Map<string, typeof transactions>();
-    
-    cardTransactions.forEach((t) => {
-      const key = `${t.credit_card_id}-${t.payment_month}`;
-      if (!invoicesMap.has(key)) {
-        invoicesMap.set(key, []);
-      }
-      invoicesMap.get(key)!.push(t);
-    });
+  // Separar transações por tipo
+  const { incomeTransactions, expenseTransactions, totalIncome, totalExpense } = useMemo(() => {
+    const income = transactions.filter((t) => t.categories?.type === "receita");
+    const expense = transactions.filter((t) => t.categories?.type === "despesa");
     
     const incomeTotal = income.reduce((sum, t) => sum + t.amount, 0);
     const expenseTotal = expense.reduce((sum, t) => sum + t.amount, 0);
@@ -79,7 +54,6 @@ export function TransactionsTable({
     return {
       incomeTransactions: income,
       expenseTransactions: expense,
-      creditCardInvoices: invoicesMap,
       totalIncome: incomeTotal,
       totalExpense: expenseTotal,
     };
@@ -89,6 +63,7 @@ export function TransactionsTable({
 
   const renderTransactionRow = (transaction: Transaction) => {
     const isExpense = transaction.categories?.type === "despesa";
+    const isCreditCard = !!transaction.credit_card_id;
     
     return (
       <TableRow key={transaction.id}>
@@ -108,7 +83,17 @@ export function TransactionsTable({
             )}
           </div>
         </TableCell>
-        <TableCell>{transaction.description}</TableCell>
+        <TableCell>
+          <div className="flex flex-col gap-1">
+            <span>{transaction.description}</span>
+            {isCreditCard && transaction.payment_month && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <CreditCard className="h-3 w-3" />
+                <span>Fatura {format(new Date(transaction.payment_month), "MM/yyyy", { locale: ptBR })}</span>
+              </div>
+            )}
+          </div>
+        </TableCell>
         <TableCell>
           {transaction.categories && (
             <div className="flex items-center gap-2">
@@ -144,49 +129,6 @@ export function TransactionsTable({
           </div>
         </TableCell>
       </TableRow>
-    );
-  };
-
-  const renderInvoiceRow = (key: string, invoiceTransactions: Transaction[]) => {
-    const total = invoiceTransactions.reduce((sum, t) => sum + t.amount, 0);
-    const paymentMonth = invoiceTransactions[0].payment_month;
-    const isExpanded = expandedInvoices.has(key);
-    
-    return (
-      <>
-        <TableRow key={key} className="bg-blue-50/50 dark:bg-blue-950/10 cursor-pointer hover:bg-blue-100/50 dark:hover:bg-blue-900/20" onClick={() => toggleInvoice(key)}>
-          <TableCell>
-            <Button variant="ghost" size="icon" className="h-6 w-6">
-              {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-            </Button>
-          </TableCell>
-          <TableCell colSpan={2}>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline">Fatura de Cartão</Badge>
-              <span className="font-medium">
-                {paymentMonth ? format(new Date(paymentMonth), "MMMM yyyy") : ""}
-              </span>
-              <span className="text-sm text-muted-foreground">
-                ({invoiceTransactions.length} {invoiceTransactions.length === 1 ? "item" : "itens"})
-              </span>
-            </div>
-          </TableCell>
-          <TableCell />
-          <TableCell className="text-right">
-            <span className="text-destructive font-semibold">
-              - {formatCurrency(total)}
-            </span>
-          </TableCell>
-          <TableCell />
-        </TableRow>
-        {isExpanded && (
-          <TableRow>
-            <TableCell colSpan={6} className="p-0">
-              <CreditCardInvoiceDetails transactions={invoiceTransactions} />
-            </TableCell>
-          </TableRow>
-        )}
-      </>
     );
   };
 
@@ -261,7 +203,7 @@ export function TransactionsTable({
       )}
 
       {/* Despesas */}
-      {(expenseTransactions.length > 0 || creditCardInvoices.size > 0) && (
+      {expenseTransactions.length > 0 && (
         <div className="border rounded-lg">
           <div className="bg-red-50 dark:bg-red-950/20 px-4 py-2 border-b">
             <h3 className="font-semibold text-red-700 dark:text-red-400">Despesas</h3>
@@ -286,9 +228,6 @@ export function TransactionsTable({
             </TableHeader>
             <TableBody>
               {expenseTransactions.map(renderTransactionRow)}
-              {Array.from(creditCardInvoices.entries()).map(([key, invoiceTransactions]) =>
-                renderInvoiceRow(key, invoiceTransactions)
-              )}
               <TableRow className="bg-red-50/50 dark:bg-red-950/10 font-semibold">
                 <TableCell colSpan={4} className="text-right">
                   Total de Despesas:
