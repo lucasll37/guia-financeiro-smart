@@ -28,8 +28,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Trash2, Gift, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart } from "lucide-react";
 import { z } from "zod";
+import { UserGrowthChart } from "@/components/admin/UserGrowthChart";
+import { AccessActivityChart } from "@/components/admin/AccessActivityChart";
+import { StatsOverview } from "@/components/admin/StatsOverview";
 
 const couponSchema = z.object({
   code: z.string().trim().min(3, "Código deve ter no mínimo 3 caracteres").max(50, "Código muito longo"),
@@ -182,11 +185,22 @@ export default function Admin() {
         <p className="text-muted-foreground">Gerencie usuários e cupons promocionais</p>
       </div>
 
-      <Tabs defaultValue="users" className="space-y-6">
+      <Tabs defaultValue="overview" className="space-y-6">
         <TabsList>
+          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="users">Usuários</TabsTrigger>
           <TabsTrigger value="coupons">Cupons</TabsTrigger>
         </TabsList>
+
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="space-y-6">
+          <StatsOverview />
+          
+          <div className="grid gap-6 md:grid-cols-2">
+            <UserGrowthChart />
+            <AccessActivityChart />
+          </div>
+        </TabsContent>
 
         {/* Users Tab */}
         <TabsContent value="users" className="space-y-4">
