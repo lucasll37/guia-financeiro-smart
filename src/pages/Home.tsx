@@ -12,9 +12,9 @@ import {
   Shield,
   Zap,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  Users
 } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -54,16 +54,19 @@ const Home = () => {
 
   const benefits = [
     {
-      title: "Controle Manual Completo",
-      description: "Registre transações, investimentos e metas no seu ritmo, sem integrações automáticas"
+      icon: Users,
+      title: "Gestão Colaborativa",
+      description: "Convide parceiros, familiares ou amigos para gerenciar finanças juntos de forma segura"
     },
     {
-      title: "Compartilhamento Seguro",
-      description: "Convide parceiros, familiares ou amigos para gerenciar finanças juntos"
-    },
-    {
+      icon: Shield,
       title: "Privacidade Total",
-      description: "Seus dados ficam protegidos, sem acessos a contas bancárias ou investimentos"
+      description: "Seus dados são 100% protegidos e nunca compartilhados com terceiros"
+    },
+    {
+      icon: Zap,
+      title: "Simples e Intuitivo",
+      description: "Interface clara e fácil de usar, cadastre tudo rapidamente no seu ritmo"
     }
   ];
 
@@ -77,7 +80,6 @@ const Home = () => {
             <span className="text-xl font-bold">Prospera</span>
           </div>
           <div className="flex items-center gap-4">
-            <ThemeToggle />
             <Button variant="ghost" onClick={() => navigate("/auth")}>
               Entrar
             </Button>
@@ -117,18 +119,18 @@ const Home = () => {
             </Button>
           </div>
 
-          <div className="flex items-center justify-center gap-8 pt-8 text-sm text-muted-foreground">
+          <div className="flex items-center justify-center gap-8 pt-8 text-sm text-muted-foreground flex-wrap">
             <div className="flex items-center gap-2">
               <Shield className="h-4 w-4 text-success" />
-              <span>100% Seguro</span>
+              <span>Dados Seguros</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-success" />
-              <span>Sem cartão de crédito</span>
+              <Users className="h-4 w-4 text-success" />
+              <span>Compartilhamento Fácil</span>
             </div>
             <div className="flex items-center gap-2">
               <Zap className="h-4 w-4 text-success" />
-              <span>Setup em 2 minutos</span>
+              <span>Setup Rápido</span>
             </div>
           </div>
         </div>
@@ -164,15 +166,17 @@ const Home = () => {
             ))}
           </div>
 
-          <div className="mt-16 grid gap-6 md:grid-cols-3">
+          <div className="mt-16 grid gap-8 md:grid-cols-3">
             {benefits.map((benefit, index) => (
-              <div key={index} className="text-center space-y-2">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-success/10 text-success mb-2">
-                  <CheckCircle2 className="h-6 w-6" />
-                </div>
-                <h3 className="font-semibold text-lg">{benefit.title}</h3>
-                <p className="text-sm text-muted-foreground">{benefit.description}</p>
-              </div>
+              <Card key={index} className="text-center border-primary/10 hover:border-primary/20 transition-all hover:shadow-lg">
+                <CardContent className="pt-6 space-y-3">
+                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 text-primary mb-2">
+                    <benefit.icon className="h-7 w-7" />
+                  </div>
+                  <h3 className="font-semibold text-lg">{benefit.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{benefit.description}</p>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
@@ -180,16 +184,19 @@ const Home = () => {
 
 
       {/* CTA Section */}
-      <section className="container py-24 bg-gradient-to-br from-primary/5 via-primary/10 to-accent/5">
+      <section className="container py-24 bg-gradient-to-br from-primary/10 via-primary/5 to-accent/5 rounded-3xl my-12">
         <div className="mx-auto max-w-3xl text-center space-y-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
+            <TrendingUp className="h-8 w-8" />
+          </div>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Pronto para transformar suas finanças?
+            Comece agora a organizar suas finanças
           </h2>
           <p className="text-xl text-muted-foreground">
-            Junte-se a milhares de usuários que já estão no controle do seu dinheiro
+            Cadastre-se gratuitamente e tenha controle total do seu dinheiro em minutos
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Button size="lg" onClick={() => navigate("/auth")} className="gap-2">
+            <Button size="lg" onClick={() => navigate("/auth")} className="gap-2 shadow-lg">
               Criar Conta Grátis
               <ArrowRight className="h-4 w-4" />
             </Button>
