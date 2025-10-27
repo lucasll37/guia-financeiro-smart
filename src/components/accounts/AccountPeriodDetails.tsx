@@ -75,9 +75,9 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
         const pm = format(new Date(t.payment_month as string), "yyyy-MM");
         return pm === periodMonth;
       } else {
-        // Para transações normais, usar a data da transação
-        const txDate = new Date(t.date);
-        return txDate >= periodStart && txDate <= periodEnd;
+        // Para transações normais, comparar o mês calendário da data com o mês de referência do período
+        const txMonth = format(new Date(t.date), "yyyy-MM");
+        return txMonth === periodMonth;
       }
     });
   }, [transactions, periodStart, periodEnd]);
