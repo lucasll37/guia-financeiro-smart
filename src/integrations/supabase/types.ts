@@ -292,6 +292,42 @@ export type Database = {
           },
         ]
       }
+      coupons: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          created_by: string
+          discount_percent: number
+          id: string
+          quantity: number
+          used_count: number
+          valid_until: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          created_by: string
+          discount_percent: number
+          id?: string
+          quantity: number
+          used_count?: number
+          valid_until: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string
+          discount_percent?: number
+          id?: string
+          quantity?: number
+          used_count?: number
+          valid_until?: string
+        }
+        Relationships: []
+      }
       credit_cards: {
         Row: {
           account_id: string

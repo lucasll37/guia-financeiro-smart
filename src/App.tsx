@@ -22,6 +22,7 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Conta from "./pages/Conta";
 import Planos from "./pages/Planos";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +77,7 @@ const App = () => (
               <Route path="configuracoes" element={<Settings />} />
               <Route path="conta" element={<Conta />} />
               <Route path="planos" element={<Planos />} />
+              <Route path="admin" element={<Admin />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
