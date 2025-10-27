@@ -8,8 +8,7 @@ import {
   BarChart3,
   Target, 
   TrendingUp, 
-  FileText, 
-  Settings 
+  FileText
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
@@ -36,7 +35,6 @@ const menuItems = [
   { title: t("nav.goals"), url: "/metas", icon: Target },
   { title: t("nav.investments"), url: "/investimentos", icon: TrendingUp },
   { title: t("nav.reports"), url: "/relatorios", icon: FileText },
-  { title: t("nav.settings"), url: "/configuracoes", icon: Settings },
 ];
 
 export function AppSidebar() {
