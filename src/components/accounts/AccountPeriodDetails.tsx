@@ -5,13 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, Copy, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronLeft, ChevronRight, Copy } from "lucide-react";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useCategories } from "@/hooks/useCategories";
 import { useForecasts } from "@/hooks/useForecasts";
 import { useCreditCards } from "@/hooks/useCreditCards";
-import { Progress } from "@/components/ui/progress";
-import { CreditCard } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
@@ -40,19 +38,6 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
   const closingDay = account.closing_day || 1;
   const [currentDate, setCurrentDate] = useState(new Date());
   const [copyFromPeriod, setCopyFromPeriod] = useState<string>("");
-  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
-  
-  const toggleCard = (cardId: string) => {
-    setExpandedCards(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(cardId)) {
-        newSet.delete(cardId);
-      } else {
-        newSet.add(cardId);
-      }
-      return newSet;
-    });
-  };
   
   const { periodStart, periodEnd } = useMemo(() => 
     calculatePeriod(currentDate, closingDay), 
@@ -78,11 +63,13 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
 
   // Agrupar por categoria e tipo
   const { incomeTotals, expenseTotals, totalIncome, totalExpense } = useMemo(() => {
-    const incomeCategories: Record<string, { actual: number; forecasted: number; categoryName: string; categoryColor: string; categoryId: string }> = {};
-    const expenseCategories: Record<string, { actual: number; forecasted: number; categoryName: string; categoryColor: string; categoryId: string }> = {};
+    const incomeCategories: Record<string, { actual: number; forecasted: number; categoryName: string; categoryColor: string; categoryId: string; isCard?: boolean }> = {};
+    const expenseCategories: Record<string, { actual: number; forecasted: number; categoryName: string; categoryColor: string; categoryId: string; isCard?: boolean }> = {};
     
-    // Calcular valores reais
+    // Calcular valores reais (excluindo transações de cartão de crédito)
     periodTransactions.forEach(t => {
+      if (t.credit_card_id) return; // Pular transações de cartão, serão agrupadas separadamente
+      
       const isIncome = t.categories?.type === "receita";
       const totals = isIncome ? incomeCategories : expenseCategories;
       
@@ -97,6 +84,55 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
       }
       totals[t.category_id].actual += Number(t.amount);
     });
+
+    // Adicionar totais de cartões de crédito como categorias especiais
+    if (creditCards && transactions) {
+      creditCards.forEach(card => {
+        const allCardTransactions = transactions.filter(t => t.credit_card_id === card.id);
+        
+        const byMonth = new Map<string, typeof allCardTransactions>();
+        allCardTransactions.forEach(t => {
+          if (t.payment_month) {
+            const key = t.payment_month;
+            if (!byMonth.has(key)) {
+              byMonth.set(key, []);
+            }
+            byMonth.get(key)!.push(t);
+          }
+        });
+        
+        const monthsInPeriod = Array.from(byMonth.entries()).filter(([month]) => {
+          const monthDate = new Date(month);
+          return monthDate >= periodStart && monthDate <= periodEnd;
+        });
+        
+        const totalSpent = monthsInPeriod.reduce((sum, [, txs]) => 
+          sum + txs.reduce((s, t) => s + Number(t.amount), 0), 0
+        );
+        
+        if (totalSpent > 0) {
+          const cardKey = `card_${card.id}`;
+          
+          // Buscar previsão para cartão
+          const cardForecasts = forecasts?.filter(f => {
+            const category = categories?.find(c => c.id === f.category_id);
+            return category?.name.toLowerCase().includes(card.name.toLowerCase()) &&
+                   f.period_start === format(periodStart, "yyyy-MM-dd");
+          }) || [];
+          
+          const totalForecast = cardForecasts.reduce((sum, f) => sum + Number(f.forecasted_amount), 0);
+          
+          expenseCategories[cardKey] = {
+            actual: totalSpent,
+            forecasted: totalForecast,
+            categoryName: `Despesas - Cartão ${card.name}`,
+            categoryColor: "#3b82f6", // Cor azul para cartões
+            categoryId: cardKey,
+            isCard: true
+          };
+        }
+      });
+    }
 
     // Adicionar previsões
     if (forecasts && categories) {
@@ -129,58 +165,9 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
       totalIncome: incomeTotal,
       totalExpense: expenseTotal,
     };
-  }, [periodTransactions, forecasts, periodStart, categories]);
+  }, [periodTransactions, forecasts, periodStart, categories, creditCards, transactions]);
 
   const balance = totalIncome - totalExpense;
-
-  // Agrupar gastos por cartão de crédito no período
-  const creditCardTotals = useMemo(() => {
-    if (!creditCards || !transactions) return [];
-    
-    return creditCards.map(card => {
-      // Pegar TODAS as transações do cartão (não apenas do período)
-      const allCardTransactions = transactions.filter(t => t.credit_card_id === card.id);
-      
-      // Agrupar transações por mês de faturamento
-      const byMonth = new Map<string, typeof allCardTransactions>();
-      allCardTransactions.forEach(t => {
-        if (t.payment_month) {
-          const key = t.payment_month;
-          if (!byMonth.has(key)) {
-            byMonth.set(key, []);
-          }
-          byMonth.get(key)!.push(t);
-        }
-      });
-      
-      // Filtrar apenas os meses que estão no período atual
-      const monthsInPeriod = Array.from(byMonth.entries()).filter(([month]) => {
-        const monthDate = new Date(month);
-        return monthDate >= periodStart && monthDate <= periodEnd;
-      });
-      
-      const totalSpent = monthsInPeriod.reduce((sum, [, txs]) => 
-        sum + txs.reduce((s, t) => s + Number(t.amount), 0), 0
-      );
-      
-      // Buscar previsão para cartão
-      const cardForecasts = forecasts?.filter(f => {
-        const category = categories?.find(c => c.id === f.category_id);
-        return category?.name.toLowerCase().includes(card.name.toLowerCase()) &&
-               f.period_start === format(periodStart, "yyyy-MM-dd");
-      }) || [];
-      
-      const totalForecast = cardForecasts.reduce((sum, f) => sum + Number(f.forecasted_amount), 0);
-      
-      return {
-        card,
-        totalSpent,
-        totalForecast,
-        percentage: totalForecast > 0 ? (totalSpent / totalForecast) * 100 : 0,
-        transactionsByMonth: monthsInPeriod.sort((a, b) => a[0].localeCompare(b[0])),
-      };
-    }).filter(c => c.totalSpent > 0); // Filtrar apenas cartões com gastos
-  }, [creditCards, transactions, forecasts, categories, periodStart, periodEnd]);
 
   // Gerar lista de períodos disponíveis para copiar
   const availablePeriods = useMemo(() => {
@@ -205,7 +192,10 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
     setCurrentDate(prev => addMonths(prev, 1));
   };
 
-  const handleForecastChange = async (categoryId: string, value: string) => {
+  const handleForecastChange = async (categoryId: string, value: string, isCard: boolean = false) => {
+    // Se for um cartão, não permitir edição de previsão aqui
+    if (isCard) return;
+    
     const amount = parseFloat(value) || 0;
     const periodStartStr = format(periodStart, "yyyy-MM-dd");
     const periodEndStr = format(periodEnd, "yyyy-MM-dd");
@@ -290,94 +280,6 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
       </div>
 
       <div className="space-y-4">
-        {/* Cartões de Crédito */}
-        {creditCardTotals.length > 0 && (
-          <div className="border rounded-lg overflow-hidden">
-            <div className="bg-blue-50 dark:bg-blue-950/20 px-4 py-2 border-b">
-              <h3 className="font-semibold text-blue-700 dark:text-blue-400 flex items-center gap-2">
-                <CreditCard className="h-4 w-4" />
-                Cartões de Crédito - Período
-              </h3>
-            </div>
-            <div className="p-4 space-y-4">
-              {creditCardTotals.map(({ card, totalSpent, totalForecast, percentage, transactionsByMonth }) => {
-                const isExpanded = expandedCards.has(card.id);
-                
-                return (
-                  <div key={card.id} className="space-y-2 border rounded-lg p-3 bg-background">
-                    <div 
-                      className="cursor-pointer"
-                      onClick={() => toggleCard(card.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
-                            {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
-                          </Button>
-                          <span className="font-medium">{card.name}</span>
-                          <span className="text-xs text-muted-foreground">
-                            ({transactionsByMonth.length} {transactionsByMonth.length === 1 ? 'fatura' : 'faturas'})
-                          </span>
-                        </div>
-                        <span className="text-sm font-semibold text-destructive">
-                          {formatCurrency(totalSpent)}
-                          {totalForecast > 0 && (
-                            <span className="text-muted-foreground font-normal ml-1">
-                              / {formatCurrency(totalForecast)}
-                            </span>
-                          )}
-                        </span>
-                      </div>
-                      {totalForecast > 0 && (
-                        <div className="space-y-1 mt-2">
-                          <Progress 
-                            value={Math.min(percentage, 100)} 
-                            className="h-2"
-                          />
-                          <p className="text-xs text-muted-foreground text-right">
-                            {percentage.toFixed(1)}% comprometido
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {isExpanded && transactionsByMonth.length > 0 && (
-                      <div className="mt-4 space-y-3 pl-2 border-t pt-3">
-                        {transactionsByMonth.map(([month, txs]) => {
-                          const monthTotal = txs.reduce((sum, t) => sum + Number(t.amount), 0);
-                          return (
-                            <div key={month} className="space-y-2 border-l-2 border-blue-200 dark:border-blue-800 pl-3">
-                              <div className="flex justify-between items-center">
-                                <h5 className="font-medium text-sm">
-                                  Fatura {format(new Date(month + "-01"), "MMMM/yyyy", { locale: ptBR })}
-                                </h5>
-                                <span className="font-semibold text-destructive text-sm">
-                                  {formatCurrency(monthTotal)}
-                                </span>
-                              </div>
-                              <div className="space-y-1 text-xs">
-                                {txs.map(t => (
-                                  <div key={t.id} className="flex justify-between py-1 hover:bg-muted/50 px-2 rounded">
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-muted-foreground">{format(new Date(t.date), "dd/MM")}</span>
-                                      <span>{t.description}</span>
-                                    </div>
-                                    <span className="font-medium">{formatCurrency(Number(t.amount))}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
         {/* Receitas */}
         {Object.keys(incomeTotals).length > 0 && (
           <div className="border rounded-lg overflow-hidden">
@@ -483,8 +385,9 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                           type="number"
                           step="0.01"
                           value={data.forecasted || ""}
-                          onChange={(e) => handleForecastChange(categoryId, e.target.value)}
+                          onChange={(e) => handleForecastChange(categoryId, e.target.value, data.isCard)}
                           className="w-32 ml-auto text-right"
+                          disabled={data.isCard}
                         />
                       </TableCell>
                       <TableCell className="text-right font-medium">
