@@ -83,6 +83,14 @@ export default function Admin() {
     message: "",
   });
 
+  const { data: session } = useQuery({
+    queryKey: ["session"],
+    queryFn: async () => {
+      const { data } = await supabase.auth.getSession();
+      return data.session;
+    },
+  });
+
   // Fetch all users with profiles and subscriptions
   const { data: usersData, isLoading: usersLoading } = useQuery({
     queryKey: ["admin-users", page, itemsPerPage, userFilters],
@@ -216,28 +224,45 @@ export default function Admin() {
   // Send bulk notifications mutation
   const sendBulkNotifications = useMutation({
     mutationFn: async (data: typeof notificationForm) => {
-      // Get users based on target group
-      let query = supabase
-        .from("profiles")
-        .select("id, subscriptions(plan)");
+      let targetUsers: string[] = [];
 
-      const { data: profiles, error: fetchError } = await query;
-      if (fetchError) throw fetchError;
+      if (data.targetGroup === "test") {
+        // Test mode: only send to current admin user
+        if (!session?.user?.id) throw new Error("Usuário não autenticado");
+        targetUsers = [session.user.id];
+      } else {
+        // Get all profiles
+        const { data: profiles, error: profilesError } = await supabase
+          .from("profiles")
+          .select("id");
+        
+        if (profilesError) throw profilesError;
 
-      // Filter by plan
-      let targetUsers = profiles || [];
-      if (data.targetGroup !== "all") {
-        targetUsers = targetUsers.filter((profile) => {
-          const subscription = Array.isArray(profile.subscriptions)
-            ? profile.subscriptions[0]
-            : profile.subscriptions;
-          return subscription?.plan === data.targetGroup;
-        });
+        if (data.targetGroup === "all") {
+          targetUsers = profiles?.map(p => p.id) || [];
+        } else {
+          // Get subscriptions for filtering
+          const { data: subscriptions, error: subsError } = await supabase
+            .from("subscriptions")
+            .select("user_id, plan");
+          
+          if (subsError) throw subsError;
+
+          // Filter by plan
+          const filteredSubs = subscriptions?.filter(sub => {
+            if (data.targetGroup === "free") return sub.plan === "free";
+            if (data.targetGroup === "plus") return sub.plan === "plus";
+            if (data.targetGroup === "pro") return sub.plan === "pro";
+            return false;
+          });
+
+          targetUsers = filteredSubs?.map(s => s.user_id) || [];
+        }
       }
 
       // Create notifications for all target users
-      const notifications = targetUsers.map((profile) => ({
-        user_id: profile.id,
+      const notifications = targetUsers.map((userId) => ({
+        user_id: userId,
         type: data.type,
         message: data.message,
         read: false,
@@ -767,6 +792,7 @@ export default function Admin() {
                     }
                     className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
                   >
+                    <option value="test">🧪 Teste (apenas você)</option>
                     <option value="all">Todos os usuários</option>
                     <option value="free">Plano Free</option>
                     <option value="plus">Plano Plus</option>
