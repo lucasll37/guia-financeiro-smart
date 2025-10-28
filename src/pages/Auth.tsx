@@ -30,7 +30,7 @@ export default function Auth() {
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") === "signup" ? "signup" : "login");
   const [showEmailConfirmModal, setShowEmailConfirmModal] = useState(false);
   const [confirmationEmail, setConfirmationEmail] = useState("");
-  const [resendCountdown, setResendCountdown] = useState(60);
+  const [resendCountdown, setResendCountdown] = useState(0);
   const [isResending, setIsResending] = useState(false);
   const { signIn, signUp, resetPassword, resend, user } = useAuth();
   const navigate = useNavigate();
@@ -130,7 +130,7 @@ export default function Auth() {
 
       // Tudo certo - mostrar modal e limpar campos
       setConfirmationEmail(email);
-      setResendCountdown(60);
+      setResendCountdown(60); // Iniciar countdown apenas após envio
       setShowEmailConfirmModal(true);
       
       // Limpar campos do formulário
@@ -179,7 +179,7 @@ export default function Auth() {
         setError("Erro ao reenviar email. Tente novamente.");
       } else {
         setError("Email reenviado com sucesso!");
-        setResendCountdown(60);
+        setResendCountdown(60); // Iniciar countdown apenas após reenvio
       }
     } catch (emailError: any) {
       if (emailError.message === 'RESEND_DOMAIN_NOT_VERIFIED') {
