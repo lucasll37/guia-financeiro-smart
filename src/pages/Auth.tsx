@@ -108,6 +108,15 @@ export default function Auth() {
       // Mostrar modal de confirmação após signup bem-sucedido
       setConfirmationEmail(email);
       setShowEmailConfirmModal(true);
+      
+      // Limpar campos do formulário
+      setName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      
+      // Mudar para aba de login
+      setActiveTab("login");
     }
     
     setLoading(false);
