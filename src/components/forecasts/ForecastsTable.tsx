@@ -1,14 +1,15 @@
 import { Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useMemo } from "react";
+import { ResponsiveTable } from "@/components/ui/responsive-table";
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 interface ForecastsTableProps {
   forecasts: any[];
@@ -18,6 +19,7 @@ interface ForecastsTableProps {
 }
 
 export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }: ForecastsTableProps) {
+  const { formatCurrency } = useUserPreferences();
   const [sortField, setSortField] = useState<'account' | 'category' | 'amount' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
@@ -56,12 +58,6 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
       return sortDirection === 'asc' ? comparison : -comparison;
     });
   }, [forecasts, sortField, sortDirection]);
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
-  };
 
   if (sortedForecasts.length === 0) {
     return (
@@ -72,79 +68,77 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
   }
 
   return (
-    <div className="border rounded-lg">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {showAccountName && (
-              <TableHead>
-                <Button variant="ghost" size="sm" onClick={() => handleSort('account')} className="flex items-center gap-1 p-0 h-auto font-medium">
-                  Conta
-                  {renderSortIcon('account')}
-                </Button>
-              </TableHead>
-            )}
+    <ResponsiveTable>
+      <TableHeader>
+        <TableRow>
+          {showAccountName && (
             <TableHead>
-              <Button variant="ghost" size="sm" onClick={() => handleSort('category')} className="flex items-center gap-1 p-0 h-auto font-medium">
-                Categoria
-                {renderSortIcon('category')}
+              <Button variant="ghost" size="sm" onClick={() => handleSort('account')} className="flex items-center gap-1 p-0 h-auto font-medium">
+                Conta
+                {renderSortIcon('account')}
               </Button>
             </TableHead>
-            <TableHead className="text-right">
-              <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
-                Valor Previsto
-                {renderSortIcon('amount')}
-              </Button>
-            </TableHead>
-            <TableHead>Observações</TableHead>
-            <TableHead className="text-right">Ações</TableHead>
+          )}
+          <TableHead>
+            <Button variant="ghost" size="sm" onClick={() => handleSort('category')} className="flex items-center gap-1 p-0 h-auto font-medium">
+              Categoria
+              {renderSortIcon('category')}
+            </Button>
+          </TableHead>
+          <TableHead className="text-right">
+            <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
+              Valor Previsto
+              {renderSortIcon('amount')}
+            </Button>
+          </TableHead>
+          <TableHead>Observações</TableHead>
+          <TableHead className="text-right">Ações</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {sortedForecasts.map((forecast) => (
+          <TableRow key={forecast.id}>
+            {showAccountName && (
+              <TableCell className="font-medium">
+                {(forecast.accounts as any)?.name || "Sem conta"}
+              </TableCell>
+            )}
+            <TableCell>
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: (forecast.categories as any)?.color || "#6366f1" }}
+                />
+                <span>{(forecast.categories as any)?.name || "Sem categoria"}</span>
+              </div>
+            </TableCell>
+            <TableCell className="text-right font-medium">
+              {formatCurrency(Number(forecast.forecasted_amount))}
+            </TableCell>
+            <TableCell className="text-muted-foreground">
+              {forecast.notes || "-"}
+            </TableCell>
+            <TableCell className="text-right">
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEdit(forecast)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onDelete(forecast.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </TableCell>
           </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sortedForecasts.map((forecast) => (
-            <TableRow key={forecast.id}>
-              {showAccountName && (
-                <TableCell className="font-medium">
-                  {(forecast.accounts as any)?.name || "Sem conta"}
-                </TableCell>
-              )}
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: (forecast.categories as any)?.color || "#6366f1" }}
-                  />
-                  <span>{(forecast.categories as any)?.name || "Sem categoria"}</span>
-                </div>
-              </TableCell>
-              <TableCell className="text-right font-medium">
-                {formatCurrency(Number(forecast.forecasted_amount))}
-              </TableCell>
-              <TableCell className="text-muted-foreground">
-                {forecast.notes || "-"}
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onEdit(forecast)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onDelete(forecast.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+        ))}
+      </TableBody>
+    </ResponsiveTable>
   );
 }

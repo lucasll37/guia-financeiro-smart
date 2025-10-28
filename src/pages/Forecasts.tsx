@@ -139,16 +139,18 @@ export default function Forecasts() {
         onFilterChange={setFilters}
       />
 
-      {isLoading ? (
-        <p className="text-muted-foreground">Carregando previsões...</p>
-      ) : (
-        <ForecastsTable
-          forecasts={filteredForecasts}
-          onEdit={handleEditForecast}
-          onDelete={handleDeleteForecast}
-          showAccountName={filters.accountId === "all"}
-        />
-      )}
+      <div className="space-y-4">
+        {isLoading ? (
+          <p className="text-muted-foreground">Carregando previsões...</p>
+        ) : (
+          <ForecastsTable
+            forecasts={filteredForecasts}
+            onEdit={handleEditForecast}
+            onDelete={handleDeleteForecast}
+            showAccountName={filters.accountId === "all"}
+          />
+        )}
+      </div>
 
       <ForecastDialog
         open={dialogOpen}
