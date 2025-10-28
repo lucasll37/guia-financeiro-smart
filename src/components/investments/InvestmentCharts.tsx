@@ -202,7 +202,7 @@ export function InvestmentCharts({
     const lastPoint = combinedData[combinedData.length - 1];
     const totalGrowth = lastPoint.saldoValorPresente - firstPoint.saldoValorPresente;
     const totalContributions = lastPoint.aportesValorPresente;
-    const returns = lastPoint.saldoValorPresente - firstPoint.saldoValorPresente - totalContributions;
+    const returns = lastPoint.saldoValorPresente - totalContributions; // Rendimento VP = Saldo Final VP - Aportes VP
     const roi = totalContributions > 0 
       ? ((lastPoint.saldoValorPresente / totalContributions) - 1) * 100 
       : 0;
