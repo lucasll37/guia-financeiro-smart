@@ -8,7 +8,8 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Pencil, Trash2, Plus, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Pencil, Trash2, Plus, ArrowUpDown, ArrowUp, ArrowDown, Info } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState, useMemo } from "react";
@@ -33,6 +34,7 @@ export function MonthlyReturnsTable({
 }: MonthlyReturnsTableProps) {
   const [sortField, setSortField] = useState<'month' | 'return' | 'contribution' | 'balance' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [isExplanationOpen, setIsExplanationOpen] = useState(false);
 
   const handleSort = (field: 'month' | 'return' | 'contribution' | 'balance') => {
     if (sortField === field) {
@@ -115,7 +117,38 @@ export function MonthlyReturnsTable({
           Registrar Rendimento
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <Collapsible open={isExplanationOpen} onOpenChange={setIsExplanationOpen}>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" size="sm" className="w-full">
+              <Info className="h-4 w-4 mr-2" />
+              {isExplanationOpen ? "Ocultar" : "Mostrar"} Explicação dos Termos
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-4 p-4 bg-muted rounded-lg space-y-3 text-sm">
+            <div>
+              <h4 className="font-semibold mb-1">Saldo Aparente</h4>
+              <p className="text-muted-foreground">Valor nominal acumulado do investimento sem ajustes pela inflação.</p>
+              <p className="font-mono text-xs mt-1">Saldo Aparente = Saldo Anterior + Aporte + Rendimento</p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-1">Saldo VP (Valor Presente)</h4>
+              <p className="text-muted-foreground">Poder de compra real do saldo, descontando o efeito acumulado da inflação desde o início.</p>
+              <p className="font-mono text-xs mt-1">Saldo VP = Saldo Aparente / (1 + Inflação Acumulada)</p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-1">Aporte Acumulado Aparente</h4>
+              <p className="text-muted-foreground">Soma nominal de todos os aportes realizados até o momento.</p>
+              <p className="font-mono text-xs mt-1">Aporte Acum. Aparente = Σ Aportes</p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-1">Aporte Acumulado VP</h4>
+              <p className="text-muted-foreground">Valor presente dos aportes já realizados, mantendo o poder de compra do momento em que foram feitos.</p>
+              <p className="font-mono text-xs mt-1">Aporte Acum. VP = Σ Aportes (no momento da aplicação)</p>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
         <div className="rounded-md border">
           <Table>
             <TableHeader>
@@ -140,14 +173,14 @@ export function MonthlyReturnsTable({
                   </Button>
                 </TableHead>
                 <TableHead className="text-right">Aporte Acum. Aparente</TableHead>
-                <TableHead className="text-right">Aporte Acum. Real</TableHead>
+                <TableHead className="text-right">Aporte Acum. VP</TableHead>
                 <TableHead className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('balance')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Saldo Aparente
                     {renderSortIcon('balance')}
                   </Button>
                 </TableHead>
-                <TableHead className="text-right">Saldo Valor Presente</TableHead>
+                <TableHead className="text-right">Saldo VP</TableHead>
                 <TableHead>Observações</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>

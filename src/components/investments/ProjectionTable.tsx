@@ -1,8 +1,11 @@
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
+import { Info } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -30,6 +33,7 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
   const [monthlyRate, setMonthlyRate] = useState(1);
   const [inflationRate, setInflationRate] = useState(0.5);
   const [monthlyContribution, setMonthlyContribution] = useState(0);
+  const [isExplanationOpen, setIsExplanationOpen] = useState(false);
 
   const projectionData = useMemo(() => {
     const data = [];
@@ -93,6 +97,37 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
         <CardTitle>Projeção de Investimento</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        <Collapsible open={isExplanationOpen} onOpenChange={setIsExplanationOpen}>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" size="sm" className="w-full">
+              <Info className="h-4 w-4 mr-2" />
+              {isExplanationOpen ? "Ocultar" : "Mostrar"} Explicação dos Termos
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-4 p-4 bg-muted rounded-lg space-y-3 text-sm">
+            <div>
+              <h4 className="font-semibold mb-1">Saldo Aparente (Projetado)</h4>
+              <p className="text-muted-foreground">Valor nominal futuro do investimento sem ajustes pela inflação.</p>
+              <p className="font-mono text-xs mt-1">Saldo = Saldo Anterior + Aporte + (Saldo + Aporte) × Taxa Mensal</p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-1">Saldo VP (Valor Presente Projetado)</h4>
+              <p className="text-muted-foreground">Poder de compra futuro do saldo em valores de hoje, descontando inflação acumulada.</p>
+              <p className="font-mono text-xs mt-1">Saldo VP = Saldo Aparente / (1 + Inflação Acumulada)</p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-1">Aporte Acumulado Aparente</h4>
+              <p className="text-muted-foreground">Soma nominal de todos os aportes futuros planejados.</p>
+              <p className="font-mono text-xs mt-1">Aporte Acum. = Σ Aportes Mensais</p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-1">Aporte Acumulado VP</h4>
+              <p className="text-muted-foreground">Quanto você precisaria investir hoje para ter o mesmo valor que os aportes futuros, considerando que o dinheiro de hoje pode render até lá.</p>
+              <p className="font-mono text-xs mt-1">Aporte VP = Aporte Futuro / (1 + Inflação)^meses</p>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -158,10 +193,10 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                 <TableHead>Mês</TableHead>
                 <TableHead className="text-right">Aporte</TableHead>
                 <TableHead className="text-right">Aporte Acum. Aparente</TableHead>
-                <TableHead className="text-right">Aporte Acum. Real</TableHead>
+                <TableHead className="text-right">Aporte Acum. VP</TableHead>
                 <TableHead className="text-right">Rendimento</TableHead>
                 <TableHead className="text-right">Saldo Aparente</TableHead>
-                <TableHead className="text-right">Saldo Valor Presente</TableHead>
+                <TableHead className="text-right">Saldo VP</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
