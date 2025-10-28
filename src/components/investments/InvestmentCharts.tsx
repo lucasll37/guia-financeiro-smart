@@ -192,17 +192,19 @@ export function InvestmentCharts({
     
     const firstPoint = combinedData[0];
     const lastPoint = combinedData[combinedData.length - 1];
-    const totalGrowth = lastPoint.saldoAparente - firstPoint.saldoAparente;
-    const growthPercentage = ((lastPoint.saldoAparente / firstPoint.saldoAparente) - 1) * 100;
-    const totalContributions = lastPoint.aportesAparente;
-    const returns = lastPoint.saldoAparente - firstPoint.saldoAparente - totalContributions;
+    const totalGrowth = lastPoint.saldoValorPresente - firstPoint.saldoValorPresente;
+    const totalContributions = lastPoint.aportesValorPresente;
+    const returns = lastPoint.saldoValorPresente - firstPoint.saldoValorPresente - totalContributions;
+    const roi = totalContributions > 0 
+      ? ((lastPoint.saldoValorPresente / totalContributions) - 1) * 100 
+      : 0;
     
     return {
-      initial: firstPoint.saldoAparente,
+      initial: firstPoint.saldoValorPresente,
       final: lastPoint.saldoAparente,
       finalPV: lastPoint.saldoValorPresente,
       growth: totalGrowth,
-      growthPercentage,
+      roi,
       contributions: totalContributions,
       returns,
       months: combinedData.length - 1,
@@ -284,8 +286,8 @@ export function InvestmentCharts({
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Saldo Final</p>
-                  <p className="text-2xl font-bold mt-1">{formatCurrency(stats.final)}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Saldo Final VP</p>
+                  <p className="text-2xl font-bold mt-1">{formatCurrency(stats.finalPV)}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                   <DollarSign className="h-6 w-6 text-primary" />
@@ -298,13 +300,13 @@ export function InvestmentCharts({
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Crescimento</p>
+                  <p className="text-sm font-medium text-muted-foreground">ROI</p>
                   <p className="text-2xl font-bold mt-1 text-chart-2">
-                    {stats.growthPercentage >= 0 ? '+' : ''}{stats.growthPercentage.toFixed(1)}%
+                    {stats.roi >= 0 ? '+' : ''}{stats.roi.toFixed(1)}%
                   </p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-chart-2/10 flex items-center justify-center">
-                  {stats.growthPercentage >= 0 ? (
+                  {stats.roi >= 0 ? (
                     <TrendingUp className="h-6 w-6 text-chart-2" />
                   ) : (
                     <TrendingDown className="h-6 w-6 text-destructive" />
@@ -318,7 +320,7 @@ export function InvestmentCharts({
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Aportes Totais</p>
+                  <p className="text-sm font-medium text-muted-foreground">Aportes VP</p>
                   <p className="text-2xl font-bold mt-1">{formatCurrency(stats.contributions)}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-chart-3/10 flex items-center justify-center">
@@ -332,7 +334,7 @@ export function InvestmentCharts({
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Rendimentos</p>
+                  <p className="text-sm font-medium text-muted-foreground">Rendimentos VP</p>
                   <p className="text-2xl font-bold mt-1">{formatCurrency(stats.returns)}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-chart-4/10 flex items-center justify-center">
