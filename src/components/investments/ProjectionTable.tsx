@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { Info, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Info, ArrowUpDown, ArrowUp, ArrowDown, Download } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import { format, addMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import * as XLSX from "xlsx";
 
 interface ProjectionTableProps {
   currentBalance: number;
@@ -190,10 +191,34 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
     }).format(value);
   };
 
+  const exportToExcel = () => {
+    const dataToExport = sortedProjectionData.map((row) => ({
+      "Mês": format(row.month, "MMM/yyyy", { locale: ptBR }),
+      "Aporte": row.contribution,
+      "Aporte Acumulado Aparente": row.cumulativeContribution,
+      "Aporte Acumulado VP": row.cumulativeContributionPV,
+      "Rendimento": row.returns,
+      "Saldo Aparente": row.balance,
+      "Saldo VP": row.presentValue,
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Projeção");
+    
+    XLSX.writeFile(wb, `projecao-investimento-${format(new Date(), "yyyy-MM-dd")}.xlsx`);
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Projeção de Investimento</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Projeção de Investimento</CardTitle>
+          <Button onClick={exportToExcel} variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Exportar Excel
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <Collapsible open={isExplanationOpen} onOpenChange={setIsExplanationOpen}>
