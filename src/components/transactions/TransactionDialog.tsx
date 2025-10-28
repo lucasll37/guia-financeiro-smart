@@ -132,6 +132,13 @@ export function TransactionDialog({
 
     if (!formData.account_id) newErrors.account = "Conta é obrigatória";
     if (!formData.category_id) newErrors.category = "Categoria é obrigatória";
+    
+    // Validar se a categoria selecionada é uma subcategoria
+    const selectedCategory = categories.find((c) => c.id === formData.category_id);
+    if (selectedCategory && !selectedCategory.parent_id) {
+      newErrors.category = "Selecione uma subcategoria, não uma categoria principal";
+    }
+    
     if (!formData.description.trim()) newErrors.description = "Descrição é obrigatória";
     if (formData.amount <= 0) newErrors.amount = "Valor deve ser maior que zero";
 
@@ -172,7 +179,10 @@ export function TransactionDialog({
 
   const totalPercent = splitMembers.reduce((sum, m) => sum + m.percent, 0);
 
-  const filteredCategories = categories.filter((c) => c.account_id === formData.account_id);
+  // Filtrar apenas subcategorias (que possuem parent_id)
+  const filteredCategories = categories.filter((c) => 
+    c.account_id === formData.account_id && c.parent_id !== null
+  );
   const filteredCreditCards = creditCards?.filter((c) => c.account_id === formData.account_id) || [];
 
   return (
@@ -207,27 +217,33 @@ export function TransactionDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category">Categoria *</Label>
+              <Label htmlFor="category">Subcategoria *</Label>
               <Select
                 value={formData.category_id}
                 onValueChange={(value) => setFormData({ ...formData, category_id: value })}
                 disabled={!formData.account_id}
               >
                 <SelectTrigger id="category">
-                  <SelectValue placeholder="Selecione a categoria" />
+                  <SelectValue placeholder="Selecione a subcategoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  {filteredCategories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: category.color }}
-                        />
-                        {category.name}
-                      </div>
-                    </SelectItem>
-                  ))}
+                  {filteredCategories.length === 0 ? (
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                      Nenhuma subcategoria disponível. Crie subcategorias primeiro.
+                    </div>
+                  ) : (
+                    filteredCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: category.color }}
+                          />
+                          {category.name}
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
               {errors.category && <p className="text-sm text-destructive">{errors.category}</p>}

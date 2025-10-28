@@ -29,7 +29,7 @@ import { Button } from "@/components/ui/button";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 
 const formSchema = z.object({
-  category_id: z.string().min(1, "Categoria é obrigatória"),
+  category_id: z.string().min(1, "Subcategoria é obrigatória"),
   forecasted_amount: z.string().min(1, "Valor é obrigatório"),
   notes: z.string().optional(),
 });
@@ -81,6 +81,16 @@ export function ForecastDialog({
   }, [forecast, form]);
 
   const handleSubmit = (data: FormData) => {
+    // Validar se é subcategoria
+    const selectedCategory = categories.find((c) => c.id === data.category_id);
+    if (selectedCategory && !selectedCategory.parent_id) {
+      form.setError("category_id", {
+        type: "manual",
+        message: "Selecione uma subcategoria, não uma categoria principal"
+      });
+      return;
+    }
+    
     const monthDate = new Date(selectedMonth + "-01");
     const periodStart = format(startOfMonth(monthDate), "yyyy-MM-dd");
     const periodEnd = format(endOfMonth(monthDate), "yyyy-MM-dd");
@@ -109,32 +119,43 @@ export function ForecastDialog({
             <FormField
               control={form.control}
               name="category_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Categoria</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione a categoria" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="w-3 h-3 rounded-full"
-                              style={{ backgroundColor: category.color }}
-                            />
-                            {category.name}
+              render={({ field }) => {
+                // Filtrar apenas subcategorias
+                const subcategories = categories.filter((c) => c.parent_id !== null);
+                
+                return (
+                  <FormItem>
+                    <FormLabel>Subcategoria</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a subcategoria" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {subcategories.length === 0 ? (
+                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                            Nenhuma subcategoria disponível. Crie subcategorias primeiro.
                           </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+                        ) : (
+                          subcategories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="w-3 h-3 rounded-full"
+                                  style={{ backgroundColor: category.color }}
+                                />
+                                {category.name}
+                              </div>
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
 
             <FormField
