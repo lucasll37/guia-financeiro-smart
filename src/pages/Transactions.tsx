@@ -1,18 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2, MoveHorizontal } from "lucide-react";
+import { Plus } from "lucide-react";
 import { format, startOfMonth, endOfMonth, parse } from "date-fns";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useCategories } from "@/hooks/useCategories";
@@ -53,10 +42,6 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [bulkActionDialog, setBulkActionDialog] = useState<"category" | "account" | "delete" | null>(null);
-  const [bulkCategoryId, setBulkCategoryId] = useState("");
-  const [bulkAccountId, setBulkAccountId] = useState("");
   
   // Update filters when propAccountId changes
   useEffect(() => {
@@ -153,69 +138,6 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
     });
   };
 
-  const handleBulkCategoryChange = async () => {
-    if (!bulkCategoryId) return;
-
-    for (const id of selectedIds) {
-      const transaction = filteredTransactions.find((t) => t.id === id);
-      if (transaction) {
-        await updateTransaction.mutateAsync({
-          id,
-          category_id: bulkCategoryId,
-        });
-      }
-    }
-
-    toast({
-      title: "Categorias atualizadas",
-      description: `${selectedIds.length} lançamento(s) atualizado(s)`,
-    });
-
-    setSelectedIds([]);
-    setBulkActionDialog(null);
-    setBulkCategoryId("");
-  };
-
-  const handleBulkAccountChange = async () => {
-    if (!bulkAccountId) return;
-
-    for (const id of selectedIds) {
-      await updateTransaction.mutateAsync({
-        id,
-        account_id: bulkAccountId,
-      });
-    }
-
-    toast({
-      title: "Contas atualizadas",
-      description: `${selectedIds.length} lançamento(s) movido(s)`,
-    });
-
-    setSelectedIds([]);
-    setBulkActionDialog(null);
-    setBulkAccountId("");
-  };
-
-  const handleBulkDelete = async () => {
-    for (const id of selectedIds) {
-      await deleteTransaction.mutateAsync(id);
-      
-      logAction.mutate({
-        entity: "transactions",
-        entity_id: id,
-        action: "delete",
-        diff: {} as any,
-      });
-    }
-
-    toast({
-      title: "Lançamentos excluídos",
-      description: `${selectedIds.length} lançamento(s) excluído(s)`,
-    });
-
-    setSelectedIds([]);
-    setBulkActionDialog(null);
-  };
 
   if (!user) return null;
 
@@ -242,58 +164,15 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
         accountId={propAccountId}
       />
 
-      <div className="space-y-4">
-        {selectedIds.length > 0 && (
-          <div className="flex items-center gap-2 p-4 border rounded-lg bg-muted">
-            <span className="text-sm">{selectedIds.length} selecionado(s)</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setBulkActionDialog("category")}
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Alterar Categoria
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setBulkActionDialog("account")}
-            >
-              <MoveHorizontal className="h-4 w-4 mr-2" />
-              Mover Conta
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setBulkActionDialog("delete")}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Excluir
-            </Button>
-          </div>
-        )}
-
-        {isLoading ? (
-          <p className="text-muted-foreground">Carregando lançamentos...</p>
-        ) : (
-          <TransactionsTable
-            transactions={filteredTransactions}
-            selectedIds={selectedIds}
-            onSelectAll={(selected) => {
-              setSelectedIds(selected ? filteredTransactions.map((t) => t.id) : []);
-            }}
-            onSelectOne={(id, selected) => {
-              setSelectedIds(
-                selected
-                  ? [...selectedIds, id]
-                  : selectedIds.filter((sid) => sid !== id)
-              );
-            }}
-            onEdit={handleEditTransaction}
-            onDelete={handleDeleteTransaction}
-          />
-        )}
-      </div>
+      {isLoading ? (
+        <p className="text-muted-foreground">Carregando lançamentos...</p>
+      ) : (
+        <TransactionsTable
+          transactions={filteredTransactions}
+          onEdit={handleEditTransaction}
+          onDelete={handleDeleteTransaction}
+        />
+      )}
 
       <TransactionDialog
         open={dialogOpen}
@@ -305,81 +184,6 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
         currentUserId={user.id}
       />
 
-      {/* Bulk Action Dialogs */}
-      <AlertDialog open={bulkActionDialog === "category"} onOpenChange={() => setBulkActionDialog(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Alterar Categoria</AlertDialogTitle>
-            <AlertDialogDescription>
-              Selecione a nova categoria para {selectedIds.length} lançamento(s)
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <Select value={bulkCategoryId} onValueChange={setBulkCategoryId}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione a categoria" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories?.map((cat) => (
-                <SelectItem key={cat.id} value={cat.id}>
-                  {cat.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleBulkCategoryChange}>
-              Confirmar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={bulkActionDialog === "account"} onOpenChange={() => setBulkActionDialog(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Mover para Outra Conta</AlertDialogTitle>
-            <AlertDialogDescription>
-              Selecione a conta de destino para {selectedIds.length} lançamento(s)
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <Select value={bulkAccountId} onValueChange={setBulkAccountId}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione a conta" />
-            </SelectTrigger>
-            <SelectContent>
-              {accounts?.map((acc) => (
-                <SelectItem key={acc.id} value={acc.id}>
-                  {acc.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleBulkAccountChange}>
-              Confirmar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={bulkActionDialog === "delete"} onOpenChange={() => setBulkActionDialog(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Excluir Lançamentos</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir {selectedIds.length} lançamento(s)? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleBulkDelete} className="bg-destructive">
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

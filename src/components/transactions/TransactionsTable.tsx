@@ -1,6 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, CreditCard, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { format, parse } from "date-fns";
@@ -20,22 +19,15 @@ type Transaction = Database["public"]["Tables"]["transactions"]["Row"] & {
 
 interface TransactionsTableProps {
   transactions: Transaction[];
-  selectedIds: string[];
-  onSelectAll: (selected: boolean) => void;
-  onSelectOne: (id: string, selected: boolean) => void;
   onEdit: (transaction: Transaction) => void;
   onDelete: (id: string) => void;
 }
 
 export function TransactionsTable({
   transactions,
-  selectedIds,
-  onSelectAll,
-  onSelectOne,
   onEdit,
   onDelete,
 }: TransactionsTableProps) {
-  const allSelected = transactions.length > 0 && selectedIds.length === transactions.length;
   const [sortField, setSortField] = useState<'date' | 'description' | 'amount' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const { maskValue } = useMaskValues();
@@ -104,14 +96,6 @@ export function TransactionsTable({
     return (
       <TableRow key={transaction.id}>
         <TableCell>
-          <Checkbox
-            checked={selectedIds.includes(transaction.id)}
-            onCheckedChange={(checked) =>
-              onSelectOne(transaction.id, checked as boolean)
-            }
-          />
-        </TableCell>
-        <TableCell>
           {format(parse(String(transaction.date), "yyyy-MM-dd", new Date()), "dd/MM/yyyy")}
         </TableCell>
         <TableCell>
@@ -163,9 +147,6 @@ export function TransactionsTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-12">
-                <Checkbox checked={false} onCheckedChange={onSelectAll} />
-              </TableHead>
               <TableHead>Data</TableHead>
               <TableHead>Descrição</TableHead>
               <TableHead>Categoria</TableHead>
@@ -196,14 +177,6 @@ export function TransactionsTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={incomeTransactions.every((t) => selectedIds.includes(t.id))}
-                    onCheckedChange={(checked) => {
-                      incomeTransactions.forEach((t) => onSelectOne(t.id, checked as boolean));
-                    }}
-                  />
-                </TableHead>
                 <TableHead>
                   <Button variant="ghost" size="sm" onClick={() => handleSort('date')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Data
@@ -229,7 +202,7 @@ export function TransactionsTable({
             <TableBody>
               {incomeTransactions.map(renderTransactionRow)}
               <TableRow className="bg-green-50/50 dark:bg-green-950/10 font-semibold">
-                <TableCell colSpan={4} className="text-right">
+                <TableCell colSpan={3} className="text-right">
                   Total de Receitas:
                 </TableCell>
                 <TableCell className="text-right text-green-600">
@@ -251,14 +224,6 @@ export function TransactionsTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={expenseTransactions.every((t) => selectedIds.includes(t.id))}
-                    onCheckedChange={(checked) => {
-                      expenseTransactions.forEach((t) => onSelectOne(t.id, checked as boolean));
-                    }}
-                  />
-                </TableHead>
                 <TableHead>
                   <Button variant="ghost" size="sm" onClick={() => handleSort('date')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Data
@@ -284,7 +249,7 @@ export function TransactionsTable({
             <TableBody>
               {expenseTransactions.map(renderTransactionRow)}
               <TableRow className="bg-red-50/50 dark:bg-red-950/10 font-semibold">
-                <TableCell colSpan={4} className="text-right">
+                <TableCell colSpan={3} className="text-right">
                   Total de Despesas:
                 </TableCell>
                 <TableCell className="text-right text-destructive">
