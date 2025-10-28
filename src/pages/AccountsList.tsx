@@ -175,14 +175,16 @@ export default function AccountsList() {
                     </div>
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => handleManageMembers(e, account)}
-                      title="Gerenciar Membros"
-                    >
-                      <Users className="h-4 w-4" />
-                    </Button>
+                    {account.is_shared && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => handleManageMembers(e, account)}
+                        title="Gerenciar Membros"
+                      >
+                        <Users className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="icon"
