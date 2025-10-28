@@ -68,27 +68,13 @@ export function MembersDialog({ open, onOpenChange, account, currentUserId }: Me
 
       const profile = profiles[0];
 
-      // Criar convite
+      // Criar convite (o trigger cria a notificação automaticamente)
       const newMember = await inviteMember.mutateAsync({
         account_id: account.id,
         user_id: profile.id,
         role: inviteRole,
         invited_by: currentUserId,
         status: "pending",
-      });
-
-      // Criar notificação para o usuário convidado
-      await supabase.from("notifications").insert({
-        user_id: profile.id,
-        type: "invite",
-        message: `Você foi convidado para participar da conta "${account.name}"`,
-        metadata: {
-          invite_id: newMember.id,
-          account_id: account.id,
-          account_name: account.name,
-          invited_by: currentUserId,
-          role: inviteRole,
-        },
       });
 
       logAction.mutate({

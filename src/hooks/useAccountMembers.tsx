@@ -106,6 +106,7 @@ export function useAccountMembers(accountId?: string) {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["account_members"] });
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
       toast({
         title: variables.status === "accepted" ? "Convite aceito" : "Convite recusado",
         description: `Você ${variables.status === "accepted" ? "aceitou" : "recusou"} o convite`,
