@@ -55,10 +55,20 @@ export function SubscriptionManager() {
   // Update subscription mutation
   const updateSubscription = useMutation({
     mutationFn: async ({ userId, newPlan }: { userId: string; newPlan: SubscriptionPlan }) => {
+      // Fazer UPSERT para garantir que a subscription seja criada se não existir
       const { error } = await supabase
         .from("subscriptions")
-        .update({ plan: newPlan })
-        .eq("user_id", userId);
+        .upsert(
+          { 
+            user_id: userId, 
+            plan: newPlan,
+            status: 'active',
+            updated_at: new Date().toISOString()
+          },
+          { 
+            onConflict: 'user_id'
+          }
+        );
 
       if (error) throw error;
     },
@@ -66,7 +76,7 @@ export function SubscriptionManager() {
       queryClient.invalidateQueries({ queryKey: ["admin-users-subscriptions"] });
       toast({
         title: "Plano atualizado!",
-        description: `Usuário promovido para ${variables.newPlan === "pro" ? "Pro" : "Free"}.`,
+        description: `Plano alterado para ${variables.newPlan === "pro" ? "Pro" : "Free"} com sucesso.`,
       });
     },
     onError: (error: any) => {

@@ -103,7 +103,7 @@ export default function Admin() {
 
       let query = supabase
         .from("profiles")
-        .select("*, subscriptions(*)", { count: "exact" });
+        .select("*", { count: "exact" });
 
       // Apply search filter
       if (userFilters.search) {
@@ -125,8 +125,23 @@ export default function Admin() {
         throw error;
       }
 
+      // Buscar subscriptions separadamente
+      const { data: subscriptions, error: subsError } = await supabase
+        .from("subscriptions")
+        .select("*");
+
+      if (subsError) {
+        console.error("Error fetching subscriptions:", subsError);
+      }
+
+      // Combinar profiles com suas subscriptions
+      const profilesWithSubs = profiles?.map(profile => ({
+        ...profile,
+        subscriptions: subscriptions?.filter(s => s.user_id === profile.id) || []
+      })) || [];
+
       // Filter by plan if needed (client-side since subscriptions is a join)
-      let filteredProfiles = profiles || [];
+      let filteredProfiles = profilesWithSubs;
       if (userFilters.plan !== "all" && filteredProfiles.length > 0) {
         filteredProfiles = filteredProfiles.filter((profile) => {
           const subscription = Array.isArray(profile.subscriptions)
