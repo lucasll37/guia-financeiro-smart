@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletion_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          token: string
+          used: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          token: string
+          used?: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token?: string
+          used?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       account_members: {
         Row: {
           account_id: string
@@ -715,6 +742,7 @@ export type Database = {
     }
     Functions: {
       cleanup_deleted_accounts: { Args: never; Returns: undefined }
+      cleanup_expired_deletion_tokens: { Args: never; Returns: undefined }
       create_notification: {
         Args: {
           _message: string
