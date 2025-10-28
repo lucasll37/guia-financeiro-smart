@@ -218,26 +218,36 @@ export default function Admin() {
     },
   });
 
-  // Delete user mutation (soft delete by updating deleted_at in accounts)
+  // Delete user mutation - Admin only
   const deleteUser = useMutation({
     mutationFn: async (userId: string) => {
-      // This should trigger account deletion - implement based on your needs
-      const { error } = await supabase
-        .from("profiles")
-        .update({ updated_at: new Date().toISOString() })
-        .eq("id", userId);
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (error) throw error;
-      
-      // You might want to implement actual account deletion logic here
-      toast({
-        title: "Aviso",
-        description: "Funcionalidade de exclusão de conta em desenvolvimento",
-        variant: "destructive",
+      if (!session) {
+        throw new Error("Não autenticado");
+      }
+
+      const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+        body: { userId },
       });
+
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast({
+        title: "Usuário deletado",
+        description: "O usuário e todos os seus dados foram removidos com sucesso.",
+      });
+      setUserToDelete(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao deletar usuário",
+        description: error.message || "Ocorreu um erro ao tentar deletar o usuário.",
+        variant: "destructive",
+      });
       setUserToDelete(null);
     },
   });
