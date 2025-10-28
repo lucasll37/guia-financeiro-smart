@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { t } from "@/lib/i18n";
 import { useTheme } from "next-themes";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Mail, CheckCircle } from "lucide-react";
+import { Mail, CheckCircle, Loader2, Check, X } from "lucide-react";
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
@@ -26,6 +27,7 @@ export default function Auth() {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [emailAvailability, setEmailAvailability] = useState<"checking" | "available" | "unavailable" | null>(null);
   const [resetMode, setResetMode] = useState(false);
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") === "signup" ? "signup" : "login");
   const [showEmailConfirmModal, setShowEmailConfirmModal] = useState(false);
@@ -85,6 +87,45 @@ export default function Auth() {
     }
     return () => clearInterval(interval);
   }, [showEmailConfirmModal, resendCountdown]);
+
+  // Verificar disponibilidade de email ao digitar (apenas no signup)
+  useEffect(() => {
+    if (activeTab !== "signup") {
+      setEmailAvailability(null);
+      return;
+    }
+    
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailAvailability(null);
+      return;
+    }
+
+    // Debounce de 500ms
+    const timeoutId = setTimeout(async () => {
+      setEmailAvailability("checking");
+      
+      try {
+        const { data, error } = await supabase.functions.invoke('check-email-availability', {
+          body: { email }
+        });
+
+        if (error) {
+          console.error("Error checking email:", error);
+          setEmailAvailability(null);
+          return;
+        }
+
+        setEmailAvailability(data.available ? "available" : "unavailable");
+      } catch (err) {
+        console.error("Error checking email:", err);
+        setEmailAvailability(null);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [email, activeTab]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -330,13 +371,35 @@ export default function Auth() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">{t("auth.email")}</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="pr-10"
+                    />
+                    {emailAvailability && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        {emailAvailability === "checking" && (
+                          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                        )}
+                        {emailAvailability === "available" && (
+                          <Check className="h-4 w-4 text-green-500" />
+                        )}
+                        {emailAvailability === "unavailable" && (
+                          <X className="h-4 w-4 text-destructive" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {emailAvailability === "unavailable" && (
+                    <p className="text-xs text-destructive">Este email já está cadastrado</p>
+                  )}
+                  {emailAvailability === "available" && (
+                    <p className="text-xs text-green-600 dark:text-green-400">Email disponível</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">{t("auth.password")}</Label>
@@ -360,7 +423,11 @@ export default function Auth() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={loading || emailAvailability === "unavailable" || emailAvailability === "checking"}
+                >
                   {loading ? t("common.loading") : t("auth.signup")}
                 </Button>
               </CardFooter>
