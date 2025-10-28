@@ -83,6 +83,21 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
     });
   }, [transactions, periodStart, periodEnd]);
 
+  // Calcular saldo remanescente do período anterior
+  const previousBalance = useMemo(() => {
+    if (!transactions) return 0;
+    
+    return transactions
+      .filter(t => {
+        const txDate = new Date(t.date);
+        return txDate < periodStart;
+      })
+      .reduce((sum, t) => {
+        const amount = Number(t.amount);
+        return t.categories?.type === "receita" ? sum + amount : sum - amount;
+      }, 0);
+  }, [transactions, periodStart]);
+
   // Agrupar por categoria e tipo
   const { incomeTotals, expenseTotals, totalIncome, totalExpense, categoryTransactionsMap } = useMemo(() => {
     const incomeCategories: Record<string, { actual: number; forecasted: number; categoryName: string; categoryColor: string; categoryId: string; transactions: any[] }> = {};
@@ -201,6 +216,41 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
       </div>
 
       <div className="space-y-4">
+        {/* Saldo Remanescente */}
+        <div className="border rounded-lg overflow-hidden">
+          <div className="bg-blue-50 dark:bg-blue-950/20 px-4 py-2 border-b">
+            <h3 className="font-semibold text-blue-700 dark:text-blue-400">Saldo Remanescente</h3>
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Descrição</TableHead>
+                <TableHead className="text-right w-[140px]">Previsto</TableHead>
+                <TableHead className="text-right w-[140px]">Realizado</TableHead>
+                <TableHead className="text-right w-[140px]">Diferença</TableHead>
+                <TableHead className="text-right w-[120px]">% Variação</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell className="w-[300px]">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 flex-shrink-0" />
+                    <div className="w-3 h-3 rounded-full flex-shrink-0 bg-blue-500" />
+                    <span className="truncate">Saldo do período anterior</span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-right w-[140px]">-</TableCell>
+                <TableCell className="text-right font-medium w-[140px]">
+                  {formatCurrency(previousBalance)}
+                </TableCell>
+                <TableCell className="text-right w-[140px]">-</TableCell>
+                <TableCell className="text-right w-[120px]">-</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+
         {/* Receitas */}
         {Object.keys(incomeTotals).length > 0 && (
           <div className="border rounded-lg overflow-hidden">
@@ -210,11 +260,11 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Categoria</TableHead>
-                  <TableHead className="text-right">Previsto</TableHead>
-                  <TableHead className="text-right">Realizado</TableHead>
-                  <TableHead className="text-right">Diferença</TableHead>
-                  <TableHead className="text-right">% Variação</TableHead>
+                  <TableHead className="w-[300px]">Categoria</TableHead>
+                  <TableHead className="text-right w-[140px]">Previsto</TableHead>
+                  <TableHead className="text-right w-[140px]">Realizado</TableHead>
+                  <TableHead className="text-right w-[140px]">Diferença</TableHead>
+                  <TableHead className="text-right w-[120px]">% Variação</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -328,11 +378,11 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Categoria</TableHead>
-                  <TableHead className="text-right">Previsto</TableHead>
-                  <TableHead className="text-right">Realizado</TableHead>
-                  <TableHead className="text-right">Diferença</TableHead>
-                  <TableHead className="text-right">% Variação</TableHead>
+                  <TableHead className="w-[300px]">Categoria</TableHead>
+                  <TableHead className="text-right w-[140px]">Previsto</TableHead>
+                  <TableHead className="text-right w-[140px]">Realizado</TableHead>
+                  <TableHead className="text-right w-[140px]">Diferença</TableHead>
+                  <TableHead className="text-right w-[120px]">% Variação</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
