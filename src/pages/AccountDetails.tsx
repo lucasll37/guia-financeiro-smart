@@ -68,6 +68,10 @@ export default function AccountDetails() {
             <LayoutDashboard className="h-4 w-4" />
             <span className="hidden sm:inline">Visão Geral</span>
           </TabsTrigger>
+          <TabsTrigger value="previsoes" className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            <span className="hidden sm:inline">Previsões</span>
+          </TabsTrigger>
           <TabsTrigger value="lancamentos" className="flex items-center gap-2">
             <Receipt className="h-4 w-4" />
             <span className="hidden sm:inline">Lançamentos</span>
@@ -79,10 +83,6 @@ export default function AccountDetails() {
           <TabsTrigger value="cartoes" className="flex items-center gap-2">
             <CreditCard className="h-4 w-4" />
             <span className="hidden sm:inline">Cartões</span>
-          </TabsTrigger>
-          <TabsTrigger value="previsoes" className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
-            <span className="hidden sm:inline">Previsões</span>
           </TabsTrigger>
           <TabsTrigger value="analise" className="flex items-center gap-2">
             <PieChart className="h-4 w-4" />
@@ -98,6 +98,10 @@ export default function AccountDetails() {
           <AccountPeriodDetails account={account} />
         </TabsContent>
 
+        <TabsContent value="previsoes">
+          <Forecasts />
+        </TabsContent>
+
         <TabsContent value="lancamentos">
           <Transactions />
         </TabsContent>
@@ -108,10 +112,6 @@ export default function AccountDetails() {
 
         <TabsContent value="cartoes">
           <CreditCards />
-        </TabsContent>
-
-        <TabsContent value="previsoes">
-          <Forecasts />
         </TabsContent>
 
         <TabsContent value="analise">
