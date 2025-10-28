@@ -9,7 +9,8 @@ import {
   Target, 
   TrendingUp, 
   FileText,
-  ShieldCheck
+  ShieldCheck,
+  Sparkles
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
@@ -36,6 +37,7 @@ const menuItems = [
   { title: t("nav.goals"), url: "/app/metas", icon: Target },
   { title: t("nav.investments"), url: "/app/investimentos", icon: TrendingUp },
   { title: t("nav.reports"), url: "/app/relatorios", icon: FileText },
+  { title: "Planos", url: "/app/planos", icon: Sparkles },
   { title: "Admin", url: "/app/admin", icon: ShieldCheck },
 ];
 
