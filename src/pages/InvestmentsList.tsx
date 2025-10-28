@@ -314,9 +314,9 @@ function InvestmentCard({
           </div>
         </div>
 
-        {/* Rendimento */}
-        <div className="space-y-1 pb-4 border-b">
-          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Rendimento</div>
+        {/* Rendimento Nominal */}
+        <div className="space-y-1">
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Rendimento Nominal</div>
           <div className={`text-2xl font-bold ${isPositive ? "text-green-600" : "text-red-600"}`}>
             {isPositive ? "+" : ""}
             {new Intl.NumberFormat("pt-BR", {
@@ -330,8 +330,22 @@ function InvestmentCard({
           </div>
         </div>
 
+        {/* Inflação */}
+        <div className="space-y-1 pb-4 border-b">
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Inflação</div>
+          <div className="text-2xl font-bold text-orange-600">
+            +{new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }).format(totalContributions * (accumulatedInflation / 100))}
+            <span className="text-base ml-2">
+              (+{accumulatedInflation.toFixed(2)}%)
+            </span>
+          </div>
+        </div>
+
         {/* Métricas em grid */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <div className="text-xs text-muted-foreground">Total de Aportes</div>
             <div className="text-lg font-semibold">
@@ -351,16 +365,6 @@ function InvestmentCard({
                   {isPositive ? "+" : ""}
                   {monthlyAverageReturn.toFixed(2)}%
                 </>
-              ) : (
-                "-"
-              )}
-            </div>
-          </div>
-          <div className="space-y-1">
-            <div className="text-xs text-muted-foreground">Inflação Acumulada</div>
-            <div className="text-lg font-semibold text-orange-600">
-              {numberOfMonths > 0 ? (
-                <>+{accumulatedInflation.toFixed(2)}%</>
               ) : (
                 "-"
               )}
