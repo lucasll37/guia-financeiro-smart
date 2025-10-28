@@ -131,14 +131,11 @@ export function MonthlyReturnsDialog({
                   <FormLabel>Rendimento (%)</FormLabel>
                   <FormControl>
                     <Input
-                      type="text"
-                      inputMode="decimal"
+                      type="number"
+                      step="0.01"
                       placeholder="0.00"
-                      value={field.value || ""}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/[^\d.-]/g, "");
-                        field.onChange(value === "" ? 0 : parseFloat(value) || 0);
-                      }}
+                      value={field.value}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
                   </FormControl>
                   <FormDescription>Percentual de rendimento no período</FormDescription>
@@ -155,14 +152,11 @@ export function MonthlyReturnsDialog({
                   <FormLabel>Inflação Mensal (%)</FormLabel>
                   <FormControl>
                     <Input
-                      type="text"
-                      inputMode="decimal"
+                      type="number"
+                      step="0.01"
                       placeholder="0.00"
-                      value={field.value || ""}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/[^\d.-]/g, "");
-                        field.onChange(value === "" ? 0 : parseFloat(value) || 0);
-                      }}
+                      value={field.value}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
                   </FormControl>
                   <FormDescription>Taxa de inflação do período</FormDescription>
@@ -179,14 +173,11 @@ export function MonthlyReturnsDialog({
                   <FormLabel>Aporte</FormLabel>
                   <FormControl>
                     <Input
-                      type="text"
-                      inputMode="decimal"
+                      type="number"
+                      step="0.01"
                       placeholder="0.00"
-                      value={field.value || ""}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/[^\d.-]/g, "");
-                        field.onChange(value === "" ? 0 : parseFloat(value) || 0);
-                      }}
+                      value={field.value}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
                   </FormControl>
                   <FormDescription>
