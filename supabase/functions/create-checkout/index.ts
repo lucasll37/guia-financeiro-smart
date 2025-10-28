@@ -30,22 +30,29 @@ serve(async (req) => {
     logStep("Function started");
 
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
+    if (!authHeader?.startsWith("Bearer ")) throw new Error("No authorization header provided");
     logStep("Authenticating user");
 
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser();
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    const token = authHeader.replace("Bearer ", "");
+    const parseJwt = (t: string) => {
+      const base64Url = t.split(".")[1] ?? "";
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+      return JSON.parse(atob(padded));
+    };
+    const payload = parseJwt(token);
+    const userId: string | undefined = payload?.sub;
+    const email: string | undefined = payload?.email;
 
-    const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    if (!userId || !email) throw new Error("User not authenticated or email not available");
+    logStep("User authenticated", { userId, email });
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { 
       apiVersion: "2025-08-27.basil" 
     });
 
     // Check if customer exists
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    const customers = await stripe.customers.list({ email, limit: 1 });
     let customerId;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
@@ -57,7 +64,7 @@ serve(async (req) => {
     // Create checkout session for Pro plan
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      customer_email: customerId ? undefined : user.email,
+      customer_email: customerId ? undefined : email,
       line_items: [
         {
           price: "price_1SN39tHHQy81N0cFELbk2209",
@@ -68,7 +75,7 @@ serve(async (req) => {
       success_url: `${req.headers.get("origin")}/app/conta?success=true`,
       cancel_url: `${req.headers.get("origin")}/app/planos?canceled=true`,
       metadata: {
-        user_id: user.id,
+        user_id: userId,
       },
     });
 
