@@ -1,16 +1,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { format, addMonths, startOfMonth } from "date-fns";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useCreditCards } from "@/hooks/useCreditCards";
 import { useTransactions } from "@/hooks/useTransactions";
 import { CreditCardsTable } from "@/components/creditcards/CreditCardsTable";
 import { CreditCardDialog } from "@/components/creditcards/CreditCardDialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CreditCardFilters } from "@/components/creditcards/CreditCardFilters";
 import type { Database } from "@/integrations/supabase/types";
 
 type CreditCardInsert = Database["public"]["Tables"]["credit_cards"]["Insert"];
@@ -18,25 +16,31 @@ type CreditCardInsert = Database["public"]["Tables"]["credit_cards"]["Insert"];
 export default function CreditCards() {
   const { user } = useAuth();
   const { accounts } = useAccounts();
-  const [selectedAccountId, setSelectedAccountId] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<any>(null);
   
   const today = new Date();
-  const [startMonth, setStartMonth] = useState(format(today, "yyyy-MM"));
-  const [endMonth, setEndMonth] = useState(format(addMonths(today, 6), "yyyy-MM"));
+  const currentMonth = format(today, "yyyy-MM");
+  
+  const [filters, setFilters] = useState({
+    accountId: "all",
+    startDate: format(startOfMonth(today), "yyyy-MM-dd"),
+    endDate: format(endOfMonth(today), "yyyy-MM-dd"),
+    viewMode: "monthly" as "monthly" | "custom",
+    selectedMonth: currentMonth,
+  });
 
   const { creditCards, isLoading, createCreditCard, updateCreditCard, deleteCreditCard } =
-    useCreditCards(selectedAccountId !== "all" ? selectedAccountId : undefined);
+    useCreditCards(filters.accountId !== "all" ? filters.accountId : undefined);
 
-  const { transactions } = useTransactions(selectedAccountId !== "all" ? selectedAccountId : undefined);
+  const { transactions } = useTransactions(filters.accountId !== "all" ? filters.accountId : undefined);
 
   // Filtrar transações por período
   const filteredTransactions = transactions?.filter((t) => {
     if (!t.credit_card_id || !t.payment_month) return false;
     const paymentDate = new Date(t.payment_month);
-    const start = startOfMonth(new Date(startMonth + "-01"));
-    const end = startOfMonth(new Date(endMonth + "-01"));
+    const start = new Date(filters.startDate);
+    const end = new Date(filters.endDate);
     return paymentDate >= start && paymentDate <= end;
   }) || [];
 
@@ -68,11 +72,11 @@ export default function CreditCards() {
   if (!user) return null;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Cartões de Crédito</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Cartões de Crédito</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             Gerencie seus cartões de crédito e controle de faturas
           </p>
         </div>
@@ -82,38 +86,11 @@ export default function CreditCards() {
         </Button>
       </div>
 
-      <div className="flex items-center gap-4">
-        <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
-          <SelectTrigger className="w-[300px]">
-            <SelectValue placeholder="Filtrar por conta" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas as contas</SelectItem>
-            {accounts?.map((account) => (
-              <SelectItem key={account.id} value={account.id}>
-                {account.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <div className="flex items-center gap-2">
-          <Label>Período:</Label>
-          <Input
-            type="month"
-            value={startMonth}
-            onChange={(e) => setStartMonth(e.target.value)}
-            className="w-40"
-          />
-          <span>até</span>
-          <Input
-            type="month"
-            value={endMonth}
-            onChange={(e) => setEndMonth(e.target.value)}
-            className="w-40"
-          />
-        </div>
-      </div>
+      <CreditCardFilters
+        accounts={accounts || []}
+        filters={filters}
+        onFilterChange={setFilters}
+      />
 
       {isLoading ? (
         <p className="text-muted-foreground">Carregando cartões...</p>
