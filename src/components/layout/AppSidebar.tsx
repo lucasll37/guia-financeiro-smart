@@ -1,14 +1,8 @@
 import { 
   LayoutDashboard, 
   Wallet, 
-  Tag, 
-  ArrowLeftRight, 
-  CreditCard,
-  CalendarClock,
-  BarChart3,
   Target, 
   TrendingUp, 
-  FileText,
   ShieldCheck,
   Sparkles
 } from "lucide-react";
@@ -28,15 +22,9 @@ import { t } from "@/lib/i18n";
 
 const menuItems = [
   { title: t("nav.dashboard"), url: "/app/dashboard", icon: LayoutDashboard },
-  { title: t("nav.accounts"), url: "/app/contas", icon: Wallet },
-  { title: t("nav.categories"), url: "/app/categorias", icon: Tag },
-  { title: t("nav.transactions"), url: "/app/lancamentos", icon: ArrowLeftRight },
-  { title: "Cartões", url: "/app/cartoes", icon: CreditCard },
-  { title: "Previsões", url: "/app/previsoes", icon: CalendarClock },
-  { title: "Análise", url: "/app/analise", icon: BarChart3 },
+  { title: "Contas", url: "/app/contas", icon: Wallet },
   { title: t("nav.goals"), url: "/app/metas", icon: Target },
   { title: t("nav.investments"), url: "/app/investimentos", icon: TrendingUp },
-  { title: t("nav.reports"), url: "/app/relatorios", icon: FileText },
   { title: "Planos", url: "/app/planos", icon: Sparkles },
   { title: "Admin", url: "/app/admin", icon: ShieldCheck },
 ];

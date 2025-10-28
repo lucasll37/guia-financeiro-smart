@@ -11,15 +11,10 @@ import { PageMeta } from "@/components/seo/PageMeta";
 import Auth from "./pages/Auth";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
-import Accounts from "./pages/Accounts";
-import Categories from "./pages/Categories";
-import Transactions from "./pages/Transactions";
-import Forecasts from "./pages/Forecasts";
-import Analysis from "./pages/Analysis";
+import AccountsList from "./pages/AccountsList";
+import AccountDetails from "./pages/AccountDetails";
 import Goals from "./pages/Goals";
 import Investments from "./pages/Investments";
-import CreditCards from "./pages/CreditCards";
-import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Conta from "./pages/Conta";
@@ -69,15 +64,10 @@ const App = () => (
               >
                 <Route index element={<Navigate to="/app/dashboard" replace />} />
                 <Route path="dashboard" element={<Dashboard />} />
-                <Route path="contas" element={<Accounts />} />
-                <Route path="categorias" element={<Categories />} />
-                <Route path="lancamentos" element={<Transactions />} />
-                <Route path="cartoes" element={<CreditCards />} />
-                <Route path="previsoes" element={<Forecasts />} />
-                <Route path="analise" element={<Analysis />} />
+                <Route path="contas" element={<AccountsList />} />
+                <Route path="contas/:accountId" element={<AccountDetails />} />
                 <Route path="metas" element={<Goals />} />
                 <Route path="investimentos" element={<Investments />} />
-                <Route path="relatorios" element={<Reports />} />
                 <Route path="configuracoes" element={<Settings />} />
                 <Route path="conta" element={<Conta />} />
                 <Route path="planos" element={<Planos />} />
