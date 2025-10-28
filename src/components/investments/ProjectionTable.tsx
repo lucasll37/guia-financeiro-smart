@@ -277,17 +277,17 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                 id="rate-input"
                 type="number"
                 step="0.01"
-                min={-10}
-                max={20}
+                min={-2}
+                max={2}
                 value={monthlyRate}
-                onChange={(e) => setMonthlyRate(Math.min(20, Math.max(-10, Number(e.target.value))))}
+                onChange={(e) => setMonthlyRate(Math.min(2, Math.max(-2, Number(e.target.value))))}
                 className="w-20 h-8 text-center"
               />
             </div>
             <Slider
               id="rate"
-              min={-10}
-              max={20}
+              min={-2}
+              max={2}
               step={0.01}
               value={[monthlyRate]}
               onValueChange={(value) => setMonthlyRate(value[0])}
@@ -302,16 +302,16 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                 type="number"
                 step="0.01"
                 min={0}
-                max={10}
+                max={1}
                 value={rateStdDev}
-                onChange={(e) => setRateStdDev(Math.min(10, Math.max(0, Number(e.target.value))))}
+                onChange={(e) => setRateStdDev(Math.min(1, Math.max(0, Number(e.target.value))))}
                 className="w-20 h-8 text-center"
               />
             </div>
             <Slider
               id="rateStdDev"
               min={0}
-              max={10}
+              max={1}
               step={0.01}
               value={[rateStdDev]}
               onValueChange={(value) => setRateStdDev(value[0])}
@@ -325,17 +325,17 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                 id="inflation-input"
                 type="number"
                 step="0.01"
-                min={-5}
-                max={10}
+                min={-2}
+                max={2}
                 value={inflationRate}
-                onChange={(e) => setInflationRate(Math.min(10, Math.max(-5, Number(e.target.value))))}
+                onChange={(e) => setInflationRate(Math.min(2, Math.max(-2, Number(e.target.value))))}
                 className="w-20 h-8 text-center"
               />
             </div>
             <Slider
               id="inflation"
-              min={-5}
-              max={10}
+              min={-2}
+              max={2}
               step={0.01}
               value={[inflationRate]}
               onValueChange={(value) => setInflationRate(value[0])}
@@ -350,16 +350,16 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                 type="number"
                 step="0.01"
                 min={0}
-                max={5}
+                max={1}
                 value={inflationStdDev}
-                onChange={(e) => setInflationStdDev(Math.min(5, Math.max(0, Number(e.target.value))))}
+                onChange={(e) => setInflationStdDev(Math.min(1, Math.max(0, Number(e.target.value))))}
                 className="w-20 h-8 text-center"
               />
             </div>
             <Slider
               id="inflationStdDev"
               min={0}
-              max={5}
+              max={1}
               step={0.01}
               value={[inflationStdDev]}
               onValueChange={(value) => setInflationStdDev(value[0])}
@@ -374,16 +374,16 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                 type="number"
                 step="100"
                 min={0}
-                max={50000}
+                max={20000}
                 value={monthlyContribution}
-                onChange={(e) => setMonthlyContribution(Math.min(50000, Math.max(0, Number(e.target.value))))}
+                onChange={(e) => setMonthlyContribution(Math.min(20000, Math.max(0, Number(e.target.value))))}
                 className="w-24 h-8 text-center"
               />
             </div>
             <Slider
               id="contribution"
               min={0}
-              max={50000}
+              max={20000}
               step={100}
               value={[monthlyContribution]}
               onValueChange={(value) => setMonthlyContribution(value[0])}
