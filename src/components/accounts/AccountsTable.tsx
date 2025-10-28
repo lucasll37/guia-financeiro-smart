@@ -124,19 +124,19 @@ export function AccountsTable({ accounts, onEdit, onDelete, onManageMembers }: A
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      {account.is_shared && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => onManageMembers(account)}
-                        >
-                          <Users className="h-4 w-4" />
-                        </Button>
-                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onManageMembers(account)}
+                        title="Gerenciar Membros"
+                      >
+                        <Users className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => onEdit(account)}
+                        title="Editar"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -144,6 +144,7 @@ export function AccountsTable({ accounts, onEdit, onDelete, onManageMembers }: A
                         variant="ghost"
                         size="icon"
                         onClick={() => onDelete(account.id)}
+                        title="Excluir"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

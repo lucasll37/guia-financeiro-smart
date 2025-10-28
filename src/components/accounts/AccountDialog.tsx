@@ -5,8 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
-import { Plus, Trash2 } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
@@ -20,11 +18,6 @@ interface AccountDialogProps {
   currentUserId: string;
 }
 
-interface SplitMember {
-  email: string;
-  percent: number;
-}
-
 export function AccountDialog({ open, onOpenChange, onSave, account, currentUserId }: AccountDialogProps) {
   const [formData, setFormData] = useState<AccountInsert>({
     owner_id: currentUserId,
@@ -36,7 +29,6 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
     closing_day: 1,
   });
 
-  const [splitMembers, setSplitMembers] = useState<SplitMember[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -50,9 +42,6 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
         default_split: account.default_split,
         closing_day: account.closing_day || 1,
       });
-      
-      const splits = (account.default_split as any) || [];
-      setSplitMembers(splits);
     } else {
       setFormData({
         owner_id: currentUserId,
@@ -63,26 +52,9 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
         default_split: [],
         closing_day: 1,
       });
-      setSplitMembers([]);
     }
     setErrors({});
   }, [account, currentUserId, open]);
-
-  const validateSplit = () => {
-    if (!formData.is_shared) return true;
-    
-    const total = splitMembers.reduce((sum, m) => sum + m.percent, 0);
-    if (total > 100) {
-      setErrors({ split: "A soma dos percentuais não pode exceder 100%" });
-      return false;
-    }
-    
-    setErrors({});
-    return true;
-  };
-
-  const totalPercent = splitMembers.reduce((sum, m) => sum + m.percent, 0);
-  const ownerPercent = 100 - totalPercent;
 
   const handleSubmit = () => {
     if (!formData.name.trim()) {
@@ -90,38 +62,10 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
       return;
     }
 
-    if (!validateSplit()) return;
-
-    // Calcular percentual remanescente para o criador da conta
-    const totalMembersPercent = splitMembers.reduce((sum, m) => sum + m.percent, 0);
-    const ownerPercent = 100 - totalMembersPercent;
-
-    // Se é conta compartilhada, incluir o criador com o percentual remanescente
-    const finalSplit = formData.is_shared 
-      ? [
-          { email: "owner", percent: ownerPercent }, // "owner" representa o criador
-          ...splitMembers
-        ]
-      : [];
-
     onSave({
       ...formData,
-      default_split: finalSplit as any,
+      default_split: [],
     });
-  };
-
-  const addSplitMember = () => {
-    setSplitMembers([...splitMembers, { email: "", percent: 0 }]);
-  };
-
-  const removeSplitMember = (index: number) => {
-    setSplitMembers(splitMembers.filter((_, i) => i !== index));
-  };
-
-  const updateSplitMember = (index: number, field: keyof SplitMember, value: any) => {
-    const updated = [...splitMembers];
-    updated[index] = { ...updated[index], [field]: value };
-    setSplitMembers(updated);
   };
 
   return (
@@ -198,81 +142,11 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
           </div>
 
           {formData.is_shared && (
-            <>
-              <Separator />
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label>Divisão Padrão de Despesas</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={addSplitMember}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Adicionar Membro
-                  </Button>
-                </div>
-
-                {splitMembers.map((member, index) => (
-                  <div key={index} className="flex gap-2">
-                    <div className="flex-1">
-                      <Input
-                        type="email"
-                        placeholder="Email do usuário"
-                        value={member.email}
-                        onChange={(e) => updateSplitMember(index, "email", e.target.value)}
-                      />
-                    </div>
-                    <div className="w-32">
-                      <Input
-                        type="number"
-                        placeholder="% (0-100)"
-                        value={member.percent || ""}
-                        onChange={(e) => updateSplitMember(index, "percent", Number(e.target.value))}
-                        min={0}
-                        max={100}
-                      />
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeSplitMember(index)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-
-                <div className="flex items-center justify-between text-sm p-3 bg-muted rounded-lg">
-                  <div>
-                    <p className="font-medium">Seu percentual (criador):</p>
-                    <p className="text-xs text-muted-foreground">
-                      Percentual calculado automaticamente
-                    </p>
-                  </div>
-                  <span className={ownerPercent >= 0 ? "text-green-600 font-bold text-lg" : "text-destructive font-bold text-lg"}>
-                    {ownerPercent}%
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between text-sm">
-                  <span>Total dos membros:</span>
-                  <span className={totalPercent <= 100 ? "text-muted-foreground font-medium" : "text-destructive font-medium"}>
-                    {totalPercent}%
-                  </span>
-                </div>
-
-                {totalPercent > 100 && (
-                  <p className="text-sm text-destructive">
-                    A soma dos percentuais dos membros excede 100%
-                  </p>
-                )}
-
-                {errors.split && <p className="text-sm text-destructive">{errors.split}</p>}
-              </div>
-            </>
+            <div className="p-4 bg-muted rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                ℹ️ Após criar a conta, use o botão <strong>"Gerenciar Membros"</strong> para convidar pessoas e definir a divisão de despesas.
+              </p>
+            </div>
           )}
         </div>
 
