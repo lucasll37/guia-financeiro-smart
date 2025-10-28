@@ -214,6 +214,9 @@ export function InvestmentCharts({
 
     const data = payload[0].payload;
     const isProjection = data.isProjection;
+    const roi = data.aportesValorPresente > 0 
+      ? ((data.saldoValorPresente / data.aportesValorPresente) - 1) * 100 
+      : 0;
 
     return (
       <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg p-4 shadow-lg">
@@ -238,9 +241,21 @@ export function InvestmentCharts({
             </span>
           </div>
           <div className="flex justify-between gap-4">
-            <span className="text-muted-foreground">Aportes Acum.:</span>
+            <span className="text-muted-foreground">Aportes Acum. Aparente:</span>
             <span className="font-semibold" style={{ color: 'hsl(var(--chart-3))' }}>
               {formatCurrencyFull(data.aportesAparente)}
+            </span>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span className="text-muted-foreground">Aportes Acum. VP:</span>
+            <span className="font-semibold" style={{ color: 'hsl(var(--chart-4))' }}>
+              {formatCurrencyFull(data.aportesValorPresente)}
+            </span>
+          </div>
+          <div className="flex justify-between gap-4 pt-2 mt-2 border-t">
+            <span className="text-muted-foreground font-medium">ROI:</span>
+            <span className={`font-bold ${roi >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
+              {roi >= 0 ? '+' : ''}{roi.toFixed(2)}%
             </span>
           </div>
         </div>
