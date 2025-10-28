@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
+import { MaskValuesProvider } from "@/hooks/useMaskValues";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageMeta } from "@/components/seo/PageMeta";
@@ -54,6 +55,7 @@ const App = () => (
         <BrowserRouter>
           <PageMeta />
           <AuthProvider>
+            <MaskValuesProvider>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/auth" element={<Auth />} />
@@ -83,10 +85,11 @@ const App = () => (
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </ThemeProvider>
+            </MaskValuesProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

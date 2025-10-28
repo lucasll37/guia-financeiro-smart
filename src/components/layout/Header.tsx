@@ -1,5 +1,4 @@
-import { Search, User, Crown } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { User, Crown, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,6 +27,7 @@ import { NotificationPreferences } from "@/components/notifications/Notification
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useMaskValues } from "@/hooks/useMaskValues";
 
 const routeLabels: Record<string, string> = {
   "/app/dashboard": t("nav.dashboard"),
@@ -46,6 +46,7 @@ export const Header = () => {
   const navigate = useNavigate();
   const currentRoute = routeLabels[location.pathname] || "Painel";
   const [preferencesOpen, setPreferencesOpen] = useState(false);
+  const { isMasked, toggleMask } = useMaskValues();
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -99,14 +100,14 @@ export const Header = () => {
         </Breadcrumb>
 
         <div className="ml-auto flex items-center gap-4">
-          <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder={t("common.search")}
-              className="pl-10"
-            />
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleMask}
+            title={isMasked ? "Mostrar valores" : "Ocultar valores"}
+          >
+            {isMasked ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </Button>
 
           {user && (
             <>
