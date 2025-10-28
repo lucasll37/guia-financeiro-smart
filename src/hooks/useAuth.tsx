@@ -62,16 +62,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Limpar estado local imediatamente
     setSession(null);
     setUser(null);
-    
-    // Tentar fazer logout no servidor (pode falhar se a sessão já expirou)
+
+    // Redirecionar para a Landing Page imediatamente (sem passar por /auth)
+    navigate("/", { replace: true });
+
+    // Fazer logout no backend em background para evitar flash de rota protegida
     try {
-      await supabase.auth.signOut();
+      // Não aguardar (para não bloquear a navegação)
+      void supabase.auth.signOut();
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
     }
-    
-    // Redirecionar para Landing Page
-    navigate("/");
   };
 
   const resetPassword = async (email: string) => {

@@ -38,9 +38,28 @@ const Home = () => {
     Autoplay({ delay: 3000, stopOnInteraction: true })
   );
 
-  // Forçar tema dark na Landing Page
+  // Forçar tema dark na Landing Page e restaurar tema anterior ao sair
   useEffect(() => {
+    const root = document.documentElement;
+    const hadDarkClass = root.classList.contains("dark");
+    // Guardar tema anterior da lib
+    const prevTheme = localStorage.getItem("theme");
+
+    // Aplicar imediatamente classe dark para evitar flash claro
+    root.classList.add("dark");
+    // E também instruir a lib a usar dark
     setTheme("dark");
+
+    return () => {
+      // Restaurar tema anterior
+      if (prevTheme) {
+        setTheme(prevTheme);
+      }
+      // Se a página anterior não era dark, removemos a classe
+      if (!hadDarkClass) {
+        root.classList.remove("dark");
+      }
+    };
   }, [setTheme]);
 
   const testimonials = [
