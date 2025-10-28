@@ -257,6 +257,14 @@ function InvestmentCard({
     accumulatedInflation = (inflationFactor - 1) * 100;
   }
 
+  // Calcular rendimento real (nominal - inflação)
+  const inflationValue = totalContributions * (accumulatedInflation / 100);
+  const realGain = nominalGain - inflationValue;
+  const realGainPercentage = totalContributions > 0
+    ? ((1 + gainPercentage / 100) / (1 + accumulatedInflation / 100) - 1) * 100
+    : 0;
+  const isRealPositive = realGain >= 0;
+
   return (
     <Card
       className="cursor-pointer hover:shadow-lg transition-shadow"
@@ -331,15 +339,31 @@ function InvestmentCard({
         </div>
 
         {/* Inflação */}
-        <div className="space-y-1 pb-4 border-b">
+        <div className="space-y-1">
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Inflação</div>
           <div className="text-2xl font-bold text-orange-600">
-            +{new Intl.NumberFormat("pt-BR", {
+            -{new Intl.NumberFormat("pt-BR", {
               style: "currency",
               currency: "BRL",
             }).format(totalContributions * (accumulatedInflation / 100))}
             <span className="text-base ml-2">
-              (+{accumulatedInflation.toFixed(2)}%)
+              (-{accumulatedInflation.toFixed(2)}%)
+            </span>
+          </div>
+        </div>
+
+        {/* Rendimento Real */}
+        <div className="space-y-1 pb-4 border-b">
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Rendimento Real</div>
+          <div className={`text-2xl font-bold ${isRealPositive ? "text-green-600" : "text-red-600"}`}>
+            {isRealPositive ? "+" : ""}
+            {new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }).format(realGain)}
+            <span className="text-base ml-2">
+              ({isRealPositive ? "+" : ""}
+              {realGainPercentage.toFixed(1)}%)
             </span>
           </div>
         </div>
