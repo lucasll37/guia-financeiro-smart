@@ -13,6 +13,7 @@ import { Pencil, Trash2, Plus, ArrowUpDown, ArrowUp, ArrowDown, Info } from "luc
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState, useMemo } from "react";
+import { useMaskValues } from "@/hooks/useMaskValues";
 import type { Database } from "@/integrations/supabase/types";
 
 type MonthlyReturn = Database["public"]["Tables"]["investment_monthly_returns"]["Row"];
@@ -35,6 +36,7 @@ export function MonthlyReturnsTable({
   const [sortField, setSortField] = useState<'month' | 'return' | 'contribution' | 'balance' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [isExplanationOpen, setIsExplanationOpen] = useState(false);
+  const { maskValue } = useMaskValues();
 
   const handleSort = (field: 'month' | 'return' | 'contribution' | 'balance') => {
     if (sortField === field) {
@@ -215,11 +217,11 @@ export function MonthlyReturnsTable({
                             : "text-red-600"
                         }
                       >
-                        {Number(returnData.actual_return).toFixed(2)}%
+                        {maskValue(`${Number(returnData.actual_return).toFixed(2)}%`)}
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
-                      {Number(returnData.inflation_rate).toFixed(2)}%
+                      {maskValue(`${Number(returnData.inflation_rate).toFixed(2)}%`)}
                     </TableCell>
                     <TableCell className="text-right">
                       <span
@@ -229,14 +231,14 @@ export function MonthlyReturnsTable({
                             : ""
                         }
                       >
-                        {formatCurrency(Number(returnData.contribution))}
+                        {maskValue(formatCurrency(Number(returnData.contribution)))}
                       </span>
                     </TableCell>
                     <TableCell className="text-right font-medium">
-                      {formatCurrency(Number(returnData.balance_after))}
+                      {maskValue(formatCurrency(Number(returnData.balance_after)))}
                     </TableCell>
                     <TableCell className="text-right text-orange-600 font-medium">
-                      -{formatCurrency(returnData.cumulativeInflationValue)}
+                      -{maskValue(formatCurrency(returnData.cumulativeInflationValue))}
                     </TableCell>
                     <TableCell className="max-w-xs truncate">
                       {returnData.notes || "-"}

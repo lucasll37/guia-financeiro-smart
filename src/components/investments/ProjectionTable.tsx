@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Info, ArrowUpDown, ArrowUp, ArrowDown, Download } from "lucide-react";
+import { useMaskValues } from "@/hooks/useMaskValues";
 import {
   Table,
   TableBody,
@@ -30,6 +31,7 @@ interface ProjectionTableProps {
 }
 
 export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }: ProjectionTableProps) {
+  const { maskValue } = useMaskValues();
   // Load initial values from localStorage
   const [months, setMonths] = useState(() => {
     const saved = localStorage.getItem('projectionTable.months');
@@ -524,22 +526,22 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                     {format(row.month, "MMM/yyyy", { locale: ptBR })}
                   </TableCell>
                   <TableCell className="text-right">
-                    {formatCurrency(row.contribution)}
+                    {maskValue(formatCurrency(row.contribution))}
                   </TableCell>
                   <TableCell className="text-right">
-                    {formatCurrency(row.cumulativeContribution)}
+                    {maskValue(formatCurrency(row.cumulativeContribution))}
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">
-                    {formatCurrency(row.cumulativeContributionPV)}
+                    {maskValue(formatCurrency(row.cumulativeContributionPV))}
                   </TableCell>
                   <TableCell className="text-right">
-                    {formatCurrency(row.returns)}
+                    {maskValue(formatCurrency(row.returns))}
                   </TableCell>
                   <TableCell className="text-right font-medium">
-                    {formatCurrency(row.balance)}
+                    {maskValue(formatCurrency(row.balance))}
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">
-                    {formatCurrency(row.presentValue)}
+                    {maskValue(formatCurrency(row.presentValue))}
                   </TableCell>
                 </TableRow>
               ))}
@@ -550,30 +552,30 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-4 border-t">
           <div>
             <p className="text-sm text-muted-foreground">Saldo Inicial</p>
-            <p className="text-lg font-semibold">{formatCurrency(currentBalance)}</p>
+            <p className="text-lg font-semibold">{maskValue(formatCurrency(currentBalance))}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Aporte Acum. Aparente</p>
             <p className="text-lg font-semibold">
-              {formatCurrency(projectionData[projectionData.length - 1]?.cumulativeContribution || 0)}
+              {maskValue(formatCurrency(projectionData[projectionData.length - 1]?.cumulativeContribution || 0))}
             </p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Aporte Acum. VP</p>
             <p className="text-lg font-semibold text-muted-foreground">
-              {formatCurrency(projectionData[projectionData.length - 1]?.cumulativeContributionPV || 0)}
+              {maskValue(formatCurrency(projectionData[projectionData.length - 1]?.cumulativeContributionPV || 0))}
             </p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Saldo Final Projetado (Aparente)</p>
             <p className="text-lg font-semibold">
-              {formatCurrency(projectionData[projectionData.length - 1]?.balance || 0)}
+              {maskValue(formatCurrency(projectionData[projectionData.length - 1]?.balance || 0))}
             </p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Saldo Final Projetado (VP)</p>
             <p className="text-lg font-semibold text-chart-2">
-              {formatCurrency(projectionData[projectionData.length - 1]?.presentValue || 0)}
+              {maskValue(formatCurrency(projectionData[projectionData.length - 1]?.presentValue || 0))}
             </p>
           </div>
         </div>

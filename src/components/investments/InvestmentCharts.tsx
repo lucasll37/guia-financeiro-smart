@@ -244,31 +244,31 @@ export function InvestmentCharts({
           <div className="flex justify-between gap-4">
             <span className="text-muted-foreground">Saldo Aparente:</span>
             <span className="font-semibold" style={{ color: 'hsl(var(--primary))' }}>
-              {formatCurrencyFull(data.saldoAparente)}
+              {maskValue(formatCurrencyFull(data.saldoAparente))}
             </span>
           </div>
           <div className="flex justify-between gap-4">
             <span className="text-muted-foreground">Saldo VP:</span>
             <span className="font-semibold" style={{ color: 'hsl(var(--chart-2))' }}>
-              {formatCurrencyFull(data.saldoValorPresente)}
+              {maskValue(formatCurrencyFull(data.saldoValorPresente))}
             </span>
           </div>
           <div className="flex justify-between gap-4">
             <span className="text-muted-foreground">Aportes Acum. Aparente:</span>
             <span className="font-semibold" style={{ color: 'hsl(var(--chart-3))' }}>
-              {formatCurrencyFull(data.aportesAparente)}
+              {maskValue(formatCurrencyFull(data.aportesAparente))}
             </span>
           </div>
           <div className="flex justify-between gap-4">
             <span className="text-muted-foreground">Aportes Acum. VP:</span>
             <span className="font-semibold" style={{ color: 'hsl(var(--chart-4))' }}>
-              {formatCurrencyFull(data.aportesValorPresente)}
+              {maskValue(formatCurrencyFull(data.aportesValorPresente))}
             </span>
           </div>
           <div className="flex justify-between gap-4 pt-2 mt-2 border-t">
             <span className="text-muted-foreground font-medium">Rendimento Real:</span>
             <span className={`font-bold ${realReturnPercent >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
-              {realReturnPercent >= 0 ? '+' : ''}{realReturnPercent.toFixed(2)}%
+              {realReturnPercent >= 0 ? '+' : ''}{maskValue(`${realReturnPercent.toFixed(2)}%`)}
             </span>
           </div>
         </div>
