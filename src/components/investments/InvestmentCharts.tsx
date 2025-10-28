@@ -403,11 +403,12 @@ export function InvestmentCharts({
                   strokeWidth={2}
                   strokeDasharray="5 5"
                   label={{ 
-                    value: "Início Projeção", 
-                    position: "top",
+                    value: "← Real | Simulação →", 
+                    position: "insideTopRight",
                     fill: 'hsl(var(--destructive))',
                     fontSize: 12,
-                    fontWeight: 600
+                    fontWeight: 700,
+                    offset: 10
                   }}
                 />
               )}
