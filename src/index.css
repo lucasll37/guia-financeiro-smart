@@ -125,3 +125,45 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Responsive utilities */
+@layer utilities {
+  /* Prevent horizontal scroll on mobile */
+  .mobile-container {
+    @apply max-w-full overflow-x-hidden;
+  }
+  
+  /* Better touch targets for mobile */
+  @media (max-width: 768px) {
+    button, a, [role="button"] {
+      @apply min-h-[44px];
+    }
+  }
+  
+  /* Scrollable tables on mobile */
+  .responsive-table-container {
+    @apply w-full overflow-x-auto -mx-4 px-4;
+  }
+  
+  @media (min-width: 768px) {
+    .responsive-table-container {
+      @apply mx-0 px-0;
+    }
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  /* Responsive chart containers */
+  .chart-container {
+    @apply w-full h-[250px] sm:h-[300px] md:h-[350px];
+  }
+}
+

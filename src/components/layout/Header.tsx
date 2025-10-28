@@ -84,10 +84,10 @@ export const Header = () => {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
-      <div className="flex h-16 items-center gap-4 px-4">
+      <div className="flex h-14 md:h-16 items-center gap-2 md:gap-4 px-2 md:px-4">
         <SidebarTrigger />
         
-        <Breadcrumb>
+        <Breadcrumb className="hidden sm:flex">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/app/dashboard">Home</BreadcrumbLink>
@@ -99,15 +99,16 @@ export const Header = () => {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="ml-auto flex items-center gap-4">
+        <div className="ml-auto flex items-center gap-1 md:gap-4">
           <Button
             variant={isMasked ? "destructive" : "ghost"}
             size="icon"
             onClick={toggleMask}
             title={isMasked ? "Mostrar valores" : "Ocultar valores"}
             aria-pressed={isMasked}
+            className="h-8 w-8 md:h-10 md:w-10"
           >
-            {isMasked ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            {isMasked ? <EyeOff className="h-4 w-4 md:h-5 md:w-5" /> : <Eye className="h-4 w-4 md:h-5 md:w-5" />}
           </Button>
 
           {user && (
@@ -128,16 +129,16 @@ export const Header = () => {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Avatar className="h-9 w-9">
+              <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 md:h-10 md:w-10">
+                <Avatar className="h-7 w-7 md:h-9 md:w-9">
                   <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.name || user?.email || "Usuário"} />
                   <AvatarFallback>
-                    <User className="h-5 w-5" />
+                    <User className="h-4 w-4 md:h-5 md:w-5" />
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
+            <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] sm:w-80 max-w-80">
               <DropdownMenuLabel>
                 <div className="flex items-start gap-3">
                   <Avatar className="h-10 w-10">

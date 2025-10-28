@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowUpRight, ArrowDownRight, Wallet, TrendingUp } from "lucide-react";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { cn } from "@/lib/utils";
 
 interface KPI {
   totalRevenue: number;
@@ -17,13 +19,7 @@ interface DashboardKPIsProps {
 }
 
 export function DashboardKPIs({ kpis }: DashboardKPIsProps) {
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
-  };
-
+  const { formatCurrency } = useUserPreferences();
   const formatPercentage = (value: number) => {
     const sign = value >= 0 ? "+" : "";
     return `${sign}${value.toFixed(1)}%`;
@@ -40,14 +36,14 @@ export function DashboardKPIs({ kpis }: DashboardKPIsProps) {
   };
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Receitas</CardTitle>
           <ArrowUpRight className="h-4 w-4 text-accent" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
+          <div className="text-xl md:text-2xl font-bold">
             {formatCurrency(kpis.totalRevenue)}
           </div>
           <p className={cn("text-xs", getChangeColor(kpis.revenueChange))}>
@@ -62,7 +58,7 @@ export function DashboardKPIs({ kpis }: DashboardKPIsProps) {
           <ArrowDownRight className="h-4 w-4 text-destructive" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
+          <div className="text-xl md:text-2xl font-bold">
             {formatCurrency(kpis.totalExpenses)}
           </div>
           <p className={cn("text-xs", getChangeColor(kpis.expensesChange, true))}>
@@ -77,7 +73,7 @@ export function DashboardKPIs({ kpis }: DashboardKPIsProps) {
           <Wallet className="h-4 w-4 text-primary" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
+          <div className="text-xl md:text-2xl font-bold">
             {formatCurrency(kpis.balance)}
           </div>
           <p className={cn("text-xs", getChangeColor(kpis.balanceChange))}>
@@ -92,7 +88,7 @@ export function DashboardKPIs({ kpis }: DashboardKPIsProps) {
           <TrendingUp className="h-4 w-4 text-accent" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
+          <div className="text-xl md:text-2xl font-bold">
             {formatCurrency(kpis.investments)}
           </div>
           <p className={cn("text-xs", getChangeColor(kpis.investmentsChange))}>
@@ -102,9 +98,4 @@ export function DashboardKPIs({ kpis }: DashboardKPIsProps) {
       </Card>
     </div>
   );
-}
-
-// Helper function for className
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(" ");
 }
