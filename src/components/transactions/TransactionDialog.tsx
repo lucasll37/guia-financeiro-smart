@@ -178,24 +178,33 @@ export function TransactionDialog({
       // Criar array de transações
       const transactions: TransactionInsert[] = [];
       
-      // Usar o mês de pagamento como base (se ajustado) ou calcular automaticamente
-      const basePaymentMonth = formData.payment_month 
-        ? parseISO(formData.payment_month)
-        : startOfMonth(new Date(formData.date));
+      // Pegar ano e mês do payment_month para evitar problemas de timezone
+      const [year, month] = formData.payment_month 
+        ? formData.payment_month.split('-').map(Number)
+        : [new Date().getFullYear(), new Date().getMonth() + 1];
       
       for (let i = 0; i < installmentCount; i++) {
         const installmentAmount = i < remainder ? baseInstallment + 0.01 : baseInstallment;
         
-        // Calcular o mês de pagamento da parcela atual
-        const paymentMonth = addMonths(basePaymentMonth, i);
-        const firstDayOfMonth = startOfMonth(paymentMonth);
+        // Calcular ano e mês da parcela atual
+        let parcelMonth = month + i;
+        let parcelYear = year;
+        
+        // Ajustar ano se o mês ultrapassar 12
+        while (parcelMonth > 12) {
+          parcelMonth -= 12;
+          parcelYear += 1;
+        }
+        
+        // Criar data como string diretamente para evitar timezone
+        const parcelDate = `${parcelYear}-${String(parcelMonth).padStart(2, '0')}-01`;
         
         transactions.push({
           ...formData,
-          date: format(firstDayOfMonth, "yyyy-MM-dd"),
+          date: parcelDate,
           amount: Math.round(installmentAmount * 100) / 100,
           description: `${formData.description} - ${cardName} (Compra em ${purchaseDate}) (${i + 1}/${installmentCount})`,
-          payment_month: format(paymentMonth, "yyyy-MM-dd"),
+          payment_month: parcelDate,
           split_override: isShared && useCustomSplit ? (splitMembers as any) : null,
         });
       }
