@@ -59,7 +59,10 @@ export function InvestmentCharts({
     let cumulativeContributionPV = 0;
     
     return sortedReturns.map((r) => {
-      const monthDate = new Date(r.month);
+      // Parse seguro da data para evitar problemas de timezone
+      const [year, month] = String(r.month).split('-').map(Number);
+      const monthDate = new Date(year, month - 1, 1);
+      
       const balance = Number(r.balance_after);
       const contribution = Number(r.contribution);
       const inflationRate = Number(r.inflation_rate) / 100;
