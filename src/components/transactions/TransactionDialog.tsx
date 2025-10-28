@@ -167,6 +167,11 @@ export function TransactionDialog({
       const baseInstallment = Math.floor((totalAmount * 100) / installmentCount) / 100; // valor base da parcela
       const remainder = Math.round((totalAmount * 100) - (baseInstallment * 100 * installmentCount)); // centavos que sobraram
       
+      // Buscar nome do cartão
+      const selectedCard = creditCards?.find(c => c.id === formData.credit_card_id);
+      const cardName = selectedCard?.name || "Cartão";
+      const purchaseDate = format(new Date(formData.date), "dd/MM/yyyy");
+      
       // Criar array de transações
       const transactions: TransactionInsert[] = [];
       
@@ -174,16 +179,19 @@ export function TransactionDialog({
         // As primeiras parcelas levam os centavos extras
         const installmentAmount = i < remainder ? baseInstallment + 0.01 : baseInstallment;
         
-        const installmentDate = new Date(formData.date);
-        const installmentPaymentMonth = formData.payment_month 
+        // Calcular o primeiro dia do mês de pagamento
+        const paymentMonth = formData.payment_month 
           ? addMonths(new Date(formData.payment_month), i)
           : addMonths(new Date(formData.date), i);
         
+        const firstDayOfMonth = new Date(paymentMonth.getFullYear(), paymentMonth.getMonth(), 1);
+        
         transactions.push({
           ...formData,
+          date: format(firstDayOfMonth, "yyyy-MM-dd"),
           amount: Math.round(installmentAmount * 100) / 100,
-          description: `${formData.description} (${i + 1}/${installmentCount})`,
-          payment_month: format(installmentPaymentMonth, "yyyy-MM-dd"),
+          description: `${formData.description} - ${cardName} (Compra em ${purchaseDate}) (${i + 1}/${installmentCount})`,
+          payment_month: format(paymentMonth, "yyyy-MM-dd"),
           split_override: isShared && useCustomSplit ? (splitMembers as any) : null,
         });
       }
