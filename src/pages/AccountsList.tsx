@@ -152,78 +152,92 @@ export default function AccountsList() {
         </div>
       ) : accounts && accounts.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {accounts.map((account) => (
-            <Card
-              key={account.id}
-              className="cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => handleAccountClick(account.id)}
-            >
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-xl">{account.name}</CardTitle>
-                    <div className="text-sm text-muted-foreground flex items-center gap-2">
-                      <Badge variant={account.type === "pessoal" ? "default" : "secondary"}>
-                        {account.type === "pessoal" ? "Pessoal" : "Empresarial"}
-                      </Badge>
-                      {account.is_shared && (
-                        <Badge variant="outline" className="gap-1">
-                          <Users className="h-3 w-3" />
-                          Compartilhada
+          {accounts.map((account) => {
+            const isOwner = account.owner_id === user?.id;
+            // Debug: log ownership and sharing flags for visibility issues
+            console.log("AccountsList card", {
+              name: account.name,
+              id: account.id,
+              owner_id: account.owner_id,
+              currentUserId: user?.id,
+              isOwner,
+              is_shared: account.is_shared,
+            });
+
+            return (
+              <Card
+                key={account.id}
+                className="cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => handleAccountClick(account.id)}
+              >
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <CardTitle className="text-xl">{account.name}</CardTitle>
+                      <div className="text-sm text-muted-foreground flex items-center gap-2">
+                        <Badge variant={account.type === "pessoal" ? "default" : "secondary"}>
+                          {account.type === "pessoal" ? "Pessoal" : "Empresarial"}
                         </Badge>
+                        {account.is_shared && (
+                          <Badge variant="outline" className="gap-1">
+                            <Users className="h-3 w-3" />
+                            Compartilhada
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                      {/* Botão Gerenciar Membros - apenas para contas compartilhadas do dono */}
+                      {account.is_shared && isOwner && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => handleManageMembers(e, account)}
+                          title="Gerenciar Membros"
+                          aria-label="Gerenciar membros"
+                        >
+                          <Users className="h-4 w-4" />
+                        </Button>
+                      )}
+
+                      {/* Botões Excluir e Editar - apenas para o dono */}
+                      {isOwner && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => handleDeleteClick(e, account)}
+                            title="Excluir"
+                            aria-label="Excluir conta"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => handleEditAccount(e, account)}
+                            title="Editar"
+                            aria-label="Editar conta"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </>
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-1 shrink-0">
-                    {/* Botão Gerenciar Membros - apenas para contas compartilhadas */}
-                    {account.is_shared && account.owner_id === user?.id && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => handleManageMembers(e, account)}
-                        title="Gerenciar Membros"
-                        aria-label="Gerenciar membros"
-                      >
-                        <Users className="h-4 w-4" />
-                      </Button>
-                    )}
-                    
-                    {/* Botões Excluir e Editar - para todos os donos */}
-                    {account.owner_id === user?.id && (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => handleDeleteClick(e, account)}
-                          title="Excluir"
-                          aria-label="Excluir conta"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => handleEditAccount(e, account)}
-                          title="Editar"
-                          aria-label="Editar conta"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </>
-                    )}
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Clique para acessar
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    Clique para acessar
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
+
         </div>
       ) : (
         <Card>
