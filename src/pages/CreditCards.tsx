@@ -29,6 +29,8 @@ export default function CreditCards() {
     viewMode: "monthly" as "monthly" | "custom",
     selectedMonth: currentMonth,
   });
+  
+  const [expandAll, setExpandAll] = useState(false);
 
   const { creditCards, isLoading, createCreditCard, updateCreditCard, deleteCreditCard } =
     useCreditCards(filters.accountId !== "all" ? filters.accountId : undefined);
@@ -90,6 +92,8 @@ export default function CreditCards() {
         accounts={accounts || []}
         filters={filters}
         onFilterChange={setFilters}
+        expandAll={expandAll}
+        onToggleExpandAll={() => setExpandAll(!expandAll)}
       />
 
       {isLoading ? (
@@ -100,6 +104,7 @@ export default function CreditCards() {
           transactions={filteredTransactions}
           onEdit={handleEditCard}
           onDelete={handleDeleteCard}
+          expandAll={expandAll}
         />
       )}
 

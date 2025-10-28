@@ -2,6 +2,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, ChevronDown, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { useState, useMemo } from "react";
+import { Badge } from "@/components/ui/badge";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 import type { Database } from "@/integrations/supabase/types";
 
 type CreditCard = Database["public"]["Tables"]["credit_cards"]["Row"];
@@ -18,6 +20,7 @@ interface CreditCardsTableProps {
   transactions: Transaction[];
   onEdit: (creditCard: CreditCard) => void;
   onDelete: (id: string) => void;
+  expandAll?: boolean;
 }
 
 export function CreditCardsTable({
@@ -25,10 +28,12 @@ export function CreditCardsTable({
   transactions,
   onEdit,
   onDelete,
+  expandAll = false,
 }: CreditCardsTableProps) {
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [sortField, setSortField] = useState<'name' | 'total' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const { formatCurrency } = useUserPreferences();
 
   const toggleCard = (id: string) => {
     setExpandedCards(prev => {
@@ -56,12 +61,8 @@ export function CreditCardsTable({
     return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 ml-1" /> : <ArrowDown className="h-4 w-4 ml-1" />;
   };
 
-  const formatCurrency = (amount: number | null) => {
-    if (!amount) return "-";
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(amount);
+  const isCardExpanded = (cardId: string) => {
+    return expandAll || expandedCards.has(cardId);
   };
 
   const getCardTransactions = (cardId: string) => {
@@ -123,7 +124,7 @@ export function CreditCardsTable({
             <TableHead className="text-right">Limite</TableHead>
             <TableHead className="text-right">
               <Button variant="ghost" size="sm" onClick={() => handleSort('total')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
-                A Pagar
+                Total a Pagar
                 {renderSortIcon('total')}
               </Button>
             </TableHead>
@@ -148,7 +149,7 @@ export function CreditCardsTable({
                   <TableRow key={card.id} className="cursor-pointer hover:bg-muted/50" onClick={() => toggleCard(card.id)}>
                     <TableCell>
                       <Button variant="ghost" size="icon" className="h-6 w-6">
-                        {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        {isCardExpanded(card.id) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                       </Button>
                     </TableCell>
                     <TableCell className="font-medium">{card.name}</TableCell>
@@ -181,11 +182,11 @@ export function CreditCardsTable({
                       </div>
                     </TableCell>
                   </TableRow>
-                  {isExpanded && (
+                  {isCardExpanded(card.id) && (
                     <TableRow>
                       <TableCell colSpan={7} className="p-0">
-                        <div className="bg-muted/30 p-4">
-                          <h4 className="font-semibold mb-3">Faturas por Mês</h4>
+                        <div className="bg-muted/30 p-4 md:p-6">
+                          <h4 className="font-semibold mb-4 text-base md:text-lg">Faturas por Mês</h4>
                           {monthlyTransactions.length === 0 ? (
                             <p className="text-sm text-muted-foreground">Nenhuma transação encontrada</p>
                           ) : (
@@ -193,25 +194,44 @@ export function CreditCardsTable({
                               {monthlyTransactions.map(([month, txs]) => {
                                 const monthTotal = txs.reduce((sum, t) => sum + Number(t.amount), 0);
                                 return (
-                                  <div key={month} className="border rounded-lg p-3 bg-background">
-                                    <div className="flex justify-between items-center mb-2">
-                                      <h5 className="font-medium">
+                                  <div key={month} className="border rounded-lg p-3 md:p-4 bg-background shadow-sm">
+                                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3 pb-3 border-b">
+                                      <h5 className="font-semibold text-base">
                                         {new Date(month).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
                                       </h5>
-                                      <span className="font-semibold text-destructive">
-                                        {formatCurrency(monthTotal)}
-                                      </span>
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-sm text-muted-foreground">Total:</span>
+                                        <span className="font-bold text-destructive text-lg">
+                                          {formatCurrency(monthTotal)}
+                                        </span>
+                                      </div>
                                     </div>
-                                    <div className="space-y-1">
+                                    <div className="space-y-3">
                                       {txs.map(t => (
-                                        <div key={t.id} className="flex justify-between text-sm">
-                                          <div className="flex items-center gap-2">
-                                            <span className="text-muted-foreground">
-                                              {new Date(t.date).toLocaleDateString('pt-BR')}
-                                            </span>
-                                            <span>{t.description}</span>
+                                        <div key={t.id} className="flex flex-col sm:flex-row sm:justify-between gap-2 p-2 rounded hover:bg-muted/50 transition-colors">
+                                          <div className="flex flex-col gap-1 flex-1">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                              <span className="text-xs text-muted-foreground font-medium">
+                                                {new Date(t.date).toLocaleDateString('pt-BR')}
+                                              </span>
+                                              {t.categories && (
+                                                <Badge 
+                                                  variant="outline" 
+                                                  className="text-xs"
+                                                  style={{ 
+                                                    borderColor: t.categories.color,
+                                                    color: t.categories.color 
+                                                  }}
+                                                >
+                                                  {t.categories.name}
+                                                </Badge>
+                                              )}
+                                            </div>
+                                            <span className="font-medium">{t.description}</span>
                                           </div>
-                                          <span>{formatCurrency(t.amount)}</span>
+                                          <div className="flex items-center justify-between sm:justify-end gap-2">
+                                            <span className="font-semibold text-lg">{formatCurrency(Number(t.amount))}</span>
+                                          </div>
                                         </div>
                                       ))}
                                     </div>

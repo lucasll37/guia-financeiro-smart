@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar, CalendarIcon } from "lucide-react";
+import { Calendar, CalendarIcon, Expand } from "lucide-react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMemo } from "react";
@@ -22,9 +22,11 @@ interface CreditCardFiltersProps {
     selectedMonth: string;
   };
   onFilterChange: (filters: any) => void;
+  expandAll: boolean;
+  onToggleExpandAll: () => void;
 }
 
-export function CreditCardFilters({ accounts, filters, onFilterChange }: CreditCardFiltersProps) {
+export function CreditCardFilters({ accounts, filters, onFilterChange, expandAll, onToggleExpandAll }: CreditCardFiltersProps) {
   // Generate month options (6 months before and after current month)
   const monthOptions = useMemo(() => {
     const options = [];
@@ -76,13 +78,23 @@ export function CreditCardFilters({ accounts, filters, onFilterChange }: CreditC
             {filters.viewMode === "monthly" ? "Visualização Mensal" : "Período Personalizado"}
           </span>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={toggleViewMode}
-        >
-          {filters.viewMode === "monthly" ? "Personalizar Período" : "Voltar para Mensal"}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant={expandAll ? "default" : "outline"}
+            size="sm"
+            onClick={onToggleExpandAll}
+          >
+            <Expand className="h-4 w-4 mr-2" />
+            {expandAll ? "Recolher Todas" : "Expandir Todas"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleViewMode}
+          >
+            {filters.viewMode === "monthly" ? "Personalizar Período" : "Voltar para Mensal"}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 border rounded-lg bg-card">
