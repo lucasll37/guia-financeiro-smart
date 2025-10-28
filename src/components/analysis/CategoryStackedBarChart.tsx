@@ -87,37 +87,38 @@ export function CategoryStackedBarChart({
     return result.sort((a, b) => (b.Previsto + b.Realizado) - (a.Previsto + a.Realizado));
   }, [categories, transactions, forecasts, periodStart, periodEnd, parentCategories]);
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload, type }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
-      const previsto = data.Previsto || 0;
-      const realizado = data.Realizado || 0;
-      const diferenca = realizado - previsto;
+      const value = type === 'previsto' ? data.Previsto : data.Realizado;
       
       return (
         <div className="bg-background border border-border p-3 rounded-lg shadow-lg">
           <p className="font-semibold mb-2">{data.categoria}</p>
-          <div className="space-y-1">
-            <p className="text-sm flex justify-between gap-4">
-              <span className="text-primary">Previsto:</span>
-              <span className="font-medium">{formatCurrency(previsto)}</span>
-            </p>
-            <p className="text-sm flex justify-between gap-4">
-              <span style={{ color: 'hsl(var(--chart-2))' }}>Realizado:</span>
-              <span className="font-medium">{formatCurrency(realizado)}</span>
-            </p>
-            <div className="border-t pt-1 mt-1">
-              <p className={`text-sm flex justify-between gap-4 ${diferenca >= 0 ? 'text-red-600' : 'text-green-600'}`}>
-                <span>Diferença:</span>
-                <span className="font-bold">{formatCurrency(Math.abs(diferenca))}</span>
-              </p>
-            </div>
-          </div>
+          <p className="text-sm">
+            {formatCurrency(value)}
+          </p>
         </div>
       );
     }
     return null;
   };
+
+  // Separar dados previsto e realizado
+  const forecastedData = chartData.filter(item => item.Previsto > 0).map(item => ({
+    categoria: item.categoria,
+    value: item.Previsto,
+    color: item.color,
+  }));
+
+  const actualData = chartData.filter(item => item.Realizado > 0).map(item => ({
+    categoria: item.categoria,
+    value: item.Realizado,
+    color: item.color,
+  }));
+
+  const totalForecasted = forecastedData.reduce((sum, item) => sum + item.value, 0);
+  const totalActual = actualData.reduce((sum, item) => sum + item.value, 0);
 
   if (chartData.length === 0) {
     return (
@@ -135,38 +136,74 @@ export function CategoryStackedBarChart({
   }
 
   return (
-    <Card className="animate-fade-in">
-      <CardHeader>
-        <CardTitle>Composição: Previsto vs Realizado</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Comparação dos valores totais por categoria (soma de todas as subcategorias)
-        </p>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={Math.max(400, chartData.length * 60)}>
-          <BarChart data={chartData} layout="vertical" margin={{ left: 20, right: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-            <XAxis type="number" tickFormatter={(value) => formatCurrency(value)} />
-            <YAxis type="category" dataKey="categoria" width={120} />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend />
-            <Bar 
-              dataKey="Previsto" 
-              fill="hsl(var(--primary))"
-              radius={[0, 4, 4, 0]}
-              animationBegin={0}
-              animationDuration={800}
-            />
-            <Bar 
-              dataKey="Realizado" 
-              fill="hsl(var(--chart-2))"
-              radius={[0, 4, 4, 0]}
-              animationBegin={100}
-              animationDuration={800}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </Card>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Gráfico Previsto */}
+      <Card className="animate-fade-in">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-primary" />
+            Composição Prevista por Categoria
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Total: {formatCurrency(totalForecasted)}
+          </p>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={Math.max(400, forecastedData.length * 50)}>
+            <BarChart data={forecastedData} layout="vertical" margin={{ left: 10, right: 30 }}>
+              <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
+              <XAxis type="number" tickFormatter={(value) => formatCurrency(value)} />
+              <YAxis type="category" dataKey="categoria" width={110} />
+              <Tooltip content={(props) => <CustomTooltip {...props} type="previsto" />} />
+              <Bar 
+                dataKey="value" 
+                fill="hsl(var(--primary))"
+                radius={[0, 4, 4, 0]}
+                animationBegin={0}
+                animationDuration={800}
+              >
+                {forecastedData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Gráfico Realizado */}
+      <Card className="animate-fade-in" style={{ animationDelay: "100ms" }}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-chart-2" />
+            Composição Realizada por Categoria
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Total: {formatCurrency(totalActual)}
+          </p>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={Math.max(400, actualData.length * 50)}>
+            <BarChart data={actualData} layout="vertical" margin={{ left: 10, right: 30 }}>
+              <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
+              <XAxis type="number" tickFormatter={(value) => formatCurrency(value)} />
+              <YAxis type="category" dataKey="categoria" width={110} />
+              <Tooltip content={(props) => <CustomTooltip {...props} type="realizado" />} />
+              <Bar 
+                dataKey="value" 
+                fill="hsl(var(--chart-2))"
+                radius={[0, 4, 4, 0]}
+                animationBegin={100}
+                animationDuration={800}
+              >
+                {actualData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
