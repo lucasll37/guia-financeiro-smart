@@ -292,73 +292,65 @@ function InvestmentCard({
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {/* Valores principais em destaque */}
-          <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg p-4 space-y-3">
-            <div className="flex items-baseline justify-between">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Valor Atual</span>
-              <span className="text-2xl font-bold">
-                {new Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                }).format(currentValue)}
-              </span>
-            </div>
-            
-            <div className="flex items-baseline justify-between pt-2 border-t border-primary/20">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Rendimento</span>
-              <span className={`text-xl font-bold ${isPositive ? "text-green-600" : "text-red-600"}`}>
-                {isPositive ? "+" : ""}
-                {new Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                }).format(nominalGain)}
-              </span>
-            </div>
+      <CardContent className="space-y-6">
+        {/* Valor Atual - destaque principal */}
+        <div className="space-y-1">
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Valor Atual</div>
+          <div className="text-3xl font-bold">
+            {new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }).format(currentValue)}
           </div>
+        </div>
 
-          {/* Métricas secundárias */}
-          <div className="grid grid-cols-3 gap-3 pt-2">
-            <div className="text-center">
-              <div className="text-xs text-muted-foreground mb-1">Aportes</div>
-              <div className="text-sm font-semibold">
-                {new Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }).format(totalContributions)}
-              </div>
-            </div>
-            <div className="text-center border-x border-border">
-              <div className="text-xs text-muted-foreground mb-1">Retorno Total</div>
-              <div className={`text-sm font-bold ${isPositive ? "text-green-600" : "text-red-600"}`}>
-                {isPositive ? "+" : ""}
-                {gainPercentage.toFixed(1)}%
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-xs text-muted-foreground mb-1">Média Mensal</div>
-              <div className={`text-sm font-bold ${isPositive ? "text-green-600" : "text-red-600"}`}>
-                {numberOfMonths > 0 ? (
-                  <>
-                    {isPositive ? "+" : ""}
-                    {monthlyAverageReturn.toFixed(2)}%
-                  </>
-                ) : (
-                  "-"
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-2">
-            <span className="text-sm text-muted-foreground">
-              Clique para ver detalhes
+        {/* Rendimento */}
+        <div className="space-y-1 pb-4 border-b">
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Rendimento</div>
+          <div className={`text-2xl font-bold ${isPositive ? "text-green-600" : "text-red-600"}`}>
+            {isPositive ? "+" : ""}
+            {new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }).format(nominalGain)}
+            <span className="text-base ml-2">
+              ({isPositive ? "+" : ""}
+              {gainPercentage.toFixed(1)}%)
             </span>
-            <ArrowRight className="h-4 w-4 text-muted-foreground" />
           </div>
+        </div>
+
+        {/* Métricas em grid */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <div className="text-xs text-muted-foreground">Total de Aportes</div>
+            <div className="text-lg font-semibold">
+              {new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              }).format(totalContributions)}
+            </div>
+          </div>
+          <div className="space-y-1">
+            <div className="text-xs text-muted-foreground">Retorno Médio/Mês</div>
+            <div className={`text-lg font-semibold ${isPositive ? "text-green-600" : "text-red-600"}`}>
+              {numberOfMonths > 0 ? (
+                <>
+                  {isPositive ? "+" : ""}
+                  {monthlyAverageReturn.toFixed(2)}%
+                </>
+              ) : (
+                "-"
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between pt-2 text-muted-foreground">
+          <span className="text-sm">Ver detalhes completos</span>
+          <ArrowRight className="h-4 w-4" />
         </div>
       </CardContent>
     </Card>
