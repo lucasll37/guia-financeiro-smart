@@ -11,7 +11,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
+import { useTheme } from "next-themes";
 import { 
   TrendingUp, 
   Wallet, 
@@ -28,6 +29,7 @@ import {
 
 const Home = () => {
   const navigate = useNavigate();
+  const { setTheme } = useTheme();
   const featuresSection = useScrollAnimation(0.1);
   const benefitsSection = useScrollAnimation(0.1);
   const ctaSection = useScrollAnimation(0.1);
@@ -35,6 +37,11 @@ const Home = () => {
   const plugin = useRef(
     Autoplay({ delay: 3000, stopOnInteraction: true })
   );
+
+  // Forçar tema dark na Landing Page
+  useEffect(() => {
+    setTheme("dark");
+  }, [setTheme]);
 
   const testimonials = [
     { name: "Mariana Costa", city: "São Paulo, SP", initials: "MC", text: "Finalmente consegui organizar as finanças com meu marido! O compartilhamento de contas facilitou muito nossa vida." },
