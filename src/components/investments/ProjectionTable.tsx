@@ -230,7 +230,7 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
           <CardTitle>Projeção de Investimento</CardTitle>
           <div className="flex gap-2">
             <Button onClick={resetToDefaults} variant="outline" size="sm">
-              Resetar
+              Resetar taxas
             </Button>
             <Button onClick={exportToExcel} variant="outline" size="sm">
               <Download className="h-4 w-4 mr-2" />
