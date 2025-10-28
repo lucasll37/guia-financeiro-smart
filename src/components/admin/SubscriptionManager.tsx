@@ -146,7 +146,8 @@ export function SubscriptionManager() {
                 <div className="flex items-center gap-3">
                   {getPlanBadge(user.subscription?.plan || "free")}
                   
-                  {user.subscription?.plan === "free" ? (
+                  {/* Só mostrar botão de promover se o plano for free */}
+                  {(user.subscription?.plan === "free" || !user.subscription) && (
                     <Button
                       size="sm"
                       onClick={() => handlePromote(user.profile.id)}
@@ -155,7 +156,10 @@ export function SubscriptionManager() {
                       <ArrowUpCircle className="h-4 w-4 mr-2" />
                       Promover para Pro
                     </Button>
-                  ) : (
+                  )}
+                  
+                  {/* Só mostrar botão de rebaixar se o plano for pro */}
+                  {user.subscription?.plan === "pro" && (
                     <Button
                       size="sm"
                       variant="outline"
