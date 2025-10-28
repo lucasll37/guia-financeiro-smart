@@ -237,16 +237,6 @@ function InvestmentCard({
   const gainPercentage = totalContributions > 0 ? (nominalGain / totalContributions) * 100 : 0;
   const isPositive = nominalGain >= 0;
 
-  // Calcular retorno médio mensal usando juros compostos
-  const numberOfMonths = returns.length;
-  let monthlyAverageReturn = 0;
-  if (numberOfMonths > 0 && totalContributions > 0 && gainPercentage !== 0) {
-    // (1 + retornoTotal) = (1 + retornoMensal)^N
-    // retornoMensal = ((1 + retornoTotal)^(1/N)) - 1
-    const totalReturnFactor = 1 + (gainPercentage / 100);
-    monthlyAverageReturn = (Math.pow(totalReturnFactor, 1 / numberOfMonths) - 1) * 100;
-  }
-
   // Calcular inflação acumulada usando juros compostos
   let accumulatedInflation = 0;
   if (returns.length > 0) {
@@ -264,6 +254,16 @@ function InvestmentCard({
     ? ((1 + gainPercentage / 100) / (1 + accumulatedInflation / 100) - 1) * 100
     : 0;
   const isRealPositive = realGain >= 0;
+
+  // Calcular retorno real médio mensal usando juros compostos
+  const numberOfMonths = returns.length;
+  let monthlyAverageReturn = 0;
+  if (numberOfMonths > 0 && totalContributions > 0 && realGainPercentage !== 0) {
+    // (1 + retornoTotal) = (1 + retornoMensal)^N
+    // retornoMensal = ((1 + retornoTotal)^(1/N)) - 1
+    const totalReturnFactor = 1 + (realGainPercentage / 100);
+    monthlyAverageReturn = (Math.pow(totalReturnFactor, 1 / numberOfMonths) - 1) * 100;
+  }
 
   return (
     <Card
