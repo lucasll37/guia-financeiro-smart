@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, RotateCcw } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuditLogs } from "@/hooks/useAuditLogs";
 import { AccountsTable } from "@/components/accounts/AccountsTable";
 import { AccountDialog } from "@/components/accounts/AccountDialog";
 import { MembersDialog } from "@/components/accounts/MembersDialog";
-import { seedCategories } from "@/lib/seedCategories";
 import type { Database } from "@/integrations/supabase/types";
 
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
@@ -61,11 +61,14 @@ export default function Accounts() {
           diff: accountData as any,
         });
         
-        // Criar categorias padrão
+        // Criar categorias padrão via função de backend (idempotente)
         try {
           console.log("Iniciando seed de categorias para conta:", newAccount.id);
-          const categoriesCreated = await seedCategories(newAccount.id);
-          console.log(`${categoriesCreated} categorias criadas com sucesso`);
+          const { data, error } = await supabase.functions.invoke('seed-categories', {
+            body: { accountId: newAccount.id },
+          });
+          if (error) throw error as any;
+          console.log(`Seed de categorias concluído:`, data);
         } catch (error) {
           console.error("Erro ao criar categorias padrão:", error);
           // Ainda assim continuamos, o usuário pode criar categorias manualmente
