@@ -310,9 +310,9 @@ function InvestmentCard({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5">
         {/* Valor Atual - destaque principal */}
-        <div className="space-y-1">
+        <div className="space-y-1.5 pb-4 border-b">
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Valor Atual</div>
           <div className="text-3xl font-bold">
             {new Intl.NumberFormat("pt-BR", {
@@ -320,67 +320,69 @@ function InvestmentCard({
               currency: "BRL",
             }).format(currentValue)}
           </div>
-        </div>
-
-        {/* Rendimentos em linha compacta */}
-        <div className="space-y-3 pb-4 border-b">
-          <div className="flex items-baseline justify-between">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider">Nominal</span>
-            <div className={`text-lg font-semibold ${isPositive ? "text-green-600" : "text-red-600"}`}>
-              {isPositive ? "+" : ""}
-              {new Intl.NumberFormat("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              }).format(nominalGain)}
-              <span className="text-sm ml-1.5 opacity-80">
-                ({isPositive ? "+" : ""}{gainPercentage.toFixed(1)}%)
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-baseline justify-between">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider">Inflação</span>
-            <div className="text-lg font-semibold text-orange-600">
-              -{new Intl.NumberFormat("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              }).format(inflationValue)}
-              <span className="text-sm ml-1.5 opacity-80">
-                (-{accumulatedInflation.toFixed(2)}%)
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-baseline justify-between pt-2 border-t">
-            <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Real</span>
-            <div className={`text-xl font-bold ${isRealPositive ? "text-green-600" : "text-red-600"}`}>
-              {isRealPositive ? "+" : ""}
-              {new Intl.NumberFormat("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              }).format(realGain)}
-              <span className="text-base ml-1.5 opacity-90">
-                ({isRealPositive ? "+" : ""}{realGainPercentage.toFixed(1)}%)
-              </span>
-            </div>
+          <div className="text-sm text-muted-foreground">
+            Total investido: {new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }).format(totalContributions)}
           </div>
         </div>
 
-        {/* Métricas compactas */}
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="space-y-0.5">
-            <div className="text-xs text-muted-foreground">Total Investido</div>
-            <div className="font-semibold">
-              {new Intl.NumberFormat("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-                minimumFractionDigits: 0,
-              }).format(totalContributions)}
+        {/* Breakdown de Retornos */}
+        <div className="space-y-3">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-sm font-medium text-muted-foreground">Retorno Nominal</span>
+            <div className={`text-right ${isPositive ? "text-green-600" : "text-red-600"}`}>
+              <div className="text-lg font-semibold">
+                {isPositive ? "+" : ""}
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(nominalGain)}
+              </div>
+              <div className="text-xs opacity-75">
+                {isPositive ? "+" : ""}{gainPercentage.toFixed(1)}%
+              </div>
             </div>
           </div>
-          <div className="space-y-0.5">
-            <div className="text-xs text-muted-foreground">Retorno Real/Mês</div>
-            <div className={`font-semibold ${isRealPositive ? "text-green-600" : "text-red-600"}`}>
+
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-sm font-medium text-muted-foreground">Inflação Acumulada</span>
+            <div className="text-right text-orange-600">
+              <div className="text-lg font-semibold">
+                -{new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(inflationValue)}
+              </div>
+              <div className="text-xs opacity-75">
+                -{accumulatedInflation.toFixed(2)}%
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-baseline justify-between gap-2 pt-2 border-t-2">
+            <span className="text-base font-semibold">Retorno Real</span>
+            <div className={`text-right ${isRealPositive ? "text-green-600" : "text-red-600"}`}>
+              <div className="text-2xl font-bold">
+                {isRealPositive ? "+" : ""}
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(realGain)}
+              </div>
+              <div className="text-sm font-medium opacity-90">
+                {isRealPositive ? "+" : ""}{realGainPercentage.toFixed(1)}%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Métrica de performance */}
+        <div className="pt-3 border-t">
+          <div className="flex items-baseline justify-between">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">Retorno Real Médio Mensal</span>
+            <div className={`text-lg font-bold ${isRealPositive ? "text-green-600" : "text-red-600"}`}>
               {numberOfMonths > 0 ? (
                 <>
                   {isRealPositive ? "+" : ""}
