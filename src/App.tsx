@@ -49,14 +49,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <PageMeta />
-          <AuthProvider>
-            <MaskValuesProvider>
-            <Routes>
+      <MaskValuesProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <PageMeta />
+            <AuthProvider>
+              <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/auth" element={<Auth />} />
               <Route
@@ -85,10 +85,10 @@ const App = () => (
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
-            </MaskValuesProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
+      </MaskValuesProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
