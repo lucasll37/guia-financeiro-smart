@@ -7,6 +7,7 @@ import { useGoals } from "@/hooks/useGoals";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useMaskValues } from "@/hooks/useMaskValues";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { GoalDialog } from "@/components/goals/GoalDialog";
 import { evaluateNotifications } from "@/lib/notificationEvaluator";
@@ -19,6 +20,7 @@ export default function Goals() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { accounts } = useAccounts();
+  const { maskValue } = useMaskValues();
   const [selectedAccountId, setSelectedAccountId] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
@@ -169,10 +171,10 @@ export default function Goals() {
               </CardHeader>
               <CardContent>
                 <p className="text-3xl font-bold">
-                  {new Intl.NumberFormat("pt-BR", {
+                  {maskValue(new Intl.NumberFormat("pt-BR", {
                     style: "currency",
                     currency: "BRL",
-                  }).format(totalTarget)}
+                  }).format(totalTarget))}
                 </p>
               </CardContent>
             </Card>
@@ -183,14 +185,14 @@ export default function Goals() {
               </CardHeader>
               <CardContent>
                 <p className="text-3xl font-bold">
-                  {new Intl.NumberFormat("pt-BR", {
+                  {maskValue(new Intl.NumberFormat("pt-BR", {
                     style: "currency",
                     currency: "BRL",
-                  }).format(totalCurrent)}
+                  }).format(totalCurrent))}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {totalTarget > 0
-                    ? `${((totalCurrent / totalTarget) * 100).toFixed(1)}% do total`
+                    ? `${maskValue(`${((totalCurrent / totalTarget) * 100).toFixed(1)}%`)} do total`
                     : ""}
                 </p>
               </CardContent>

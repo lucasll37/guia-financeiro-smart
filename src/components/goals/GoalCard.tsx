@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Target, Edit, Trash2, Calendar, TrendingUp } from "lucide-react";
 import { format, isPast, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useMaskValues } from "@/hooks/useMaskValues";
 import type { Database } from "@/integrations/supabase/types";
 
 type Goal = Database["public"]["Tables"]["goals"]["Row"];
@@ -17,6 +18,7 @@ interface GoalCardProps {
 }
 
 export function GoalCard({ goal, onEdit, onDelete, onUpdateProgress }: GoalCardProps) {
+  const { maskValue } = useMaskValues();
   const percentage = (Number(goal.current_amount) / Number(goal.target_amount)) * 100;
   const isComplete = percentage >= 100;
   const isOverdue = goal.deadline ? isPast(new Date(goal.deadline)) && !isComplete : false;
@@ -58,10 +60,10 @@ export function GoalCard({ goal, onEdit, onDelete, onUpdateProgress }: GoalCardP
         <div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-2xl font-bold">
-              {formatCurrency(Number(goal.current_amount))}
+              {maskValue(formatCurrency(Number(goal.current_amount)))}
             </span>
             <span className="text-sm text-muted-foreground">
-              de {formatCurrency(Number(goal.target_amount))}
+              de {maskValue(formatCurrency(Number(goal.target_amount)))}
             </span>
           </div>
           <Progress value={Math.min(percentage, 100)} className="h-2" />
@@ -73,11 +75,11 @@ export function GoalCard({ goal, onEdit, onDelete, onUpdateProgress }: GoalCardP
                   Meta atingida!
                 </span>
               ) : (
-                `${percentage.toFixed(1)}%`
+                maskValue(`${percentage.toFixed(1)}%`)
               )}
             </span>
             <span className="text-muted-foreground">
-              Faltam {formatCurrency(Number(goal.target_amount) - Number(goal.current_amount))}
+              Faltam {maskValue(formatCurrency(Number(goal.target_amount) - Number(goal.current_amount)))}
             </span>
           </div>
         </div>
