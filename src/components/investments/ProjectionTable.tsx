@@ -547,10 +547,22 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
           </Table>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-4 border-t">
           <div>
             <p className="text-sm text-muted-foreground">Saldo Inicial</p>
             <p className="text-lg font-semibold">{formatCurrency(currentBalance)}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Aporte Acum. Aparente</p>
+            <p className="text-lg font-semibold">
+              {formatCurrency(projectionData[projectionData.length - 1]?.cumulativeContribution || 0)}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Aporte Acum. VP</p>
+            <p className="text-lg font-semibold text-muted-foreground">
+              {formatCurrency(projectionData[projectionData.length - 1]?.cumulativeContributionPV || 0)}
+            </p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Saldo Final Projetado (Aparente)</p>
