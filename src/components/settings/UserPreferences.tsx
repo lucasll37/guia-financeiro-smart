@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Palette } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -9,10 +10,12 @@ import {
 } from "@/components/ui/select";
 import { useUserPreferences, Language, Currency, DateFormat } from "@/hooks/useUserPreferences";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "next-themes";
 
 export function UserPreferences() {
   const { preferences, updatePreferences } = useUserPreferences();
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   const handleChange = (key: string, value: string) => {
     updatePreferences({ [key]: value });
@@ -24,6 +27,33 @@ export function UserPreferences() {
 
   return (
     <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Palette className="h-5 w-5" />
+            Tema
+          </CardTitle>
+          <CardDescription>
+            Escolha o tema de cores da interface
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="theme">Aparência</Label>
+            <Select value={theme} onValueChange={setTheme}>
+              <SelectTrigger id="theme">
+                <SelectValue placeholder="Selecione o tema" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="light">☀️ Claro</SelectItem>
+                <SelectItem value="dark">🌙 Escuro</SelectItem>
+                <SelectItem value="system">💻 Sistema</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Idioma</CardTitle>

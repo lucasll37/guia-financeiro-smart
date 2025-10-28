@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, X } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function ProfileSection() {
@@ -17,6 +17,7 @@ export function ProfileSection() {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const { data: profile, isLoading: loadingProfile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -39,6 +40,119 @@ export function ProfileSection() {
     },
     enabled: !!user?.id,
   });
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user?.id) return;
+
+    // Validar tamanho (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "O avatar deve ter no máximo 2MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validar tipo
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Tipo inválido",
+        description: "Apenas imagens são permitidas",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploadingAvatar(true);
+
+    try {
+      // Deletar avatar anterior se existir
+      if (avatarUrl && avatarUrl.includes(user.id)) {
+        const oldPath = avatarUrl.split("/").slice(-1)[0];
+        await supabase.storage.from("avatars").remove([`${user.id}/${oldPath}`]);
+      }
+
+      // Upload novo avatar
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Obter URL pública
+      const { data: { publicUrl } } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
+
+      setAvatarUrl(publicUrl);
+
+      // Atualizar perfil imediatamente se não estiver editando
+      if (!isEditing) {
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({ avatar_url: publicUrl })
+          .eq("id", user.id);
+
+        if (updateError) throw updateError;
+
+        queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
+
+        toast({
+          title: "Avatar atualizado",
+          description: "Sua foto de perfil foi atualizada com sucesso",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erro ao fazer upload",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!user?.id || !avatarUrl) return;
+
+    try {
+      // Remover do storage se for uma URL do nosso bucket
+      if (avatarUrl.includes(user.id)) {
+        const oldPath = avatarUrl.split("/").slice(-1)[0];
+        await supabase.storage.from("avatars").remove([`${user.id}/${oldPath}`]);
+      }
+
+      setAvatarUrl("");
+
+      // Atualizar perfil
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: null })
+        .eq("id", user.id);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
+
+      toast({
+        title: "Avatar removido",
+        description: "Sua foto de perfil foi removida",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao remover avatar",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const updateProfile = useMutation({
     mutationFn: async () => {
@@ -98,22 +212,56 @@ export function ProfileSection() {
         <CardDescription>Gerencie suas informações de perfil</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="flex items-center gap-6">
-          <Avatar className="h-24 w-24">
-            <AvatarImage src={avatarUrl} alt={name} />
-            <AvatarFallback className="text-2xl">{initials || "U"}</AvatarFallback>
-          </Avatar>
-          {isEditing && (
-            <div className="flex-1 space-y-2">
-              <Label htmlFor="avatar">URL do Avatar</Label>
+        <div className="flex items-start gap-6">
+          <div className="relative">
+            <Avatar className="h-24 w-24">
+              <AvatarImage src={avatarUrl} alt={name} />
+              <AvatarFallback className="text-2xl">{initials || "U"}</AvatarFallback>
+            </Avatar>
+            {uploadingAvatar && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-full">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            )}
+          </div>
+          <div className="flex-1 space-y-3">
+            <div>
+              <Label htmlFor="avatar-upload" className="cursor-pointer">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={uploadingAvatar}
+                  onClick={() => document.getElementById("avatar-upload")?.click()}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  {avatarUrl ? "Trocar foto" : "Fazer upload"}
+                </Button>
+              </Label>
               <Input
-                id="avatar"
-                placeholder="https://..."
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
+                id="avatar-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarUpload}
+                disabled={uploadingAvatar}
               />
             </div>
-          )}
+            {avatarUrl && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleRemoveAvatar}
+              >
+                <X className="h-4 w-4 mr-2" />
+                Remover foto
+              </Button>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 2MB
+            </p>
+          </div>
         </div>
 
         <div className="space-y-4">
