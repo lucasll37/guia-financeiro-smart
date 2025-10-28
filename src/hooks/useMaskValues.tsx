@@ -16,9 +16,22 @@ export function MaskValuesProvider({ children }: { children: ReactNode }) {
   const maskValue = (value: number | string) => {
     if (!isMasked) return String(value);
     
+    // Sempre retorna um valor mascarado de tamanho fixo, 
+    // independente do tamanho real do número
     const str = String(value);
-    // Mascara números mantendo símbolos de moeda e formatação
-    return str.replace(/\d/g, "*");
+    // Detecta se tem símbolo de moeda
+    const hasCurrency = str.includes("R$") || str.includes("$");
+    
+    if (hasCurrency) {
+      return "R$ ••••••";
+    }
+    
+    // Para números sem moeda ou percentuais
+    if (str.includes("%")) {
+      return "••••%";
+    }
+    
+    return "••••••";
   };
 
   return (
