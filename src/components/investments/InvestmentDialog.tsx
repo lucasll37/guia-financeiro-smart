@@ -169,11 +169,14 @@ export function InvestmentDialog({
                   <FormLabel>Saldo Inicial</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
                       placeholder="0.00"
-                      {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^\d.-]/g, "");
+                        field.onChange(value === "" ? 0 : parseFloat(value) || 0);
+                      }}
                     />
                   </FormControl>
                   <FormDescription>

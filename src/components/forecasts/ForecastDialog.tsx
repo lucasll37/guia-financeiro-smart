@@ -166,10 +166,14 @@ export function ForecastDialog({
                   <FormLabel>Valor Previsto</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
                       placeholder="0.00"
                       {...field}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^\d.-]/g, "");
+                        field.onChange(value);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

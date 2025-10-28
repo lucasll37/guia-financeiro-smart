@@ -96,12 +96,14 @@ export function GoalDialog({ open, onOpenChange, onSave, goal, accountId }: Goal
               <Label htmlFor="target">Valor Alvo (R$) *</Label>
               <Input
                 id="target"
-                type="number"
-                step="0.01"
-                value={formData.target_amount}
-                onChange={(e) =>
-                  setFormData({ ...formData, target_amount: Number(e.target.value) })
-                }
+                type="text"
+                inputMode="decimal"
+                placeholder="0.00"
+                value={formData.target_amount || ""}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^\d.-]/g, "");
+                  setFormData({ ...formData, target_amount: value === "" ? 0 : Number(value) });
+                }}
               />
               {errors.target && <p className="text-sm text-destructive">{errors.target}</p>}
             </div>
@@ -110,12 +112,14 @@ export function GoalDialog({ open, onOpenChange, onSave, goal, accountId }: Goal
               <Label htmlFor="current">Valor Atual (R$)</Label>
               <Input
                 id="current"
-                type="number"
-                step="0.01"
-                value={formData.current_amount}
-                onChange={(e) =>
-                  setFormData({ ...formData, current_amount: Number(e.target.value) })
-                }
+                type="text"
+                inputMode="decimal"
+                placeholder="0.00"
+                value={formData.current_amount || ""}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^\d.-]/g, "");
+                  setFormData({ ...formData, current_amount: value === "" ? 0 : Number(value) });
+                }}
               />
               {errors.current && <p className="text-sm text-destructive">{errors.current}</p>}
             </div>

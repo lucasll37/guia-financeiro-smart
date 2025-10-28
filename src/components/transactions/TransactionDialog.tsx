@@ -334,10 +334,14 @@ export function TransactionDialog({
               <Label htmlFor="amount">Valor (R$) *</Label>
               <Input
                 id="amount"
-                type="number"
-                step="0.01"
-                value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
+                type="text"
+                inputMode="decimal"
+                placeholder="0.00"
+                value={formData.amount || ""}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^\d.-]/g, "");
+                  setFormData({ ...formData, amount: value === "" ? 0 : Number(value) });
+                }}
               />
               {errors.amount && <p className="text-sm text-destructive">{errors.amount}</p>}
             </div>
