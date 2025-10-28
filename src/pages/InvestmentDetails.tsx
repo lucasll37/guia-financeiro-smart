@@ -146,9 +146,6 @@ export default function InvestmentDetails() {
         </Button>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{investment.name}</h1>
-          <p className="text-muted-foreground">
-            {getInvestmentTypeLabel(investment.type)} • Taxa: {investment.monthly_rate}% a.m.
-          </p>
         </div>
       </div>
 
