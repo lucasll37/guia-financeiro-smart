@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useCategories } from "@/hooks/useCategories";
 import { useTransactions } from "@/hooks/useTransactions";
@@ -10,7 +10,11 @@ import { AnalysisFilters } from "@/components/analysis/AnalysisFilters";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export default function Analysis() {
+interface AnalysisProps {
+  accountId?: string;
+}
+
+export default function Analysis({ accountId: propAccountId }: AnalysisProps = {}) {
   const { accounts } = useAccounts();
   const [filters, setFilters] = useState({
     accountId: "all",
@@ -23,6 +27,13 @@ export default function Analysis() {
   const { categories } = useCategories(filters.accountId !== "all" ? filters.accountId : undefined);
   const { transactions } = useTransactions(filters.accountId !== "all" ? filters.accountId : undefined);
   const { forecasts } = useForecasts(filters.accountId !== "all" ? filters.accountId : undefined);
+
+  // Set accountId from prop if provided
+  useEffect(() => {
+    if (propAccountId && filters.accountId !== propAccountId) {
+      setFilters(prev => ({ ...prev, accountId: propAccountId }));
+    }
+  }, [propAccountId]);
 
   // Helper to get parent category
   const getParentCategory = (categoryId: string) => {
@@ -131,6 +142,7 @@ export default function Analysis() {
         accounts={accounts || []}
         filters={filters}
         onFilterChange={setFilters}
+        accountId={propAccountId}
       />
 
       {filters.accountId === "all" ? (

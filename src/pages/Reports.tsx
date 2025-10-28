@@ -8,10 +8,14 @@ import {
 } from "@/components/reports/ReportGenerator";
 import { ReportHistory } from "@/components/reports/ReportHistory";
 
-export default function Reports() {
+interface ReportsProps {
+  accountId?: string;
+}
+
+export default function Reports({ accountId: propAccountId }: ReportsProps = {}) {
   const { accounts } = useAccounts();
-  const { transactions } = useTransactions();
-  const { categories } = useCategories();
+  const { transactions } = useTransactions(propAccountId);
+  const { categories } = useCategories(propAccountId);
   const [reportHistory, setReportHistory] = useState<GeneratedReport[]>([]);
 
   // Load report history from localStorage

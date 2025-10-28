@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Copy } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -21,7 +21,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-export default function Forecasts() {
+interface ForecastsProps {
+  accountId?: string;
+}
+
+export default function Forecasts({ accountId: propAccountId }: ForecastsProps = {}) {
   const { accounts } = useAccounts();
   const currentMonth = format(new Date(), "yyyy-MM");
   
@@ -39,6 +43,13 @@ export default function Forecasts() {
   const { forecasts, isLoading, createForecast, updateForecast, deleteForecast, copyForecast } = useForecasts(
     filters.accountId !== "all" ? filters.accountId : null
   );
+
+  // Set accountId from prop if provided
+  useEffect(() => {
+    if (propAccountId && filters.accountId !== propAccountId) {
+      setFilters(prev => ({ ...prev, accountId: propAccountId }));
+    }
+  }, [propAccountId]);
 
   // Generate month options for copy dialog (6 months before and after current month)
   const monthOptions = useMemo(() => {
@@ -134,6 +145,7 @@ export default function Forecasts() {
         accounts={accounts || []}
         filters={filters}
         onFilterChange={setFilters}
+        accountId={propAccountId}
       />
 
       <div className="space-y-4">

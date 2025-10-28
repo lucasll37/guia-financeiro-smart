@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2, MoveHorizontal } from "lucide-react";
 import { format, startOfMonth, endOfMonth, parse } from "date-fns";
@@ -26,7 +26,11 @@ import type { Database } from "@/integrations/supabase/types";
 
 type TransactionInsert = Database["public"]["Tables"]["transactions"]["Insert"];
 
-export default function Transactions() {
+interface TransactionsProps {
+  accountId?: string;
+}
+
+export default function Transactions({ accountId: propAccountId }: TransactionsProps = {}) {
   const { user } = useAuth();
   const { toast } = useToast();
   const { accounts } = useAccounts();
@@ -60,6 +64,13 @@ export default function Transactions() {
   const { categories } = useCategories(
     filters.accountId !== "all" ? filters.accountId : undefined
   );
+
+  // Set accountId from prop if provided
+  useEffect(() => {
+    if (propAccountId && filters.accountId !== propAccountId) {
+      setFilters(prev => ({ ...prev, accountId: propAccountId }));
+    }
+  }, [propAccountId]);
 
   // Filter transactions
   const filteredTransactions = useMemo(() => {
@@ -228,6 +239,7 @@ export default function Transactions() {
         categories={categories || []}
         filters={filters}
         onFilterChange={setFilters}
+        accountId={propAccountId}
       />
 
       <div className="space-y-4">

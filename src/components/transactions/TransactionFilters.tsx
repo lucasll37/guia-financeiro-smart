@@ -28,9 +28,10 @@ interface TransactionFiltersProps {
     selectedMonth: string;
   };
   onFilterChange: (filters: any) => void;
+  accountId?: string;
 }
 
-export function TransactionFilters({ accounts, categories, filters, onFilterChange }: TransactionFiltersProps) {
+export function TransactionFilters({ accounts, categories, filters, onFilterChange, accountId }: TransactionFiltersProps) {
   // Generate month options (6 months before and after current month)
   const monthOptions = useMemo(() => {
     const options = [];
@@ -91,26 +92,28 @@ export function TransactionFilters({ accounts, categories, filters, onFilterChan
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 p-4 border rounded-lg bg-card">
-      <div className="space-y-2">
-        <Label htmlFor="account-filter">Conta</Label>
-        <Select
-          value={filters.accountId}
-          onValueChange={(value) => onFilterChange({ ...filters, accountId: value })}
-        >
-          <SelectTrigger id="account-filter">
-            <SelectValue placeholder="Todas" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas</SelectItem>
-            {accounts.map((account) => (
-              <SelectItem key={account.id} value={account.id}>
-                {account.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <div className={`grid grid-cols-1 md:grid-cols-3 ${accountId ? 'lg:grid-cols-5' : 'lg:grid-cols-6'} gap-4 p-4 border rounded-lg bg-card`}>
+      {!accountId && (
+        <div className="space-y-2">
+          <Label htmlFor="account-filter">Conta</Label>
+          <Select
+            value={filters.accountId}
+            onValueChange={(value) => onFilterChange({ ...filters, accountId: value })}
+          >
+            <SelectTrigger id="account-filter">
+              <SelectValue placeholder="Todas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas</SelectItem>
+              {accounts.map((account) => (
+                <SelectItem key={account.id} value={account.id}>
+                  {account.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="category-filter">Categoria</Label>
