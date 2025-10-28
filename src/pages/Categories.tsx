@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, TreePine } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCategories } from "@/hooks/useCategories";
@@ -9,6 +9,8 @@ import { useTransactions } from "@/hooks/useTransactions";
 import { CategoryTree } from "@/components/categories/CategoryTree";
 import { CategoryDialog } from "@/components/categories/CategoryDialog";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { seedCategories } from "@/lib/seedCategories";
 import type { Database } from "@/integrations/supabase/types";
 
 type Category = Database["public"]["Tables"]["categories"]["Row"];
@@ -24,6 +26,7 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [parentId, setParentId] = useState<string | null>(null);
+  const [seedingCategories, setSeedingCategories] = useState(false);
   
   // Update selectedAccountId when propAccountId changes
   useEffect(() => {
@@ -35,6 +38,52 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
   const { categories, isLoading, createCategory, updateCategory, deleteCategory } =
     useCategories(selectedAccountId);
   const { transactions } = useTransactions(selectedAccountId);
+
+  const handleSeedCategories = async () => {
+    if (!selectedAccountId) return;
+    
+    setSeedingCategories(true);
+    try {
+      // Primeiro tenta via edge function
+      console.log("Tentando seed via edge function...");
+      const { data, error } = await supabase.functions.invoke('seed-categories', {
+        body: { accountId: selectedAccountId },
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Categorias criadas",
+        description: `${data?.created || 0} categorias foram criadas com sucesso!`,
+      });
+      
+      // Recarrega as categorias
+      window.location.reload();
+    } catch (error) {
+      console.error("Erro via edge function, tentando função local:", error);
+      
+      // Fallback para função local
+      try {
+        const categoriesCreated = await seedCategories(selectedAccountId);
+        toast({
+          title: "Categorias criadas",
+          description: `${categoriesCreated} categorias foram criadas com sucesso!`,
+        });
+        
+        // Recarrega as categorias
+        window.location.reload();
+      } catch (localError) {
+        console.error("Erro na função local também:", localError);
+        toast({
+          title: "Erro ao criar categorias",
+          description: "Não foi possível criar as categorias padrão. Tente novamente.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setSeedingCategories(false);
+    }
+  };
 
   const handleCreateCategory = () => {
     if (!selectedAccountId) {
@@ -113,10 +162,22 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
             Organize seus lançamentos em categorias
           </p>
         </div>
-        <Button onClick={handleCreateCategory}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nova Categoria
-        </Button>
+        <div className="flex gap-2">
+          {selectedAccountId && (!categories || categories.length === 0) && (
+            <Button 
+              onClick={handleSeedCategories} 
+              disabled={seedingCategories}
+              variant="outline"
+            >
+              <TreePine className="h-4 w-4 mr-2" />
+              {seedingCategories ? "Criando..." : "Semear Categorias"}
+            </Button>
+          )}
+          <Button onClick={handleCreateCategory}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nova Categoria
+          </Button>
+        </div>
       </div>
 
       {!propAccountId && (

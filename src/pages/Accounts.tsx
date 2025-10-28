@@ -62,14 +62,24 @@ export default function Accounts() {
           diff: accountData as any,
         });
         
-        // Criar categorias padrão diretamente
+        // Criar categorias padrão via backend usando edge function
         try {
-          console.log("Iniciando seed de categorias para conta:", newAccount.id);
-          const categoriesCreated = await seedCategories(newAccount.id);
-          console.log(`${categoriesCreated} categorias criadas com sucesso`);
+          console.log("Iniciando seed de categorias via edge function para conta:", newAccount.id);
+          const { data, error } = await supabase.functions.invoke('seed-categories', {
+            body: { accountId: newAccount.id },
+          });
+          if (error) throw error;
+          console.log(`Seed de categorias concluído:`, data);
         } catch (error) {
-          console.error("Erro ao criar categorias padrão:", error);
-          // Ainda assim continuamos, o usuário pode criar categorias manualmente
+          console.error("Erro ao criar categorias padrão via edge function:", error);
+          // Fallback para função local
+          try {
+            console.log("Tentando fallback com função local...");
+            const categoriesCreated = await seedCategories(newAccount.id);
+            console.log(`${categoriesCreated} categorias criadas com sucesso via função local`);
+          } catch (localError) {
+            console.error("Erro ao criar categorias padrão via função local:", localError);
+          }
         }
       }
     }
