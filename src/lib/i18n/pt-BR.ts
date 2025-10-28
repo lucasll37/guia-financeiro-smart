@@ -17,7 +17,7 @@ export const ptBR = {
   
   // Navigation
   nav: {
-    dashboard: "Painel",
+    dashboard: "Dashboard",
     accounts: "Contas",
     categories: "Categorias",
     transactions: "Lançamentos",
