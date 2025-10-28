@@ -6,6 +6,7 @@ import { Edit, Trash2, CreditCard, ArrowUpDown, ArrowUp, ArrowDown } from "lucid
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMemo, useState } from "react";
+import { useMaskValues } from "@/hooks/useMaskValues";
 
 import type { Database } from "@/integrations/supabase/types";
 
@@ -37,6 +38,7 @@ export function TransactionsTable({
   const allSelected = transactions.length > 0 && selectedIds.length === transactions.length;
   const [sortField, setSortField] = useState<'date' | 'description' | 'amount' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const { maskValue } = useMaskValues();
 
   const handleSort = (field: 'date' | 'description' | 'amount') => {
     if (sortField === field) {
@@ -130,7 +132,7 @@ export function TransactionsTable({
         </TableCell>
         <TableCell className="text-right">
           <span className={isExpense ? "text-destructive" : "text-green-600"}>
-            {isExpense ? "-" : "+"} {formatCurrency(transaction.amount)}
+            {isExpense ? "-" : "+"} {maskValue(formatCurrency(transaction.amount))}
           </span>
         </TableCell>
         <TableCell className="text-right">
@@ -231,7 +233,7 @@ export function TransactionsTable({
                   Total de Receitas:
                 </TableCell>
                 <TableCell className="text-right text-green-600">
-                  + {formatCurrency(totalIncome)}
+                  + {maskValue(formatCurrency(totalIncome))}
                 </TableCell>
                 <TableCell />
               </TableRow>
@@ -286,7 +288,7 @@ export function TransactionsTable({
                   Total de Despesas:
                 </TableCell>
                 <TableCell className="text-right text-destructive">
-                  - {formatCurrency(totalExpense)}
+                  - {maskValue(formatCurrency(totalExpense))}
                 </TableCell>
                 <TableCell />
               </TableRow>
@@ -301,7 +303,7 @@ export function TransactionsTable({
           <div className="flex items-center justify-between">
             <span className="text-lg font-semibold">Saldo do Período:</span>
             <span className={`text-xl font-bold ${balance >= 0 ? "text-green-600" : "text-destructive"}`}>
-              {formatCurrency(balance)}
+              {maskValue(formatCurrency(balance))}
             </span>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useAccounts } from "@/hooks/useAccounts";
+import { useMaskValues } from "@/hooks/useMaskValues";
 
 interface ComparisonChartProps {
   data: Array<{
@@ -15,6 +16,7 @@ interface ComparisonChartProps {
 export function ComparisonChart({ data, accountId }: ComparisonChartProps) {
   const { accounts } = useAccounts();
   const account = accounts?.find((a) => a.id === accountId);
+  const { maskValue } = useMaskValues();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -62,7 +64,7 @@ export function ComparisonChart({ data, accountId }: ComparisonChartProps) {
             <CardTitle className="text-sm font-medium">Total Previsto</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalForecasted)}</div>
+            <div className="text-2xl font-bold">{maskValue(formatCurrency(totalForecasted))}</div>
           </CardContent>
         </Card>
 
@@ -71,7 +73,7 @@ export function ComparisonChart({ data, accountId }: ComparisonChartProps) {
             <CardTitle className="text-sm font-medium">Total Realizado</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalActual)}</div>
+            <div className="text-2xl font-bold">{maskValue(formatCurrency(totalActual))}</div>
           </CardContent>
         </Card>
 
@@ -81,7 +83,7 @@ export function ComparisonChart({ data, accountId }: ComparisonChartProps) {
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${totalDifference >= 0 ? "text-green-600" : "text-red-600"}`}>
-              {formatCurrency(Math.abs(totalDifference))}
+              {maskValue(formatCurrency(Math.abs(totalDifference)))}
               <span className="text-sm ml-2">({percentageDifference}%)</span>
             </div>
           </CardContent>

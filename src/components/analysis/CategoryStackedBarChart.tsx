@@ -4,6 +4,7 @@ import { useAccounts } from "@/hooks/useAccounts";
 import { useCategories } from "@/hooks/useCategories";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useForecasts } from "@/hooks/useForecasts";
+import { useMaskValues } from "@/hooks/useMaskValues";
 import { useMemo } from "react";
 
 interface CategoryStackedBarChartProps {
@@ -28,6 +29,7 @@ export function CategoryStackedBarChart({
   const { categories } = useCategories(accountId);
   const { transactions } = useTransactions(accountId);
   const { forecasts } = useForecasts(accountId);
+  const { maskValue } = useMaskValues();
   
   const account = accounts?.find((a) => a.id === accountId);
 
@@ -96,7 +98,7 @@ export function CategoryStackedBarChart({
         <div className="bg-background border border-border p-3 rounded-lg shadow-lg">
           <p className="font-semibold mb-2">{data.categoria}</p>
           <p className="text-sm">
-            {formatCurrency(value)}
+            {maskValue(formatCurrency(value))}
           </p>
         </div>
       );
@@ -145,7 +147,7 @@ export function CategoryStackedBarChart({
             Composição Prevista por Categoria
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Total: {formatCurrency(totalForecasted)}
+            Total: {maskValue(formatCurrency(totalForecasted))}
           </p>
         </CardHeader>
         <CardContent>
@@ -185,7 +187,7 @@ export function CategoryStackedBarChart({
             Composição Realizada por Categoria
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Total: {formatCurrency(totalActual)}
+            Total: {maskValue(formatCurrency(totalActual))}
           </p>
         </CardHeader>
         <CardContent>

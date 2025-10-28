@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { useAccounts } from "@/hooks/useAccounts";
+import { useMaskValues } from "@/hooks/useMaskValues";
 
 interface CategoryPieChartsProps {
   data: Array<{
@@ -15,6 +16,7 @@ interface CategoryPieChartsProps {
 export function CategoryPieCharts({ data, accountId }: CategoryPieChartsProps) {
   const { accounts } = useAccounts();
   const account = accounts?.find((a) => a.id === accountId);
+  const { maskValue } = useMaskValues();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -57,7 +59,7 @@ export function CategoryPieCharts({ data, accountId }: CategoryPieChartsProps) {
         <div className="bg-background border border-border p-3 rounded-lg shadow-lg">
           <p className="font-semibold">{data.payload.name}</p>
           <p className="text-sm">
-            {formatCurrency(data.value)} ({formatPercent(data.value, total)})
+            {maskValue(formatCurrency(data.value))} ({formatPercent(data.value, total)})
           </p>
         </div>
       );
@@ -102,7 +104,7 @@ export function CategoryPieCharts({ data, accountId }: CategoryPieChartsProps) {
             Gastos Previstos por Categoria
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Total: {formatCurrency(totalForecasted)}
+            Total: {maskValue(formatCurrency(totalForecasted))}
           </p>
         </CardHeader>
         <CardContent>
@@ -133,7 +135,7 @@ export function CategoryPieCharts({ data, accountId }: CategoryPieChartsProps) {
                   const percent = totalForecasted > 0 ? ((entry.payload.value / totalForecasted) * 100).toFixed(1) : '0';
                   return (
                     <span className="text-sm">
-                      {entry.payload.name}: {formatCurrency(entry.payload.value)} ({percent}%)
+                      {entry.payload.name}: {maskValue(formatCurrency(entry.payload.value))} ({percent}%)
                     </span>
                   );
                 }}
@@ -151,7 +153,7 @@ export function CategoryPieCharts({ data, accountId }: CategoryPieChartsProps) {
             Gastos Realizados por Categoria
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Total: {formatCurrency(totalActual)}
+            Total: {maskValue(formatCurrency(totalActual))}
           </p>
         </CardHeader>
         <CardContent>
@@ -182,7 +184,7 @@ export function CategoryPieCharts({ data, accountId }: CategoryPieChartsProps) {
                   const percent = totalActual > 0 ? ((entry.payload.value / totalActual) * 100).toFixed(1) : '0';
                   return (
                     <span className="text-sm">
-                      {entry.payload.name}: {formatCurrency(entry.payload.value)} ({percent}%)
+                      {entry.payload.name}: {maskValue(formatCurrency(entry.payload.value))} ({percent}%)
                     </span>
                   );
                 }}
