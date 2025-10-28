@@ -1,4 +1,4 @@
-import { User, Crown, Eye, EyeOff } from "lucide-react";
+import { User, Crown, Eye, EyeOff, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,6 +28,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useMaskValues } from "@/hooks/useMaskValues";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 const routeLabels: Record<string, string> = {
   "/app/dashboard": t("nav.dashboard"),
@@ -47,6 +48,7 @@ export const Header = () => {
   const currentRoute = routeLabels[location.pathname] || "Dashboard";
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const { isMasked, toggleMask } = useMaskValues();
+  const { data: isAdmin } = useIsAdmin();
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -148,9 +150,17 @@ export const Header = () => {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <div className="font-semibold truncate">{profile?.name || user?.email || "Usuário"}</div>
-                      <div className={`ml-2 inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ${isPro ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="font-semibold truncate">{profile?.name || user?.email || "Usuário"}</div>
+                        {isAdmin && (
+                          <div className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                            <Shield className="h-3 w-3" />
+                            Admin
+                          </div>
+                        )}
+                      </div>
+                      <div className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ${isPro ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                         {isPro && <Crown className="h-3 w-3" />}
                         {plan === "pro" ? "Pro" : "Free"}
                       </div>
