@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2, MoveHorizontal } from "lucide-react";
 import { format, startOfMonth, endOfMonth, parse } from "date-fns";
@@ -26,11 +26,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 type TransactionInsert = Database["public"]["Tables"]["transactions"]["Insert"];
 
-interface TransactionsProps {
-  accountId?: string;
-}
-
-export default function Transactions({ accountId: propAccountId }: TransactionsProps = {}) {
+export default function Transactions() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { accounts } = useAccounts();
@@ -41,7 +37,7 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
   const currentMonthEnd = format(endOfMonth(new Date()), "yyyy-MM-dd");
 
   const [filters, setFilters] = useState({
-    accountId: propAccountId || "all",
+    accountId: "all",
     categoryId: "all",
     type: "all",
     startDate: currentMonthStart,
@@ -50,13 +46,6 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
     viewMode: "monthly" as "monthly" | "custom",
     selectedMonth: currentMonth,
   });
-
-  // Se accountId foi passado como prop, atualizar o filtro
-  useEffect(() => {
-    if (propAccountId) {
-      setFilters(prev => ({ ...prev, accountId: propAccountId }));
-    }
-  }, [propAccountId]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Copy } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -21,16 +21,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-interface ForecastsProps {
-  accountId?: string;
-}
-
-export default function Forecasts({ accountId: propAccountId }: ForecastsProps = {}) {
+export default function Forecasts() {
   const { accounts } = useAccounts();
   const currentMonth = format(new Date(), "yyyy-MM");
   
   const [filters, setFilters] = useState({
-    accountId: propAccountId || "all",
+    accountId: "all",
     selectedMonth: currentMonth,
   });
   
@@ -38,13 +34,6 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps =
   const [selectedForecast, setSelectedForecast] = useState<any>(null);
   const [copyDialogOpen, setCopyDialogOpen] = useState(false);
   const [copyTargetMonth, setCopyTargetMonth] = useState<string>("");
-
-  // Atualizar conta quando prop mudar
-  useEffect(() => {
-    if (propAccountId) {
-      setFilters(prev => ({ ...prev, accountId: propAccountId }));
-    }
-  }, [propAccountId]);
 
   const { categories } = useCategories(filters.accountId !== "all" ? filters.accountId : undefined);
   const { forecasts, isLoading, createForecast, updateForecast, deleteForecast, copyForecast } = useForecasts(

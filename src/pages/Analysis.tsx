@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useCategories } from "@/hooks/useCategories";
 import { useTransactions } from "@/hooks/useTransactions";
@@ -10,26 +10,15 @@ import { AnalysisFilters } from "@/components/analysis/AnalysisFilters";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-interface AnalysisProps {
-  accountId?: string;
-}
-
-export default function Analysis({ accountId: propAccountId }: AnalysisProps = {}) {
+export default function Analysis() {
   const { accounts } = useAccounts();
   const [filters, setFilters] = useState({
-    accountId: propAccountId || "all",
+    accountId: "all",
     viewMode: "monthly" as "monthly" | "custom",
     selectedMonth: format(new Date(), "yyyy-MM"),
     startDate: "",
     endDate: "",
   });
-
-  // Atualizar conta quando prop mudar
-  useEffect(() => {
-    if (propAccountId) {
-      setFilters(prev => ({ ...prev, accountId: propAccountId }));
-    }
-  }, [propAccountId]);
 
   const { categories } = useCategories(filters.accountId !== "all" ? filters.accountId : undefined);
   const { transactions } = useTransactions(filters.accountId !== "all" ? filters.accountId : undefined);
