@@ -94,7 +94,7 @@ export default function Admin() {
   });
 
   // Fetch all users with profiles and subscriptions
-  const { data: usersData, isLoading: usersLoading } = useQuery({
+  const { data: usersData, isLoading: usersLoading, error: usersError } = useQuery({
     queryKey: ["admin-users", page, itemsPerPage, userFilters],
     queryFn: async () => {
       const from = (page - 1) * itemsPerPage;
@@ -119,7 +119,10 @@ export default function Admin() {
 
       const { data: profiles, error, count } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching users:", error);
+        throw error;
+      }
 
       // Filter by plan if needed (client-side since subscriptions is a join)
       let filteredProfiles = profiles || [];
@@ -425,6 +428,25 @@ export default function Admin() {
             <CardContent>
               {usersLoading ? (
                 <p className="text-center py-8">Carregando...</p>
+              ) : usersError ? (
+                <div className="text-center py-8">
+                  <p className="text-destructive mb-4">
+                    Erro ao carregar usuários: {(usersError as Error).message}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Você precisa ter permissão de <strong>admin</strong> para visualizar usuários.
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Para se tornar admin, acesse o backend e execute esta query SQL substituindo 'seu@email.com' pelo seu email:
+                  </p>
+                  <code className="block mt-2 p-4 bg-muted rounded text-left text-xs">
+                    INSERT INTO public.user_roles (user_id, role)<br/>
+                    SELECT id, 'admin'::app_role<br/>
+                    FROM auth.users<br/>
+                    WHERE email = 'seu@email.com'<br/>
+                    ON CONFLICT (user_id, role) DO NOTHING;
+                  </code>
+                </div>
               ) : usersData?.profiles && usersData.profiles.length > 0 ? (
                 <>
                   <Table>
