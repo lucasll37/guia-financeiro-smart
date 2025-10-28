@@ -310,17 +310,17 @@ function InvestmentCard({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-3 py-4">
         {/* Valor Atual - destaque principal */}
-        <div className="space-y-1.5 pb-4 border-b">
-          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Valor Atual</div>
-          <div className="text-3xl font-bold">
+        <div className="space-y-1 pb-3 border-b">
+          <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Valor Atual</div>
+          <div className="text-2xl font-bold">
             {new Intl.NumberFormat("pt-BR", {
               style: "currency",
               currency: "BRL",
             }).format(currentValue)}
           </div>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs text-muted-foreground">
             Total investido: {new Intl.NumberFormat("pt-BR", {
               style: "currency",
               currency: "BRL",
@@ -329,49 +329,49 @@ function InvestmentCard({
         </div>
 
         {/* Breakdown de Retornos */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div className="flex items-baseline justify-between gap-2">
-            <span className="text-sm font-medium text-muted-foreground">Retorno Nominal</span>
+            <span className="text-xs font-medium text-muted-foreground">Retorno Nominal</span>
             <div className={`text-right ${isPositive ? "text-green-600" : "text-red-600"}`}>
-              <div className="text-lg font-semibold">
+              <div className="text-base font-semibold">
                 {isPositive ? "+" : ""}
                 {new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
                 }).format(nominalGain)}
               </div>
-              <div className="text-xs opacity-75">
+              <div className="text-[10px] opacity-75">
                 {isPositive ? "+" : ""}{gainPercentage.toFixed(1)}%
               </div>
             </div>
           </div>
 
           <div className="flex items-baseline justify-between gap-2">
-            <span className="text-sm font-medium text-muted-foreground">Inflação Acumulada</span>
+            <span className="text-xs font-medium text-muted-foreground">Inflação Acumulada</span>
             <div className="text-right text-orange-600">
-              <div className="text-lg font-semibold">
+              <div className="text-base font-semibold">
                 -{new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
                 }).format(inflationValue)}
               </div>
-              <div className="text-xs opacity-75">
+              <div className="text-[10px] opacity-75">
                 -{accumulatedInflation.toFixed(2)}%
               </div>
             </div>
           </div>
 
           <div className="flex items-baseline justify-between gap-2 pt-2 border-t-2">
-            <span className="text-base font-semibold">Retorno Real</span>
+            <span className="text-sm font-semibold">Retorno Real</span>
             <div className={`text-right ${isRealPositive ? "text-green-600" : "text-red-600"}`}>
-              <div className="text-2xl font-bold">
+              <div className="text-xl font-bold">
                 {isRealPositive ? "+" : ""}
                 {new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
                 }).format(realGain)}
               </div>
-              <div className="text-sm font-medium opacity-90">
+              <div className="text-xs font-medium opacity-90">
                 {isRealPositive ? "+" : ""}{realGainPercentage.toFixed(1)}%
               </div>
             </div>
@@ -379,10 +379,10 @@ function InvestmentCard({
         </div>
 
         {/* Métrica de performance */}
-        <div className="pt-3 border-t">
+        <div className="pt-2 border-t">
           <div className="flex items-baseline justify-between">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider">Retorno Real Médio Mensal</span>
-            <div className={`text-lg font-bold ${isRealPositive ? "text-green-600" : "text-red-600"}`}>
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Retorno Real Médio Mensal</span>
+            <div className={`text-base font-bold ${isRealPositive ? "text-green-600" : "text-red-600"}`}>
               {numberOfMonths > 0 ? (
                 <>
                   {isRealPositive ? "+" : ""}
@@ -396,11 +396,11 @@ function InvestmentCard({
         </div>
 
         <button 
-          className="w-full flex items-center justify-center gap-2 pt-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+          className="w-full flex items-center justify-center gap-2 pt-2 text-xs text-muted-foreground hover:text-foreground transition-colors group"
           onClick={() => onClick(investment.id)}
         >
           <span>Ver detalhes completos</span>
-          <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
         </button>
       </CardContent>
     </Card>
