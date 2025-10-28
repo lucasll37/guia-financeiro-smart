@@ -100,12 +100,23 @@ export default function Auth() {
 
     setLoading(true);
 
-    const { error } = await signUp(email, password, name);
-    
-    if (error) {
-      setError(error.message);
-    } else {
-      // Mostrar modal de confirmação após signup bem-sucedido
+    try {
+      const { error } = await signUp(email, password, name);
+      
+      if (error) {
+        // Verificar se é erro de email já existente
+        if (error.message.includes("already registered") || 
+            error.message.includes("already been registered") ||
+            error.message.includes("User already registered")) {
+          setError("✉️ Este email já está cadastrado. Tente fazer login ou use outro email.");
+        } else {
+          setError(error.message);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Tudo certo - mostrar modal e limpar campos
       setConfirmationEmail(email);
       setShowEmailConfirmModal(true);
       
@@ -117,6 +128,14 @@ export default function Auth() {
       
       // Mudar para aba de login
       setActiveTab("login");
+      
+    } catch (emailError: any) {
+      // Erro específico do envio de email
+      if (emailError.message === 'RESEND_DOMAIN_NOT_VERIFIED') {
+        setError("⚠️ Conta criada! Porém, o domínio de email não está verificado no Resend. Configure em https://resend.com/domains");
+      } else {
+        setError("✅ Conta criada! Porém houve um problema ao enviar o email de confirmação.");
+      }
     }
     
     setLoading(false);

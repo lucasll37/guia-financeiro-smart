@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Enviar email de boas-vindas estilizado
     if (!error && data.user) {
       try {
-        await supabase.functions.invoke('send-welcome-email', {
+        const { data: emailResponse, error: emailError } = await supabase.functions.invoke('send-welcome-email', {
           body: {
             user: {
               id: data.user.id,
@@ -59,10 +59,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
           }
         });
-        console.log('Email de confirmação enviado com sucesso');
-      } catch (emailError) {
+
+        // Verificar se o email foi enviado com sucesso
+        if (emailError || (emailResponse && !emailResponse.success)) {
+          console.error('Erro ao enviar email de confirmação:', emailError || emailResponse);
+          
+          // Se for erro do Resend sobre domínio não verificado
+          if (emailResponse?.data?.error?.message?.includes('verify a domain')) {
+            throw new Error('RESEND_DOMAIN_NOT_VERIFIED');
+          }
+        } else {
+          console.log('Email de confirmação enviado com sucesso');
+        }
+      } catch (emailError: any) {
         console.error('Erro ao enviar email de confirmação:', emailError);
-        // Não bloqueia o signup se o email falhar
+        // Propagar erro específico do Resend
+        if (emailError.message === 'RESEND_DOMAIN_NOT_VERIFIED') {
+          throw emailError;
+        }
       }
     }
 
