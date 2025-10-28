@@ -145,7 +145,11 @@ export default function InvestmentDetails() {
         <TabsContent value="projecao">
           <ProjectionTable
             currentBalance={currentValue || investment.balance}
-            initialMonth={new Date()}
+            initialMonth={
+              returns && returns.length > 0
+                ? new Date(returns[returns.length - 1].month)
+                : new Date(investment.initial_month)
+            }
           />
         </TabsContent>
 
