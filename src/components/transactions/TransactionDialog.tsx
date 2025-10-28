@@ -178,14 +178,17 @@ export function TransactionDialog({
       // Criar array de transações
       const transactions: TransactionInsert[] = [];
       
+      // Usar o mês de pagamento como base (se ajustado) ou calcular automaticamente
+      const basePaymentMonth = formData.payment_month 
+        ? parseISO(formData.payment_month)
+        : startOfMonth(new Date(formData.date));
+      
       for (let i = 0; i < installmentCount; i++) {
         const installmentAmount = i < remainder ? baseInstallment + 0.01 : baseInstallment;
         
-        const paymentMonth = formData.payment_month 
-          ? addMonths(new Date(formData.payment_month), i)
-          : addMonths(new Date(formData.date), i);
-        
-        const firstDayOfMonth = new Date(paymentMonth.getFullYear(), paymentMonth.getMonth(), 1);
+        // Calcular o mês de pagamento da parcela atual
+        const paymentMonth = addMonths(basePaymentMonth, i);
+        const firstDayOfMonth = startOfMonth(paymentMonth);
         
         transactions.push({
           ...formData,
