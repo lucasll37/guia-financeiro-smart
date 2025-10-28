@@ -10,6 +10,7 @@ import { MonthlyReturnsTable } from "@/components/investments/MonthlyReturnsTabl
 import { InvestmentSimulator } from "@/components/investments/InvestmentSimulator";
 import { MonthlyReturnsDialog } from "@/components/investments/MonthlyReturnsDialog";
 import { ProjectionTable } from "@/components/investments/ProjectionTable";
+import { addMonths } from "date-fns";
 import { useState, useMemo } from "react";
 
 import type { Database } from "@/integrations/supabase/types";
@@ -44,11 +45,21 @@ export default function InvestmentDetails() {
   }, [investment, returns]);
 
   const lastReturnMonth = useMemo(() => {
+    const toDate = (val: any) => {
+      if (!val) return null;
+      if (val instanceof Date) return val;
+      const s = String(val);
+      const d = new Date(s);
+      if (!isNaN(d.getTime())) return d;
+      const [y, m] = s.split("-");
+      return new Date(Number(y), Number(m) - 1, 1);
+    };
+
     if (returns && returns.length > 0) {
-      const maxTs = Math.max(...returns.map((r) => new Date(r.month as unknown as string).getTime()));
+      const maxTs = Math.max(...returns.map((r) => (toDate(r.month)?.getTime() ?? 0)));
       return new Date(maxTs);
     }
-    return investment ? new Date(investment.initial_month as unknown as string) : new Date();
+    return investment ? toDate(investment.initial_month) || new Date() : new Date();
   }, [returns, investment]);
 
   const handleSubmitReturn = (data: any) => {
@@ -154,7 +165,7 @@ export default function InvestmentDetails() {
         <TabsContent value="projecao">
           <ProjectionTable
             currentBalance={currentValue || investment.balance}
-            initialMonth={lastReturnMonth}
+            initialMonth={addMonths(lastReturnMonth, 1)}
           />
         </TabsContent>
 

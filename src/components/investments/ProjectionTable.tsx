@@ -29,7 +29,7 @@ export function ProjectionTable({ currentBalance, initialMonth }: ProjectionTabl
     const data = [];
     let balance = currentBalance;
 
-    for (let i = 1; i <= months; i++) {
+    for (let i = 0; i < months; i++) {
       const month = addMonths(initialMonth, i);
       const contribution = monthlyContribution;
       const returns = (balance + contribution) * (monthlyRate / 100);
