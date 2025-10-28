@@ -73,7 +73,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Enviar email estilizado
     const emailResponse = await resend.emails.send({
-      from: "Controle Financeiro <onboarding@resend.dev>",
+      from: "Controle Financeiro <noreply@prospera.lucaslima.ai>",
       to: [email],
       subject: "Redefinição de Senha - Controle Financeiro",
       html: `
