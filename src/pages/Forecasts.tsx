@@ -27,10 +27,7 @@ export default function Forecasts() {
   
   const [filters, setFilters] = useState({
     accountId: "all",
-    viewMode: "monthly" as "monthly" | "custom",
     selectedMonth: currentMonth,
-    startDate: "",
-    endDate: "",
   });
   
   const [dialogOpen, setDialogOpen] = useState(false);
