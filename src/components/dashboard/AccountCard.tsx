@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { useTransactions } from "@/hooks/useTransactions";
@@ -14,6 +15,7 @@ interface AccountCardProps {
 }
 
 export function AccountCard({ account }: AccountCardProps) {
+  const navigate = useNavigate();
   const { transactions } = useTransactions();
   const { budgets } = useBudgets();
 
@@ -61,7 +63,10 @@ export function AccountCard({ account }: AccountCardProps) {
   const percentage = budgetTotal > 0 ? (spent / budgetTotal) * 100 : 0;
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card 
+      className="hover:shadow-lg transition-shadow cursor-pointer" 
+      onClick={() => navigate(`/app/contas/${account.id}`)}
+    >
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-medium">{account.name}</CardTitle>
         <div className="text-2xl font-bold">

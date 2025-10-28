@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Target } from "lucide-react";
@@ -15,7 +16,8 @@ interface GoalProgressCardProps {
 }
 
 export function GoalProgressCard({ goal }: GoalProgressCardProps) {
-  const progress = goal.target_amount > 0 
+  const navigate = useNavigate();
+  const progress = goal.target_amount > 0
     ? (goal.current_amount / goal.target_amount) * 100 
     : 0;
   
@@ -26,7 +28,10 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
     : null;
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card 
+      className="hover:shadow-lg transition-shadow cursor-pointer" 
+      onClick={() => navigate("/app/metas")}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <Target className="h-5 w-5 text-primary" />

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { useInvestmentCurrentValue } from "@/hooks/useInvestmentCurrentValue";
@@ -17,6 +18,7 @@ interface InvestmentCardProps {
 }
 
 export function InvestmentCard({ investment }: InvestmentCardProps) {
+  const navigate = useNavigate();
   const { data: currentValue = investment.balance } = useInvestmentCurrentValue(investment.id);
   const { returns = [] } = useMonthlyReturns(investment.id);
 
@@ -40,7 +42,10 @@ export function InvestmentCard({ investment }: InvestmentCardProps) {
   const gainPercentage = investment.balance > 0 ? (gain / investment.balance) * 100 : 0;
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card 
+      className="hover:shadow-lg transition-shadow cursor-pointer" 
+      onClick={() => navigate("/app/investimentos")}
+    >
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-medium">{investment.name}</CardTitle>
         <div className="text-2xl font-bold">
