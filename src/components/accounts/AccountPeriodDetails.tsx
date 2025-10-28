@@ -10,6 +10,7 @@ import { useTransactions } from "@/hooks/useTransactions";
 import { useCategories } from "@/hooks/useCategories";
 import { useForecasts } from "@/hooks/useForecasts";
 import { useCreditCards } from "@/hooks/useCreditCards";
+import { useMaskValues } from "@/hooks/useMaskValues";
 import type { Database } from "@/integrations/supabase/types";
 
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
@@ -38,6 +39,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
   const closingDay = account.closing_day || 1;
   const [currentDate, setCurrentDate] = useState(new Date());
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const { maskValue } = useMaskValues();
   
   const toggleCategoryExpansion = (categoryKey: string) => {
     setExpandedCategories(prev => {
@@ -284,10 +286,10 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                           />
                         </TableCell>
                         <TableCell className="text-right font-medium w-[140px]">
-                          {formatCurrency(data.actual)}
+                          {maskValue(formatCurrency(data.actual))}
                         </TableCell>
                         <TableCell className={`text-right w-[140px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {formatCurrency(Math.abs(difference))}
+                          {maskValue(formatCurrency(Math.abs(difference)))}
                         </TableCell>
                           <TableCell className="text-right w-[120px]">
                             <div className="flex items-center gap-2">
@@ -313,7 +315,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                                       <span className="text-xs text-muted-foreground">({t.credit_cards.name})</span>
                                     )}
                                   </div>
-                                  <span className="font-medium">{formatCurrency(Number(t.amount))}</span>
+                                   <span className="font-medium">{maskValue(formatCurrency(Number(t.amount)))}</span>
                                 </div>
                               ))}
                             </div>
@@ -326,7 +328,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 <TableRow className="bg-green-50/50 dark:bg-green-950/10 font-semibold">
                   <TableCell>Total de Receitas</TableCell>
                   <TableCell colSpan={4} className="text-right text-green-600">
-                    {formatCurrency(totalIncome)}
+                    {maskValue(formatCurrency(totalIncome))}
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -402,10 +404,10 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                           />
                         </TableCell>
                         <TableCell className="text-right font-medium w-[140px]">
-                          {formatCurrency(data.actual)}
+                          {maskValue(formatCurrency(data.actual))}
                         </TableCell>
                         <TableCell className={`text-right w-[140px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {formatCurrency(Math.abs(difference))}
+                          {maskValue(formatCurrency(Math.abs(difference)))}
                         </TableCell>
                         <TableCell className="text-right w-[120px]">
                           <div className="flex items-center gap-2">
@@ -431,7 +433,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                                       <span className="text-xs text-muted-foreground">({t.credit_cards.name})</span>
                                     )}
                                   </div>
-                                  <span className="font-medium">{formatCurrency(Number(t.amount))}</span>
+                                  <span className="font-medium">{maskValue(formatCurrency(Number(t.amount)))}</span>
                                 </div>
                               ))}
                             </div>
@@ -444,7 +446,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 <TableRow className="bg-red-50/50 dark:bg-red-950/10 font-semibold">
                   <TableCell>Total de Despesas</TableCell>
                   <TableCell colSpan={4} className="text-right text-destructive">
-                    {formatCurrency(totalExpense)}
+                    {maskValue(formatCurrency(totalExpense))}
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -478,7 +480,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 </TableCell>
                 <TableCell className="text-right w-[140px]">-</TableCell>
                 <TableCell className="text-right font-medium w-[140px]">
-                  {formatCurrency(previousBalance)}
+                  {maskValue(formatCurrency(previousBalance))}
                 </TableCell>
                 <TableCell className="text-right w-[140px]">-</TableCell>
                 <TableCell className="text-right w-[120px]">-</TableCell>
@@ -493,7 +495,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
             <div className="flex items-center justify-between">
               <span className="text-lg font-semibold">Saldo do Período:</span>
               <span className={`text-xl font-bold ${balance >= 0 ? "text-green-600" : "text-destructive"}`}>
-                {formatCurrency(balance)}
+                {maskValue(formatCurrency(balance))}
               </span>
             </div>
           </div>
