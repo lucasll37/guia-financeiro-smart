@@ -34,6 +34,7 @@ import { UserGrowthChart } from "@/components/admin/UserGrowthChart";
 import { AccessActivityChart } from "@/components/admin/AccessActivityChart";
 import { StatsOverview } from "@/components/admin/StatsOverview";
 import { PlanLimitsManager } from "@/components/admin/PlanLimitsManager";
+import { SubscriptionManager } from "@/components/admin/SubscriptionManager";
 
 const couponSchema = z.object({
   code: z.string().trim().min(3, "Código deve ter no mínimo 3 caracteres").max(50, "Código muito longo"),
@@ -252,7 +253,6 @@ export default function Admin() {
           // Filter by plan
           const filteredSubs = subscriptions?.filter(sub => {
             if (data.targetGroup === "free") return sub.plan === "free";
-            if (data.targetGroup === "plus") return sub.plan === "plus";
             if (data.targetGroup === "pro") return sub.plan === "pro";
             return false;
           });
@@ -338,6 +338,7 @@ export default function Admin() {
         <TabsList>
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="users">Usuários</TabsTrigger>
+          <TabsTrigger value="subscriptions">Assinaturas</TabsTrigger>
           <TabsTrigger value="coupons">Cupons</TabsTrigger>
           <TabsTrigger value="notifications">Notificações</TabsTrigger>
           <TabsTrigger value="limits">Limites de Planos</TabsTrigger>
@@ -388,7 +389,6 @@ export default function Admin() {
                   >
                     <option value="all">Todos os planos</option>
                     <option value="free">Free</option>
-                    <option value="plus">Plus</option>
                     <option value="pro">Pro</option>
                   </select>
                 </div>
@@ -797,7 +797,6 @@ export default function Admin() {
                     <option value="test">🧪 Teste (apenas você)</option>
                     <option value="all">Todos os usuários</option>
                     <option value="free">Plano Free</option>
-                    <option value="plus">Plano Plus</option>
                     <option value="pro">Plano Pro</option>
                   </select>
                 </div>
@@ -873,6 +872,11 @@ export default function Admin() {
         {/* Plan Limits Tab */}
         <TabsContent value="limits" className="space-y-4">
           <PlanLimitsManager />
+        </TabsContent>
+
+        {/* Subscriptions Tab */}
+        <TabsContent value="subscriptions" className="space-y-4">
+          <SubscriptionManager />
         </TabsContent>
       </Tabs>
 
