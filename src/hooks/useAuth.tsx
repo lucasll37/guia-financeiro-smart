@@ -118,19 +118,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const resend = async (email: string) => {
     try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: email,
+      // Chamar a edge function de email de boas-vindas (sem precisar do ID)
+      const { data: emailResponse, error: emailError } = await supabase.functions.invoke('send-welcome-email', {
+        body: {
+          user: {
+            email: email,
+          }
+        }
       });
 
-      if (error) {
-        console.error('Erro ao reenviar email:', error);
-        return { error };
+      if (emailError || (emailResponse && !emailResponse.success)) {
+        console.error('Erro ao reenviar email:', emailError || emailResponse);
+        
+        if (emailResponse?.error?.message?.includes('verify a domain')) {
+          throw new Error('RESEND_DOMAIN_NOT_VERIFIED');
+        }
+        
+        return { error: emailError || new Error(emailResponse?.error || 'Erro ao enviar email') };
       }
 
+      console.log('Email reenviado com sucesso');
       return { error: null };
     } catch (emailError: any) {
       console.error('Erro ao reenviar email de confirmação:', emailError);
+      
+      if (emailError.message === 'RESEND_DOMAIN_NOT_VERIFIED') {
+        throw emailError;
+      }
+      
       return { error: emailError };
     }
   };

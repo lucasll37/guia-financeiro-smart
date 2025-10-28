@@ -131,7 +131,7 @@ const corsHeaders = {
 
 interface EmailPayload {
   user: {
-    id: string;
+    id?: string;
     email: string;
   };
 }
@@ -151,12 +151,29 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("User email is required");
     }
 
+    // Se não tiver ID, buscar pelo email
+    let userId = user.id;
+    if (!userId) {
+      const { data: userData, error: userError } = await supabaseAdmin.auth.admin.listUsers();
+      if (userError) {
+        console.error("Erro ao buscar usuários:", userError);
+        throw userError;
+      }
+      
+      const foundUser = userData.users.find(u => u.email === user.email);
+      if (!foundUser) {
+        throw new Error("User not found");
+      }
+      userId = foundUser.id;
+      console.log("User ID found:", userId);
+    }
+
     // Gerar link de confirmação/magic link usando Supabase Admin
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
       email: user.email,
       options: {
-        redirectTo: `${supabaseUrl}/app/dashboard`
+        redirectTo: `${supabaseUrl}/auth`
       }
     });
 
