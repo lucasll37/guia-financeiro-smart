@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCategories } from "@/hooks/useCategories";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useTransactions } from "@/hooks/useTransactions";
@@ -129,12 +130,28 @@ export default function Categories() {
       ) : isLoading ? (
         <p className="text-muted-foreground">Carregando categorias...</p>
       ) : (
-        <CategoryTree
-          categories={categories || []}
-          onEdit={handleEditCategory}
-          onDelete={handleDeleteCategory}
-          onAddChild={handleAddChild}
-        />
+        <Tabs defaultValue="receita" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 max-w-md">
+            <TabsTrigger value="receita">Receita</TabsTrigger>
+            <TabsTrigger value="despesa">Despesas</TabsTrigger>
+          </TabsList>
+          <TabsContent value="receita" className="mt-6">
+            <CategoryTree
+              categories={categories?.filter(c => c.type === 'receita') || []}
+              onEdit={handleEditCategory}
+              onDelete={handleDeleteCategory}
+              onAddChild={handleAddChild}
+            />
+          </TabsContent>
+          <TabsContent value="despesa" className="mt-6">
+            <CategoryTree
+              categories={categories?.filter(c => c.type === 'despesa') || []}
+              onEdit={handleEditCategory}
+              onDelete={handleDeleteCategory}
+              onAddChild={handleAddChild}
+            />
+          </TabsContent>
+        </Tabs>
       )}
 
       {selectedAccountId && (
