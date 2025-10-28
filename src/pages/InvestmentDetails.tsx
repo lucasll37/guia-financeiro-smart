@@ -148,8 +148,8 @@ export default function InvestmentDetails() {
             currentBalance={currentValue || investment.balance}
             initialMonth={
               returns && returns.length > 0
-                ? addMonths(new Date(returns[returns.length - 1].month), 1)
-                : addMonths(new Date(investment.initial_month), 1)
+                ? new Date(returns[returns.length - 1].month)
+                : new Date(investment.initial_month)
             }
           />
         </TabsContent>
