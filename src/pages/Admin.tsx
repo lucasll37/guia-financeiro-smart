@@ -33,6 +33,7 @@ import { z } from "zod";
 import { UserGrowthChart } from "@/components/admin/UserGrowthChart";
 import { AccessActivityChart } from "@/components/admin/AccessActivityChart";
 import { StatsOverview } from "@/components/admin/StatsOverview";
+import { PlanLimitsManager } from "@/components/admin/PlanLimitsManager";
 
 const couponSchema = z.object({
   code: z.string().trim().min(3, "Código deve ter no mínimo 3 caracteres").max(50, "Código muito longo"),
@@ -339,6 +340,7 @@ export default function Admin() {
           <TabsTrigger value="users">Usuários</TabsTrigger>
           <TabsTrigger value="coupons">Cupons</TabsTrigger>
           <TabsTrigger value="notifications">Notificações</TabsTrigger>
+          <TabsTrigger value="limits">Limites de Planos</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -866,6 +868,11 @@ export default function Admin() {
               </ul>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Plan Limits Tab */}
+        <TabsContent value="limits" className="space-y-4">
+          <PlanLimitsManager />
         </TabsContent>
       </Tabs>
 

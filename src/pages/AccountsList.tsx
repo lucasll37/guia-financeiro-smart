@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Users, ArrowRight } from "lucide-react";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useAuth } from "@/hooks/useAuth";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { AccountDialog } from "@/components/accounts/AccountDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -18,10 +19,26 @@ export default function AccountsList() {
   const { user } = useAuth();
   const { accounts, isLoading, createAccount } = useAccounts();
   const { toast } = useToast();
+  const { canCreateAccount, maxAccounts, userPlan } = usePlanLimits();
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleAccountClick = (accountId: string) => {
     navigate(`/app/contas/${accountId}`);
+  };
+
+  const handleCreateClick = async () => {
+    const canCreate = await canCreateAccount();
+    
+    if (!canCreate) {
+      toast({
+        title: "Limite atingido",
+        description: `Seu plano ${userPlan.toUpperCase()} permite até ${maxAccounts} conta${maxAccounts > 1 ? 's' : ''}. Faça upgrade para criar mais contas.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setDialogOpen(true);
   };
 
   const handleSaveAccount = async (accountData: AccountInsert) => {
@@ -44,7 +61,7 @@ export default function AccountsList() {
             Gerencie suas contas financeiras
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
+        <Button onClick={handleCreateClick}>
           <Plus className="h-4 w-4 mr-2" />
           Nova Conta
         </Button>
@@ -107,7 +124,7 @@ export default function AccountsList() {
             <p className="text-muted-foreground mb-4">
               Você ainda não possui contas cadastradas
             </p>
-            <Button onClick={() => setDialogOpen(true)}>
+            <Button onClick={handleCreateClick}>
               <Plus className="h-4 w-4 mr-2" />
               Criar Primeira Conta
             </Button>

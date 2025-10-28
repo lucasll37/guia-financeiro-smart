@@ -6,6 +6,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useCreditCards } from "@/hooks/useCreditCards";
 import { useTransactions } from "@/hooks/useTransactions";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { useToast } from "@/hooks/use-toast";
 import { CreditCardsTable } from "@/components/creditcards/CreditCardsTable";
 import { CreditCardDialog } from "@/components/creditcards/CreditCardDialog";
 import { CreditCardFilters } from "@/components/creditcards/CreditCardFilters";
@@ -20,6 +22,8 @@ interface CreditCardsProps {
 export default function CreditCards({ accountId: propAccountId }: CreditCardsProps) {
   const { user } = useAuth();
   const { accounts } = useAccounts();
+  const { toast } = useToast();
+  const { canCreateCreditCard, maxCreditCards, userPlan } = usePlanLimits();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<any>(null);
   
@@ -57,7 +61,30 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
     return paymentDate >= start && paymentDate <= end;
   }) || [];
 
-  const handleCreateCard = () => {
+  const handleCreateCard = async () => {
+    // Get the account ID to check
+    const accountIdToCheck = filters.accountId !== "all" ? filters.accountId : accounts?.[0]?.id;
+    
+    if (!accountIdToCheck) {
+      toast({
+        title: "Selecione uma conta",
+        description: "Selecione uma conta específica para adicionar um cartão de crédito.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const canCreate = await canCreateCreditCard(accountIdToCheck);
+    
+    if (!canCreate) {
+      toast({
+        title: "Limite atingido",
+        description: `Seu plano ${userPlan.toUpperCase()} permite até ${maxCreditCards} cartão${maxCreditCards > 1 ? 'ões' : ''} de crédito por conta. Faça upgrade para criar mais cartões.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSelectedCard(null);
     setDialogOpen(true);
   };

@@ -569,6 +569,33 @@ export type Database = {
           },
         ]
       }
+      plan_limits: {
+        Row: {
+          created_at: string | null
+          id: string
+          max_accounts: number
+          max_credit_cards: number
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          max_accounts?: number
+          max_credit_cards?: number
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          max_accounts?: number
+          max_credit_cards?: number
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
