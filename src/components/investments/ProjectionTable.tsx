@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
@@ -29,15 +29,59 @@ interface ProjectionTableProps {
 }
 
 export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }: ProjectionTableProps) {
-  const [months, setMonths] = useState(12);
-  const [monthlyRate, setMonthlyRate] = useState(1);
-  const [inflationRate, setInflationRate] = useState(0.5);
-  const [monthlyContribution, setMonthlyContribution] = useState(0);
-  const [rateStdDev, setRateStdDev] = useState(0);
-  const [inflationStdDev, setInflationStdDev] = useState(0);
+  // Load initial values from localStorage
+  const [months, setMonths] = useState(() => {
+    const saved = localStorage.getItem('projectionTable.months');
+    return saved ? Number(saved) : 12;
+  });
+  const [monthlyRate, setMonthlyRate] = useState(() => {
+    const saved = localStorage.getItem('projectionTable.monthlyRate');
+    return saved ? Number(saved) : 1;
+  });
+  const [inflationRate, setInflationRate] = useState(() => {
+    const saved = localStorage.getItem('projectionTable.inflationRate');
+    return saved ? Number(saved) : 0.5;
+  });
+  const [monthlyContribution, setMonthlyContribution] = useState(() => {
+    const saved = localStorage.getItem('projectionTable.monthlyContribution');
+    return saved ? Number(saved) : 0;
+  });
+  const [rateStdDev, setRateStdDev] = useState(() => {
+    const saved = localStorage.getItem('projectionTable.rateStdDev');
+    return saved ? Number(saved) : 0;
+  });
+  const [inflationStdDev, setInflationStdDev] = useState(() => {
+    const saved = localStorage.getItem('projectionTable.inflationStdDev');
+    return saved ? Number(saved) : 0;
+  });
   const [isExplanationOpen, setIsExplanationOpen] = useState(false);
   const [sortField, setSortField] = useState<'month' | 'contribution' | 'returns' | 'balance' | 'presentValue' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  // Save to localStorage when values change
+  useEffect(() => {
+    localStorage.setItem('projectionTable.months', String(months));
+  }, [months]);
+
+  useEffect(() => {
+    localStorage.setItem('projectionTable.monthlyRate', String(monthlyRate));
+  }, [monthlyRate]);
+
+  useEffect(() => {
+    localStorage.setItem('projectionTable.inflationRate', String(inflationRate));
+  }, [inflationRate]);
+
+  useEffect(() => {
+    localStorage.setItem('projectionTable.monthlyContribution', String(monthlyContribution));
+  }, [monthlyContribution]);
+
+  useEffect(() => {
+    localStorage.setItem('projectionTable.rateStdDev', String(rateStdDev));
+  }, [rateStdDev]);
+
+  useEffect(() => {
+    localStorage.setItem('projectionTable.inflationStdDev', String(inflationStdDev));
+  }, [inflationStdDev]);
 
   // Box-Muller transform for normal distribution
   const generateNormalRandom = (mean: number, stdDev: number) => {
