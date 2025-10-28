@@ -93,7 +93,7 @@ export default function AccountsList() {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
                     <CardTitle className="text-xl">{account.name}</CardTitle>
-                    <CardDescription className="flex items-center gap-2">
+                    <div className="text-sm text-muted-foreground flex items-center gap-2">
                       <Badge variant={account.type === "pessoal" ? "default" : "secondary"}>
                         {account.type === "pessoal" ? "Pessoal" : "Empresarial"}
                       </Badge>
@@ -103,7 +103,7 @@ export default function AccountsList() {
                           Compartilhada
                         </Badge>
                       )}
-                    </CardDescription>
+                    </div>
                   </div>
                 </div>
               </CardHeader>
