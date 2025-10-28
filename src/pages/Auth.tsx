@@ -9,6 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { t } from "@/lib/i18n";
 import { useTheme } from "next-themes";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Mail, CheckCircle } from "lucide-react";
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
@@ -20,6 +28,8 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [resetMode, setResetMode] = useState(false);
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") === "signup" ? "signup" : "login");
+  const [showEmailConfirmModal, setShowEmailConfirmModal] = useState(false);
+  const [confirmationEmail, setConfirmationEmail] = useState("");
   const { signIn, signUp, resetPassword, user } = useAuth();
   const navigate = useNavigate();
   const { setTheme } = useTheme();
@@ -57,7 +67,16 @@ export default function Auth() {
     const { error } = await signIn(email, password);
     
     if (error) {
-      setError(error.message);
+      // Detectar erro de email não confirmado
+      if (error.message.includes("Email not confirmed") || 
+          error.message.includes("email_not_confirmed") ||
+          error.message.includes("not confirmed")) {
+        setConfirmationEmail(email);
+        setShowEmailConfirmModal(true);
+        setError("");
+      } else {
+        setError(error.message);
+      }
     } else {
       navigate("/app/dashboard");
     }
@@ -86,7 +105,9 @@ export default function Auth() {
     if (error) {
       setError(error.message);
     } else {
-      navigate("/app/dashboard");
+      // Mostrar modal de confirmação após signup bem-sucedido
+      setConfirmationEmail(email);
+      setShowEmailConfirmModal(true);
     }
     
     setLoading(false);
@@ -269,6 +290,68 @@ export default function Auth() {
           </TabsContent>
         </Tabs>
       </Card>
+
+      {/* Modal de Confirmação de Email */}
+      <Dialog open={showEmailConfirmModal} onOpenChange={setShowEmailConfirmModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center space-y-4">
+            <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+              <Mail className="w-8 h-8 text-primary" />
+            </div>
+            <DialogTitle className="text-2xl font-bold">
+              📧 Confirme seu Email
+            </DialogTitle>
+            <DialogDescription className="text-base text-muted-foreground">
+              Enviamos um email de confirmação para:
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            <div className="bg-primary/5 rounded-lg p-4 text-center">
+              <p className="font-semibold text-lg text-primary">
+                {confirmationEmail}
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 text-sm">
+                <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <p className="text-muted-foreground">
+                  Abra sua caixa de entrada e clique no link de confirmação
+                </p>
+              </div>
+              
+              <div className="flex items-start gap-3 text-sm">
+                <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <p className="text-muted-foreground">
+                  Não encontrou? Verifique a pasta de spam ou lixo eletrônico
+                </p>
+              </div>
+              
+              <div className="flex items-start gap-3 text-sm">
+                <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <p className="text-muted-foreground">
+                  O link expira em 24 horas
+                </p>
+              </div>
+            </div>
+
+            <div className="border-t pt-4">
+              <p className="text-sm text-center text-muted-foreground mb-4">
+                Após confirmar seu email, você poderá fazer login normalmente
+              </p>
+              
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setShowEmailConfirmModal(false)}
+              >
+                Entendi
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

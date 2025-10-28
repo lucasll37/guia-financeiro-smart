@@ -39,14 +39,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, name: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { name },
-        emailRedirectTo: `${window.location.origin}/app`,
+        emailRedirectTo: `${window.location.origin}/app/dashboard`,
       },
     });
+
+    // Enviar email de boas-vindas estilizado
+    if (!error && data.user) {
+      try {
+        await supabase.functions.invoke('send-welcome-email', {
+          body: {
+            user: {
+              id: data.user.id,
+              email: data.user.email,
+            }
+          }
+        });
+        console.log('Email de confirmação enviado com sucesso');
+      } catch (emailError) {
+        console.error('Erro ao enviar email de confirmação:', emailError);
+        // Não bloqueia o signup se o email falhar
+      }
+    }
+
     return { error };
   };
 
