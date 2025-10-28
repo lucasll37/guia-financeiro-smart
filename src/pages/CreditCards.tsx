@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
@@ -13,7 +13,11 @@ import type { Database } from "@/integrations/supabase/types";
 
 type CreditCardInsert = Database["public"]["Tables"]["credit_cards"]["Insert"];
 
-export default function CreditCards() {
+interface CreditCardsProps {
+  accountId?: string;
+}
+
+export default function CreditCards({ accountId: propAccountId }: CreditCardsProps = {}) {
   const { user } = useAuth();
   const { accounts } = useAccounts();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -23,7 +27,7 @@ export default function CreditCards() {
   const currentMonth = format(today, "yyyy-MM");
   
   const [filters, setFilters] = useState({
-    accountId: "all",
+    accountId: propAccountId || "all",
     startDate: format(startOfMonth(today), "yyyy-MM-dd"),
     endDate: format(endOfMonth(today), "yyyy-MM-dd"),
     viewMode: "monthly" as "monthly" | "custom",
@@ -31,6 +35,13 @@ export default function CreditCards() {
   });
   
   const [expandAll, setExpandAll] = useState(false);
+
+  // Atualizar conta quando prop mudar
+  useEffect(() => {
+    if (propAccountId) {
+      setFilters(prev => ({ ...prev, accountId: propAccountId }));
+    }
+  }, [propAccountId]);
 
   const { creditCards, isLoading, createCreditCard, updateCreditCard, deleteCreditCard } =
     useCreditCards(filters.accountId !== "all" ? filters.accountId : undefined);

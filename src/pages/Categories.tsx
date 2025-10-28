@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,13 +13,24 @@ import type { Database } from "@/integrations/supabase/types";
 
 type Category = Database["public"]["Tables"]["categories"]["Row"];
 
-export default function Categories() {
+interface CategoriesProps {
+  accountId?: string;
+}
+
+export default function Categories({ accountId: propAccountId }: CategoriesProps = {}) {
   const { toast } = useToast();
   const { accounts } = useAccounts();
-  const [selectedAccountId, setSelectedAccountId] = useState<string>("");
+  const [selectedAccountId, setSelectedAccountId] = useState<string>(propAccountId || "");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [parentId, setParentId] = useState<string | null>(null);
+
+  // Atualizar conta selecionada quando prop mudar
+  useEffect(() => {
+    if (propAccountId) {
+      setSelectedAccountId(propAccountId);
+    }
+  }, [propAccountId]);
 
   const { categories, isLoading, createCategory, updateCategory, deleteCategory } =
     useCategories(selectedAccountId);

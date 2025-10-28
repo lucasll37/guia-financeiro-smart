@@ -1,12 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, LayoutDashboard, Receipt, FolderTree, CreditCard, TrendingUp, PieChart, FileText } from "lucide-react";
+import { ArrowLeft, Receipt, FolderTree, CreditCard, TrendingUp, PieChart, FileText } from "lucide-react";
 import { useAccounts } from "@/hooks/useAccounts";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Import existing page components (we'll refactor these into tab components)
-import Dashboard from "./Dashboard";
 import Transactions from "./Transactions";
 import Categories from "./Categories";
 import CreditCards from "./CreditCards";
@@ -62,11 +61,11 @@ export default function AccountDetails() {
         </div>
       </div>
 
-      <Tabs defaultValue="visao-geral" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7 h-auto">
-          <TabsTrigger value="visao-geral" className="flex items-center gap-2">
-            <LayoutDashboard className="h-4 w-4" />
-            <span className="hidden sm:inline">Visão Geral</span>
+      <Tabs defaultValue="realizacoes" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-6 h-auto">
+          <TabsTrigger value="realizacoes" className="flex items-center gap-2">
+            <PieChart className="h-4 w-4" />
+            <span className="hidden sm:inline">Realizações</span>
           </TabsTrigger>
           <TabsTrigger value="lancamentos" className="flex items-center gap-2">
             <Receipt className="h-4 w-4" />
@@ -84,42 +83,34 @@ export default function AccountDetails() {
             <TrendingUp className="h-4 w-4" />
             <span className="hidden sm:inline">Previsões</span>
           </TabsTrigger>
-          <TabsTrigger value="analise" className="flex items-center gap-2">
-            <PieChart className="h-4 w-4" />
-            <span className="hidden sm:inline">Análise</span>
-          </TabsTrigger>
           <TabsTrigger value="relatorios" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             <span className="hidden sm:inline">Relatórios</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="visao-geral">
-          <Dashboard />
+        <TabsContent value="realizacoes">
+          <Analysis accountId={accountId!} />
         </TabsContent>
 
         <TabsContent value="lancamentos">
-          <Transactions />
+          <Transactions accountId={accountId!} />
         </TabsContent>
 
         <TabsContent value="categorias">
-          <Categories />
+          <Categories accountId={accountId!} />
         </TabsContent>
 
         <TabsContent value="cartoes">
-          <CreditCards />
+          <CreditCards accountId={accountId!} />
         </TabsContent>
 
         <TabsContent value="previsoes">
-          <Forecasts />
-        </TabsContent>
-
-        <TabsContent value="analise">
-          <Analysis />
+          <Forecasts accountId={accountId!} />
         </TabsContent>
 
         <TabsContent value="relatorios">
-          <Reports />
+          <Reports accountId={accountId!} />
         </TabsContent>
       </Tabs>
     </div>
