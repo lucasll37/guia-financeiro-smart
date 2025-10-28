@@ -47,6 +47,8 @@ export function InvestmentCharts({
   const realReturnsData: ChartDataPoint[] = useMemo(() => {
     if (!returns || returns.length === 0) return [];
     
+    // Acumular inflação multiplicativamente: (1 + i1) × (1 + i2) × ... - 1
+    let inflationAccumulator = 1;
     let cumulativeContribution = 0;
     let cumulativeContributionPV = 0;
     
@@ -56,13 +58,17 @@ export function InvestmentCharts({
       const contribution = Number(r.contribution);
       const inflationRate = Number(r.inflation_rate) / 100;
       
-      cumulativeContribution += contribution;
-      cumulativeContributionPV += contribution; // No momento do aporte, valor presente = valor nominal
+      // Acumular inflação: inflação_acum = (1 + i1) × (1 + i2) × ... - 1
+      inflationAccumulator *= (1 + inflationRate);
+      const cumulativeInflation = inflationAccumulator - 1;
       
-      // Calcular valor presente do saldo (descontando inflação acumulada)
-      const monthsFromStart = returns.indexOf(r);
-      const inflationFactor = Math.pow(1 + inflationRate, monthsFromStart);
-      const balancePV = balance / inflationFactor;
+      // Saldo VP = Saldo Aparente / (1 + Inflação Acumulada)
+      const balancePV = balance / (1 + cumulativeInflation);
+      
+      // Aportes acumulados
+      cumulativeContribution += contribution;
+      // Para aportes históricos, mantém o valor no momento da aplicação
+      cumulativeContributionPV += contribution;
       
       return {
         month: format(monthDate, "MMM/yy", { locale: ptBR }),
@@ -82,8 +88,12 @@ export function InvestmentCharts({
       let cumulativeContribution = data[data.length - 1]?.aportesAparente || 0;
       let cumulativeContributionPV = data[data.length - 1]?.aportesValorPresente || 0;
       
-      const totalMonths = returns.length;
-      const avgInflationRate = returns.reduce((sum, r) => sum + Number(r.inflation_rate), 0) / returns.length / 100;
+      // Pegar a inflação acumulada do último mês histórico
+      const lastHistoricData = realReturnsData[realReturnsData.length - 1];
+      let inflationAccumulator = 1;
+      returns.forEach((r) => {
+        inflationAccumulator *= (1 + Number(r.inflation_rate) / 100);
+      });
       
       for (let i = 1; i <= projectionConfig.months; i++) {
         const month = addMonths(lastReturnMonth, i);
@@ -91,17 +101,21 @@ export function InvestmentCharts({
         const returnAmount = (balance + contribution) * (projectionConfig.monthlyRate / 100);
         balance = balance + contribution + returnAmount;
         
+        // Aportes acumulados aparentes
         cumulativeContribution += contribution;
         
-        // Valor presente do aporte futuro (desconto até o presente)
+        // Aporte futuro VP: desconto do valor futuro para o presente
+        // Fórmula: Aporte_VP = Aporte_Futuro / (1 + inflação)^n
         const monthsFromNow = i;
         const pvFactor = Math.pow(1 + projectionConfig.inflationRate / 100, -monthsFromNow);
         cumulativeContributionPV += contribution * pvFactor;
         
-        // Valor presente do saldo (descontando inflação acumulada desde o início)
-        const totalMonthsFromStart = totalMonths + i;
-        const inflationFactor = Math.pow(1 + avgInflationRate, totalMonthsFromStart);
-        const balancePV = balance / inflationFactor;
+        // Acumular inflação projetada ao acumulador histórico
+        inflationAccumulator *= (1 + projectionConfig.inflationRate / 100);
+        const cumulativeInflation = inflationAccumulator - 1;
+        
+        // Saldo VP = Saldo Aparente / (1 + Inflação Acumulada Total)
+        const balancePV = balance / (1 + cumulativeInflation);
         
         data.push({
           month: format(month, "MMM/yy", { locale: ptBR }),

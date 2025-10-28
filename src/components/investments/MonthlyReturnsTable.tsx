@@ -67,20 +67,29 @@ export function MonthlyReturnsTable({
       return sortDirection === 'asc' ? comparison : -comparison;
     });
 
-    // Calcular valor presente e aportes acumulados para cada rendimento
-    let cumulativeInflation = 0;
+    // Calcular inflação acumulada e valores presentes
+    // Fórmula: VP = VF / (1 + inflação_acumulada)
+    // Inflação acumulada = (1 + i1) × (1 + i2) × ... × (1 + in) - 1
+    let inflationAccumulator = 1; // Começa em 1 para multiplicação
     let cumulativeContribution = 0;
     let cumulativeContributionPV = 0;
     
-    return sorted.map((returnData, index) => {
+    return sorted.map((returnData) => {
       const inflationRate = Number(returnData.inflation_rate) / 100;
       const contribution = Number(returnData.contribution);
       
-      cumulativeInflation = (1 + cumulativeInflation) * (1 + inflationRate) - 1;
+      // Acumular inflação multiplicativamente
+      inflationAccumulator *= (1 + inflationRate);
+      const cumulativeInflation = inflationAccumulator - 1;
+      
+      // Saldo VP = Saldo Aparente / (1 + Inflação Acumulada)
       const presentValue = Number(returnData.balance_after) / (1 + cumulativeInflation);
       
+      // Aportes aparentes: soma simples
       cumulativeContribution += contribution;
-      // Aporte em valor presente (o aporte já foi feito, então mantém o valor no momento)
+      
+      // Aportes VP: para aportes já realizados, mantém o valor no momento da aplicação
+      // Não descontamos para o passado, apenas somamos
       cumulativeContributionPV += contribution;
       
       return {
@@ -125,26 +134,76 @@ export function MonthlyReturnsTable({
               {isExplanationOpen ? "Ocultar" : "Mostrar"} Explicação dos Termos
             </Button>
           </CollapsibleTrigger>
-          <CollapsibleContent className="mt-4 p-4 bg-muted rounded-lg space-y-3 text-sm">
-            <div>
-              <h4 className="font-semibold mb-1">Saldo Aparente</h4>
-              <p className="text-muted-foreground">Valor nominal acumulado do investimento sem ajustes pela inflação.</p>
-              <p className="font-mono text-xs mt-1">Saldo Aparente = Saldo Anterior + Aporte + Rendimento</p>
+          <CollapsibleContent className="mt-4 p-4 bg-muted rounded-lg space-y-4 text-sm">
+            <div className="pb-3 border-b border-border">
+              <h4 className="font-semibold text-base mb-2 text-primary">💰 Valores Aparentes (Nominais)</h4>
+              <p className="text-muted-foreground mb-3">
+                São os valores "de face" que aparecem no extrato, sem considerar a perda de poder de compra pela inflação.
+              </p>
             </div>
+            
             <div>
-              <h4 className="font-semibold mb-1">Saldo VP (Valor Presente)</h4>
-              <p className="text-muted-foreground">Poder de compra real do saldo, descontando o efeito acumulado da inflação desde o início.</p>
-              <p className="font-mono text-xs mt-1">Saldo VP = Saldo Aparente / (1 + Inflação Acumulada)</p>
+              <h4 className="font-semibold mb-1.5">📊 Saldo Aparente</h4>
+              <p className="text-muted-foreground mb-2">
+                É o montante nominal acumulado no investimento. Representa quanto dinheiro você tem "no papel", 
+                mas não reflete o poder de compra real.
+              </p>
+              <p className="font-mono text-xs mt-1 bg-background p-2 rounded border">
+                Saldo Aparente = Saldo Anterior + Aporte + Rendimento
+              </p>
             </div>
+
             <div>
-              <h4 className="font-semibold mb-1">Aporte Acumulado Aparente</h4>
-              <p className="text-muted-foreground">Soma nominal de todos os aportes realizados até o momento.</p>
-              <p className="font-mono text-xs mt-1">Aporte Acum. Aparente = Σ Aportes</p>
+              <h4 className="font-semibold mb-1.5">💵 Aporte Acumulado Aparente</h4>
+              <p className="text-muted-foreground mb-2">
+                É a soma simples de todos os depósitos que você fez ao longo do tempo, sem ajustes pela inflação.
+              </p>
+              <p className="font-mono text-xs mt-1 bg-background p-2 rounded border">
+                Aporte Acum. Aparente = Σ Aportes Mensais
+              </p>
             </div>
+
+            <div className="pb-3 border-b border-border pt-2">
+              <h4 className="font-semibold text-base mb-2 text-chart-2">💎 Valores Presentes (Reais)</h4>
+              <p className="text-muted-foreground mb-3">
+                São os valores ajustados pela inflação, mostrando o poder de compra efetivo em relação ao início do investimento.
+              </p>
+            </div>
+
             <div>
-              <h4 className="font-semibold mb-1">Aporte Acumulado VP</h4>
-              <p className="text-muted-foreground">Valor presente dos aportes já realizados, mantendo o poder de compra do momento em que foram feitos.</p>
-              <p className="font-mono text-xs mt-1">Aporte Acum. VP = Σ Aportes (no momento da aplicação)</p>
+              <h4 className="font-semibold mb-1.5">📈 Saldo VP (Valor Presente)</h4>
+              <p className="text-muted-foreground mb-2">
+                É quanto o seu saldo vale em termos de poder de compra do primeiro mês. Mostra se você realmente 
+                ganhou poder de compra ou apenas acompanhou a inflação.
+              </p>
+              <p className="font-mono text-xs mt-1 bg-background p-2 rounded border mb-1">
+                Saldo VP = Saldo Aparente / (1 + Inflação Acumulada)
+              </p>
+              <p className="text-xs text-muted-foreground italic">
+                Inflação Acumulada = (1 + i₁) × (1 + i₂) × ... × (1 + iₙ) - 1
+              </p>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-1.5">💰 Aporte Acumulado VP</h4>
+              <p className="text-muted-foreground mb-2">
+                Para aportes já realizados (histórico), mantemos o valor no momento em que foram feitos. 
+                Não descontamos para o passado, apenas somamos os valores investidos.
+              </p>
+              <p className="font-mono text-xs mt-1 bg-background p-2 rounded border">
+                Aporte Acum. VP = Σ Aportes (valor no momento da aplicação)
+              </p>
+            </div>
+
+            <div className="pt-3 bg-primary/5 -m-4 mt-4 p-4 rounded-b-lg">
+              <h4 className="font-semibold mb-1.5 flex items-center gap-2">
+                <span>💡</span> Por que é importante?
+              </h4>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                Comparar o <strong>Saldo Aparente</strong> com o <strong>Saldo VP</strong> mostra se seu investimento 
+                está realmente gerando ganho real acima da inflação. Se o Saldo VP estiver muito abaixo do aparente, 
+                a inflação está "comendo" seus ganhos.
+              </p>
             </div>
           </CollapsibleContent>
         </Collapsible>
