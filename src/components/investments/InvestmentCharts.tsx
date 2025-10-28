@@ -158,7 +158,7 @@ export function InvestmentCharts({
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Evolução dos Rendimentos Reais</CardTitle>
+          <CardTitle>Evolução Histórica dos Investimentos</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={400}>
@@ -178,14 +178,14 @@ export function InvestmentCharts({
               <Line
                 type="monotone"
                 dataKey="saldoValorPresente"
-                name="Saldo Valor Presente"
+                name="Saldo VP"
                 stroke="hsl(var(--chart-2))"
                 strokeWidth={2}
               />
               <Line
                 type="monotone"
                 dataKey="aportesAparente"
-                name="Aportes Acumulados"
+                name="Aportes Acum. Aparente"
                 stroke="hsl(var(--chart-3))"
                 strokeWidth={2}
                 strokeDasharray="5 5"
@@ -193,7 +193,7 @@ export function InvestmentCharts({
               <Line
                 type="monotone"
                 dataKey="aportesValorPresente"
-                name="Aportes Valor Presente"
+                name="Aportes Acum. VP"
                 stroke="hsl(var(--chart-4))"
                 strokeWidth={2}
                 strokeDasharray="5 5"
@@ -205,7 +205,7 @@ export function InvestmentCharts({
 
       <Card>
         <CardHeader>
-          <CardTitle>Projeção Futura com Histórico Real</CardTitle>
+          <CardTitle>Histórico + Projeção Futura</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={400}>
@@ -232,14 +232,14 @@ export function InvestmentCharts({
               <Line
                 type="monotone"
                 dataKey="saldoValorPresente"
-                name="Saldo Valor Presente"
+                name="Saldo VP"
                 stroke="hsl(var(--chart-2))"
                 strokeWidth={2}
               />
               <Line
                 type="monotone"
                 dataKey="aportesAparente"
-                name="Aportes Acumulados"
+                name="Aportes Acum. Aparente"
                 stroke="hsl(var(--chart-3))"
                 strokeWidth={2}
                 strokeDasharray="5 5"
@@ -247,7 +247,7 @@ export function InvestmentCharts({
               <Line
                 type="monotone"
                 dataKey="aportesValorPresente"
-                name="Aportes Valor Presente"
+                name="Aportes Acum. VP"
                 stroke="hsl(var(--chart-4))"
                 strokeWidth={2}
                 strokeDasharray="5 5"
