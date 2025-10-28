@@ -4,8 +4,11 @@ import { useCategories } from "@/hooks/useCategories";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useForecasts } from "@/hooks/useForecasts";
 import { ComparisonChart } from "@/components/analysis/ComparisonChart";
+import { CategoryPieCharts } from "@/components/analysis/CategoryPieCharts";
+import { CategoryStackedBarChart } from "@/components/analysis/CategoryStackedBarChart";
 import { AnalysisFilters } from "@/components/analysis/AnalysisFilters";
 import { format, startOfMonth, endOfMonth } from "date-fns";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Analysis() {
   const { accounts } = useAccounts();
@@ -100,6 +103,19 @@ export default function Analysis() {
     return Object.values(categoryMap);
   }, [categories, forecasts, transactions, filters]);
 
+  const periodDates = useMemo(() => {
+    if (filters.viewMode === "custom" && filters.startDate && filters.endDate) {
+      return {
+        start: filters.startDate,
+        end: filters.endDate,
+      };
+    }
+    return {
+      start: format(startOfMonth(new Date(filters.selectedMonth + "-01")), "yyyy-MM-dd"),
+      end: format(endOfMonth(new Date(filters.selectedMonth + "-01")), "yyyy-MM-dd"),
+    };
+  }, [filters]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -122,7 +138,30 @@ export default function Analysis() {
           Selecione uma conta para visualizar a análise
         </div>
       ) : (
-        <ComparisonChart data={comparisonData} accountId={filters.accountId} />
+        <Tabs defaultValue="comparison" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 max-w-2xl mx-auto">
+            <TabsTrigger value="comparison">Comparativo</TabsTrigger>
+            <TabsTrigger value="distribution">Distribuição</TabsTrigger>
+            <TabsTrigger value="composition">Composição</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="comparison" className="mt-6">
+            <ComparisonChart data={comparisonData} accountId={filters.accountId} />
+          </TabsContent>
+
+          <TabsContent value="distribution" className="mt-6">
+            <CategoryPieCharts data={comparisonData} accountId={filters.accountId} />
+          </TabsContent>
+
+          <TabsContent value="composition" className="mt-6">
+            <CategoryStackedBarChart
+              accountId={filters.accountId}
+              periodStart={periodDates.start}
+              periodEnd={periodDates.end}
+              parentCategories={comparisonData}
+            />
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );

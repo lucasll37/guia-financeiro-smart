@@ -90,8 +90,8 @@ export function ComparisonChart({ data, accountId }: ComparisonChartProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Comparação por Categoria</CardTitle>
-          <CardDescription>Valores previstos vs realizados</CardDescription>
+          <CardTitle>Previsto x Realizado</CardTitle>
+          <CardDescription>Valores previstos vs realizados por categoria</CardDescription>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={400}>
