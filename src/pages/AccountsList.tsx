@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Users, ArrowRight, Edit, Trash2 } from "lucide-react";
+import { Plus, Users, ArrowRight, Edit, Trash2, Copy } from "lucide-react";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useAuth } from "@/hooks/useAuth";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
@@ -11,6 +11,18 @@ import { AccountDialog } from "@/components/accounts/AccountDialog";
 import { MembersDialog } from "@/components/accounts/MembersDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { Database } from "@/integrations/supabase/types";
 
 type AccountInsert = Database["public"]["Tables"]["accounts"]["Insert"];
@@ -24,7 +36,9 @@ export default function AccountsList() {
   const { canCreateAccount, maxAccounts, userPlan } = usePlanLimits();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [membersDialogOpen, setMembersDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
+  const [deleteConfirmName, setDeleteConfirmName] = useState("");
 
   const handleAccountClick = (accountId: string) => {
     navigate(`/app/contas/${accountId}`);
@@ -69,15 +83,34 @@ export default function AccountsList() {
     setDialogOpen(true);
   };
 
-  const handleDeleteAccount = async (e: React.MouseEvent, id: string) => {
+  const handleDeleteClick = (e: React.MouseEvent, account: Account) => {
     e.stopPropagation();
-    if (!confirm("Tem certeza que deseja excluir esta conta?")) return;
+    setSelectedAccount(account);
+    setDeleteConfirmName("");
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedAccount) return;
     
-    await deleteAccount.mutateAsync(id);
+    await deleteAccount.mutateAsync(selectedAccount.id);
     toast({
       title: "Conta excluída",
       description: "A conta foi excluída com sucesso",
     });
+    setDeleteDialogOpen(false);
+    setSelectedAccount(null);
+    setDeleteConfirmName("");
+  };
+
+  const handleCopyAccountName = () => {
+    if (selectedAccount) {
+      navigator.clipboard.writeText(selectedAccount.name);
+      toast({
+        title: "Nome copiado",
+        description: "O nome da conta foi copiado para a área de transferência",
+      });
+    }
   };
 
   const handleManageMembers = (e: React.MouseEvent, account: Account) => {
@@ -141,7 +174,7 @@ export default function AccountsList() {
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 shrink-0">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -161,7 +194,7 @@ export default function AccountsList() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={(e) => handleDeleteAccount(e, account.id)}
+                      onClick={(e) => handleDeleteClick(e, account)}
                       title="Excluir"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -208,6 +241,56 @@ export default function AccountsList() {
         account={selectedAccount}
         currentUserId={user.id}
       />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tem certeza que deseja excluir esta conta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Para confirmar, digite o nome da conta abaixo:
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 p-3 bg-muted rounded-md font-mono text-sm">
+                {selectedAccount?.name}
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleCopyAccountName}
+                title="Copiar nome"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="confirm-name">Digite o nome da conta</Label>
+              <Input
+                id="confirm-name"
+                value={deleteConfirmName}
+                onChange={(e) => setDeleteConfirmName(e.target.value)}
+                placeholder="Nome da conta"
+              />
+            </div>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteConfirmName("")}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={deleteConfirmName !== selectedAccount?.name}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir Conta
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
