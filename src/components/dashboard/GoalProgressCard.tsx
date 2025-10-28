@@ -29,13 +29,14 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
 
   return (
     <Card 
-      className="hover:shadow-lg transition-shadow cursor-pointer" 
+      className="group relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl border-2 hover:border-primary/50" 
       onClick={() => navigate("/app/metas")}
     >
-      <CardHeader className="pb-3">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <CardHeader className="pb-3 relative z-10">
         <div className="flex items-center gap-2">
-          <Target className="h-5 w-5 text-primary" />
-          <CardTitle className="text-lg font-medium">{goal.name}</CardTitle>
+          <Target className="h-5 w-5 text-primary group-hover:scale-110 transition-transform duration-300" />
+          <CardTitle className="text-lg font-medium group-hover:text-primary transition-colors duration-300">{goal.name}</CardTitle>
         </div>
         <div className="text-2xl font-bold">
           {new Intl.NumberFormat("pt-BR", {
@@ -44,7 +45,7 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
           }).format(goal.current_amount)}
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative z-10">
         <div className="space-y-4">
           <Progress value={progress} className="h-3" />
           

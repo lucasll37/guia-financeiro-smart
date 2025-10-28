@@ -64,11 +64,12 @@ export function AccountCard({ account }: AccountCardProps) {
 
   return (
     <Card 
-      className="hover:shadow-lg transition-shadow cursor-pointer" 
+      className="group relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl border-2 hover:border-primary/50" 
       onClick={() => navigate(`/app/contas/${account.id}`)}
     >
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-medium">{account.name}</CardTitle>
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <CardHeader className="pb-3 relative z-10">
+        <CardTitle className="text-lg font-medium group-hover:text-primary transition-colors duration-300">{account.name}</CardTitle>
         <div className="text-2xl font-bold">
           {new Intl.NumberFormat("pt-BR", {
             style: "currency",
@@ -76,7 +77,7 @@ export function AccountCard({ account }: AccountCardProps) {
           }).format(balance)}
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative z-10">
         <div className="h-[160px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
