@@ -61,11 +61,14 @@ export default function Accounts() {
           diff: accountData as any,
         });
         
-        // Criar categorias padrão e garantir todas as subcategorias antes de fechar
+        // Criar categorias padrão
         try {
-          await seedCategories(newAccount.id);
+          console.log("Iniciando seed de categorias para conta:", newAccount.id);
+          const categoriesCreated = await seedCategories(newAccount.id);
+          console.log(`${categoriesCreated} categorias criadas com sucesso`);
         } catch (error) {
           console.error("Erro ao criar categorias padrão:", error);
+          // Ainda assim continuamos, o usuário pode criar categorias manualmente
         }
       }
     }

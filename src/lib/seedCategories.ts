@@ -1,6 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export async function seedCategories(accountId: string) {
+  console.log("seedCategories chamado para account_id:", accountId);
+  
   const categories = [
     // RECEITAS - PRIMEIRA CATEGORIA
     { name: "Receita", type: "receita" as const, color: "#10b981", parent_id: null },
@@ -105,8 +107,15 @@ export async function seedCategories(accountId: string) {
     .select('id, name, parent_id')
     .eq('account_id', accountId);
 
+  if (existingError) {
+    console.error("Erro ao buscar categorias existentes:", existingError);
+    throw existingError;
+  }
+
+  console.log(`Encontradas ${existing?.length || 0} categorias existentes`);
+
   const byKey = new Map<string, string>();
-  if (!existingError && existing) {
+  if (existing) {
     for (const row of existing) {
       byKey.set(buildKey(row.name as string, (row as any).parent_id as string | null), row.id as string);
     }
@@ -200,5 +209,6 @@ export async function seedCategories(accountId: string) {
     }
   }
 
+  console.log(`Seed de categorias concluído. Total de categorias criadas: ${createdCount}`);
   return createdCount;
 }
