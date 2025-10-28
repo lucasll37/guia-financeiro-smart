@@ -159,7 +159,6 @@ export const Header = () => {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate("/app/conta")}>Minha Conta</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/app/configuracoes")}>Configurações</DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/app/planos")}>
                 {plan === "pro" ? "Planos e Pagamento" : "Upgrade para Pro"}
               </DropdownMenuItem>
