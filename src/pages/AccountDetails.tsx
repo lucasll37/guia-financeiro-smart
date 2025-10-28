@@ -1,11 +1,12 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Receipt, FolderTree, CreditCard, TrendingUp, PieChart, FileText } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, Receipt, FolderTree, CreditCard, TrendingUp, PieChart, FileText } from "lucide-react";
 import { useAccounts } from "@/hooks/useAccounts";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Import existing page components (we'll refactor these into tab components)
+import Dashboard from "./Dashboard";
 import Transactions from "./Transactions";
 import Categories from "./Categories";
 import CreditCards from "./CreditCards";
@@ -61,8 +62,12 @@ export default function AccountDetails() {
         </div>
       </div>
 
-      <Tabs defaultValue="lancamentos" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6 h-auto">
+      <Tabs defaultValue="visao-geral" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-7 h-auto">
+          <TabsTrigger value="visao-geral" className="flex items-center gap-2">
+            <LayoutDashboard className="h-4 w-4" />
+            <span className="hidden sm:inline">Visão Geral</span>
+          </TabsTrigger>
           <TabsTrigger value="lancamentos" className="flex items-center gap-2">
             <Receipt className="h-4 w-4" />
             <span className="hidden sm:inline">Lançamentos</span>
@@ -88,6 +93,10 @@ export default function AccountDetails() {
             <span className="hidden sm:inline">Relatórios</span>
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="visao-geral">
+          <Dashboard />
+        </TabsContent>
 
         <TabsContent value="lancamentos">
           <Transactions />

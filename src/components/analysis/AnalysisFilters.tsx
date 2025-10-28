@@ -22,10 +22,9 @@ interface AnalysisFiltersProps {
     endDate: string;
   };
   onFilterChange: (filters: any) => void;
-  accountId?: string;
 }
 
-export function AnalysisFilters({ accounts, filters, onFilterChange, accountId }: AnalysisFiltersProps) {
+export function AnalysisFilters({ accounts, filters, onFilterChange }: AnalysisFiltersProps) {
   // Generate month options (6 months before and after current month)
   const monthOptions = useMemo(() => {
     const options = [];
@@ -86,31 +85,29 @@ export function AnalysisFilters({ accounts, filters, onFilterChange, accountId }
         </Button>
       </div>
 
-      <div className={`grid grid-cols-1 ${accountId ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-4 p-4 border rounded-lg bg-card`}>
-        {!accountId && (
-          <div className="space-y-2">
-            <Label htmlFor="account-filter">Conta</Label>
-            <Select
-              value={filters.accountId}
-              onValueChange={(value) => onFilterChange({ ...filters, accountId: value })}
-            >
-              <SelectTrigger id="account-filter">
-                <SelectValue placeholder="Todas" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas as contas</SelectItem>
-                {accounts.map((account) => (
-                  <SelectItem key={account.id} value={account.id}>
-                    {account.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-card">
+        <div className="space-y-2">
+          <Label htmlFor="account-filter">Conta</Label>
+          <Select
+            value={filters.accountId}
+            onValueChange={(value) => onFilterChange({ ...filters, accountId: value })}
+          >
+            <SelectTrigger id="account-filter">
+              <SelectValue placeholder="Todas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as contas</SelectItem>
+              {accounts.map((account) => (
+                <SelectItem key={account.id} value={account.id}>
+                  {account.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {filters.viewMode === "monthly" ? (
-          <div className={`space-y-2 ${accountId ? 'md:col-span-1' : 'md:col-span-2'}`}>
+          <div className="space-y-2 md:col-span-2">
             <Label htmlFor="month-filter">Mês</Label>
             <Select
               value={filters.selectedMonth}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
@@ -13,11 +13,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 type CreditCardInsert = Database["public"]["Tables"]["credit_cards"]["Insert"];
 
-interface CreditCardsProps {
-  accountId?: string;
-}
-
-export default function CreditCards({ accountId: propAccountId }: CreditCardsProps = {}) {
+export default function CreditCards() {
   const { user } = useAuth();
   const { accounts } = useAccounts();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -40,13 +36,6 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
     useCreditCards(filters.accountId !== "all" ? filters.accountId : undefined);
 
   const { transactions } = useTransactions(filters.accountId !== "all" ? filters.accountId : undefined);
-
-  // Set accountId from prop if provided
-  useEffect(() => {
-    if (propAccountId && filters.accountId !== propAccountId) {
-      setFilters(prev => ({ ...prev, accountId: propAccountId }));
-    }
-  }, [propAccountId]);
 
   // Filtrar transações por período
   const filteredTransactions = transactions?.filter((t) => {
@@ -105,7 +94,6 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
         onFilterChange={setFilters}
         expandAll={expandAll}
         onToggleExpandAll={() => setExpandAll(!expandAll)}
-        accountId={propAccountId}
       />
 
       {isLoading ? (

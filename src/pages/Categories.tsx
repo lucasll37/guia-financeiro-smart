@@ -13,14 +13,10 @@ import type { Database } from "@/integrations/supabase/types";
 
 type Category = Database["public"]["Tables"]["categories"]["Row"];
 
-interface CategoriesProps {
-  accountId?: string;
-}
-
-export default function Categories({ accountId: propAccountId }: CategoriesProps = {}) {
+export default function Categories() {
   const { toast } = useToast();
   const { accounts } = useAccounts();
-  const [selectedAccountId, setSelectedAccountId] = useState<string>(propAccountId || "");
+  const [selectedAccountId, setSelectedAccountId] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [parentId, setParentId] = useState<string | null>(null);
@@ -112,22 +108,20 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
         </Button>
       </div>
 
-      {!propAccountId && (
-        <div className="w-64">
-          <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione uma conta" />
-            </SelectTrigger>
-            <SelectContent>
-              {accounts?.map((account) => (
-                <SelectItem key={account.id} value={account.id}>
-                  {account.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
+      <div className="w-64">
+        <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione uma conta" />
+          </SelectTrigger>
+          <SelectContent>
+            {accounts?.map((account) => (
+              <SelectItem key={account.id} value={account.id}>
+                {account.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       {!selectedAccountId ? (
         <div className="text-center py-12 border rounded-lg">
