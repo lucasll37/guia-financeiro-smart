@@ -8,7 +8,7 @@ BEGIN
   -- Busca o ID do usuário pelo email (você deve substituir pelo seu email)
   SELECT id INTO admin_user_id
   FROM auth.users
-  WHERE email = 'SEU_EMAIL_AQUI'  -- IMPORTANTE: Substitua pelo seu email
+  WHERE email = 'lucas@lucas.com'  -- IMPORTANTE: Substitua pelo seu email
   LIMIT 1;
 
   -- Se encontrou o usuário, adiciona o role de admin
