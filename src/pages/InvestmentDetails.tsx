@@ -11,7 +11,7 @@ import { InvestmentSimulator } from "@/components/investments/InvestmentSimulato
 import { MonthlyReturnsDialog } from "@/components/investments/MonthlyReturnsDialog";
 import { ProjectionTable } from "@/components/investments/ProjectionTable";
 import { useState, useMemo } from "react";
-import { addMonths } from "date-fns";
+
 import type { Database } from "@/integrations/supabase/types";
 
 type MonthlyReturn = Database["public"]["Tables"]["investment_monthly_returns"]["Row"];
@@ -42,6 +42,14 @@ export default function InvestmentDetails() {
       [investment.id]: returns,
     };
   }, [investment, returns]);
+
+  const lastReturnMonth = useMemo(() => {
+    if (returns && returns.length > 0) {
+      const maxTs = Math.max(...returns.map((r) => new Date(r.month as unknown as string).getTime()));
+      return new Date(maxTs);
+    }
+    return investment ? new Date(investment.initial_month as unknown as string) : new Date();
+  }, [returns, investment]);
 
   const handleSubmitReturn = (data: any) => {
     if (selectedReturn) {
@@ -146,11 +154,7 @@ export default function InvestmentDetails() {
         <TabsContent value="projecao">
           <ProjectionTable
             currentBalance={currentValue || investment.balance}
-            initialMonth={
-              returns && returns.length > 0
-                ? new Date(returns[returns.length - 1].month)
-                : new Date(investment.initial_month)
-            }
+            initialMonth={lastReturnMonth}
           />
         </TabsContent>
 
