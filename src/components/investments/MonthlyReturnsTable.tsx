@@ -67,19 +67,27 @@ export function MonthlyReturnsTable({
       return sortDirection === 'asc' ? comparison : -comparison;
     });
 
-    // Calcular inflação acumulada
+    // Calcular inflação acumulada e aportes totais
     let inflationAccumulator = 1;
+    let totalContributions = 0;
     
     return sorted.map((returnData) => {
       const inflationRate = Number(returnData.inflation_rate) / 100;
+      const contribution = Number(returnData.contribution);
       
       // Acumular inflação multiplicativamente
       inflationAccumulator *= (1 + inflationRate);
-      const cumulativeInflation = (inflationAccumulator - 1) * 100; // Converter para percentual
+      const cumulativeInflationPercent = (inflationAccumulator - 1) * 100;
+      
+      // Somar aportes
+      totalContributions += contribution;
+      
+      // Valor absoluto da inflação acumulada = Total de Aportes * (Inflação Acumulada %)
+      const cumulativeInflationValue = totalContributions * (cumulativeInflationPercent / 100);
       
       return {
         ...returnData,
-        cumulativeInflation,
+        cumulativeInflationValue,
       };
     });
   }, [returns, sortField, sortDirection]);
@@ -130,13 +138,13 @@ export function MonthlyReturnsTable({
             </div>
 
             <div>
-              <h4 className="font-semibold mb-1.5">📈 Inflação Acumulada</h4>
+              <h4 className="font-semibold mb-1.5">📉 Inflação Acumulada</h4>
               <p className="text-muted-foreground mb-2">
-                Mostra quanto a inflação acumulou desde o início do investimento. É calculada multiplicativamente 
-                para refletir o efeito composto da inflação mês a mês.
+                Mostra o valor em reais que a inflação "corroeu" dos seus aportes desde o início do investimento. 
+                É calculado aplicando a inflação acumulada percentual sobre o total de aportes realizados.
               </p>
               <p className="font-mono text-xs mt-1 bg-background p-2 rounded border">
-                Inflação Acumulada = (1 + i₁) × (1 + i₂) × ... × (1 + iₙ) - 1
+                Inflação Acumulada (R$) = Total de Aportes × Inflação Acumulada (%)
               </p>
             </div>
 
@@ -145,8 +153,8 @@ export function MonthlyReturnsTable({
                 <span>💡</span> Por que é importante?
               </h4>
               <p className="text-muted-foreground text-xs leading-relaxed">
-                A inflação acumulada ajuda a entender quanto do seu rendimento nominal está sendo "comido" pela inflação. 
-                Para ter ganho real, o rendimento do investimento precisa superar a inflação acumulada no período.
+                A inflação acumulada em reais mostra concretamente quanto do seu poder de compra foi perdido pela inflação. 
+                Para ter ganho real, o rendimento do investimento precisa superar esse valor.
               </p>
             </div>
           </CollapsibleContent>
@@ -169,7 +177,6 @@ export function MonthlyReturnsTable({
                   </Button>
                 </TableHead>
                 <TableHead className="text-right">Inflação (%)</TableHead>
-                <TableHead className="text-right">Inflação Acumulada (%)</TableHead>
                 <TableHead className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('contribution')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Aporte
@@ -182,6 +189,7 @@ export function MonthlyReturnsTable({
                     {renderSortIcon('balance')}
                   </Button>
                 </TableHead>
+                <TableHead className="text-right">Inflação Acumulada</TableHead>
                 <TableHead>Observações</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -213,9 +221,6 @@ export function MonthlyReturnsTable({
                     <TableCell className="text-right">
                       {Number(returnData.inflation_rate).toFixed(2)}%
                     </TableCell>
-                    <TableCell className="text-right text-orange-600 font-medium">
-                      {returnData.cumulativeInflation.toFixed(2)}%
-                    </TableCell>
                     <TableCell className="text-right">
                       <span
                         className={
@@ -229,6 +234,9 @@ export function MonthlyReturnsTable({
                     </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrency(Number(returnData.balance_after))}
+                    </TableCell>
+                    <TableCell className="text-right text-orange-600 font-medium">
+                      -{formatCurrency(returnData.cumulativeInflationValue)}
                     </TableCell>
                     <TableCell className="max-w-xs truncate">
                       {returnData.notes || "-"}
