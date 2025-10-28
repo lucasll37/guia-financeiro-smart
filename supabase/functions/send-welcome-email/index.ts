@@ -169,11 +169,12 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Gerar link de confirmação/magic link usando Supabase Admin
+    // Nota: magiclink faz login automático, então redirecionamos para página de confirmação
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
       email: user.email,
       options: {
-        redirectTo: `${supabaseUrl}/auth`
+        redirectTo: `${supabaseUrl}/auth?confirmed=true`
       }
     });
 

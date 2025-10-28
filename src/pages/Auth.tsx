@@ -32,7 +32,7 @@ export default function Auth() {
   const [confirmationEmail, setConfirmationEmail] = useState("");
   const [resendCountdown, setResendCountdown] = useState(0);
   const [isResending, setIsResending] = useState(false);
-  const { signIn, signUp, resetPassword, resend, user } = useAuth();
+  const { signIn, signUp, resetPassword, resend, signOut, user } = useAuth();
   const navigate = useNavigate();
   const { setTheme } = useTheme();
 
@@ -55,11 +55,26 @@ export default function Auth() {
     };
   }, [setTheme]);
 
+  // Verificar se usuário veio de confirmação de email e fazer logout
   useEffect(() => {
-    if (user) {
+    const confirmed = searchParams.get("confirmed");
+    if (confirmed === "true" && user) {
+      // Fazer logout imediatamente
+      signOut();
+      // Mostrar mensagem de sucesso
+      setError("✅ Email confirmado com sucesso! Agora você pode fazer login.");
+      // Limpar o parâmetro da URL
+      navigate("/auth?tab=login", { replace: true });
+    }
+  }, [searchParams, user, signOut, navigate]);
+
+  useEffect(() => {
+    // Não redirecionar se estiver vindo de confirmação de email
+    const confirmed = searchParams.get("confirmed");
+    if (user && confirmed !== "true") {
       navigate("/app/dashboard");
     }
-  }, [user, navigate]);
+  }, [user, navigate, searchParams]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
