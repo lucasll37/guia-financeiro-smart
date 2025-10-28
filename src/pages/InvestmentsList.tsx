@@ -247,6 +247,16 @@ function InvestmentCard({
     monthlyAverageReturn = (Math.pow(totalReturnFactor, 1 / numberOfMonths) - 1) * 100;
   }
 
+  // Calcular inflação acumulada usando juros compostos
+  let accumulatedInflation = 0;
+  if (returns.length > 0) {
+    const inflationFactor = returns.reduce((factor, r) => {
+      const monthlyInflation = Number(r.inflation_rate || 0) / 100;
+      return factor * (1 + monthlyInflation);
+    }, 1);
+    accumulatedInflation = (inflationFactor - 1) * 100;
+  }
+
   return (
     <Card
       className="cursor-pointer hover:shadow-lg transition-shadow"
@@ -321,7 +331,7 @@ function InvestmentCard({
         </div>
 
         {/* Métricas em grid */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div className="space-y-1">
             <div className="text-xs text-muted-foreground">Total de Aportes</div>
             <div className="text-lg font-semibold">
@@ -341,6 +351,16 @@ function InvestmentCard({
                   {isPositive ? "+" : ""}
                   {monthlyAverageReturn.toFixed(2)}%
                 </>
+              ) : (
+                "-"
+              )}
+            </div>
+          </div>
+          <div className="space-y-1">
+            <div className="text-xs text-muted-foreground">Inflação Acumulada</div>
+            <div className="text-lg font-semibold text-orange-600">
+              {numberOfMonths > 0 ? (
+                <>+{accumulatedInflation.toFixed(2)}%</>
               ) : (
                 "-"
               )}
