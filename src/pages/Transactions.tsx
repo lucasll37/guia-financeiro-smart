@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2, MoveHorizontal } from "lucide-react";
-import { format, startOfMonth, endOfMonth } from "date-fns";
+import { format, startOfMonth, endOfMonth, parse } from "date-fns";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -73,9 +73,9 @@ export default function Transactions() {
       if (filters.type !== "all" && t.categories?.type !== filters.type) return false;
       
       // Date range filter
-      const transactionDate = new Date(t.date);
-      const startDate = new Date(filters.startDate);
-      const endDate = new Date(filters.endDate);
+      const transactionDate = parse(String(t.date), "yyyy-MM-dd", new Date());
+      const startDate = parse(filters.startDate, "yyyy-MM-dd", new Date());
+      const endDate = parse(filters.endDate, "yyyy-MM-dd", new Date());
       if (transactionDate < startDate || transactionDate > endDate) return false;
       
       // Search filter

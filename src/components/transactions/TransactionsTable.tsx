@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, CreditCard, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMemo, useState } from "react";
 
@@ -110,7 +110,7 @@ export function TransactionsTable({
           />
         </TableCell>
         <TableCell>
-          {format(new Date(transaction.date), "dd/MM/yyyy")}
+          {format(parse(String(transaction.date), "yyyy-MM-dd", new Date()), "dd/MM/yyyy")}
         </TableCell>
         <TableCell>
           <div className="flex flex-col gap-1">
