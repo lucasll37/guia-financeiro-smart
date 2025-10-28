@@ -175,16 +175,20 @@ export default function AccountsList() {
                     </div>
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    {account.is_shared && (
+                    {/* Botão Gerenciar Membros - apenas para contas compartilhadas */}
+                    {account.is_shared && account.owner_id === user?.id && (
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={(e) => handleManageMembers(e, account)}
                         title="Gerenciar Membros"
+                        aria-label="Gerenciar membros"
                       >
                         <Users className="h-4 w-4" />
                       </Button>
                     )}
+                    
+                    {/* Botões Excluir e Editar - para todos os donos */}
                     {account.owner_id === user?.id && (
                       <>
                         <Button
