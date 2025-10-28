@@ -34,12 +34,12 @@ export function CategoryPieCharts({ data, accountId }: CategoryPieChartsProps) {
     .filter(item => item.forecasted > 0)
     .map(item => ({
       name: item.name,
-      value: item.forecasted,
+      value: Math.abs(item.forecasted),
       color: item.color,
     }));
 
   const actualData = data
-    .filter(item => item.actual > 0)
+    .filter(item => Math.abs(item.actual) > 0)
     .map(item => ({
       name: item.name,
       value: Math.abs(item.actual),
@@ -66,10 +66,15 @@ export function CategoryPieCharts({ data, accountId }: CategoryPieChartsProps) {
   };
 
   const renderCustomLabel = (entry: any) => {
-    const total = forecastedData.includes(entry) ? totalForecasted : totalActual;
+    const total = entry.name ? 
+      (forecastedData.find(d => d.name === entry.name) ? totalForecasted : totalActual) 
+      : totalForecasted;
+    
+    if (!entry.value || total === 0) return null;
+    
     const percent = ((entry.value / total) * 100);
     if (percent < 5) return null; // Não mostrar labels pequenas
-    return formatPercent(entry.value, total);
+    return `${percent.toFixed(1)}%`;
   };
 
   if (data.length === 0) {
