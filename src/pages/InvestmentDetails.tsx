@@ -1,13 +1,15 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, TrendingUp, Calendar, LineChart } from "lucide-react";
+import { ArrowLeft, TrendingUp, Calendar, LineChart, TrendingDown } from "lucide-react";
 import { useInvestments } from "@/hooks/useInvestments";
 import { useMonthlyReturns } from "@/hooks/useMonthlyReturns";
+import { useInvestmentCurrentValue } from "@/hooks/useInvestmentCurrentValue";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MonthlyReturnsTable } from "@/components/investments/MonthlyReturnsTable";
 import { InvestmentSimulator } from "@/components/investments/InvestmentSimulator";
 import { MonthlyReturnsDialog } from "@/components/investments/MonthlyReturnsDialog";
+import { ProjectionTable } from "@/components/investments/ProjectionTable";
 import { useState, useMemo } from "react";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -21,6 +23,7 @@ export default function InvestmentDetails() {
   const [selectedReturn, setSelectedReturn] = useState<MonthlyReturn | null>(null);
 
   const investment = investments?.find((inv) => inv.id === investmentId);
+  const { data: currentValue } = useInvestmentCurrentValue(investmentId || "");
 
   const {
     returns,
@@ -114,10 +117,14 @@ export default function InvestmentDetails() {
       </div>
 
       <Tabs defaultValue="rendimentos" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
+        <TabsList className="grid w-full grid-cols-3 max-w-2xl">
           <TabsTrigger value="rendimentos" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             <span className="hidden sm:inline">Rendimentos</span>
+          </TabsTrigger>
+          <TabsTrigger value="projecao" className="flex items-center gap-2">
+            <TrendingDown className="h-4 w-4" />
+            <span className="hidden sm:inline">Projeção</span>
           </TabsTrigger>
           <TabsTrigger value="simulador" className="flex items-center gap-2">
             <LineChart className="h-4 w-4" />
@@ -132,6 +139,13 @@ export default function InvestmentDetails() {
             onDelete={handleDeleteReturn}
             onNew={handleNewReturn}
             investmentName={investment.name}
+          />
+        </TabsContent>
+
+        <TabsContent value="projecao">
+          <ProjectionTable
+            currentBalance={currentValue || investment.balance}
+            initialMonth={new Date()}
           />
         </TabsContent>
 
