@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, LayoutDashboard, Receipt, FolderTree, CreditCard, TrendingUp, PieChart, FileText } from "lucide-react";
-import { AccountDashboard } from "@/components/dashboard/AccountDashboard";
+import { AccountPeriodDetails } from "@/components/accounts/AccountPeriodDetails";
 import { useAccounts } from "@/hooks/useAccounts";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -95,7 +95,7 @@ export default function AccountDetails() {
         </TabsList>
 
         <TabsContent value="visao-geral">
-          <AccountDashboard accountId={accountId!} />
+          <AccountPeriodDetails account={account} />
         </TabsContent>
 
         <TabsContent value="lancamentos">
