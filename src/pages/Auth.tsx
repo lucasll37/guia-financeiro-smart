@@ -30,7 +30,9 @@ export default function Auth() {
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") === "signup" ? "signup" : "login");
   const [showEmailConfirmModal, setShowEmailConfirmModal] = useState(false);
   const [confirmationEmail, setConfirmationEmail] = useState("");
-  const { signIn, signUp, resetPassword, user } = useAuth();
+  const [resendCountdown, setResendCountdown] = useState(60);
+  const [isResending, setIsResending] = useState(false);
+  const { signIn, signUp, resetPassword, resend, user } = useAuth();
   const navigate = useNavigate();
   const { setTheme } = useTheme();
 
@@ -58,6 +60,16 @@ export default function Auth() {
       navigate("/app/dashboard");
     }
   }, [user, navigate]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (showEmailConfirmModal && resendCountdown > 0) {
+      interval = setInterval(() => {
+        setResendCountdown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [showEmailConfirmModal, resendCountdown]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,6 +130,7 @@ export default function Auth() {
 
       // Tudo certo - mostrar modal e limpar campos
       setConfirmationEmail(email);
+      setResendCountdown(60);
       setShowEmailConfirmModal(true);
       
       // Limpar campos do formulário
@@ -155,6 +168,28 @@ export default function Auth() {
     }
     
     setLoading(false);
+  };
+
+  const handleResendEmail = async () => {
+    setIsResending(true);
+    setError("");
+    try {
+      const { error } = await resend(confirmationEmail);
+      if (error) {
+        setError("Erro ao reenviar email. Tente novamente.");
+      } else {
+        setError("Email reenviado com sucesso!");
+        setResendCountdown(60);
+      }
+    } catch (emailError: any) {
+      if (emailError.message === 'RESEND_DOMAIN_NOT_VERIFIED') {
+        setError("⚠️ Domínio de email não está verificado no Resend.");
+      } else {
+        setError("Erro ao reenviar email. Tente novamente.");
+      }
+    } finally {
+      setIsResending(false);
+    }
   };
 
   if (resetMode) {
@@ -369,13 +404,34 @@ export default function Auth() {
                 Após confirmar seu email, você poderá fazer login normalmente
               </p>
               
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => setShowEmailConfirmModal(false)}
-              >
-                Entendi
-              </Button>
+              {error && (
+                <Alert className="mb-4">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              
+              <div className="space-y-2">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setShowEmailConfirmModal(false)}
+                >
+                  Entendi
+                </Button>
+                
+                <Button
+                  variant="secondary"
+                  className="w-full"
+                  onClick={handleResendEmail}
+                  disabled={resendCountdown > 0 || isResending}
+                >
+                  {isResending 
+                    ? "Reenviando..." 
+                    : resendCountdown > 0 
+                      ? `Reenviar email (${resendCountdown}s)` 
+                      : "Reenviar email"}
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>
