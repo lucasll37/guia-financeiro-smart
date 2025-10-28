@@ -9,10 +9,10 @@ interface PageMetaData {
 
 const pageMetadata: Record<string, PageMetaData> = {
   "/": {
-    title: "Prospera! - Painel",
+    title: "Prospera! - Dashboard",
     description:
       "Visualize seus KPIs financeiros, fluxo de caixa, metas e alertas em tempo real",
-    keywords: "painel, finanças pessoais, controle financeiro, KPIs",
+    keywords: "dashboard, finanças pessoais, controle financeiro, KPIs",
   },
   "/contas": {
     title: "Prospera! - Contas",

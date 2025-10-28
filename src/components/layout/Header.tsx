@@ -44,7 +44,7 @@ export const Header = () => {
   const { user, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const currentRoute = routeLabels[location.pathname] || "Painel";
+  const currentRoute = routeLabels[location.pathname] || "Dashboard";
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const { isMasked, toggleMask } = useMaskValues();
 
