@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { Info } from "lucide-react";
+import { Info, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -34,6 +34,8 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
   const [inflationRate, setInflationRate] = useState(0.5);
   const [monthlyContribution, setMonthlyContribution] = useState(0);
   const [isExplanationOpen, setIsExplanationOpen] = useState(false);
+  const [sortField, setSortField] = useState<'month' | 'contribution' | 'returns' | 'balance' | 'presentValue' | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const projectionData = useMemo(() => {
     const data = [];
@@ -68,6 +70,7 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
         presentValue,
         cumulativeContribution,
         cumulativeContributionPV,
+        monthIndex: i,
       });
     }
 
@@ -83,6 +86,42 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
 
     return data;
   }, [currentBalance, initialMonth, months, monthlyRate, inflationRate, monthlyContribution, onConfigChange]);
+
+  const handleSort = (field: 'month' | 'contribution' | 'returns' | 'balance' | 'presentValue') => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const renderSortIcon = (field: 'month' | 'contribution' | 'returns' | 'balance' | 'presentValue') => {
+    if (sortField !== field) return <ArrowUpDown className="h-4 w-4 ml-1" />;
+    return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 ml-1" /> : <ArrowDown className="h-4 w-4 ml-1" />;
+  };
+
+  const sortedProjectionData = useMemo(() => {
+    if (!sortField) return projectionData;
+
+    return [...projectionData].sort((a, b) => {
+      let comparison = 0;
+
+      if (sortField === 'month') {
+        comparison = a.monthIndex - b.monthIndex;
+      } else if (sortField === 'contribution') {
+        comparison = a.contribution - b.contribution;
+      } else if (sortField === 'returns') {
+        comparison = a.returns - b.returns;
+      } else if (sortField === 'balance') {
+        comparison = a.balance - b.balance;
+      } else if (sortField === 'presentValue') {
+        comparison = a.presentValue - b.presentValue;
+      }
+
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+  }, [projectionData, sortField, sortDirection]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -253,17 +292,42 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Mês</TableHead>
-                <TableHead className="text-right">Aporte</TableHead>
+                <TableHead>
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('month')} className="flex items-center gap-1 p-0 h-auto font-medium">
+                    Mês
+                    {renderSortIcon('month')}
+                  </Button>
+                </TableHead>
+                <TableHead className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('contribution')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
+                    Aporte
+                    {renderSortIcon('contribution')}
+                  </Button>
+                </TableHead>
                 <TableHead className="text-right">Aporte Acum. Aparente</TableHead>
                 <TableHead className="text-right">Aporte Acum. VP</TableHead>
-                <TableHead className="text-right">Rendimento</TableHead>
-                <TableHead className="text-right">Saldo Aparente</TableHead>
-                <TableHead className="text-right">Saldo VP</TableHead>
+                <TableHead className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('returns')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
+                    Rendimento
+                    {renderSortIcon('returns')}
+                  </Button>
+                </TableHead>
+                <TableHead className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('balance')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
+                    Saldo Aparente
+                    {renderSortIcon('balance')}
+                  </Button>
+                </TableHead>
+                <TableHead className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('presentValue')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
+                    Saldo VP
+                    {renderSortIcon('presentValue')}
+                  </Button>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {projectionData.map((row, index) => (
+              {sortedProjectionData.map((row, index) => (
                 <TableRow key={index}>
                   <TableCell>
                     {format(row.month, "MMM/yyyy", { locale: ptBR })}
@@ -298,9 +362,15 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
             <p className="text-lg font-semibold">{formatCurrency(currentBalance)}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Saldo Final Projetado</p>
+            <p className="text-sm text-muted-foreground">Saldo Final Projetado (Aparente)</p>
             <p className="text-lg font-semibold">
               {formatCurrency(projectionData[projectionData.length - 1]?.balance || 0)}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Saldo Final Projetado (VP)</p>
+            <p className="text-lg font-semibold text-chart-2">
+              {formatCurrency(projectionData[projectionData.length - 1]?.presentValue || 0)}
             </p>
           </div>
         </div>
