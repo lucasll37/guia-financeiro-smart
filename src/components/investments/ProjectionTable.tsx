@@ -35,6 +35,8 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
     const data = [];
     let balance = currentBalance;
     let cumulativeInflation = 0;
+    let cumulativeContribution = 0;
+    let cumulativeContributionPV = 0;
 
     for (let i = 0; i < months; i++) {
       const month = addMonths(initialMonth, i);
@@ -45,6 +47,14 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
       // Acumular inflação ao longo dos meses
       cumulativeInflation = (1 + cumulativeInflation) * (1 + inflationRate / 100) - 1;
       const presentValue = balance / (1 + cumulativeInflation);
+      
+      // Aportes acumulados
+      cumulativeContribution += contribution;
+      
+      // Valor presente do aporte futuro (desconto até o presente)
+      const monthsFromNow = i + 1;
+      const pvFactor = Math.pow(1 + inflationRate / 100, -monthsFromNow);
+      cumulativeContributionPV += contribution * pvFactor;
 
       data.push({
         month,
@@ -52,6 +62,8 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
         returns,
         balance,
         presentValue,
+        cumulativeContribution,
+        cumulativeContributionPV,
       });
     }
 
@@ -145,6 +157,8 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
               <TableRow>
                 <TableHead>Mês</TableHead>
                 <TableHead className="text-right">Aporte</TableHead>
+                <TableHead className="text-right">Aporte Acum. Aparente</TableHead>
+                <TableHead className="text-right">Aporte Acum. Real</TableHead>
                 <TableHead className="text-right">Rendimento</TableHead>
                 <TableHead className="text-right">Saldo Aparente</TableHead>
                 <TableHead className="text-right">Saldo Valor Presente</TableHead>
@@ -158,6 +172,12 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                   </TableCell>
                   <TableCell className="text-right">
                     {formatCurrency(row.contribution)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {formatCurrency(row.cumulativeContribution)}
+                  </TableCell>
+                  <TableCell className="text-right text-muted-foreground">
+                    {formatCurrency(row.cumulativeContributionPV)}
                   </TableCell>
                   <TableCell className="text-right">
                     {formatCurrency(row.returns)}

@@ -65,16 +65,27 @@ export function MonthlyReturnsTable({
       return sortDirection === 'asc' ? comparison : -comparison;
     });
 
-    // Calcular valor presente para cada rendimento
+    // Calcular valor presente e aportes acumulados para cada rendimento
     let cumulativeInflation = 0;
+    let cumulativeContribution = 0;
+    let cumulativeContributionPV = 0;
+    
     return sorted.map((returnData, index) => {
       const inflationRate = Number(returnData.inflation_rate) / 100;
+      const contribution = Number(returnData.contribution);
+      
       cumulativeInflation = (1 + cumulativeInflation) * (1 + inflationRate) - 1;
       const presentValue = Number(returnData.balance_after) / (1 + cumulativeInflation);
+      
+      cumulativeContribution += contribution;
+      // Aporte em valor presente (o aporte já foi feito, então mantém o valor no momento)
+      cumulativeContributionPV += contribution;
       
       return {
         ...returnData,
         presentValue,
+        cumulativeContribution,
+        cumulativeContributionPV,
       };
     });
   }, [returns, sortField, sortDirection]);
@@ -128,6 +139,8 @@ export function MonthlyReturnsTable({
                     {renderSortIcon('contribution')}
                   </Button>
                 </TableHead>
+                <TableHead className="text-right">Aporte Acum. Aparente</TableHead>
+                <TableHead className="text-right">Aporte Acum. Real</TableHead>
                 <TableHead className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('balance')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Saldo Aparente
@@ -142,7 +155,7 @@ export function MonthlyReturnsTable({
             <TableBody>
               {sortedReturnsWithPV.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground">
+                  <TableCell colSpan={10} className="text-center text-muted-foreground">
                     Nenhum rendimento registrado
                   </TableCell>
                 </TableRow>
@@ -176,6 +189,12 @@ export function MonthlyReturnsTable({
                       >
                         {formatCurrency(Number(returnData.contribution))}
                       </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(returnData.cumulativeContribution)}
+                    </TableCell>
+                    <TableCell className="text-right text-muted-foreground">
+                      {formatCurrency(returnData.cumulativeContributionPV)}
                     </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrency(Number(returnData.balance_after))}
