@@ -35,13 +35,20 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
     const saved = localStorage.getItem('projectionTable.months');
     return saved ? Number(saved) : 12;
   });
+  const DEFAULT_VALUES = {
+    monthlyRate: 0.83,
+    inflationRate: 0.35,
+    rateStdDev: 0.15,
+    inflationStdDev: 0.25,
+  };
+
   const [monthlyRate, setMonthlyRate] = useState(() => {
     const saved = localStorage.getItem('projectionTable.monthlyRate');
-    return saved ? Number(saved) : 1;
+    return saved ? Number(saved) : DEFAULT_VALUES.monthlyRate;
   });
   const [inflationRate, setInflationRate] = useState(() => {
     const saved = localStorage.getItem('projectionTable.inflationRate');
-    return saved ? Number(saved) : 0.5;
+    return saved ? Number(saved) : DEFAULT_VALUES.inflationRate;
   });
   const [monthlyContribution, setMonthlyContribution] = useState(() => {
     const saved = localStorage.getItem('projectionTable.monthlyContribution');
@@ -49,11 +56,11 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
   });
   const [rateStdDev, setRateStdDev] = useState(() => {
     const saved = localStorage.getItem('projectionTable.rateStdDev');
-    return saved ? Number(saved) : 0;
+    return saved ? Number(saved) : DEFAULT_VALUES.rateStdDev;
   });
   const [inflationStdDev, setInflationStdDev] = useState(() => {
     const saved = localStorage.getItem('projectionTable.inflationStdDev');
-    return saved ? Number(saved) : 0;
+    return saved ? Number(saved) : DEFAULT_VALUES.inflationStdDev;
   });
   const [isExplanationOpen, setIsExplanationOpen] = useState(false);
   const [sortField, setSortField] = useState<'month' | 'contribution' | 'returns' | 'balance' | 'presentValue' | null>(null);
@@ -191,6 +198,13 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
     }).format(value);
   };
 
+  const resetToDefaults = () => {
+    setMonthlyRate(DEFAULT_VALUES.monthlyRate);
+    setInflationRate(DEFAULT_VALUES.inflationRate);
+    setRateStdDev(DEFAULT_VALUES.rateStdDev);
+    setInflationStdDev(DEFAULT_VALUES.inflationStdDev);
+  };
+
   const exportToExcel = () => {
     const dataToExport = sortedProjectionData.map((row) => ({
       "Mês": format(row.month, "MMM/yyyy", { locale: ptBR }),
@@ -214,10 +228,15 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Projeção de Investimento</CardTitle>
-          <Button onClick={exportToExcel} variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar Excel
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={resetToDefaults} variant="outline" size="sm">
+              Resetar
+            </Button>
+            <Button onClick={exportToExcel} variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Exportar Excel
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
