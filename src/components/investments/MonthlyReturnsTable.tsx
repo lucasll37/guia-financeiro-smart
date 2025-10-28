@@ -67,36 +67,19 @@ export function MonthlyReturnsTable({
       return sortDirection === 'asc' ? comparison : -comparison;
     });
 
-    // Calcular inflação acumulada e valores presentes
-    // Fórmula: VP = VF / (1 + inflação_acumulada)
-    // Inflação acumulada = (1 + i1) × (1 + i2) × ... × (1 + in) - 1
-    let inflationAccumulator = 1; // Começa em 1 para multiplicação
-    let cumulativeContribution = 0;
-    let cumulativeContributionPV = 0;
+    // Calcular inflação acumulada
+    let inflationAccumulator = 1;
     
     return sorted.map((returnData) => {
       const inflationRate = Number(returnData.inflation_rate) / 100;
-      const contribution = Number(returnData.contribution);
       
       // Acumular inflação multiplicativamente
       inflationAccumulator *= (1 + inflationRate);
-      const cumulativeInflation = inflationAccumulator - 1;
-      
-      // Saldo VP = Saldo Aparente / (1 + Inflação Acumulada)
-      const presentValue = Number(returnData.balance_after) / (1 + cumulativeInflation);
-      
-      // Aportes aparentes: soma simples
-      cumulativeContribution += contribution;
-      
-      // Aportes VP: para aportes já realizados, mantém o valor no momento da aplicação
-      // Não descontamos para o passado, apenas somamos
-      cumulativeContributionPV += contribution;
+      const cumulativeInflation = (inflationAccumulator - 1) * 100; // Converter para percentual
       
       return {
         ...returnData,
-        presentValue,
-        cumulativeContribution,
-        cumulativeContributionPV,
+        cumulativeInflation,
       };
     });
   }, [returns, sortField, sortDirection]);
@@ -135,13 +118,6 @@ export function MonthlyReturnsTable({
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-4 p-4 bg-muted rounded-lg space-y-4 text-sm">
-            <div className="pb-3 border-b border-border">
-              <h4 className="font-semibold text-base mb-2 text-primary">💰 Valores Aparentes (Nominais)</h4>
-              <p className="text-muted-foreground mb-3">
-                São os valores "de face" que aparecem no extrato, sem considerar a perda de poder de compra pela inflação.
-              </p>
-            </div>
-            
             <div>
               <h4 className="font-semibold mb-1.5">📊 Saldo Aparente</h4>
               <p className="text-muted-foreground mb-2">
@@ -154,44 +130,13 @@ export function MonthlyReturnsTable({
             </div>
 
             <div>
-              <h4 className="font-semibold mb-1.5">💵 Aporte Acumulado Aparente</h4>
+              <h4 className="font-semibold mb-1.5">📈 Inflação Acumulada</h4>
               <p className="text-muted-foreground mb-2">
-                É a soma simples de todos os depósitos que você fez ao longo do tempo, sem ajustes pela inflação.
+                Mostra quanto a inflação acumulou desde o início do investimento. É calculada multiplicativamente 
+                para refletir o efeito composto da inflação mês a mês.
               </p>
               <p className="font-mono text-xs mt-1 bg-background p-2 rounded border">
-                Aporte Acum. Aparente = Σ Aportes Mensais
-              </p>
-            </div>
-
-            <div className="pb-3 border-b border-border pt-2">
-              <h4 className="font-semibold text-base mb-2 text-chart-2">💎 Valores Presentes (Reais)</h4>
-              <p className="text-muted-foreground mb-3">
-                São os valores ajustados pela inflação, mostrando o poder de compra efetivo em relação ao início do investimento.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-1.5">📈 Saldo VP (Valor Presente)</h4>
-              <p className="text-muted-foreground mb-2">
-                É quanto o seu saldo vale em termos de poder de compra do primeiro mês. Mostra se você realmente 
-                ganhou poder de compra ou apenas acompanhou a inflação.
-              </p>
-              <p className="font-mono text-xs mt-1 bg-background p-2 rounded border mb-1">
-                Saldo VP = Saldo Aparente / (1 + Inflação Acumulada)
-              </p>
-              <p className="text-xs text-muted-foreground italic">
                 Inflação Acumulada = (1 + i₁) × (1 + i₂) × ... × (1 + iₙ) - 1
-              </p>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-1.5">💰 Aporte Acumulado VP</h4>
-              <p className="text-muted-foreground mb-2">
-                Para aportes já realizados (histórico), mantemos o valor no momento em que foram feitos. 
-                Não descontamos para o passado, apenas somamos os valores investidos.
-              </p>
-              <p className="font-mono text-xs mt-1 bg-background p-2 rounded border">
-                Aporte Acum. VP = Σ Aportes (valor no momento da aplicação)
               </p>
             </div>
 
@@ -200,9 +145,8 @@ export function MonthlyReturnsTable({
                 <span>💡</span> Por que é importante?
               </h4>
               <p className="text-muted-foreground text-xs leading-relaxed">
-                Comparar o <strong>Saldo Aparente</strong> com o <strong>Saldo VP</strong> mostra se seu investimento 
-                está realmente gerando ganho real acima da inflação. Se o Saldo VP estiver muito abaixo do aparente, 
-                a inflação está "comendo" seus ganhos.
+                A inflação acumulada ajuda a entender quanto do seu rendimento nominal está sendo "comido" pela inflação. 
+                Para ter ganho real, o rendimento do investimento precisa superar a inflação acumulada no período.
               </p>
             </div>
           </CollapsibleContent>
@@ -225,21 +169,19 @@ export function MonthlyReturnsTable({
                   </Button>
                 </TableHead>
                 <TableHead className="text-right">Inflação (%)</TableHead>
+                <TableHead className="text-right">Inflação Acumulada (%)</TableHead>
                 <TableHead className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('contribution')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Aporte
                     {renderSortIcon('contribution')}
                   </Button>
                 </TableHead>
-                <TableHead className="text-right">Aporte Acum. Aparente</TableHead>
-                <TableHead className="text-right">Aporte Acum. VP</TableHead>
                 <TableHead className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('balance')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Saldo Aparente
                     {renderSortIcon('balance')}
                   </Button>
                 </TableHead>
-                <TableHead className="text-right">Saldo VP</TableHead>
                 <TableHead>Observações</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -247,7 +189,7 @@ export function MonthlyReturnsTable({
             <TableBody>
               {sortedReturnsWithPV.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center text-muted-foreground">
                     Nenhum rendimento registrado
                   </TableCell>
                 </TableRow>
@@ -271,6 +213,9 @@ export function MonthlyReturnsTable({
                     <TableCell className="text-right">
                       {Number(returnData.inflation_rate).toFixed(2)}%
                     </TableCell>
+                    <TableCell className="text-right text-orange-600 font-medium">
+                      {returnData.cumulativeInflation.toFixed(2)}%
+                    </TableCell>
                     <TableCell className="text-right">
                       <span
                         className={
@@ -282,17 +227,8 @@ export function MonthlyReturnsTable({
                         {formatCurrency(Number(returnData.contribution))}
                       </span>
                     </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(returnData.cumulativeContribution)}
-                    </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
-                      {formatCurrency(returnData.cumulativeContributionPV)}
-                    </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrency(Number(returnData.balance_after))}
-                    </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
-                      {formatCurrency(returnData.presentValue)}
                     </TableCell>
                     <TableCell className="max-w-xs truncate">
                       {returnData.notes || "-"}
