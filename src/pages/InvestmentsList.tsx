@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Users, ArrowRight, Edit, Trash2, TrendingUp } from "lucide-react";
 import { useInvestments } from "@/hooks/useInvestments";
 import { useAuth } from "@/hooks/useAuth";
+import { useMaskValues } from "@/hooks/useMaskValues";
 import { InvestmentDialog } from "@/components/investments/InvestmentDialog";
 import { InvestmentMembersDialog } from "@/components/investments/InvestmentMembersDialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -228,6 +229,7 @@ function InvestmentCard({
 }: InvestmentCardProps) {
   const { data: currentValue = 0 } = useInvestmentCurrentValue(investment.id);
   const { returns = [] } = useMonthlyReturns(investment.id);
+  const { maskValue } = useMaskValues();
 
   // Calcular aportes nominais totais
   const totalContributions = returns.reduce((sum, r) => sum + Number(r.contribution || 0), 0);
@@ -315,16 +317,16 @@ function InvestmentCard({
         <div className="space-y-1 pb-3 border-b">
           <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Valor Atual</div>
           <div className="text-2xl font-bold">
-            {new Intl.NumberFormat("pt-BR", {
+            {maskValue(new Intl.NumberFormat("pt-BR", {
               style: "currency",
               currency: "BRL",
-            }).format(currentValue)}
+            }).format(currentValue))}
           </div>
           <div className="text-xs text-muted-foreground">
-            Total investido: {new Intl.NumberFormat("pt-BR", {
+            Total investido: {maskValue(new Intl.NumberFormat("pt-BR", {
               style: "currency",
               currency: "BRL",
-            }).format(totalContributions)}
+            }).format(totalContributions))}
           </div>
         </div>
 
@@ -335,13 +337,13 @@ function InvestmentCard({
             <div className={`text-right ${isPositive ? "text-green-600" : "text-red-600"}`}>
               <div className="text-base font-semibold">
                 {isPositive ? "+" : ""}
-                {new Intl.NumberFormat("pt-BR", {
+                {maskValue(new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
-                }).format(nominalGain)}
+                }).format(nominalGain))}
               </div>
               <div className="text-[10px] opacity-75">
-                {isPositive ? "+" : ""}{gainPercentage.toFixed(1)}%
+                {isPositive ? "+" : ""}{maskValue(`${gainPercentage.toFixed(1)}%`)}
               </div>
             </div>
           </div>
@@ -350,13 +352,13 @@ function InvestmentCard({
             <span className="text-xs font-medium text-muted-foreground">Inflação Acumulada</span>
             <div className="text-right text-orange-600">
               <div className="text-base font-semibold">
-                -{new Intl.NumberFormat("pt-BR", {
+                -{maskValue(new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
-                }).format(inflationValue)}
+                }).format(inflationValue))}
               </div>
               <div className="text-[10px] opacity-75">
-                -{accumulatedInflation.toFixed(2)}%
+                -{maskValue(`${accumulatedInflation.toFixed(2)}%`)}
               </div>
             </div>
           </div>
@@ -366,13 +368,13 @@ function InvestmentCard({
             <div className={`text-right ${isRealPositive ? "text-green-600" : "text-red-600"}`}>
               <div className="text-xl font-bold">
                 {isRealPositive ? "+" : ""}
-                {new Intl.NumberFormat("pt-BR", {
+                {maskValue(new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
-                }).format(realGain)}
+                }).format(realGain))}
               </div>
               <div className="text-xs font-medium opacity-90">
-                {isRealPositive ? "+" : ""}{realGainPercentage.toFixed(1)}%
+                {isRealPositive ? "+" : ""}{maskValue(`${realGainPercentage.toFixed(1)}%`)}
               </div>
             </div>
           </div>
@@ -386,7 +388,7 @@ function InvestmentCard({
               {numberOfMonths > 0 ? (
                 <>
                   {isRealPositive ? "+" : ""}
-                  {monthlyAverageReturn.toFixed(2)}%
+                  {maskValue(`${monthlyAverageReturn.toFixed(2)}%`)}
                 </>
               ) : (
                 "-"

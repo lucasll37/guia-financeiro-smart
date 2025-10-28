@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Users } from "lucide-react";
 import { useState, useMemo } from "react";
+import { useMaskValues } from "@/hooks/useMaskValues";
 import type { Database } from "@/integrations/supabase/types";
 import { useInvestmentCurrentValue } from "@/hooks/useInvestmentCurrentValue";
 
@@ -46,6 +47,7 @@ function InvestmentRow({
   isSelected: boolean;
 }) {
   const { data: currentValue, isLoading } = useInvestmentCurrentValue(investment.id);
+  const { maskValue } = useMaskValues();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -64,10 +66,10 @@ function InvestmentRow({
         {investmentTypes[investment.type as keyof typeof investmentTypes]}
       </TableCell>
       <TableCell className="text-right">
-        {formatCurrency(Number(investment.balance))}
+        {maskValue(formatCurrency(Number(investment.balance)))}
       </TableCell>
       <TableCell className="text-right font-medium">
-        {isLoading ? "..." : formatCurrency(currentValue || 0)}
+        {isLoading ? "..." : maskValue(formatCurrency(currentValue || 0))}
       </TableCell>
       <TableCell className="text-right">
         <div className="flex justify-end gap-2">

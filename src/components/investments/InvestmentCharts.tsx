@@ -4,6 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { format, addMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { TrendingUp, TrendingDown, DollarSign, Calendar } from "lucide-react";
+import { useMaskValues } from "@/hooks/useMaskValues";
 
 interface MonthlyReturn {
   month: string;
@@ -44,6 +45,7 @@ export function InvestmentCharts({
   lastReturnMonth,
   projectionConfig,
 }: InvestmentChartsProps) {
+  const { maskValue } = useMaskValues();
   
   const realReturnsData: ChartDataPoint[] = useMemo(() => {
     if (!returns || returns.length === 0) return [];
@@ -296,7 +298,7 @@ export function InvestmentCharts({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Saldo Final VP</p>
-                  <p className="text-2xl font-bold mt-1">{formatCurrency(stats.finalPV)}</p>
+                  <p className="text-2xl font-bold mt-1">{maskValue(formatCurrency(stats.finalPV))}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                   <DollarSign className="h-6 w-6 text-primary" />
@@ -311,7 +313,7 @@ export function InvestmentCharts({
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Rendimento Real</p>
                   <p className="text-2xl font-bold mt-1 text-chart-2">
-                    {stats.realReturnPercent >= 0 ? '+' : ''}{stats.realReturnPercent.toFixed(1)}%
+                    {stats.realReturnPercent >= 0 ? '+' : ''}{maskValue(`${stats.realReturnPercent.toFixed(1)}%`)}
                   </p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-chart-2/10 flex items-center justify-center">
@@ -330,7 +332,7 @@ export function InvestmentCharts({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Aportes VP</p>
-                  <p className="text-2xl font-bold mt-1">{formatCurrency(stats.contributions)}</p>
+                  <p className="text-2xl font-bold mt-1">{maskValue(formatCurrency(stats.contributions))}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-chart-3/10 flex items-center justify-center">
                   <TrendingUp className="h-6 w-6 text-chart-3" />
@@ -344,7 +346,7 @@ export function InvestmentCharts({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Rendimentos VP</p>
-                  <p className="text-2xl font-bold mt-1">{formatCurrency(stats.returns)}</p>
+                  <p className="text-2xl font-bold mt-1">{maskValue(formatCurrency(stats.returns))}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-chart-4/10 flex items-center justify-center">
                   <DollarSign className="h-6 w-6 text-chart-4" />
