@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,11 +6,14 @@ import { Check, Loader2, Sparkles } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { PageMeta } from "@/components/seo/PageMeta";
 
 export default function Planos() {
   const { subscription, isLoading, getPlanLabel } = useSubscription();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  useEffect(() => {
+    document.title = "Planos e Preços - Prospera";
+  }, []);
 
   const handleUpgrade = async () => {
     try {
@@ -38,9 +41,9 @@ export default function Planos() {
       period: "/mês",
       description: "Ideal para começar a organizar suas finanças",
       features: [
-        "Até 3 contas",
-        "Categorias ilimitadas",
-        "Relatórios básicos",
+        "Até 1 conta",
+        "Categorias fixas",
+        "Sem geração de relatórios",
         "Suporte por email",
       ],
       highlighted: false,
@@ -48,17 +51,17 @@ export default function Planos() {
     },
     {
       name: "Pro",
-      price: "R$ 29,90",
+      price: "R$ 9,90",
       period: "/mês",
       description: "Para quem precisa de recursos avançados",
       features: [
-        "Até 10 contas",
-        "Até 10 cartões de crédito",
-        "Temas claro e escuro",
-        "Contas compartilhadas",
+        "Até 5 contas",
+        "Até 5 cartões de crédito",
+        "Tema claro ou escuro",
+        "Contas compartilhadas com repartição proporcional",
+        "Geração de relatórios",
         "Análises avançadas",
         "Previsões financeiras",
-        "Relatórios customizados",
         "Suporte prioritário",
       ],
       highlighted: true,
@@ -69,13 +72,7 @@ export default function Planos() {
   const currentPlan = subscription?.plan || "free";
 
   return (
-    <>
-      <PageMeta
-        title="Planos e Preços - Prospera"
-        description="Escolha o plano ideal para gerenciar suas finanças. Plano Free ou Pro com recursos avançados."
-      />
-      
-      <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Escolha seu plano</h1>
           <p className="text-muted-foreground text-lg">
@@ -177,7 +174,6 @@ export default function Planos() {
             Você pode cancelar sua assinatura a qualquer momento.
           </p>
         </div>
-      </div>
-    </>
+    </div>
   );
 }

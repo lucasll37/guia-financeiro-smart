@@ -92,7 +92,7 @@ serve(async (req) => {
       
       // Check if it's the Pro plan
       const productId = subscription.items.data[0].price.product;
-      if (productId === "prod_TJgSwtRnrBXr39") {
+      if (productId === "prod_TJgWfbytXQglsK") {
         plan = "pro";
       }
       

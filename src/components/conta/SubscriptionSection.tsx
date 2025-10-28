@@ -40,9 +40,9 @@ export function SubscriptionSection() {
 
   const planFeatures: Record<string, string[]> = {
     free: [
-      "3 contas",
-      "Categorias ilimitadas",
-      "Relatórios básicos",
+      "Até 1 conta",
+      "Categorias fixas",
+      "Sem geração de relatórios",
       "Suporte por email",
     ],
     plus: [
@@ -53,12 +53,14 @@ export function SubscriptionSection() {
       "Suporte prioritário",
     ],
     pro: [
-      "Contas ilimitadas",
-      "Tudo do Plus",
-      "Múltiplos usuários por conta",
-      "Relatórios customizados",
-      "API de integração",
-      "Suporte 24/7",
+      "Até 5 contas",
+      "Até 5 cartões de crédito",
+      "Tema claro ou escuro",
+      "Contas compartilhadas com repartição proporcional",
+      "Geração de relatórios",
+      "Análises avançadas",
+      "Previsões financeiras",
+      "Suporte prioritário",
     ],
   };
 
