@@ -10,7 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Plus, Trash2, CalendarIcon } from "lucide-react";
-import { format, addMonths, startOfMonth } from "date-fns";
+import { format, addMonths, startOfMonth, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
 import { useCreditCards } from "@/hooks/useCreditCards";
@@ -396,20 +397,22 @@ export function TransactionDialog({
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.payment_month 
-                        ? format(new Date(formData.payment_month), "MMMM 'de' yyyy") 
+                        ? format(parseISO(formData.payment_month), "MMMM 'de' yyyy", { locale: ptBR }) 
                         : "Selecione o mês"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={formData.payment_month ? new Date(formData.payment_month) : undefined}
+                      selected={formData.payment_month ? parseISO(formData.payment_month) : undefined}
                       onSelect={(date) => {
                         if (date) {
-                          setFormData({ ...formData, payment_month: format(startOfMonth(date), "yyyy-MM-dd") });
+                          const firstDay = startOfMonth(date);
+                          setFormData({ ...formData, payment_month: format(firstDay, "yyyy-MM-dd") });
                         }
                       }}
                       initialFocus
+                      locale={ptBR}
                       className={cn("p-3 pointer-events-auto")}
                     />
                   </PopoverContent>
