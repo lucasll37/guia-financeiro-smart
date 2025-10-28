@@ -1,43 +1,25 @@
 import { useState, useMemo } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useCategories } from "@/hooks/useCategories";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useForecasts } from "@/hooks/useForecasts";
 import { ComparisonChart } from "@/components/analysis/ComparisonChart";
+import { AnalysisFilters } from "@/components/analysis/AnalysisFilters";
 import { format, startOfMonth, endOfMonth } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { cn } from "@/lib/utils";
 
 export default function Analysis() {
   const { accounts } = useAccounts();
-  const [selectedAccountId, setSelectedAccountId] = useState<string>("all");
-  const [periodType, setPeriodType] = useState<"month" | "custom">("month");
-  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), "yyyy-MM"));
-  const [customStartDate, setCustomStartDate] = useState<Date>();
-  const [customEndDate, setCustomEndDate] = useState<Date>();
+  const [filters, setFilters] = useState({
+    accountId: "all",
+    viewMode: "monthly" as "monthly" | "custom",
+    selectedMonth: format(new Date(), "yyyy-MM"),
+    startDate: "",
+    endDate: "",
+  });
 
-  const { categories } = useCategories(selectedAccountId !== "all" ? selectedAccountId : undefined);
-  const { transactions } = useTransactions(selectedAccountId !== "all" ? selectedAccountId : undefined);
-  const { forecasts } = useForecasts(selectedAccountId !== "all" ? selectedAccountId : undefined);
-
-  // Generate month options (6 months before and after current month)
-  const monthOptions = useMemo(() => {
-    const options = [];
-    const current = new Date();
-    for (let i = -6; i <= 6; i++) {
-      const date = new Date(current.getFullYear(), current.getMonth() + i, 1);
-      options.push({
-        value: format(date, "yyyy-MM"),
-        label: format(date, "MMMM 'de' yyyy", { locale: ptBR }),
-      });
-    }
-    return options;
-  }, []);
+  const { categories } = useCategories(filters.accountId !== "all" ? filters.accountId : undefined);
+  const { transactions } = useTransactions(filters.accountId !== "all" ? filters.accountId : undefined);
+  const { forecasts } = useForecasts(filters.accountId !== "all" ? filters.accountId : undefined);
 
   // Helper to get parent category
   const getParentCategory = (categoryId: string) => {
@@ -55,18 +37,18 @@ export default function Analysis() {
 
   // Prepare comparison data
   const comparisonData = useMemo(() => {
-    if (!categories || selectedAccountId === "all") return [];
+    if (!categories || filters.accountId === "all") return [];
 
     let periodStart: string;
     let periodEnd: string;
 
-    if (periodType === "custom") {
-      if (!customStartDate || !customEndDate) return [];
-      periodStart = format(customStartDate, "yyyy-MM-dd");
-      periodEnd = format(customEndDate, "yyyy-MM-dd");
+    if (filters.viewMode === "custom") {
+      if (!filters.startDate || !filters.endDate) return [];
+      periodStart = filters.startDate;
+      periodEnd = filters.endDate;
     } else {
-      periodStart = format(startOfMonth(new Date(selectedMonth + "-01")), "yyyy-MM-dd");
-      periodEnd = format(endOfMonth(new Date(selectedMonth + "-01")), "yyyy-MM-dd");
+      periodStart = format(startOfMonth(new Date(filters.selectedMonth + "-01")), "yyyy-MM-dd");
+      periodEnd = format(endOfMonth(new Date(filters.selectedMonth + "-01")), "yyyy-MM-dd");
     }
 
     // Get forecasts for the period
@@ -116,7 +98,7 @@ export default function Analysis() {
     });
 
     return Object.values(categoryMap);
-  }, [categories, forecasts, transactions, selectedMonth, selectedAccountId, periodType, customStartDate, customEndDate]);
+  }, [categories, forecasts, transactions, filters]);
 
   return (
     <div className="space-y-6">
@@ -129,103 +111,18 @@ export default function Analysis() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-4">
-        <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
-          <SelectTrigger className="w-[250px]">
-            <SelectValue placeholder="Selecione a conta" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas as contas</SelectItem>
-            {accounts?.map((account) => (
-              <SelectItem key={account.id} value={account.id}>
-                {account.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <AnalysisFilters
+        accounts={accounts || []}
+        filters={filters}
+        onFilterChange={setFilters}
+      />
 
-        <Select value={periodType} onValueChange={(v) => setPeriodType(v as "month" | "custom")}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="month">Por mês</SelectItem>
-            <SelectItem value="custom">Período personalizado</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {periodType === "month" ? (
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-[250px]">
-              <SelectValue placeholder="Selecione o mês" />
-            </SelectTrigger>
-            <SelectContent>
-              {monthOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : (
-          <>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-[200px] justify-start text-left font-normal",
-                    !customStartDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {customStartDate ? format(customStartDate, "dd/MM/yyyy") : "Data inicial"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={customStartDate}
-                  onSelect={setCustomStartDate}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-[200px] justify-start text-left font-normal",
-                    !customEndDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {customEndDate ? format(customEndDate, "dd/MM/yyyy") : "Data final"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={customEndDate}
-                  onSelect={setCustomEndDate}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-          </>
-        )}
-      </div>
-
-      {selectedAccountId === "all" ? (
+      {filters.accountId === "all" ? (
         <div className="text-center py-12 text-muted-foreground">
           Selecione uma conta para visualizar a análise
         </div>
       ) : (
-        <ComparisonChart data={comparisonData} accountId={selectedAccountId} />
+        <ComparisonChart data={comparisonData} accountId={filters.accountId} />
       )}
     </div>
   );
