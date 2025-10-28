@@ -7,8 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Trash2 } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Plus, Trash2, CalendarIcon } from "lucide-react";
 import { format, addMonths, startOfMonth } from "date-fns";
+import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
 import { useCreditCards } from "@/hooks/useCreditCards";
 
@@ -298,12 +301,33 @@ export function TransactionDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="date">Data *</Label>
-              <Input
-                id="date"
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.date ? format(new Date(formData.date), "dd/MM/yyyy") : "Selecione a data"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.date ? new Date(formData.date) : undefined}
+                    onSelect={(date) => {
+                      if (date) {
+                        setFormData({ ...formData, date: format(date, "yyyy-MM-dd") });
+                      }
+                    }}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-2">
@@ -357,12 +381,35 @@ export function TransactionDialog({
             <>
               <div className="space-y-2">
                 <Label htmlFor="payment_month">Mês de Pagamento</Label>
-                <Input
-                  id="payment_month"
-                  type="month"
-                  value={formData.payment_month ? format(new Date(formData.payment_month), "yyyy-MM") : ""}
-                  onChange={(e) => setFormData({ ...formData, payment_month: e.target.value + "-01" })}
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.payment_month && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.payment_month 
+                        ? format(new Date(formData.payment_month), "MMMM 'de' yyyy") 
+                        : "Selecione o mês"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.payment_month ? new Date(formData.payment_month) : undefined}
+                      onSelect={(date) => {
+                        if (date) {
+                          setFormData({ ...formData, payment_month: format(startOfMonth(date), "yyyy-MM-dd") });
+                        }
+                      }}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
                 <p className="text-xs text-muted-foreground">
                   Calculado automaticamente. Ajuste se necessário.
                 </p>
