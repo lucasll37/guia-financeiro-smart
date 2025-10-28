@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import { useMaskValues } from "@/hooks/useMaskValues";
 export type Language = "pt-BR" | "en-US";
 export type Currency = "BRL" | "USD" | "EUR";
 export type DateFormat = "dd/MM/yyyy" | "MM/dd/yyyy" | "yyyy-MM-dd";
@@ -31,10 +31,11 @@ export function useUserPreferences() {
     return defaultPreferences;
   });
 
+  const { maskValue, isMasked } = useMaskValues();
+
   useEffect(() => {
     localStorage.setItem("user-preferences", JSON.stringify(preferences));
   }, [preferences]);
-
   const updatePreferences = (updates: Partial<UserPreferences>) => {
     setPreferences((prev) => ({ ...prev, ...updates }));
   };
@@ -44,13 +45,15 @@ export function useUserPreferences() {
       BRL: { locale: "pt-BR", currency: "BRL" },
       USD: { locale: "en-US", currency: "USD" },
       EUR: { locale: "de-DE", currency: "EUR" },
-    };
+    } as const;
 
     const config = currencyConfig[preferences.currency];
-    return new Intl.NumberFormat(config.locale, {
+    const formatted = new Intl.NumberFormat(config.locale, {
       style: "currency",
       currency: config.currency,
     }).format(value);
+
+    return isMasked ? maskValue(formatted) : formatted;
   };
 
   const formatDate = (date: Date) => {

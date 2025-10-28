@@ -101,10 +101,11 @@ export const Header = () => {
 
         <div className="ml-auto flex items-center gap-4">
           <Button
-            variant="ghost"
+            variant={isMasked ? "destructive" : "ghost"}
             size="icon"
             onClick={toggleMask}
             title={isMasked ? "Mostrar valores" : "Ocultar valores"}
+            aria-pressed={isMasked}
           >
             {isMasked ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
           </Button>
