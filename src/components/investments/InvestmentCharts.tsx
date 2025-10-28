@@ -203,7 +203,7 @@ export function InvestmentCharts({
     const totalGrowth = lastPoint.saldoValorPresente - firstPoint.saldoValorPresente;
     const totalContributions = lastPoint.aportesValorPresente;
     const returns = lastPoint.saldoValorPresente - totalContributions; // Rendimento VP = Saldo Final VP - Aportes VP
-    const roi = totalContributions > 0 
+    const realReturnPercent = totalContributions > 0 
       ? ((lastPoint.saldoValorPresente / totalContributions) - 1) * 100 
       : 0;
     
@@ -212,7 +212,7 @@ export function InvestmentCharts({
       final: lastPoint.saldoAparente,
       finalPV: lastPoint.saldoValorPresente,
       growth: totalGrowth,
-      roi,
+      realReturnPercent,
       contributions: totalContributions,
       returns,
       months: combinedData.length - 1,
@@ -224,7 +224,8 @@ export function InvestmentCharts({
 
     const data = payload[0].payload;
     const isProjection = data.isProjection;
-    const roi = data.aportesValorPresente > 0 
+    const realReturn = data.saldoValorPresente - data.aportesValorPresente;
+    const realReturnPercent = data.aportesValorPresente > 0 
       ? ((data.saldoValorPresente / data.aportesValorPresente) - 1) * 100 
       : 0;
 
@@ -263,9 +264,9 @@ export function InvestmentCharts({
             </span>
           </div>
           <div className="flex justify-between gap-4 pt-2 mt-2 border-t">
-            <span className="text-muted-foreground font-medium">ROI:</span>
-            <span className={`font-bold ${roi >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
-              {roi >= 0 ? '+' : ''}{roi.toFixed(2)}%
+            <span className="text-muted-foreground font-medium">Rendimento Real:</span>
+            <span className={`font-bold ${realReturnPercent >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
+              {realReturnPercent >= 0 ? '+' : ''}{realReturnPercent.toFixed(2)}%
             </span>
           </div>
         </div>
@@ -308,13 +309,13 @@ export function InvestmentCharts({
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">ROI</p>
+                  <p className="text-sm font-medium text-muted-foreground">Rendimento Real</p>
                   <p className="text-2xl font-bold mt-1 text-chart-2">
-                    {stats.roi >= 0 ? '+' : ''}{stats.roi.toFixed(1)}%
+                    {stats.realReturnPercent >= 0 ? '+' : ''}{stats.realReturnPercent.toFixed(1)}%
                   </p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-chart-2/10 flex items-center justify-center">
-                  {stats.roi >= 0 ? (
+                  {stats.realReturnPercent >= 0 ? (
                     <TrendingUp className="h-6 w-6 text-chart-2" />
                   ) : (
                     <TrendingDown className="h-6 w-6 text-destructive" />
