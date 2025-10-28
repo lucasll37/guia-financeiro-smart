@@ -271,59 +271,122 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="rate">Rendimento Mensal (%)</Label>
-            <Input
+            <div className="flex items-center justify-between">
+              <Label htmlFor="rate">Rendimento Mensal (%)</Label>
+              <Input
+                id="rate-input"
+                type="number"
+                step="0.01"
+                min={-10}
+                max={20}
+                value={monthlyRate}
+                onChange={(e) => setMonthlyRate(Math.min(20, Math.max(-10, Number(e.target.value))))}
+                className="w-20 h-8 text-center"
+              />
+            </div>
+            <Slider
               id="rate"
-              type="number"
-              step="0.01"
-              value={monthlyRate}
-              onChange={(e) => setMonthlyRate(Number(e.target.value))}
+              min={-10}
+              max={20}
+              step={0.01}
+              value={[monthlyRate]}
+              onValueChange={(value) => setMonthlyRate(value[0])}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="rateStdDev">Desvio Padrão Rendimento (%)</Label>
-            <Input
+            <div className="flex items-center justify-between">
+              <Label htmlFor="rateStdDev">Desvio Padrão Rendimento (%)</Label>
+              <Input
+                id="rateStdDev-input"
+                type="number"
+                step="0.01"
+                min={0}
+                max={10}
+                value={rateStdDev}
+                onChange={(e) => setRateStdDev(Math.min(10, Math.max(0, Number(e.target.value))))}
+                className="w-20 h-8 text-center"
+              />
+            </div>
+            <Slider
               id="rateStdDev"
-              type="number"
-              step="0.01"
-              min="0"
-              value={rateStdDev}
-              onChange={(e) => setRateStdDev(Math.max(0, Number(e.target.value)))}
+              min={0}
+              max={10}
+              step={0.01}
+              value={[rateStdDev]}
+              onValueChange={(value) => setRateStdDev(value[0])}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="inflation">Inflação Mensal (%)</Label>
-            <Input
+            <div className="flex items-center justify-between">
+              <Label htmlFor="inflation">Inflação Mensal (%)</Label>
+              <Input
+                id="inflation-input"
+                type="number"
+                step="0.01"
+                min={-5}
+                max={10}
+                value={inflationRate}
+                onChange={(e) => setInflationRate(Math.min(10, Math.max(-5, Number(e.target.value))))}
+                className="w-20 h-8 text-center"
+              />
+            </div>
+            <Slider
               id="inflation"
-              type="number"
-              step="0.01"
-              value={inflationRate}
-              onChange={(e) => setInflationRate(Number(e.target.value))}
+              min={-5}
+              max={10}
+              step={0.01}
+              value={[inflationRate]}
+              onValueChange={(value) => setInflationRate(value[0])}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="inflationStdDev">Desvio Padrão Inflação (%)</Label>
-            <Input
+            <div className="flex items-center justify-between">
+              <Label htmlFor="inflationStdDev">Desvio Padrão Inflação (%)</Label>
+              <Input
+                id="inflationStdDev-input"
+                type="number"
+                step="0.01"
+                min={0}
+                max={5}
+                value={inflationStdDev}
+                onChange={(e) => setInflationStdDev(Math.min(5, Math.max(0, Number(e.target.value))))}
+                className="w-20 h-8 text-center"
+              />
+            </div>
+            <Slider
               id="inflationStdDev"
-              type="number"
-              step="0.01"
-              min="0"
-              value={inflationStdDev}
-              onChange={(e) => setInflationStdDev(Math.max(0, Number(e.target.value)))}
+              min={0}
+              max={5}
+              step={0.01}
+              value={[inflationStdDev]}
+              onValueChange={(value) => setInflationStdDev(value[0])}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="contribution">Aporte Mensal (R$)</Label>
-            <Input
+            <div className="flex items-center justify-between">
+              <Label htmlFor="contribution">Aporte Mensal (R$)</Label>
+              <Input
+                id="contribution-input"
+                type="number"
+                step="100"
+                min={0}
+                max={50000}
+                value={monthlyContribution}
+                onChange={(e) => setMonthlyContribution(Math.min(50000, Math.max(0, Number(e.target.value))))}
+                className="w-24 h-8 text-center"
+              />
+            </div>
+            <Slider
               id="contribution"
-              type="number"
-              step="100"
-              value={monthlyContribution}
-              onChange={(e) => setMonthlyContribution(Number(e.target.value))}
+              min={0}
+              max={50000}
+              step={100}
+              value={[monthlyContribution]}
+              onValueChange={(value) => setMonthlyContribution(value[0])}
             />
           </div>
         </div>
