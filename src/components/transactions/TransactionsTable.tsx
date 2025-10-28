@@ -2,7 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Repeat, CreditCard, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Edit, Trash2, CreditCard, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMemo, useState } from "react";
@@ -110,12 +110,7 @@ export function TransactionsTable({
           />
         </TableCell>
         <TableCell>
-          <div className="flex items-center gap-2">
-            {format(new Date(transaction.date), "dd/MM/yyyy")}
-            {transaction.is_recurring && (
-              <Repeat className="h-4 w-4 text-muted-foreground" />
-            )}
-          </div>
+          {format(new Date(transaction.date), "dd/MM/yyyy")}
         </TableCell>
         <TableCell>
           <div className="flex flex-col gap-1">

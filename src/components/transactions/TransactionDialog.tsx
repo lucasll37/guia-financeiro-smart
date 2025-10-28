@@ -53,6 +53,9 @@ export function TransactionDialog({
     payment_month: null,
   });
 
+  const [installmentType, setInstallmentType] = useState<"single" | "installments">("single");
+  const [installmentCount, setInstallmentCount] = useState(2);
+
   const { creditCards } = useCreditCards();
 
   const [useCustomSplit, setUseCustomSplit] = useState(false);
@@ -93,6 +96,8 @@ export function TransactionDialog({
       });
       setUseCustomSplit(false);
       setSplitMembers([]);
+      setInstallmentType("single");
+      setInstallmentCount(2);
     }
     setErrors({});
   }, [transaction, currentUserId, open]);
@@ -156,10 +161,43 @@ export function TransactionDialog({
   const handleSubmit = () => {
     if (!validateForm()) return;
 
-    onSave({
-      ...formData,
-      split_override: isShared && useCustomSplit ? (splitMembers as any) : null,
-    });
+    // Se for parcelado no cartão, criar múltiplas transações
+    if (formData.credit_card_id && installmentType === "installments" && installmentCount > 1) {
+      const totalAmount = formData.amount;
+      const baseInstallment = Math.floor((totalAmount * 100) / installmentCount) / 100; // valor base da parcela
+      const remainder = Math.round((totalAmount * 100) - (baseInstallment * 100 * installmentCount)); // centavos que sobraram
+      
+      // Criar array de transações
+      const transactions: TransactionInsert[] = [];
+      
+      for (let i = 0; i < installmentCount; i++) {
+        // As primeiras parcelas levam os centavos extras
+        const installmentAmount = i < remainder ? baseInstallment + 0.01 : baseInstallment;
+        
+        const installmentDate = new Date(formData.date);
+        const installmentPaymentMonth = formData.payment_month 
+          ? addMonths(new Date(formData.payment_month), i)
+          : addMonths(new Date(formData.date), i);
+        
+        transactions.push({
+          ...formData,
+          amount: Math.round(installmentAmount * 100) / 100,
+          description: `${formData.description} (${i + 1}/${installmentCount})`,
+          payment_month: format(installmentPaymentMonth, "yyyy-MM-dd"),
+          split_override: isShared && useCustomSplit ? (splitMembers as any) : null,
+        });
+      }
+      
+      // Salvar todas as parcelas
+      transactions.forEach(t => onSave(t));
+    } else {
+      // Lançamento único
+      onSave({
+        ...formData,
+        split_override: isShared && useCustomSplit ? (splitMembers as any) : null,
+      });
+    }
+    
     onOpenChange(false);
   };
 
@@ -309,28 +347,61 @@ export function TransactionDialog({
           </div>
 
           {formData.credit_card_id && (
-            <div className="space-y-2">
-              <Label htmlFor="payment_month">Mês de Pagamento</Label>
-              <Input
-                id="payment_month"
-                type="month"
-                value={formData.payment_month ? format(new Date(formData.payment_month), "yyyy-MM") : ""}
-                onChange={(e) => setFormData({ ...formData, payment_month: e.target.value + "-01" })}
-              />
-              <p className="text-xs text-muted-foreground">
-                Calculado automaticamente. Ajuste se necessário.
-              </p>
-            </div>
-          )}
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="payment_month">Mês de Pagamento</Label>
+                <Input
+                  id="payment_month"
+                  type="month"
+                  value={formData.payment_month ? format(new Date(formData.payment_month), "yyyy-MM") : ""}
+                  onChange={(e) => setFormData({ ...formData, payment_month: e.target.value + "-01" })}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Calculado automaticamente. Ajuste se necessário.
+                </p>
+              </div>
 
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="recurring"
-              checked={formData.is_recurring}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_recurring: checked })}
-            />
-            <Label htmlFor="recurring">Lançamento Recorrente (mensal)</Label>
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="installment_type">Tipo de Pagamento</Label>
+                <Select
+                  value={installmentType}
+                  onValueChange={(value: "single" | "installments") => setInstallmentType(value)}
+                >
+                  <SelectTrigger id="installment_type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="single">À vista</SelectItem>
+                    <SelectItem value="installments">Parcelado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {installmentType === "installments" && (
+                <div className="space-y-2">
+                  <Label htmlFor="installment_count">Número de Parcelas</Label>
+                  <Select
+                    value={installmentCount.toString()}
+                    onValueChange={(value) => setInstallmentCount(Number(value))}
+                  >
+                    <SelectTrigger id="installment_count">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 12 }, (_, i) => i + 2).map((num) => (
+                        <SelectItem key={num} value={num.toString()}>
+                          {num}x de R$ {(formData.amount / num).toFixed(2)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    As parcelas iniciais podem ter centavos de diferença para ajuste.
+                  </p>
+                </div>
+              )}
+            </>
+          )}
 
           {isShared && (
             <>
