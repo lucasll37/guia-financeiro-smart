@@ -33,9 +33,20 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
   const [monthlyRate, setMonthlyRate] = useState(1);
   const [inflationRate, setInflationRate] = useState(0.5);
   const [monthlyContribution, setMonthlyContribution] = useState(0);
+  const [rateStdDev, setRateStdDev] = useState(0);
+  const [inflationStdDev, setInflationStdDev] = useState(0);
   const [isExplanationOpen, setIsExplanationOpen] = useState(false);
   const [sortField, setSortField] = useState<'month' | 'contribution' | 'returns' | 'balance' | 'presentValue' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  // Box-Muller transform for normal distribution
+  const generateNormalRandom = (mean: number, stdDev: number) => {
+    if (stdDev === 0) return mean;
+    const u1 = Math.random();
+    const u2 = Math.random();
+    const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    return mean + z0 * stdDev;
+  };
 
   const projectionData = useMemo(() => {
     const data = [];
@@ -47,19 +58,24 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
     for (let i = 0; i < months; i++) {
       const month = addMonths(initialMonth, i);
       const contribution = monthlyContribution;
-      const returns = (balance + contribution) * (monthlyRate / 100);
+      
+      // Apply variability using normal distribution
+      const actualMonthlyRate = generateNormalRandom(monthlyRate, rateStdDev);
+      const actualInflationRate = generateNormalRandom(inflationRate, inflationStdDev);
+      
+      const returns = (balance + contribution) * (actualMonthlyRate / 100);
       balance = balance + contribution + returns;
       
-      // Acumular inflação ao longo dos meses
-      cumulativeInflation = (1 + cumulativeInflation) * (1 + inflationRate / 100) - 1;
+      // Acumular inflação ao longo dos meses (usando taxa com variabilidade)
+      cumulativeInflation = (1 + cumulativeInflation) * (1 + actualInflationRate / 100) - 1;
       const presentValue = balance / (1 + cumulativeInflation);
       
       // Aportes acumulados
       cumulativeContribution += contribution;
       
-      // Valor presente do aporte futuro (desconto até o presente)
+      // Valor presente do aporte futuro (desconto até o presente usando taxa com variabilidade)
       const monthsFromNow = i + 1;
-      const pvFactor = Math.pow(1 + inflationRate / 100, -monthsFromNow);
+      const pvFactor = Math.pow(1 + actualInflationRate / 100, -monthsFromNow);
       cumulativeContributionPV += contribution * pvFactor;
 
       data.push({
@@ -85,7 +101,7 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
     }
 
     return data;
-  }, [currentBalance, initialMonth, months, monthlyRate, inflationRate, monthlyContribution, onConfigChange]);
+  }, [currentBalance, initialMonth, months, monthlyRate, inflationRate, monthlyContribution, rateStdDev, inflationStdDev, onConfigChange]);
 
   const handleSort = (field: 'month' | 'contribution' | 'returns' | 'balance' | 'presentValue') => {
     if (sortField === field) {
@@ -230,7 +246,7 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
           </CollapsibleContent>
         </Collapsible>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="months">Prazo (meses)</Label>
@@ -266,6 +282,18 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="rateStdDev">Desvio Padrão Rendimento (%)</Label>
+            <Input
+              id="rateStdDev"
+              type="number"
+              step="0.01"
+              min="0"
+              value={rateStdDev}
+              onChange={(e) => setRateStdDev(Math.max(0, Number(e.target.value)))}
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="inflation">Inflação Mensal (%)</Label>
             <Input
               id="inflation"
@@ -273,6 +301,18 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
               step="0.01"
               value={inflationRate}
               onChange={(e) => setInflationRate(Number(e.target.value))}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="inflationStdDev">Desvio Padrão Inflação (%)</Label>
+            <Input
+              id="inflationStdDev"
+              type="number"
+              step="0.01"
+              min="0"
+              value={inflationStdDev}
+              onChange={(e) => setInflationStdDev(Math.max(0, Number(e.target.value)))}
             />
           </div>
 
