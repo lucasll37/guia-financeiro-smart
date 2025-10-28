@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { useInvestmentCurrentValue } from "@/hooks/useInvestmentCurrentValue";
 import { useMonthlyReturns } from "@/hooks/useMonthlyReturns";
+import { useMaskValues } from "@/hooks/useMaskValues";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -21,6 +22,7 @@ export function InvestmentCard({ investment }: InvestmentCardProps) {
   const navigate = useNavigate();
   const { data: currentValue = investment.balance } = useInvestmentCurrentValue(investment.id);
   const { returns = [] } = useMonthlyReturns(investment.id);
+  const { maskValue } = useMaskValues();
 
   const chartData = useMemo(() => {
     if (!returns || returns.length === 0) {
@@ -50,10 +52,10 @@ export function InvestmentCard({ investment }: InvestmentCardProps) {
       <CardHeader className="pb-3 relative z-10">
         <CardTitle className="text-lg font-medium group-hover:text-primary transition-colors duration-300">{investment.name}</CardTitle>
         <div className="text-2xl font-bold">
-          {new Intl.NumberFormat("pt-BR", {
+          {maskValue(new Intl.NumberFormat("pt-BR", {
             style: "currency",
             currency: "BRL",
-          }).format(currentValue)}
+          }).format(currentValue))}
         </div>
       </CardHeader>
       <CardContent className="relative z-10">
@@ -95,19 +97,19 @@ export function InvestmentCard({ investment }: InvestmentCardProps) {
           <div className="flex justify-between">
             <span className="text-muted-foreground">Investido</span>
             <span className="font-medium">
-              {new Intl.NumberFormat("pt-BR", {
+              {maskValue(new Intl.NumberFormat("pt-BR", {
                 style: "currency",
                 currency: "BRL",
-              }).format(investment.balance)}
+              }).format(investment.balance))}
             </span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Ganho</span>
             <span className={`font-medium ${gain >= 0 ? "text-green-600" : "text-red-600"}`}>
-              {new Intl.NumberFormat("pt-BR", {
+              {maskValue(new Intl.NumberFormat("pt-BR", {
                 style: "currency",
                 currency: "BRL",
-              }).format(gain)} ({gainPercentage.toFixed(2)}%)
+              }).format(gain))} ({maskValue(`${gainPercentage.toFixed(2)}%`)})
             </span>
           </div>
         </div>

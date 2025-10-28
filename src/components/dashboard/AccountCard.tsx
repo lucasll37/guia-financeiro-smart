@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useBudgets } from "@/hooks/useBudgets";
+import { useMaskValues } from "@/hooks/useMaskValues";
 import { startOfMonth, endOfMonth } from "date-fns";
 
 interface AccountCardProps {
@@ -18,6 +19,7 @@ export function AccountCard({ account }: AccountCardProps) {
   const navigate = useNavigate();
   const { transactions } = useTransactions();
   const { budgets } = useBudgets();
+  const { maskValue } = useMaskValues();
 
   const { balance, spent, budgetTotal, chartData } = useMemo(() => {
     const now = new Date();
@@ -71,10 +73,10 @@ export function AccountCard({ account }: AccountCardProps) {
       <CardHeader className="pb-3 relative z-10">
         <CardTitle className="text-lg font-medium group-hover:text-primary transition-colors duration-300">{account.name}</CardTitle>
         <div className="text-2xl font-bold">
-          {new Intl.NumberFormat("pt-BR", {
+          {maskValue(new Intl.NumberFormat("pt-BR", {
             style: "currency",
             currency: account.currency,
-          }).format(balance)}
+          }).format(balance))}
         </div>
       </CardHeader>
       <CardContent className="relative z-10">
@@ -113,10 +115,10 @@ export function AccountCard({ account }: AccountCardProps) {
           <div className="flex justify-between">
             <span className="text-muted-foreground">Orçado</span>
             <span className="font-medium">
-              {new Intl.NumberFormat("pt-BR", {
+              {maskValue(new Intl.NumberFormat("pt-BR", {
                 style: "currency",
                 currency: account.currency,
-              }).format(budgetTotal)}
+              }).format(budgetTotal))}
             </span>
           </div>
         </div>

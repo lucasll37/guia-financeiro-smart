@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Target } from "lucide-react";
+import { useMaskValues } from "@/hooks/useMaskValues";
 import { differenceInDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -17,6 +18,7 @@ interface GoalProgressCardProps {
 
 export function GoalProgressCard({ goal }: GoalProgressCardProps) {
   const navigate = useNavigate();
+  const { maskValue } = useMaskValues();
   const progress = goal.target_amount > 0
     ? (goal.current_amount / goal.target_amount) * 100 
     : 0;
@@ -39,10 +41,10 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
           <CardTitle className="text-lg font-medium group-hover:text-primary transition-colors duration-300">{goal.name}</CardTitle>
         </div>
         <div className="text-2xl font-bold">
-          {new Intl.NumberFormat("pt-BR", {
+          {maskValue(new Intl.NumberFormat("pt-BR", {
             style: "currency",
             currency: "BRL",
-          }).format(goal.current_amount)}
+          }).format(goal.current_amount))}
         </div>
       </CardHeader>
       <CardContent className="relative z-10">
@@ -57,19 +59,19 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
             <div className="flex justify-between">
               <span className="text-muted-foreground">Meta</span>
               <span className="font-medium">
-                {new Intl.NumberFormat("pt-BR", {
+                {maskValue(new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
-                }).format(goal.target_amount)}
+                }).format(goal.target_amount))}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Falta</span>
               <span className="font-medium">
-                {new Intl.NumberFormat("pt-BR", {
+                {maskValue(new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
-                }).format(remaining)}
+                }).format(remaining))}
               </span>
             </div>
             {daysLeft !== null && (
