@@ -11,6 +11,7 @@ import { InvestmentSimulator } from "@/components/investments/InvestmentSimulato
 import { MonthlyReturnsDialog } from "@/components/investments/MonthlyReturnsDialog";
 import { ProjectionTable } from "@/components/investments/ProjectionTable";
 import { useState, useMemo } from "react";
+import { addMonths } from "date-fns";
 import type { Database } from "@/integrations/supabase/types";
 
 type MonthlyReturn = Database["public"]["Tables"]["investment_monthly_returns"]["Row"];
@@ -147,8 +148,8 @@ export default function InvestmentDetails() {
             currentBalance={currentValue || investment.balance}
             initialMonth={
               returns && returns.length > 0
-                ? new Date(returns[returns.length - 1].month)
-                : new Date(investment.initial_month)
+                ? addMonths(new Date(returns[returns.length - 1].month), 1)
+                : addMonths(new Date(investment.initial_month), 1)
             }
           />
         </TabsContent>
