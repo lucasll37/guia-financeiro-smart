@@ -45,21 +45,33 @@ export default function InvestmentDetails() {
   }, [investment, returns]);
 
   const lastReturnMonth = useMemo(() => {
-    const toDate = (val: any) => {
+    const toMonthStart = (val: any) => {
       if (!val) return null;
-      if (val instanceof Date) return val;
-      const s = String(val);
-      const d = new Date(s);
-      if (!isNaN(d.getTime())) return d;
-      const [y, m] = s.split("-");
-      return new Date(Number(y), Number(m) - 1, 1);
+      if (typeof val === "string") {
+        const m = val.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (m) {
+          const [, y, mo] = m;
+          return new Date(Number(y), Number(mo) - 1, 1);
+        }
+      }
+      if (val instanceof Date) {
+        return new Date(val.getFullYear(), val.getMonth(), 1);
+      }
+      // Fallback: try Date then normalize to first day of month
+      const d = new Date(String(val));
+      if (!isNaN(d.getTime())) return new Date(d.getFullYear(), d.getMonth(), 1);
+      return null;
     };
 
     if (returns && returns.length > 0) {
-      const maxTs = Math.max(...returns.map((r) => (toDate(r.month)?.getTime() ?? 0)));
+      const months = returns
+        .map((r) => toMonthStart(r.month))
+        .filter((d): d is Date => !!d);
+      const maxTs = Math.max(...months.map((d) => d.getTime()));
       return new Date(maxTs);
     }
-    return investment ? toDate(investment.initial_month) || new Date() : new Date();
+    const init = investment ? toMonthStart(investment.initial_month) : null;
+    return init || new Date();
   }, [returns, investment]);
 
   const handleSubmitReturn = (data: any) => {
