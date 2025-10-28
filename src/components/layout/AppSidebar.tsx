@@ -2,9 +2,7 @@ import {
   LayoutDashboard, 
   Wallet, 
   Target, 
-  TrendingUp, 
-  ShieldCheck,
-  Sparkles
+  TrendingUp
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
@@ -25,8 +23,6 @@ const menuItems = [
   { title: "Contas", url: "/app/contas", icon: Wallet },
   { title: t("nav.goals"), url: "/app/metas", icon: Target },
   { title: t("nav.investments"), url: "/app/investimentos", icon: TrendingUp },
-  { title: "Planos", url: "/app/planos", icon: Sparkles },
-  { title: "Admin", url: "/app/admin", icon: ShieldCheck },
 ];
 
 export function AppSidebar() {
