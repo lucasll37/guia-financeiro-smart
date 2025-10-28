@@ -98,6 +98,8 @@ export default function Transactions() {
   };
 
   const handleSaveTransaction = async (transactionData: TransactionInsert) => {
+    const isInstallment = transactionData.description?.includes("(Compra em");
+    
     if (selectedTransaction) {
       await updateTransaction.mutateAsync({ ...transactionData, id: selectedTransaction.id });
       
@@ -117,33 +119,14 @@ export default function Transactions() {
           action: "create",
           diff: transactionData as any,
         });
-
-        // If recurring, create next 3 months
-        if (transactionData.is_recurring) {
-          const promises = [];
-          for (let i = 1; i <= 3; i++) {
-            const nextDate = new Date(transactionData.date);
-            nextDate.setMonth(nextDate.getMonth() + i);
-            
-            promises.push(
-              createTransaction.mutateAsync({
-                ...transactionData,
-                date: nextDate.toISOString().split("T")[0],
-              })
-            );
-          }
-          await Promise.all(promises);
-          
-          toast({
-            title: "Lançamentos recorrentes criados",
-            description: "Foram criados lançamentos para os próximos 3 meses",
-          });
-        }
       }
     }
     
-    setDialogOpen(false);
-    setSelectedTransaction(null);
+    // Mostrar toast apenas para transações únicas ou na última parcela
+    if (!isInstallment) {
+      setDialogOpen(false);
+      setSelectedTransaction(null);
+    }
   };
 
   const handleDeleteTransaction = async (id: string) => {

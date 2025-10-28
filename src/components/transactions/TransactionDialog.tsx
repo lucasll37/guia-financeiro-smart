@@ -19,7 +19,7 @@ type TransactionInsert = Database["public"]["Tables"]["transactions"]["Insert"];
 interface TransactionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (transaction: TransactionInsert) => void;
+  onSave: (transaction: TransactionInsert) => Promise<void>;
   transaction?: any;
   accounts: Account[];
   categories: Category[];
@@ -158,16 +158,15 @@ export function TransactionDialog({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return;
 
     // Se for parcelado no cartão, criar múltiplas transações
     if (formData.credit_card_id && installmentType === "installments" && installmentCount > 1) {
       const totalAmount = formData.amount;
-      const baseInstallment = Math.floor((totalAmount * 100) / installmentCount) / 100; // valor base da parcela
-      const remainder = Math.round((totalAmount * 100) - (baseInstallment * 100 * installmentCount)); // centavos que sobraram
+      const baseInstallment = Math.floor((totalAmount * 100) / installmentCount) / 100;
+      const remainder = Math.round((totalAmount * 100) - (baseInstallment * 100 * installmentCount));
       
-      // Buscar nome do cartão
       const selectedCard = creditCards?.find(c => c.id === formData.credit_card_id);
       const cardName = selectedCard?.name || "Cartão";
       const purchaseDate = format(new Date(formData.date), "dd/MM/yyyy");
@@ -176,10 +175,8 @@ export function TransactionDialog({
       const transactions: TransactionInsert[] = [];
       
       for (let i = 0; i < installmentCount; i++) {
-        // As primeiras parcelas levam os centavos extras
         const installmentAmount = i < remainder ? baseInstallment + 0.01 : baseInstallment;
         
-        // Calcular o primeiro dia do mês de pagamento
         const paymentMonth = formData.payment_month 
           ? addMonths(new Date(formData.payment_month), i)
           : addMonths(new Date(formData.date), i);
@@ -196,11 +193,13 @@ export function TransactionDialog({
         });
       }
       
-      // Salvar todas as parcelas
-      transactions.forEach(t => onSave(t));
+      // Salvar todas as parcelas sequencialmente sem mostrar toast individual
+      for (const transaction of transactions) {
+        await onSave(transaction);
+      }
     } else {
       // Lançamento único
-      onSave({
+      await onSave({
         ...formData,
         split_override: isShared && useCustomSplit ? (splitMembers as any) : null,
       });

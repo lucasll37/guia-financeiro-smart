@@ -115,12 +115,6 @@ export function TransactionsTable({
         <TableCell>
           <div className="flex flex-col gap-1">
             <span>{transaction.description}</span>
-            {isCreditCard && transaction.payment_month && (
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <CreditCard className="h-3 w-3" />
-                <span>Fatura {format(new Date(transaction.payment_month), "MM/yyyy", { locale: ptBR })}</span>
-              </div>
-            )}
           </div>
         </TableCell>
         <TableCell>
