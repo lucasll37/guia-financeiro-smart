@@ -445,11 +445,21 @@ export function InvestmentCharts({
         <Card className="overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-chart-4/10 to-chart-5/10 border-b">
             <CardTitle>Dados Históricos Detalhados</CardTitle>
-            <CardDescription>Evolução real registrada mês a mês</CardDescription>
+            <CardDescription>Evolução real registrada mês a mês • {realReturnsData.length} meses</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={realReturnsData}>
+            <ResponsiveContainer width="100%" height={450}>
+              <AreaChart data={realReturnsData}>
+                <defs>
+                  <linearGradient id="colorHistoricoSaldo" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.25}/>
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorHistoricoVP" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis 
                   dataKey="month"
@@ -460,37 +470,58 @@ export function InvestmentCharts({
                   tickFormatter={formatCurrency}
                   tick={{ fontSize: 12 }}
                   tickLine={{ stroke: 'hsl(var(--border))' }}
-                />
+                >
+                  <Label 
+                    value="Valor (R$)" 
+                    angle={-90} 
+                    position="insideLeft"
+                    style={{ textAnchor: 'middle', fontSize: 14, fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                </YAxis>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="line" />
-                <Line
+                <Legend 
+                  wrapperStyle={{ paddingTop: '20px' }}
+                  iconType="line"
+                />
+                <Area
                   type="monotone"
                   dataKey="saldoAparente"
                   name="Saldo Aparente"
                   stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                  dot={{ r: 4, strokeWidth: 2 }}
+                  strokeWidth={3}
+                  fill="url(#colorHistoricoSaldo)"
+                  dot={{ r: 4, strokeWidth: 2, fill: 'hsl(var(--background))' }}
                   activeDot={{ r: 6, strokeWidth: 2 }}
                 />
-                <Line
+                <Area
                   type="monotone"
                   dataKey="saldoValorPresente"
                   name="Saldo VP"
                   stroke="hsl(var(--chart-2))"
-                  strokeWidth={2}
-                  dot={{ r: 4, strokeWidth: 2 }}
+                  strokeWidth={3}
+                  fill="url(#colorHistoricoVP)"
+                  dot={{ r: 4, strokeWidth: 2, fill: 'hsl(var(--background))' }}
                   activeDot={{ r: 6, strokeWidth: 2 }}
                 />
                 <Line
                   type="monotone"
                   dataKey="aportesAparente"
-                  name="Aportes Acum."
+                  name="Aportes Acum. Aparente"
                   stroke="hsl(var(--chart-3))"
                   strokeWidth={2}
                   strokeDasharray="5 5"
                   dot={false}
                 />
-              </LineChart>
+                <Line
+                  type="monotone"
+                  dataKey="aportesValorPresente"
+                  name="Aportes Acum. VP"
+                  stroke="hsl(var(--chart-4))"
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  dot={false}
+                />
+              </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
