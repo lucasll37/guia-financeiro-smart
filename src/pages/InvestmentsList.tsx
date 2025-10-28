@@ -310,7 +310,7 @@ function InvestmentCard({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
         {/* Valor Atual - destaque principal */}
         <div className="space-y-1">
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Valor Atual</div>
@@ -322,71 +322,68 @@ function InvestmentCard({
           </div>
         </div>
 
-        {/* Rendimento Nominal */}
-        <div className="space-y-1">
-          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Rendimento Nominal</div>
-          <div className={`text-2xl font-bold ${isPositive ? "text-green-600" : "text-red-600"}`}>
-            {isPositive ? "+" : ""}
-            {new Intl.NumberFormat("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            }).format(nominalGain)}
-            <span className="text-base ml-2">
-              ({isPositive ? "+" : ""}
-              {gainPercentage.toFixed(1)}%)
-            </span>
+        {/* Rendimentos em linha compacta */}
+        <div className="space-y-3 pb-4 border-b">
+          <div className="flex items-baseline justify-between">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">Nominal</span>
+            <div className={`text-lg font-semibold ${isPositive ? "text-green-600" : "text-red-600"}`}>
+              {isPositive ? "+" : ""}
+              {new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              }).format(nominalGain)}
+              <span className="text-sm ml-1.5 opacity-80">
+                ({isPositive ? "+" : ""}{gainPercentage.toFixed(1)}%)
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-baseline justify-between">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">Inflação</span>
+            <div className="text-lg font-semibold text-orange-600">
+              -{new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              }).format(inflationValue)}
+              <span className="text-sm ml-1.5 opacity-80">
+                (-{accumulatedInflation.toFixed(2)}%)
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-baseline justify-between pt-2 border-t">
+            <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Real</span>
+            <div className={`text-xl font-bold ${isRealPositive ? "text-green-600" : "text-red-600"}`}>
+              {isRealPositive ? "+" : ""}
+              {new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              }).format(realGain)}
+              <span className="text-base ml-1.5 opacity-90">
+                ({isRealPositive ? "+" : ""}{realGainPercentage.toFixed(1)}%)
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Inflação */}
-        <div className="space-y-1">
-          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Inflação</div>
-          <div className="text-2xl font-bold text-orange-600">
-            -{new Intl.NumberFormat("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            }).format(totalContributions * (accumulatedInflation / 100))}
-            <span className="text-base ml-2">
-              (-{accumulatedInflation.toFixed(2)}%)
-            </span>
-          </div>
-        </div>
-
-        {/* Rendimento Real */}
-        <div className="space-y-1 pb-4 border-b">
-          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Rendimento Real</div>
-          <div className={`text-2xl font-bold ${isRealPositive ? "text-green-600" : "text-red-600"}`}>
-            {isRealPositive ? "+" : ""}
-            {new Intl.NumberFormat("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            }).format(realGain)}
-            <span className="text-base ml-2">
-              ({isRealPositive ? "+" : ""}
-              {realGainPercentage.toFixed(1)}%)
-            </span>
-          </div>
-        </div>
-
-        {/* Métricas em grid */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <div className="text-xs text-muted-foreground">Total de Aportes</div>
-            <div className="text-lg font-semibold">
+        {/* Métricas compactas */}
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="space-y-0.5">
+            <div className="text-xs text-muted-foreground">Total Investido</div>
+            <div className="font-semibold">
               {new Intl.NumberFormat("pt-BR", {
                 style: "currency",
                 currency: "BRL",
                 minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
               }).format(totalContributions)}
             </div>
           </div>
-          <div className="space-y-1">
-            <div className="text-xs text-muted-foreground">Retorno Médio/Mês</div>
-            <div className={`text-lg font-semibold ${isPositive ? "text-green-600" : "text-red-600"}`}>
+          <div className="space-y-0.5">
+            <div className="text-xs text-muted-foreground">Retorno Real/Mês</div>
+            <div className={`font-semibold ${isRealPositive ? "text-green-600" : "text-red-600"}`}>
               {numberOfMonths > 0 ? (
                 <>
-                  {isPositive ? "+" : ""}
+                  {isRealPositive ? "+" : ""}
                   {monthlyAverageReturn.toFixed(2)}%
                 </>
               ) : (
@@ -396,10 +393,13 @@ function InvestmentCard({
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-2 text-muted-foreground">
-          <span className="text-sm">Ver detalhes completos</span>
-          <ArrowRight className="h-4 w-4" />
-        </div>
+        <button 
+          className="w-full flex items-center justify-center gap-2 pt-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+          onClick={() => onClick(investment.id)}
+        >
+          <span>Ver detalhes completos</span>
+          <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+        </button>
       </CardContent>
     </Card>
   );
