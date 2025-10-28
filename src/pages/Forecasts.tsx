@@ -28,6 +28,7 @@ export default function Forecasts() {
   const [filters, setFilters] = useState({
     accountId: "all",
     selectedMonth: currentMonth,
+    type: "all",
   });
   
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -54,12 +55,20 @@ export default function Forecasts() {
     return options;
   }, []);
 
-  // Filter forecasts by selected month
+  // Filter forecasts by selected month and type
   const filteredForecasts = useMemo(() => {
     if (!forecasts) return [];
     const periodStart = format(startOfMonth(new Date(filters.selectedMonth + "-01")), "yyyy-MM-dd");
-    return forecasts.filter((f) => f.period_start === periodStart);
-  }, [forecasts, filters.selectedMonth]);
+    return forecasts.filter((f) => {
+      // Filter by period
+      if (f.period_start !== periodStart) return false;
+      
+      // Filter by type
+      if (filters.type !== "all" && f.categories?.type !== filters.type) return false;
+      
+      return true;
+    });
+  }, [forecasts, filters.selectedMonth, filters.type]);
 
   const handleCreateForecast = () => {
     setSelectedForecast(null);

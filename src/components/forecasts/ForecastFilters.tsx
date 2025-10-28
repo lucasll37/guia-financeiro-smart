@@ -12,6 +12,7 @@ interface ForecastFiltersProps {
   filters: {
     accountId: string;
     selectedMonth: string;
+    type: string;
   };
   onFilterChange: (filters: any) => void;
 }
@@ -41,7 +42,7 @@ export function ForecastFilters({ accounts, filters, onFilterChange }: ForecastF
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-card">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-card">
       <div className="space-y-2">
         <Label htmlFor="account-filter">Conta</Label>
         <Select
@@ -58,6 +59,23 @@ export function ForecastFilters({ accounts, filters, onFilterChange }: ForecastF
                 {account.name}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="type-filter">Tipo</Label>
+        <Select
+          value={filters.type}
+          onValueChange={(value) => onFilterChange({ ...filters, type: value })}
+        >
+          <SelectTrigger id="type-filter">
+            <SelectValue placeholder="Todos" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="receita">Receitas</SelectItem>
+            <SelectItem value="despesa">Despesas</SelectItem>
           </SelectContent>
         </Select>
       </div>
