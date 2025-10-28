@@ -789,6 +789,33 @@ export type Database = {
           },
         ]
       }
+      user_action_logs: {
+        Row: {
+          action: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -817,6 +844,7 @@ export type Database = {
     Functions: {
       cleanup_deleted_accounts: { Args: never; Returns: undefined }
       cleanup_expired_deletion_tokens: { Args: never; Returns: undefined }
+      cleanup_old_action_logs: { Args: never; Returns: undefined }
       create_notification: {
         Args: {
           _message: string
@@ -832,6 +860,15 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      log_user_action: {
+        Args: {
+          p_action: string
+          p_entity_id?: string
+          p_entity_type?: string
+          p_user_id: string
+        }
+        Returns: undefined
       }
       restore_account: { Args: { account_id: string }; Returns: undefined }
       user_has_account_access: {

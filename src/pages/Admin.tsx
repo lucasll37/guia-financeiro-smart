@@ -35,6 +35,7 @@ import { AccessActivityChart } from "@/components/admin/AccessActivityChart";
 import { StatsOverview } from "@/components/admin/StatsOverview";
 import { PlanLimitsManager } from "@/components/admin/PlanLimitsManager";
 import { SubscriptionManager } from "@/components/admin/SubscriptionManager";
+import { UserActionLogs } from "@/components/admin/UserActionLogs";
 
 const couponSchema = z.object({
   code: z.string().trim().min(3, "Código deve ter no mínimo 3 caracteres").max(50, "Código muito longo"),
@@ -345,6 +346,7 @@ export default function Admin() {
           <TabsTrigger value="coupons">Cupons</TabsTrigger>
           <TabsTrigger value="notifications">Notificações</TabsTrigger>
           <TabsTrigger value="limits">Limites de Planos</TabsTrigger>
+          <TabsTrigger value="logs">Logs de Ações</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -899,6 +901,11 @@ export default function Admin() {
         {/* Subscriptions Tab */}
         <TabsContent value="subscriptions" className="space-y-4">
           <SubscriptionManager />
+        </TabsContent>
+
+        {/* User Action Logs Tab */}
+        <TabsContent value="logs" className="space-y-4">
+          <UserActionLogs />
         </TabsContent>
       </Tabs>
 
