@@ -3,24 +3,28 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Users, ArrowRight } from "lucide-react";
+import { Plus, Users, ArrowRight, Edit, Trash2 } from "lucide-react";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useAuth } from "@/hooks/useAuth";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { AccountDialog } from "@/components/accounts/AccountDialog";
+import { MembersDialog } from "@/components/accounts/MembersDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 
 type AccountInsert = Database["public"]["Tables"]["accounts"]["Insert"];
+type Account = Database["public"]["Tables"]["accounts"]["Row"];
 
 export default function AccountsList() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { accounts, isLoading, createAccount } = useAccounts();
+  const { accounts, isLoading, createAccount, updateAccount, deleteAccount } = useAccounts();
   const { toast } = useToast();
   const { canCreateAccount, maxAccounts, userPlan } = usePlanLimits();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [membersDialogOpen, setMembersDialogOpen] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
 
   const handleAccountClick = (accountId: string) => {
     navigate(`/app/contas/${accountId}`);
@@ -42,12 +46,44 @@ export default function AccountsList() {
   };
 
   const handleSaveAccount = async (accountData: AccountInsert) => {
-    await createAccount.mutateAsync(accountData);
-    toast({
-      title: "Conta criada",
-      description: "A conta foi criada com sucesso",
-    });
+    if (selectedAccount) {
+      await updateAccount.mutateAsync({ ...accountData, id: selectedAccount.id });
+      toast({
+        title: "Conta atualizada",
+        description: "A conta foi atualizada com sucesso",
+      });
+    } else {
+      await createAccount.mutateAsync(accountData);
+      toast({
+        title: "Conta criada",
+        description: "A conta foi criada com sucesso",
+      });
+    }
     setDialogOpen(false);
+    setSelectedAccount(null);
+  };
+
+  const handleEditAccount = (e: React.MouseEvent, account: Account) => {
+    e.stopPropagation();
+    setSelectedAccount(account);
+    setDialogOpen(true);
+  };
+
+  const handleDeleteAccount = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!confirm("Tem certeza que deseja excluir esta conta?")) return;
+    
+    await deleteAccount.mutateAsync(id);
+    toast({
+      title: "Conta excluída",
+      description: "A conta foi excluída com sucesso",
+    });
+  };
+
+  const handleManageMembers = (e: React.MouseEvent, account: Account) => {
+    e.stopPropagation();
+    setSelectedAccount(account);
+    setMembersDialogOpen(true);
   };
 
   if (!user) return null;
@@ -105,6 +141,32 @@ export default function AccountsList() {
                       )}
                     </div>
                   </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => handleManageMembers(e, account)}
+                      title="Gerenciar Membros"
+                    >
+                      <Users className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => handleEditAccount(e, account)}
+                      title="Editar"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => handleDeleteAccount(e, account.id)}
+                      title="Excluir"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -136,6 +198,14 @@ export default function AccountsList() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onSave={handleSaveAccount}
+        account={selectedAccount}
+        currentUserId={user.id}
+      />
+
+      <MembersDialog
+        open={membersDialogOpen}
+        onOpenChange={setMembersDialogOpen}
+        account={selectedAccount}
         currentUserId={user.id}
       />
     </div>
