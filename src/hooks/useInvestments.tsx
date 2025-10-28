@@ -16,6 +16,8 @@ export function useInvestments(accountId?: string) {
     queryFn: async () => {
       let query = supabase.from("investment_assets").select("*");
 
+      // If accountId is provided, filter by it (optional association)
+      // Otherwise, fetch all investments the user has access to (owned or shared)
       if (accountId) {
         query = query.eq("account_id", accountId);
       }
@@ -27,7 +29,6 @@ export function useInvestments(accountId?: string) {
       if (error) throw error;
       return data as Investment[];
     },
-    enabled: !!accountId || accountId === undefined,
   });
 
   const createInvestment = useMutation({

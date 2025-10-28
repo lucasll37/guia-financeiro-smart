@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import * as z from "zod";
 import {
   Dialog,
@@ -44,7 +46,7 @@ interface InvestmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   investment: Investment | null;
-  accountId: string;
+  accountId?: string;
   onSubmit: (data: any) => void;
 }
 
@@ -72,6 +74,15 @@ export function InvestmentDialog({
     },
   });
 
+  // Get current user
+  const { data: session } = useQuery({
+    queryKey: ["session"],
+    queryFn: async () => {
+      const { data } = await supabase.auth.getSession();
+      return data.session;
+    },
+  });
+
   useEffect(() => {
     if (investment) {
       form.reset({
@@ -91,6 +102,11 @@ export function InvestmentDialog({
   }, [investment, form]);
 
   const handleSubmit = (data: InvestmentFormData) => {
+    if (!session?.user?.id && !investment) {
+      alert("Você precisa estar logado para criar um investimento");
+      return;
+    }
+
     // Convert YYYY-MM to YYYY-MM-01 for PostgreSQL date format
     const formattedData = {
       ...data,
@@ -100,7 +116,18 @@ export function InvestmentDialog({
     if (investment) {
       onSubmit({ id: investment.id, ...formattedData });
     } else {
-      onSubmit({ ...formattedData, account_id: accountId });
+      // Add owner_id for new investments and optional account_id
+      const newInvestmentData: any = {
+        ...formattedData,
+        owner_id: session!.user!.id,
+      };
+      
+      // Only include account_id if provided
+      if (accountId) {
+        newInvestmentData.account_id = accountId;
+      }
+      
+      onSubmit(newInvestmentData);
     }
     onOpenChange(false);
     form.reset();

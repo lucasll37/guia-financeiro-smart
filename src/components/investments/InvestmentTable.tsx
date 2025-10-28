@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Users } from "lucide-react";
 import { useState, useMemo } from "react";
 import type { Database } from "@/integrations/supabase/types";
 import { useInvestmentCurrentValue } from "@/hooks/useInvestmentCurrentValue";
@@ -19,6 +19,7 @@ interface InvestmentTableProps {
   onEdit: (investment: Investment) => void;
   onDelete: (id: string) => void;
   onSelectForReturns?: (investment: Investment) => void;
+  onManageMembers?: (investment: Investment) => void;
   selectedInvestmentId?: string;
 }
 
@@ -34,12 +35,14 @@ function InvestmentRow({
   onEdit,
   onDelete,
   onSelectForReturns,
+  onManageMembers,
   isSelected,
 }: {
   investment: Investment;
   onEdit: (investment: Investment) => void;
   onDelete: (id: string) => void;
   onSelectForReturns?: (investment: Investment) => void;
+  onManageMembers?: (investment: Investment) => void;
   isSelected: boolean;
 }) {
   const { data: currentValue, isLoading } = useInvestmentCurrentValue(investment.id);
@@ -68,6 +71,19 @@ function InvestmentRow({
       </TableCell>
       <TableCell className="text-right">
         <div className="flex justify-end gap-2">
+          {onManageMembers && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                onManageMembers(investment);
+              }}
+              title="Gerenciar membros"
+            >
+              <Users className="h-4 w-4" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -99,6 +115,7 @@ export function InvestmentTable({
   onEdit,
   onDelete,
   onSelectForReturns,
+  onManageMembers,
   selectedInvestmentId,
 }: InvestmentTableProps) {
   const [sortField, setSortField] = useState<'name' | 'type' | 'balance' | null>(null);
@@ -178,6 +195,7 @@ export function InvestmentTable({
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onSelectForReturns={onSelectForReturns}
+                onManageMembers={onManageMembers}
                 isSelected={selectedInvestmentId === investment.id}
               />
             ))

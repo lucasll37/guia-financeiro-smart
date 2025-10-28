@@ -1,4 +1,6 @@
 import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { EmptyState } from "@/components/EmptyState";
 import { TrendingUp, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,27 +19,38 @@ import { InvestmentTable } from "@/components/investments/InvestmentTable";
 import { InvestmentSimulator } from "@/components/investments/InvestmentSimulator";
 import { MonthlyReturnsDialog } from "@/components/investments/MonthlyReturnsDialog";
 import { MonthlyReturnsTable } from "@/components/investments/MonthlyReturnsTable";
+import { InvestmentMembersDialog } from "@/components/investments/InvestmentMembersDialog";
 import type { Database } from "@/integrations/supabase/types";
 
 type Investment = Database["public"]["Tables"]["investment_assets"]["Row"];
 type MonthlyReturn = Database["public"]["Tables"]["investment_monthly_returns"]["Row"];
 
 export default function Investments() {
-  const [selectedAccountId, setSelectedAccountId] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedInvestment, setSelectedInvestment] = useState<Investment | null>(null);
   const [returnsDialogOpen, setReturnsDialogOpen] = useState(false);
   const [selectedReturn, setSelectedReturn] = useState<MonthlyReturn | null>(null);
   const [selectedInvestmentForReturns, setSelectedInvestmentForReturns] = useState<Investment | null>(null);
+  const [membersDialogOpen, setMembersDialogOpen] = useState(false);
+  const [selectedInvestmentForMembers, setSelectedInvestmentForMembers] = useState<Investment | null>(null);
 
   const { accounts } = useAccounts();
+  const { data: session } = useQuery({
+    queryKey: ["session"],
+    queryFn: async () => {
+      const { data } = await supabase.auth.getSession();
+      return data.session;
+    },
+  });
+
+  // Fetch all investments (not filtered by account)
   const {
     investments,
     isLoading,
     createInvestment,
     updateInvestment,
     deleteInvestment,
-  } = useInvestments(selectedAccountId || undefined);
+  } = useInvestments();
 
   const {
     returns,
@@ -113,6 +126,11 @@ export default function Investments() {
     setReturnsDialogOpen(true);
   };
 
+  const handleManageMembers = (investment: Investment) => {
+    setSelectedInvestmentForMembers(investment);
+    setMembersDialogOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -122,38 +140,13 @@ export default function Investments() {
             Acompanhe sua carteira de investimentos
           </p>
         </div>
-        {selectedAccountId && (
-          <Button onClick={handleNewInvestment}>
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Investimento
-          </Button>
-        )}
+        <Button onClick={handleNewInvestment}>
+          <Plus className="h-4 w-4 mr-2" />
+          Novo Investimento
+        </Button>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="w-64">
-          <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione uma conta" />
-            </SelectTrigger>
-            <SelectContent>
-              {accounts?.map((account) => (
-                <SelectItem key={account.id} value={account.id}>
-                  {account.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {!selectedAccountId ? (
-        <EmptyState
-          icon={TrendingUp}
-          title="Selecione uma conta"
-          description="Escolha uma conta para visualizar e gerenciar seus investimentos."
-        />
-      ) : isLoading ? (
+      {isLoading ? (
         <div className="text-center py-8">Carregando...</div>
       ) : !investments || investments.length === 0 ? (
         <EmptyState
@@ -170,6 +163,7 @@ export default function Investments() {
             onEdit={handleEdit}
             onDelete={handleDelete}
             onSelectForReturns={handleViewReturns}
+            onManageMembers={handleManageMembers}
             selectedInvestmentId={selectedInvestmentForReturns?.id}
           />
           
@@ -202,7 +196,7 @@ export default function Investments() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         investment={selectedInvestment}
-        accountId={selectedAccountId}
+        accountId={undefined}
         onSubmit={handleSubmit}
       />
 
@@ -212,6 +206,13 @@ export default function Investments() {
         monthlyReturn={selectedReturn}
         investmentId={selectedInvestmentForReturns?.id || ""}
         onSubmit={handleSubmitReturn}
+      />
+
+      <InvestmentMembersDialog
+        open={membersDialogOpen}
+        onOpenChange={setMembersDialogOpen}
+        investment={selectedInvestmentForMembers}
+        ownerId={session?.user?.id || ""}
       />
     </div>
   );

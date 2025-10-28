@@ -439,7 +439,7 @@ export type Database = {
       }
       investment_assets: {
         Row: {
-          account_id: string
+          account_id: string | null
           balance: number
           created_at: string
           fees: number
@@ -447,11 +447,12 @@ export type Database = {
           initial_month: string
           monthly_rate: number
           name: string
+          owner_id: string
           type: Database["public"]["Enums"]["investment_type"]
           updated_at: string
         }
         Insert: {
-          account_id: string
+          account_id?: string | null
           balance?: number
           created_at?: string
           fees?: number
@@ -459,11 +460,12 @@ export type Database = {
           initial_month?: string
           monthly_rate?: number
           name: string
+          owner_id: string
           type: Database["public"]["Enums"]["investment_type"]
           updated_at?: string
         }
         Update: {
-          account_id?: string
+          account_id?: string | null
           balance?: number
           created_at?: string
           fees?: number
@@ -471,6 +473,7 @@ export type Database = {
           initial_month?: string
           monthly_rate?: number
           name?: string
+          owner_id?: string
           type?: Database["public"]["Enums"]["investment_type"]
           updated_at?: string
         }
@@ -480,6 +483,44 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investment_members: {
+        Row: {
+          created_at: string | null
+          id: string
+          investment_id: string
+          invited_by: string
+          role: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          investment_id: string
+          invited_by: string
+          role?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          investment_id?: string
+          invited_by?: string
+          role?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investment_members_investment_id_fkey"
+            columns: ["investment_id"]
+            isOneToOne: false
+            referencedRelation: "investment_assets"
             referencedColumns: ["id"]
           },
         ]
@@ -789,6 +830,10 @@ export type Database = {
       restore_account: { Args: { account_id: string }; Returns: undefined }
       user_has_account_access: {
         Args: { account_uuid: string; user_uuid: string }
+        Returns: boolean
+      }
+      user_has_investment_access: {
+        Args: { investment_uuid: string; user_uuid: string }
         Returns: boolean
       }
       user_has_plan: {
