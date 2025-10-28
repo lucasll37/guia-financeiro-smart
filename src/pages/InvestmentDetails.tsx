@@ -1,13 +1,13 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, TrendingUp, Calendar, LineChart, TrendingDown } from "lucide-react";
+import { ArrowLeft, Calendar, LineChart, TrendingDown } from "lucide-react";
 import { useInvestments } from "@/hooks/useInvestments";
 import { useMonthlyReturns } from "@/hooks/useMonthlyReturns";
 import { useInvestmentCurrentValue } from "@/hooks/useInvestmentCurrentValue";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MonthlyReturnsTable } from "@/components/investments/MonthlyReturnsTable";
-import { InvestmentSimulator } from "@/components/investments/InvestmentSimulator";
+import { InvestmentCharts } from "@/components/investments/InvestmentCharts";
 import { MonthlyReturnsDialog } from "@/components/investments/MonthlyReturnsDialog";
 import { ProjectionTable } from "@/components/investments/ProjectionTable";
 import { addMonths } from "date-fns";
@@ -23,6 +23,10 @@ export default function InvestmentDetails() {
   const { investments, isLoading } = useInvestments();
   const [returnsDialogOpen, setReturnsDialogOpen] = useState(false);
   const [selectedReturn, setSelectedReturn] = useState<MonthlyReturn | null>(null);
+  const [projectionMonths, setProjectionMonths] = useState(12);
+  const [projectionRate, setProjectionRate] = useState(1);
+  const [projectionInflation, setProjectionInflation] = useState(0.5);
+  const [projectionContribution, setProjectionContribution] = useState(0);
 
   const investment = investments?.find((inv) => inv.id === investmentId);
   const { data: currentValue } = useInvestmentCurrentValue(investmentId || "");
@@ -158,9 +162,9 @@ export default function InvestmentDetails() {
             <TrendingDown className="h-4 w-4" />
             <span className="hidden sm:inline">Projeção</span>
           </TabsTrigger>
-          <TabsTrigger value="simulador" className="flex items-center gap-2">
+          <TabsTrigger value="grafico" className="flex items-center gap-2">
             <LineChart className="h-4 w-4" />
-            <span className="hidden sm:inline">Simulador</span>
+            <span className="hidden sm:inline">Gráfico</span>
           </TabsTrigger>
         </TabsList>
 
@@ -178,13 +182,27 @@ export default function InvestmentDetails() {
           <ProjectionTable
             currentBalance={currentValue || investment.balance}
             initialMonth={addMonths(lastReturnMonth, 1)}
+            onConfigChange={(config) => {
+              setProjectionMonths(config.months);
+              setProjectionRate(config.monthlyRate);
+              setProjectionInflation(config.inflationRate);
+              setProjectionContribution(config.monthlyContribution);
+            }}
           />
         </TabsContent>
 
-        <TabsContent value="simulador">
-          <InvestmentSimulator 
-            investments={[investment]} 
-            monthlyReturnsByInvestment={monthlyReturnsByInvestment}
+        <TabsContent value="grafico">
+          <InvestmentCharts
+            returns={returns || []}
+            initialBalance={investment.balance}
+            currentBalance={currentValue || investment.balance}
+            lastReturnMonth={lastReturnMonth}
+            projectionConfig={{
+              months: projectionMonths,
+              monthlyRate: projectionRate,
+              inflationRate: projectionInflation,
+              monthlyContribution: projectionContribution,
+            }}
           />
         </TabsContent>
       </Tabs>

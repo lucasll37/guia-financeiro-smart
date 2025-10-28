@@ -17,9 +17,15 @@ import { ptBR } from "date-fns/locale";
 interface ProjectionTableProps {
   currentBalance: number;
   initialMonth: Date;
+  onConfigChange?: (config: {
+    months: number;
+    monthlyRate: number;
+    inflationRate: number;
+    monthlyContribution: number;
+  }) => void;
 }
 
-export function ProjectionTable({ currentBalance, initialMonth }: ProjectionTableProps) {
+export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }: ProjectionTableProps) {
   const [months, setMonths] = useState(12);
   const [monthlyRate, setMonthlyRate] = useState(1);
   const [inflationRate, setInflationRate] = useState(0.5);
@@ -46,8 +52,18 @@ export function ProjectionTable({ currentBalance, initialMonth }: ProjectionTabl
       });
     }
 
+    // Notify parent of config changes
+    if (onConfigChange) {
+      onConfigChange({
+        months,
+        monthlyRate,
+        inflationRate,
+        monthlyContribution,
+      });
+    }
+
     return data;
-  }, [currentBalance, initialMonth, months, monthlyRate, inflationRate, monthlyContribution]);
+  }, [currentBalance, initialMonth, months, monthlyRate, inflationRate, monthlyContribution, onConfigChange]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
