@@ -129,11 +129,14 @@ export function CategoryPieCharts({ data, accountId }: CategoryPieChartsProps) {
               <Legend 
                 verticalAlign="bottom" 
                 height={36}
-                formatter={(value, entry: any) => (
-                  <span className="text-sm">
-                    {entry.payload.name}: {formatCurrency(entry.payload.value)}
-                  </span>
-                )}
+                formatter={(value, entry: any) => {
+                  const percent = totalForecasted > 0 ? ((entry.payload.value / totalForecasted) * 100).toFixed(1) : '0';
+                  return (
+                    <span className="text-sm">
+                      {entry.payload.name}: {formatCurrency(entry.payload.value)} ({percent}%)
+                    </span>
+                  );
+                }}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -175,11 +178,14 @@ export function CategoryPieCharts({ data, accountId }: CategoryPieChartsProps) {
               <Legend 
                 verticalAlign="bottom" 
                 height={36}
-                formatter={(value, entry: any) => (
-                  <span className="text-sm">
-                    {entry.payload.name}: {formatCurrency(entry.payload.value)}
-                  </span>
-                )}
+                formatter={(value, entry: any) => {
+                  const percent = totalActual > 0 ? ((entry.payload.value / totalActual) * 100).toFixed(1) : '0';
+                  return (
+                    <span className="text-sm">
+                      {entry.payload.name}: {formatCurrency(entry.payload.value)} ({percent}%)
+                    </span>
+                  );
+                }}
               />
             </PieChart>
           </ResponsiveContainer>

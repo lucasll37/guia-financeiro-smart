@@ -155,7 +155,13 @@ export function CategoryStackedBarChart({
               <XAxis type="number" tickFormatter={(value) => formatCurrency(value)} />
               <YAxis type="category" dataKey="categoria" width={110} />
               <Tooltip content={(props) => <CustomTooltip {...props} type="previsto" />} />
-              <Bar 
+              <Legend 
+                formatter={(value, entry: any) => {
+                  const percent = totalForecasted > 0 ? ((entry.payload.value / totalForecasted) * 100).toFixed(1) : '0';
+                  return `${entry.payload.categoria} - ${percent}%`;
+                }}
+              />
+              <Bar
                 dataKey="value" 
                 fill="hsl(var(--primary))"
                 radius={[0, 4, 4, 0]}
@@ -189,7 +195,13 @@ export function CategoryStackedBarChart({
               <XAxis type="number" tickFormatter={(value) => formatCurrency(value)} />
               <YAxis type="category" dataKey="categoria" width={110} />
               <Tooltip content={(props) => <CustomTooltip {...props} type="realizado" />} />
-              <Bar 
+              <Legend 
+                formatter={(value, entry: any) => {
+                  const percent = totalActual > 0 ? ((entry.payload.value / totalActual) * 100).toFixed(1) : '0';
+                  return `${entry.payload.categoria} - ${percent}%`;
+                }}
+              />
+              <Bar
                 dataKey="value" 
                 fill="hsl(var(--chart-2))"
                 radius={[0, 4, 4, 0]}
