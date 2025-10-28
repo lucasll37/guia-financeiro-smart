@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useInvestmentCurrentValue } from "@/hooks/useInvestmentCurrentValue";
+import { useMonthlyReturns } from "@/hooks/useMonthlyReturns";
 import type { Database } from "@/integrations/supabase/types";
 
 type Investment = Database["public"]["Tables"]["investment_assets"]["Row"];
@@ -226,10 +227,15 @@ function InvestmentCard({
   getTypeLabel,
 }: InvestmentCardProps) {
   const { data: currentValue = 0 } = useInvestmentCurrentValue(investment.id);
+  const { returns = [] } = useMonthlyReturns(investment.id);
 
-  const gain = currentValue - investment.balance;
-  const gainPercentage = investment.balance > 0 ? (gain / investment.balance) * 100 : 0;
-  const isPositive = gain >= 0;
+  // Calcular aportes nominais totais
+  const totalContributions = returns.reduce((sum, r) => sum + Number(r.contribution || 0), 0);
+  
+  // Rendimento nominal = Valor atual - Total de aportes
+  const nominalGain = currentValue - totalContributions;
+  const gainPercentage = totalContributions > 0 ? (nominalGain / totalContributions) * 100 : 0;
+  const isPositive = nominalGain >= 0;
 
   return (
     <Card
@@ -278,33 +284,44 @@ function InvestmentCard({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div>
-            <div className="text-sm text-muted-foreground mb-1">Valor Atual</div>
-            <div className="text-2xl font-bold">
-              {new Intl.NumberFormat("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              }).format(currentValue)}
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-between pt-2 border-t">
+          <div className="grid grid-cols-3 gap-3">
             <div>
-              <div className="text-xs text-muted-foreground">Rendimento</div>
+              <div className="text-xs text-muted-foreground mb-1">Aportes</div>
+              <div className="text-sm font-semibold">
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(totalContributions)}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground mb-1">Valor Atual</div>
+              <div className="text-sm font-semibold">
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(currentValue)}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground mb-1">Rendimento</div>
               <div className={`text-sm font-semibold ${isPositive ? "text-green-600" : "text-red-600"}`}>
                 {isPositive ? "+" : ""}
                 {new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
-                }).format(gain)}
+                }).format(nominalGain)}
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-xs text-muted-foreground">%</div>
-              <div className={`text-sm font-semibold ${isPositive ? "text-green-600" : "text-red-600"}`}>
-                {isPositive ? "+" : ""}
-                {gainPercentage.toFixed(2)}%
-              </div>
+          </div>
+          
+          <div className="flex items-center justify-between pt-2 border-t">
+            <div className="text-sm text-muted-foreground">
+              Retorno
+            </div>
+            <div className={`text-lg font-bold ${isPositive ? "text-green-600" : "text-red-600"}`}>
+              {isPositive ? "+" : ""}
+              {gainPercentage.toFixed(2)}%
             </div>
           </div>
 
