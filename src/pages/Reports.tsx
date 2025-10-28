@@ -78,6 +78,7 @@ export default function Reports({ accountId: propAccountId }: ReportsProps) {
             transactions={transactions}
             categories={categories || []}
             onReportGenerated={handleReportGenerated}
+            accountId={propAccountId}
           />
 
           <ReportHistory

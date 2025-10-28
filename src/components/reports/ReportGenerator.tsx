@@ -36,6 +36,7 @@ interface ReportGeneratorProps {
   transactions: Transaction[];
   categories: Category[];
   onReportGenerated: (report: GeneratedReport) => void;
+  accountId?: string;
 }
 
 export interface GeneratedReport {
@@ -52,13 +53,19 @@ export function ReportGenerator({
   transactions,
   categories,
   onReportGenerated,
+  accountId,
 }: ReportGeneratorProps) {
   const { toast } = useToast();
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
-  const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>([]);
+  const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>(
+    accountId ? [accountId] : []
+  );
   const [reportType, setReportType] = useState<"summary" | "detailed">("summary");
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Se accountId está presente no contexto, essa conta é fixa
+  const isContextAccount = !!accountId;
 
   const toggleAccount = (accountId: string) => {
     setSelectedAccountIds((prev) =>
@@ -299,36 +306,38 @@ export function ReportGenerator({
           </div>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">Contas</label>
-            <Button
-              variant="link"
-              size="sm"
-              onClick={selectAllAccounts}
-              className="h-auto p-0"
-            >
-              Selecionar todas
-            </Button>
+        {!isContextAccount && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Contas</label>
+              <Button
+                variant="link"
+                size="sm"
+                onClick={selectAllAccounts}
+                className="h-auto p-0"
+              >
+                Selecionar todas
+              </Button>
+            </div>
+            <div className="grid gap-2">
+              {accounts.map((account) => (
+                <div key={account.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={account.id}
+                    checked={selectedAccountIds.includes(account.id)}
+                    onCheckedChange={() => toggleAccount(account.id)}
+                  />
+                  <label
+                    htmlFor={account.id}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {account.name}
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="grid gap-2">
-            {accounts.map((account) => (
-              <div key={account.id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={account.id}
-                  checked={selectedAccountIds.includes(account.id)}
-                  onCheckedChange={() => toggleAccount(account.id)}
-                />
-                <label
-                  htmlFor={account.id}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {account.name}
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
 
         <div className="space-y-2">
           <label className="text-sm font-medium">Tipo de Relatório</label>
