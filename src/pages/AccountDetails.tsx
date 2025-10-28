@@ -99,7 +99,7 @@ export default function AccountDetails() {
         </TabsContent>
 
         <TabsContent value="previsoes">
-          <Forecasts />
+          <Forecasts accountId={accountId} />
         </TabsContent>
 
         <TabsContent value="lancamentos">
