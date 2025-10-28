@@ -10,7 +10,6 @@ export async function seedCategories(accountId: string) {
     { name: "Aposentadoria", type: "receita" as const, color: "#10b981", parent_id: "Receita" },
     { name: "Receita extra (aluguel, restituição IR)", type: "receita" as const, color: "#10b981", parent_id: "Receita" },
     { name: "Outras Receitas", type: "receita" as const, color: "#10b981", parent_id: "Receita" },
-    { name: "Total da Receita   Líquida", type: "receita" as const, color: "#10b981", parent_id: "Receita" },
     
     // DESPESAS
     // Alimentação
