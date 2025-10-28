@@ -34,21 +34,24 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
   const projectionData = useMemo(() => {
     const data = [];
     let balance = currentBalance;
+    let cumulativeInflation = 0;
 
     for (let i = 0; i < months; i++) {
       const month = addMonths(initialMonth, i);
       const contribution = monthlyContribution;
       const returns = (balance + contribution) * (monthlyRate / 100);
       balance = balance + contribution + returns;
-      const inflationImpact = balance * (inflationRate / 100);
-      const realValue = balance - inflationImpact;
+      
+      // Acumular inflação ao longo dos meses
+      cumulativeInflation = (1 + cumulativeInflation) * (1 + inflationRate / 100) - 1;
+      const presentValue = balance / (1 + cumulativeInflation);
 
       data.push({
         month,
         contribution,
         returns,
         balance,
-        realValue,
+        presentValue,
       });
     }
 
@@ -143,8 +146,8 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                 <TableHead>Mês</TableHead>
                 <TableHead className="text-right">Aporte</TableHead>
                 <TableHead className="text-right">Rendimento</TableHead>
-                <TableHead className="text-right">Saldo</TableHead>
-                <TableHead className="text-right">Valor Real</TableHead>
+                <TableHead className="text-right">Saldo Aparente</TableHead>
+                <TableHead className="text-right">Saldo Valor Presente</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -163,7 +166,7 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                     {formatCurrency(row.balance)}
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">
-                    {formatCurrency(row.realValue)}
+                    {formatCurrency(row.presentValue)}
                   </TableCell>
                 </TableRow>
               ))}

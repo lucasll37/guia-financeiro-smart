@@ -48,10 +48,8 @@ export function MonthlyReturnsTable({
     return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 ml-1" /> : <ArrowDown className="h-4 w-4 ml-1" />;
   };
 
-  const sortedReturns = useMemo(() => {
-    if (!sortField) return returns;
-    
-    return [...returns].sort((a, b) => {
+  const sortedReturnsWithPV = useMemo(() => {
+    const sorted = !sortField ? returns : [...returns].sort((a, b) => {
       let comparison = 0;
       
       if (sortField === 'month') {
@@ -65,6 +63,19 @@ export function MonthlyReturnsTable({
       }
       
       return sortDirection === 'asc' ? comparison : -comparison;
+    });
+
+    // Calcular valor presente para cada rendimento
+    let cumulativeInflation = 0;
+    return sorted.map((returnData, index) => {
+      const inflationRate = Number(returnData.inflation_rate) / 100;
+      cumulativeInflation = (1 + cumulativeInflation) * (1 + inflationRate) - 1;
+      const presentValue = Number(returnData.balance_after) / (1 + cumulativeInflation);
+      
+      return {
+        ...returnData,
+        presentValue,
+      };
     });
   }, [returns, sortField, sortDirection]);
   const formatCurrency = (value: number) => {
@@ -119,23 +130,24 @@ export function MonthlyReturnsTable({
                 </TableHead>
                 <TableHead className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('balance')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
-                    Saldo Final
+                    Saldo Aparente
                     {renderSortIcon('balance')}
                   </Button>
                 </TableHead>
+                <TableHead className="text-right">Saldo Valor Presente</TableHead>
                 <TableHead>Observações</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sortedReturns.length === 0 ? (
+              {sortedReturnsWithPV.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center text-muted-foreground">
                     Nenhum rendimento registrado
                   </TableCell>
                 </TableRow>
               ) : (
-                sortedReturns.map((returnData) => (
+                sortedReturnsWithPV.map((returnData) => (
                   <TableRow key={returnData.id}>
                     <TableCell className="font-medium">
                       {formatMonthLabel(returnData.month)}
@@ -167,6 +179,9 @@ export function MonthlyReturnsTable({
                     </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrency(Number(returnData.balance_after))}
+                    </TableCell>
+                    <TableCell className="text-right text-muted-foreground">
+                      {formatCurrency(returnData.presentValue)}
                     </TableCell>
                     <TableCell className="max-w-xs truncate">
                       {returnData.notes || "-"}
