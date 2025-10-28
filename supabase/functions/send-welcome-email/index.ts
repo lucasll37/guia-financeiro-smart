@@ -173,7 +173,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Enviar email via Resend
     const emailResponse = await resend.emails.send({
-      from: "Prospera <onboarding@resend.dev>",
+      from: "Prospera <noreply@prospera.lucaslima.ai>",
       to: [user.email],
       subject: "🎉 Bem-vindo ao Prospera! Confirme seu email",
       html,
