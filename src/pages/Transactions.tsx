@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2, MoveHorizontal } from "lucide-react";
 import { format, startOfMonth, endOfMonth, parse } from "date-fns";
@@ -26,7 +26,11 @@ import type { Database } from "@/integrations/supabase/types";
 
 type TransactionInsert = Database["public"]["Tables"]["transactions"]["Insert"];
 
-export default function Transactions() {
+interface TransactionsProps {
+  accountId?: string;
+}
+
+export default function Transactions({ accountId: propAccountId }: TransactionsProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const { accounts } = useAccounts();
@@ -37,7 +41,7 @@ export default function Transactions() {
   const currentMonthEnd = format(endOfMonth(new Date()), "yyyy-MM-dd");
 
   const [filters, setFilters] = useState({
-    accountId: "all",
+    accountId: propAccountId || "all",
     categoryId: "all",
     type: "all",
     startDate: currentMonthStart,
@@ -53,6 +57,13 @@ export default function Transactions() {
   const [bulkActionDialog, setBulkActionDialog] = useState<"category" | "account" | "delete" | null>(null);
   const [bulkCategoryId, setBulkCategoryId] = useState("");
   const [bulkAccountId, setBulkAccountId] = useState("");
+  
+  // Update filters when propAccountId changes
+  useEffect(() => {
+    if (propAccountId) {
+      setFilters(prev => ({ ...prev, accountId: propAccountId }));
+    }
+  }, [propAccountId]);
 
   const { transactions, isLoading, createTransaction, updateTransaction, deleteTransaction } =
     useTransactions(filters.accountId !== "all" ? filters.accountId : undefined);
@@ -228,6 +239,7 @@ export default function Transactions() {
         categories={categories || []}
         filters={filters}
         onFilterChange={setFilters}
+        accountId={propAccountId}
       />
 
       <div className="space-y-4">

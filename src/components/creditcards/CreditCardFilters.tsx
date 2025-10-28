@@ -24,9 +24,10 @@ interface CreditCardFiltersProps {
   onFilterChange: (filters: any) => void;
   expandAll: boolean;
   onToggleExpandAll: () => void;
+  accountId?: string;
 }
 
-export function CreditCardFilters({ accounts, filters, onFilterChange, expandAll, onToggleExpandAll }: CreditCardFiltersProps) {
+export function CreditCardFilters({ accounts, filters, onFilterChange, expandAll, onToggleExpandAll, accountId }: CreditCardFiltersProps) {
   // Generate month options (6 months before and after current month)
   const monthOptions = useMemo(() => {
     const options = [];
@@ -97,29 +98,31 @@ export function CreditCardFilters({ accounts, filters, onFilterChange, expandAll
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 border rounded-lg bg-card">
-        <div className="space-y-2">
-          <Label htmlFor="account-filter">Conta</Label>
-          <Select
-            value={filters.accountId}
-            onValueChange={(value) => onFilterChange({ ...filters, accountId: value })}
-          >
-            <SelectTrigger id="account-filter">
-              <SelectValue placeholder="Todas" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas</SelectItem>
-              {accounts.map((account) => (
-                <SelectItem key={account.id} value={account.id}>
-                  {account.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className={`grid gap-4 p-4 border rounded-lg bg-card ${accountId ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
+        {!accountId && (
+          <div className="space-y-2">
+            <Label htmlFor="account-filter">Conta</Label>
+            <Select
+              value={filters.accountId}
+              onValueChange={(value) => onFilterChange({ ...filters, accountId: value })}
+            >
+              <SelectTrigger id="account-filter">
+                <SelectValue placeholder="Todas" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                {accounts.map((account) => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {filters.viewMode === "monthly" ? (
-          <div className="space-y-2 md:col-span-3">
+          <div className={`space-y-2 ${accountId ? 'md:col-span-3' : 'md:col-span-3'}`}>
             <Label htmlFor="month-filter">Mês</Label>
             <Select
               value={filters.selectedMonth}

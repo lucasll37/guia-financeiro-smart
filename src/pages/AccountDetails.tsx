@@ -103,23 +103,23 @@ export default function AccountDetails() {
         </TabsContent>
 
         <TabsContent value="lancamentos">
-          <Transactions />
+          <Transactions accountId={accountId} />
         </TabsContent>
 
         <TabsContent value="categorias">
-          <Categories />
+          <Categories accountId={accountId} />
         </TabsContent>
 
         <TabsContent value="cartoes">
-          <CreditCards />
+          <CreditCards accountId={accountId} />
         </TabsContent>
 
         <TabsContent value="analise">
-          <Analysis />
+          <Analysis accountId={accountId} />
         </TabsContent>
 
         <TabsContent value="relatorios">
-          <Reports />
+          <Reports accountId={accountId} />
         </TabsContent>
       </Tabs>
     </div>
