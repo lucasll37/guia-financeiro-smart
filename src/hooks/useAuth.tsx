@@ -70,6 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error("Erro ao fazer logout:", error);
     }
     
+    // Redirecionar para Landing Page
     navigate("/");
   };
 
