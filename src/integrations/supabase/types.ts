@@ -612,6 +612,8 @@ export type Database = {
       }
       plan_limits: {
         Row: {
+          can_edit_categories: boolean
+          can_generate_reports: boolean
           created_at: string | null
           id: string
           max_accounts: number
@@ -620,6 +622,8 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          can_edit_categories?: boolean
+          can_generate_reports?: boolean
           created_at?: string | null
           id?: string
           max_accounts?: number
@@ -628,6 +632,8 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          can_edit_categories?: boolean
+          can_generate_reports?: boolean
           created_at?: string | null
           id?: string
           max_accounts?: number

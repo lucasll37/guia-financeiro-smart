@@ -69,5 +69,7 @@ export function usePlanLimits() {
     canCreateCreditCard,
     maxAccounts: currentPlanLimits?.max_accounts || 1,
     maxCreditCards: currentPlanLimits?.max_credit_cards || 1,
+    canEditCategories: currentPlanLimits?.can_edit_categories || false,
+    canGenerateReports: currentPlanLimits?.can_generate_reports || false,
   };
 }

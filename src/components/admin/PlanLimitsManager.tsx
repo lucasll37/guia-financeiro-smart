@@ -20,6 +20,8 @@ export function PlanLimitsManager() {
   const [editForm, setEditForm] = useState({
     max_accounts: 0,
     max_credit_cards: 0,
+    can_edit_categories: false,
+    can_generate_reports: false,
   });
 
   // Fetch plan limits
@@ -38,16 +40,20 @@ export function PlanLimitsManager() {
 
   // Update plan limits mutation
   const updatePlanLimit = useMutation({
-    mutationFn: async ({ plan, max_accounts, max_credit_cards }: {
+    mutationFn: async ({ plan, max_accounts, max_credit_cards, can_edit_categories, can_generate_reports }: {
       plan: SubscriptionPlan;
       max_accounts: number;
       max_credit_cards: number;
+      can_edit_categories: boolean;
+      can_generate_reports: boolean;
     }) => {
       const { error } = await supabase
         .from("plan_limits")
         .update({
           max_accounts,
           max_credit_cards,
+          can_edit_categories,
+          can_generate_reports,
         })
         .eq("plan", plan);
 
@@ -75,6 +81,8 @@ export function PlanLimitsManager() {
     setEditForm({
       max_accounts: limit.max_accounts,
       max_credit_cards: limit.max_credit_cards,
+      can_edit_categories: limit.can_edit_categories,
+      can_generate_reports: limit.can_generate_reports,
     });
   };
 
@@ -94,25 +102,25 @@ export function PlanLimitsManager() {
       plan: editingPlan,
       max_accounts: editForm.max_accounts,
       max_credit_cards: editForm.max_credit_cards,
+      can_edit_categories: editForm.can_edit_categories,
+      can_generate_reports: editForm.can_generate_reports,
     });
   };
 
   const getPlanLabel = (plan: SubscriptionPlan) => {
-    const labels: Record<SubscriptionPlan, string> = {
+    const labels: Partial<Record<SubscriptionPlan, string>> = {
       free: "Free",
-      plus: "Plus",
       pro: "Pro",
     };
-    return labels[plan];
+    return labels[plan] || plan;
   };
 
   const getPlanColor = (plan: SubscriptionPlan) => {
-    const colors: Record<SubscriptionPlan, "default" | "secondary" | "destructive"> = {
+    const colors: Partial<Record<SubscriptionPlan, "default" | "secondary" | "destructive">> = {
       free: "secondary",
-      plus: "default",
       pro: "destructive",
     };
-    return colors[plan];
+    return colors[plan] || "default";
   };
 
   if (isLoading) {
@@ -133,7 +141,7 @@ export function PlanLimitsManager() {
           <CardTitle>Limites de Planos</CardTitle>
         </div>
         <CardDescription>
-          Configure quantas contas e cartões de crédito cada plano pode ter
+          Configure limites e permissões para cada plano de assinatura
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -158,44 +166,86 @@ export function PlanLimitsManager() {
               </div>
 
               {editingPlan === limit.plan ? (
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor={`accounts-${limit.plan}`}>
-                      Máximo de Contas
-                    </Label>
-                    <Input
-                      id={`accounts-${limit.plan}`}
-                      type="number"
-                      min="1"
-                      value={editForm.max_accounts}
-                      onChange={(e) =>
-                        setEditForm({
-                          ...editForm,
-                          max_accounts: parseInt(e.target.value) || 1,
-                        })
-                      }
-                    />
+                <div className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor={`accounts-${limit.plan}`}>
+                        Máximo de Contas
+                      </Label>
+                      <Input
+                        id={`accounts-${limit.plan}`}
+                        type="number"
+                        min="1"
+                        value={editForm.max_accounts}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            max_accounts: parseInt(e.target.value) || 1,
+                          })
+                        }
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor={`cards-${limit.plan}`}>
+                        Máximo de Cartões de Crédito
+                      </Label>
+                      <Input
+                        id={`cards-${limit.plan}`}
+                        type="number"
+                        min="1"
+                        value={editForm.max_credit_cards}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            max_credit_cards: parseInt(e.target.value) || 1,
+                          })
+                        }
+                      />
+                    </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor={`cards-${limit.plan}`}>
-                      Máximo de Cartões de Crédito
-                    </Label>
-                    <Input
-                      id={`cards-${limit.plan}`}
-                      type="number"
-                      min="1"
-                      value={editForm.max_credit_cards}
-                      onChange={(e) =>
-                        setEditForm({
-                          ...editForm,
-                          max_credit_cards: parseInt(e.target.value) || 1,
-                        })
-                      }
-                    />
+                  <div className="space-y-3 pt-2 border-t">
+                    <Label className="text-base font-medium">Permissões</Label>
+                    
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`edit-categories-${limit.plan}`}
+                        checked={editForm.can_edit_categories}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            can_edit_categories: e.target.checked,
+                          })
+                        }
+                        className="h-4 w-4 rounded border-border"
+                      />
+                      <Label htmlFor={`edit-categories-${limit.plan}`} className="font-normal cursor-pointer">
+                        Pode editar categorias
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`generate-reports-${limit.plan}`}
+                        checked={editForm.can_generate_reports}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            can_generate_reports: e.target.checked,
+                          })
+                        }
+                        className="h-4 w-4 rounded border-border"
+                      />
+                      <Label htmlFor={`generate-reports-${limit.plan}`} className="font-normal cursor-pointer">
+                        Pode gerar relatórios
+                      </Label>
+                    </div>
                   </div>
 
-                  <div className="col-span-2 flex gap-2 justify-end">
+                  <div className="flex gap-2 justify-end pt-2">
                     <Button
                       variant="outline"
                       onClick={() => setEditingPlan(null)}
@@ -209,18 +259,32 @@ export function PlanLimitsManager() {
                   </div>
                 </div>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">Contas:</span>
-                    <span className="ml-2 font-medium">
-                      {limit.max_accounts === 999 ? "Ilimitado" : limit.max_accounts}
-                    </span>
+                <div className="space-y-3">
+                  <div className="grid gap-4 md:grid-cols-2 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Contas:</span>
+                      <span className="ml-2 font-medium">
+                        {limit.max_accounts === 999 ? "Ilimitado" : limit.max_accounts}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Cartões:</span>
+                      <span className="ml-2 font-medium">
+                        {limit.max_credit_cards === 999 ? "Ilimitado" : limit.max_credit_cards}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-muted-foreground">Cartões:</span>
-                    <span className="ml-2 font-medium">
-                      {limit.max_credit_cards === 999 ? "Ilimitado" : limit.max_credit_cards}
-                    </span>
+
+                  <div className="pt-2 border-t">
+                    <div className="text-sm font-medium mb-2">Permissões:</div>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant={limit.can_edit_categories ? "default" : "secondary"}>
+                        {limit.can_edit_categories ? "✓" : "✗"} Editar categorias
+                      </Badge>
+                      <Badge variant={limit.can_generate_reports ? "default" : "secondary"}>
+                        {limit.can_generate_reports ? "✓" : "✗"} Gerar relatórios
+                      </Badge>
+                    </div>
                   </div>
                 </div>
               )}
