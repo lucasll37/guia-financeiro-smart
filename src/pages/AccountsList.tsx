@@ -190,18 +190,20 @@ export default function AccountsList() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={(e) => handleEditAccount(e, account)}
-                          title="Editar"
+                          onClick={(e) => handleDeleteClick(e, account)}
+                          title="Excluir"
+                          aria-label="Excluir conta"
                         >
-                          <Edit className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={(e) => handleDeleteClick(e, account)}
-                          title="Excluir"
+                          onClick={(e) => handleEditAccount(e, account)}
+                          title="Editar"
+                          aria-label="Editar conta"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Edit className="h-4 w-4" />
                         </Button>
                       </>
                     )}
