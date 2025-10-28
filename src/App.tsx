@@ -10,6 +10,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageMeta } from "@/components/seo/PageMeta";
 import Auth from "./pages/Auth";
 import Home from "./pages/Home";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import AccountsList from "./pages/AccountsList";
 import AccountDetails from "./pages/AccountDetails";
@@ -54,6 +55,7 @@ const App = () => (
               <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route
                 path="/app"
                 element={

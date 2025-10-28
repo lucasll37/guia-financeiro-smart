@@ -57,14 +57,21 @@ export default function Auth() {
     };
   }, [setTheme]);
 
-  // Verificar se usuário veio de confirmação de email e fazer logout
+  // Verificar se usuário veio de confirmação de email ou reset de senha e fazer logout
   useEffect(() => {
     const confirmed = searchParams.get("confirmed");
+    const resetSuccess = searchParams.get("reset");
+    
     if (confirmed === "true" && user) {
       // Fazer logout imediatamente
       signOut();
       // Mostrar mensagem de sucesso
       setError("✅ Email confirmado com sucesso! Agora você pode fazer login.");
+      // Limpar o parâmetro da URL
+      navigate("/auth?tab=login", { replace: true });
+    } else if (resetSuccess === "success") {
+      // Mostrar mensagem de sucesso para reset de senha
+      setError("✅ Senha redefinida com sucesso! Faça login com sua nova senha.");
       // Limpar o parâmetro da URL
       navigate("/auth?tab=login", { replace: true });
     }

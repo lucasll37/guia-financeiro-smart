@@ -110,10 +110,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth`,
-    });
-    return { error };
+    try {
+      // Chamar a edge function para enviar email estilizado
+      const { error: functionError } = await supabase.functions.invoke('send-reset-password-email', {
+        body: { email }
+      });
+
+      if (functionError) {
+        throw functionError;
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      console.error("Erro ao enviar email de reset:", error);
+      return { error };
+    }
   };
 
   const resend = async (email: string) => {
