@@ -1,8 +1,9 @@
 import { useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine, Area, AreaChart, Label } from "recharts";
 import { format, addMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { TrendingUp, TrendingDown, DollarSign, Calendar } from "lucide-react";
 
 interface MonthlyReturn {
   month: string;
@@ -83,13 +84,56 @@ export function InvestmentCharts({
   const combinedData: ChartDataPoint[] = useMemo(() => {
     const data = [...realReturnsData];
     
-    if (returns && returns.length > 0 && projectionConfig.months > 0) {
+    // Se não houver histórico, começar com saldo inicial
+    if (returns.length === 0 && projectionConfig.months > 0) {
+      let balance = initialBalance;
+      let cumulativeContribution = 0;
+      let cumulativeContributionPV = 0;
+      let inflationAccumulator = 1;
+      
+      for (let i = 0; i <= projectionConfig.months; i++) {
+        const month = addMonths(lastReturnMonth, i);
+        
+        if (i === 0) {
+          // Ponto inicial
+          data.push({
+            month: format(month, "MMM/yy", { locale: ptBR }),
+            saldoAparente: balance,
+            saldoValorPresente: balance,
+            aportesAparente: 0,
+            aportesValorPresente: 0,
+            isProjection: true,
+          });
+          continue;
+        }
+        
+        const contribution = projectionConfig.monthlyContribution;
+        const returnAmount = (balance + contribution) * (projectionConfig.monthlyRate / 100);
+        balance = balance + contribution + returnAmount;
+        
+        cumulativeContribution += contribution;
+        const pvFactor = Math.pow(1 + projectionConfig.inflationRate / 100, -i);
+        cumulativeContributionPV += contribution * pvFactor;
+        
+        inflationAccumulator *= (1 + projectionConfig.inflationRate / 100);
+        const cumulativeInflation = inflationAccumulator - 1;
+        const balancePV = balance / (1 + cumulativeInflation);
+        
+        data.push({
+          month: format(month, "MMM/yy", { locale: ptBR }),
+          saldoAparente: balance,
+          saldoValorPresente: balancePV,
+          aportesAparente: cumulativeContribution,
+          aportesValorPresente: cumulativeContributionPV,
+          isProjection: true,
+        });
+      }
+    } else if (returns && returns.length > 0 && projectionConfig.months > 0) {
+      // Continuar com projeção após histórico
       let balance = currentBalance;
       let cumulativeContribution = data[data.length - 1]?.aportesAparente || 0;
       let cumulativeContributionPV = data[data.length - 1]?.aportesValorPresente || 0;
       
-      // Pegar a inflação acumulada do último mês histórico
-      const lastHistoricData = realReturnsData[realReturnsData.length - 1];
       let inflationAccumulator = 1;
       returns.forEach((r) => {
         inflationAccumulator *= (1 + Number(r.inflation_rate) / 100);
@@ -101,20 +145,13 @@ export function InvestmentCharts({
         const returnAmount = (balance + contribution) * (projectionConfig.monthlyRate / 100);
         balance = balance + contribution + returnAmount;
         
-        // Aportes acumulados aparentes
         cumulativeContribution += contribution;
-        
-        // Aporte futuro VP: desconto do valor futuro para o presente
-        // Fórmula: Aporte_VP = Aporte_Futuro / (1 + inflação)^n
         const monthsFromNow = i;
         const pvFactor = Math.pow(1 + projectionConfig.inflationRate / 100, -monthsFromNow);
         cumulativeContributionPV += contribution * pvFactor;
         
-        // Acumular inflação projetada ao acumulador histórico
         inflationAccumulator *= (1 + projectionConfig.inflationRate / 100);
         const cumulativeInflation = inflationAccumulator - 1;
-        
-        // Saldo VP = Saldo Aparente / (1 + Inflação Acumulada Total)
         const balancePV = balance / (1 + cumulativeInflation);
         
         data.push({
@@ -129,7 +166,7 @@ export function InvestmentCharts({
     }
     
     return data;
-  }, [realReturnsData, returns, currentBalance, lastReturnMonth, projectionConfig]);
+  }, [realReturnsData, returns, currentBalance, initialBalance, lastReturnMonth, projectionConfig]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -140,14 +177,83 @@ export function InvestmentCharts({
     }).format(value);
   };
 
+  const formatCurrencyFull = (value: number) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value);
+  };
+
   const dividerIndex = realReturnsData.length - 1;
 
-  if (returns.length === 0) {
+  // Calcular estatísticas importantes
+  const stats = useMemo(() => {
+    if (combinedData.length === 0) return null;
+    
+    const firstPoint = combinedData[0];
+    const lastPoint = combinedData[combinedData.length - 1];
+    const totalGrowth = lastPoint.saldoAparente - firstPoint.saldoAparente;
+    const growthPercentage = ((lastPoint.saldoAparente / firstPoint.saldoAparente) - 1) * 100;
+    const totalContributions = lastPoint.aportesAparente;
+    const returns = lastPoint.saldoAparente - firstPoint.saldoAparente - totalContributions;
+    
+    return {
+      initial: firstPoint.saldoAparente,
+      final: lastPoint.saldoAparente,
+      finalPV: lastPoint.saldoValorPresente,
+      growth: totalGrowth,
+      growthPercentage,
+      contributions: totalContributions,
+      returns,
+      months: combinedData.length - 1,
+    };
+  }, [combinedData]);
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (!active || !payload?.length) return null;
+
+    const data = payload[0].payload;
+    const isProjection = data.isProjection;
+
+    return (
+      <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg p-4 shadow-lg">
+        <div className="flex items-center gap-2 mb-2 pb-2 border-b">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <p className="font-semibold">{data.month}</p>
+          {isProjection && (
+            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">Projeção</span>
+          )}
+        </div>
+        <div className="space-y-1.5 text-sm">
+          <div className="flex justify-between gap-4">
+            <span className="text-muted-foreground">Saldo Aparente:</span>
+            <span className="font-semibold" style={{ color: 'hsl(var(--primary))' }}>
+              {formatCurrencyFull(data.saldoAparente)}
+            </span>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span className="text-muted-foreground">Saldo VP:</span>
+            <span className="font-semibold" style={{ color: 'hsl(var(--chart-2))' }}>
+              {formatCurrencyFull(data.saldoValorPresente)}
+            </span>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span className="text-muted-foreground">Aportes Acum.:</span>
+            <span className="font-semibold" style={{ color: 'hsl(var(--chart-3))' }}>
+              {formatCurrencyFull(data.aportesAparente)}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  if (combinedData.length === 0) {
     return (
       <Card>
         <CardContent className="py-8">
           <p className="text-center text-muted-foreground">
-            Registre rendimentos mensais para visualizar os gráficos
+            Configure a projeção para visualizar o gráfico
           </p>
         </CardContent>
       </Card>
@@ -156,106 +262,222 @@ export function InvestmentCharts({
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Evolução Histórica dos Investimentos</CardTitle>
+      {/* Stats Cards */}
+      {stats && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Saldo Final</p>
+                  <p className="text-2xl font-bold mt-1">{formatCurrency(stats.final)}</p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <DollarSign className="h-6 w-6 text-primary" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-chart-2/20 bg-gradient-to-br from-chart-2/5 to-chart-2/10">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Crescimento</p>
+                  <p className="text-2xl font-bold mt-1 text-chart-2">
+                    {stats.growthPercentage >= 0 ? '+' : ''}{stats.growthPercentage.toFixed(1)}%
+                  </p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-chart-2/10 flex items-center justify-center">
+                  {stats.growthPercentage >= 0 ? (
+                    <TrendingUp className="h-6 w-6 text-chart-2" />
+                  ) : (
+                    <TrendingDown className="h-6 w-6 text-destructive" />
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-chart-3/20 bg-gradient-to-br from-chart-3/5 to-chart-3/10">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Aportes Totais</p>
+                  <p className="text-2xl font-bold mt-1">{formatCurrency(stats.contributions)}</p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-chart-3/10 flex items-center justify-center">
+                  <TrendingUp className="h-6 w-6 text-chart-3" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-chart-4/20 bg-gradient-to-br from-chart-4/5 to-chart-4/10">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Rendimentos</p>
+                  <p className="text-2xl font-bold mt-1">{formatCurrency(stats.returns)}</p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-chart-4/10 flex items-center justify-center">
+                  <DollarSign className="h-6 w-6 text-chart-4" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Main Chart */}
+      <Card className="overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-primary/10 via-chart-2/10 to-chart-3/10 border-b">
+          <CardTitle className="text-2xl">Evolução do Investimento</CardTitle>
+          <CardDescription>
+            {returns.length > 0 ? 'Histórico real e projeção futura' : 'Projeção futura do investimento'}
+            {stats && ` • ${stats.months} meses`}
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={realReturnsData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis tickFormatter={formatCurrency} />
-              <Tooltip formatter={formatCurrency} />
-              <Legend />
-              <Line
+        <CardContent className="pt-6">
+          <ResponsiveContainer width="100%" height={500}>
+            <AreaChart data={combinedData}>
+              <defs>
+                <linearGradient id="colorSaldoAparente" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorSaldoVP" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.2}/>
+                  <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis 
+                dataKey="month" 
+                tick={{ fontSize: 12 }}
+                tickLine={{ stroke: 'hsl(var(--border))' }}
+              />
+              <YAxis 
+                tickFormatter={formatCurrency}
+                tick={{ fontSize: 12 }}
+                tickLine={{ stroke: 'hsl(var(--border))' }}
+              >
+                <Label 
+                  value="Valor (R$)" 
+                  angle={-90} 
+                  position="insideLeft"
+                  style={{ textAnchor: 'middle', fontSize: 14, fill: 'hsl(var(--muted-foreground))' }}
+                />
+              </YAxis>
+              <Tooltip content={<CustomTooltip />} />
+              <Legend 
+                wrapperStyle={{ paddingTop: '20px' }}
+                iconType="line"
+              />
+              {returns.length > 0 && dividerIndex >= 0 && (
+                <ReferenceLine
+                  x={combinedData[dividerIndex]?.month}
+                  stroke="hsl(var(--destructive))"
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  label={{ 
+                    value: "Início Projeção", 
+                    position: "top",
+                    fill: 'hsl(var(--destructive))',
+                    fontSize: 12,
+                    fontWeight: 600
+                  }}
+                />
+              )}
+              <Area
                 type="monotone"
                 dataKey="saldoAparente"
                 name="Saldo Aparente"
                 stroke="hsl(var(--primary))"
-                strokeWidth={2}
+                strokeWidth={3}
+                fill="url(#colorSaldoAparente)"
+                dot={false}
+                activeDot={{ r: 6, strokeWidth: 2 }}
               />
-              <Line
+              <Area
                 type="monotone"
                 dataKey="saldoValorPresente"
                 name="Saldo VP"
                 stroke="hsl(var(--chart-2))"
-                strokeWidth={2}
+                strokeWidth={3}
+                fill="url(#colorSaldoVP)"
+                dot={false}
+                activeDot={{ r: 6, strokeWidth: 2 }}
               />
               <Line
                 type="monotone"
                 dataKey="aportesAparente"
-                name="Aportes Acum. Aparente"
+                name="Aportes Acumulados"
                 stroke="hsl(var(--chart-3))"
                 strokeWidth={2}
                 strokeDasharray="5 5"
+                dot={false}
               />
-              <Line
-                type="monotone"
-                dataKey="aportesValorPresente"
-                name="Aportes Acum. VP"
-                stroke="hsl(var(--chart-4))"
-                strokeWidth={2}
-                strokeDasharray="5 5"
-              />
-            </LineChart>
+            </AreaChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Histórico + Projeção Futura</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={combinedData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis tickFormatter={formatCurrency} />
-              <Tooltip formatter={formatCurrency} />
-              <Legend />
-              <ReferenceLine
-                x={combinedData[dividerIndex]?.month}
-                stroke="hsl(var(--destructive))"
-                strokeWidth={2}
-                strokeDasharray="3 3"
-                label={{ value: "Início da Projeção", position: "top" }}
-              />
-              <Line
-                type="monotone"
-                dataKey="saldoAparente"
-                name="Saldo Aparente"
-                stroke="hsl(var(--primary))"
-                strokeWidth={2}
-              />
-              <Line
-                type="monotone"
-                dataKey="saldoValorPresente"
-                name="Saldo VP"
-                stroke="hsl(var(--chart-2))"
-                strokeWidth={2}
-              />
-              <Line
-                type="monotone"
-                dataKey="aportesAparente"
-                name="Aportes Acum. Aparente"
-                stroke="hsl(var(--chart-3))"
-                strokeWidth={2}
-                strokeDasharray="5 5"
-              />
-              <Line
-                type="monotone"
-                dataKey="aportesValorPresente"
-                name="Aportes Acum. VP"
-                stroke="hsl(var(--chart-4))"
-                strokeWidth={2}
-                strokeDasharray="5 5"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+      {/* Historical Data Chart (only if there's history) */}
+      {realReturnsData.length > 0 && (
+        <Card className="overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-chart-4/10 to-chart-5/10 border-b">
+            <CardTitle>Dados Históricos Detalhados</CardTitle>
+            <CardDescription>Evolução real registrada mês a mês</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={realReturnsData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis 
+                  dataKey="month"
+                  tick={{ fontSize: 12 }}
+                  tickLine={{ stroke: 'hsl(var(--border))' }}
+                />
+                <YAxis 
+                  tickFormatter={formatCurrency}
+                  tick={{ fontSize: 12 }}
+                  tickLine={{ stroke: 'hsl(var(--border))' }}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend iconType="line" />
+                <Line
+                  type="monotone"
+                  dataKey="saldoAparente"
+                  name="Saldo Aparente"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  dot={{ r: 4, strokeWidth: 2 }}
+                  activeDot={{ r: 6, strokeWidth: 2 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="saldoValorPresente"
+                  name="Saldo VP"
+                  stroke="hsl(var(--chart-2))"
+                  strokeWidth={2}
+                  dot={{ r: 4, strokeWidth: 2 }}
+                  activeDot={{ r: 6, strokeWidth: 2 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="aportesAparente"
+                  name="Aportes Acum."
+                  stroke="hsl(var(--chart-3))"
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
