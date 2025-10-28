@@ -48,12 +48,17 @@ export function InvestmentCharts({
   const realReturnsData: ChartDataPoint[] = useMemo(() => {
     if (!returns || returns.length === 0) return [];
     
+    // Ordenar por mês (do mais antigo para o mais recente)
+    const sortedReturns = [...returns].sort((a, b) => 
+      new Date(a.month).getTime() - new Date(b.month).getTime()
+    );
+    
     // Acumular inflação multiplicativamente: (1 + i1) × (1 + i2) × ... - 1
     let inflationAccumulator = 1;
     let cumulativeContribution = 0;
     let cumulativeContributionPV = 0;
     
-    return returns.map((r) => {
+    return sortedReturns.map((r) => {
       const monthDate = new Date(r.month);
       const balance = Number(r.balance_after);
       const contribution = Number(r.contribution);
