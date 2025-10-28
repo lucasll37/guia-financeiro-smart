@@ -40,9 +40,9 @@ export function CategoryStackedBarChart({
     }).format(value);
   };
 
-  // Preparar dados detalhados com subcategorias
-  const detailedData = useMemo(() => {
-    if (!categories || !transactions || !forecasts) return { forecasted: [], actual: [] };
+  // Preparar dados combinados (previsto e realizado lado a lado)
+  const chartData = useMemo(() => {
+    if (!categories || !transactions || !forecasts) return [];
 
     const periodForecasts = forecasts.filter((f) => f.period_start === periodStart);
     const periodTransactions = transactions.filter((t) => {
@@ -52,9 +52,7 @@ export function CategoryStackedBarChart({
       return tDate >= start && tDate <= end;
     });
 
-    // Mapear dados por categoria pai e suas subcategorias
-    const forecastedMap: Record<string, any> = {};
-    const actualMap: Record<string, any> = {};
+    const result: any[] = [];
 
     parentCategories.forEach(parent => {
       const parentCat = categories.find(c => c.name === parent.name && !c.parent_id);
@@ -62,90 +60,58 @@ export function CategoryStackedBarChart({
 
       const children = categories.filter(c => c.parent_id === parentCat.id);
       
-      // Dados previsto
-      const forecastedItem: any = {
-        categoria: parent.name,
-        total: 0,
-        color: parent.color,
-      };
+      // Calcular totais previsto e realizado para esta categoria
+      let forecastedTotal = 0;
+      let actualTotal = 0;
 
-      // Adicionar previsões das subcategorias
       children.forEach(child => {
         const forecast = periodForecasts.find(f => f.category_id === child.id);
         if (forecast) {
-          forecastedItem[child.name] = Number(forecast.forecasted_amount);
-          forecastedItem.total += Number(forecast.forecasted_amount);
+          forecastedTotal += Number(forecast.forecasted_amount);
         }
-      });
 
-      if (forecastedItem.total > 0) {
-        forecastedMap[parent.name] = forecastedItem;
-      }
-
-      // Dados realizado
-      const actualItem: any = {
-        categoria: parent.name,
-        total: 0,
-        color: parent.color,
-      };
-
-      // Adicionar transações das subcategorias
-      children.forEach(child => {
         const childTransactions = periodTransactions.filter(t => t.category_id === child.id);
-        const childTotal = childTransactions.reduce((sum, t) => sum + Math.abs(Number(t.amount)), 0);
-        if (childTotal > 0) {
-          actualItem[child.name] = childTotal;
-          actualItem.total += childTotal;
-        }
+        actualTotal += childTransactions.reduce((sum, t) => sum + Math.abs(Number(t.amount)), 0);
       });
 
-      if (actualItem.total > 0) {
-        actualMap[parent.name] = actualItem;
+      if (forecastedTotal > 0 || actualTotal > 0) {
+        result.push({
+          categoria: parent.name,
+          Previsto: forecastedTotal,
+          Realizado: actualTotal,
+          color: parent.color,
+        });
       }
     });
 
-    return {
-      forecasted: Object.values(forecastedMap),
-      actual: Object.values(actualMap),
-    };
+    return result.sort((a, b) => (b.Previsto + b.Realizado) - (a.Previsto + a.Realizado));
   }, [categories, transactions, forecasts, periodStart, periodEnd, parentCategories]);
-
-  // Obter todas as subcategorias únicas para as legendas
-  const allSubcategories = useMemo(() => {
-    const subs = new Set<string>();
-    [...detailedData.forecasted, ...detailedData.actual].forEach(item => {
-      Object.keys(item).forEach(key => {
-        if (key !== 'categoria' && key !== 'total' && key !== 'color') {
-          subs.add(key);
-        }
-      });
-    });
-    return Array.from(subs);
-  }, [detailedData]);
-
-  // Gerar cores para subcategorias
-  const getSubcategoryColor = (subcategoryName: string, index: number) => {
-    const hues = [210, 240, 270, 180, 150, 120, 90, 60, 30, 0];
-    const hue = hues[index % hues.length];
-    return `hsl(${hue}, 70%, 50%)`;
-  };
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
+      const previsto = data.Previsto || 0;
+      const realizado = data.Realizado || 0;
+      const diferenca = realizado - previsto;
+      
       return (
-        <div className="bg-background border border-border p-3 rounded-lg shadow-lg max-w-xs">
+        <div className="bg-background border border-border p-3 rounded-lg shadow-lg">
           <p className="font-semibold mb-2">{data.categoria}</p>
-          <p className="text-sm font-bold mb-1">
-            Total: {formatCurrency(data.total)}
-          </p>
           <div className="space-y-1">
-            {payload.map((entry: any, index: number) => (
-              <p key={index} className="text-xs flex justify-between gap-2">
-                <span style={{ color: entry.fill }}>{entry.name}:</span>
-                <span className="font-medium">{formatCurrency(entry.value)}</span>
+            <p className="text-sm flex justify-between gap-4">
+              <span className="text-primary">Previsto:</span>
+              <span className="font-medium">{formatCurrency(previsto)}</span>
+            </p>
+            <p className="text-sm flex justify-between gap-4">
+              <span style={{ color: 'hsl(var(--chart-2))' }}>Realizado:</span>
+              <span className="font-medium">{formatCurrency(realizado)}</span>
+            </p>
+            <div className="border-t pt-1 mt-1">
+              <p className={`text-sm flex justify-between gap-4 ${diferenca >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                <span>Diferença:</span>
+                <span className="font-bold">{formatCurrency(Math.abs(diferenca))}</span>
               </p>
-            ))}
+            </div>
           </div>
         </div>
       );
@@ -153,77 +119,54 @@ export function CategoryStackedBarChart({
     return null;
   };
 
-  if (detailedData.forecasted.length === 0 && detailedData.actual.length === 0) {
-    return null;
+  if (chartData.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Composição por Categoria</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-12 text-muted-foreground">
+            Nenhum dado disponível
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Gráfico Previsto com Subcategorias */}
-      {detailedData.forecasted.length > 0 && (
-        <Card className="animate-fade-in">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-primary" />
-              Composição Prevista por Subcategoria
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={detailedData.forecasted} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-                <XAxis type="number" tickFormatter={(value) => formatCurrency(value)} />
-                <YAxis type="category" dataKey="categoria" width={100} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ fontSize: '12px' }} />
-                {allSubcategories.map((subcategory, index) => (
-                  <Bar 
-                    key={subcategory} 
-                    dataKey={subcategory} 
-                    stackId="a" 
-                    fill={getSubcategoryColor(subcategory, index)}
-                    animationBegin={index * 50}
-                    animationDuration={800}
-                  />
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Gráfico Realizado com Subcategorias */}
-      {detailedData.actual.length > 0 && (
-        <Card className="animate-fade-in" style={{ animationDelay: "100ms" }}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-chart-2" />
-              Composição Realizada por Subcategoria
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={detailedData.actual} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-                <XAxis type="number" tickFormatter={(value) => formatCurrency(value)} />
-                <YAxis type="category" dataKey="categoria" width={100} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ fontSize: '12px' }} />
-                {allSubcategories.map((subcategory, index) => (
-                  <Bar 
-                    key={subcategory} 
-                    dataKey={subcategory} 
-                    stackId="a" 
-                    fill={getSubcategoryColor(subcategory, index)}
-                    animationBegin={index * 50 + 100}
-                    animationDuration={800}
-                  />
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+    <Card className="animate-fade-in">
+      <CardHeader>
+        <CardTitle>Composição: Previsto vs Realizado</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Comparação dos valores totais por categoria (soma de todas as subcategorias)
+        </p>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={Math.max(400, chartData.length * 60)}>
+          <BarChart data={chartData} layout="vertical" margin={{ left: 20, right: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
+            <XAxis type="number" tickFormatter={(value) => formatCurrency(value)} />
+            <YAxis type="category" dataKey="categoria" width={120} />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend />
+            <Bar 
+              dataKey="Previsto" 
+              fill="hsl(var(--primary))"
+              radius={[0, 4, 4, 0]}
+              animationBegin={0}
+              animationDuration={800}
+            />
+            <Bar 
+              dataKey="Realizado" 
+              fill="hsl(var(--chart-2))"
+              radius={[0, 4, 4, 0]}
+              animationBegin={100}
+              animationDuration={800}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
   );
 }
