@@ -33,15 +33,14 @@ export function ProjectionTable({ currentBalance, initialMonth }: ProjectionTabl
       const month = addMonths(initialMonth, i);
       const contribution = monthlyContribution;
       const returns = (balance + contribution) * (monthlyRate / 100);
-      const inflation = balance * (inflationRate / 100);
       balance = balance + contribution + returns;
-      const realValue = balance - (balance * inflationRate / 100 * i);
+      const inflationImpact = balance * (inflationRate / 100);
+      const realValue = balance - inflationImpact;
 
       data.push({
         month,
         contribution,
         returns,
-        inflation: inflation * i,
         balance,
         realValue,
       });
@@ -65,11 +64,22 @@ export function ProjectionTable({ currentBalance, initialMonth }: ProjectionTabl
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="months">Prazo (meses): {months}</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="months">Prazo (meses)</Label>
+              <Input
+                id="months-input"
+                type="number"
+                min={1}
+                max={360}
+                value={months}
+                onChange={(e) => setMonths(Math.min(360, Math.max(1, parseInt(e.target.value) || 1)))}
+                className="w-20 h-8 text-center"
+              />
+            </div>
             <Slider
               id="months"
               min={1}
-              max={120}
+              max={360}
               step={1}
               value={[months]}
               onValueChange={(value) => setMonths(value[0])}
