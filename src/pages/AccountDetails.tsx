@@ -2,11 +2,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, LayoutDashboard, Receipt, FolderTree, CreditCard, TrendingUp, PieChart, FileText } from "lucide-react";
+import { AccountDashboard } from "@/components/dashboard/AccountDashboard";
 import { useAccounts } from "@/hooks/useAccounts";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Import existing page components (we'll refactor these into tab components)
-import Dashboard from "./Dashboard";
 import Transactions from "./Transactions";
 import Categories from "./Categories";
 import CreditCards from "./CreditCards";
@@ -95,7 +95,7 @@ export default function AccountDetails() {
         </TabsList>
 
         <TabsContent value="visao-geral">
-          <Dashboard />
+          <AccountDashboard accountId={accountId!} />
         </TabsContent>
 
         <TabsContent value="lancamentos">
