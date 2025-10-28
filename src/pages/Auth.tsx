@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { t } from "@/lib/i18n";
+import { useTheme } from "next-themes";
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
@@ -21,6 +22,26 @@ export default function Auth() {
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") === "signup" ? "signup" : "login");
   const { signIn, signUp, resetPassword, user } = useAuth();
   const navigate = useNavigate();
+  const { setTheme } = useTheme();
+
+  // Forçar tema dark na tela de Auth
+  useEffect(() => {
+    const root = document.documentElement;
+    const hadDarkClass = root.classList.contains("dark");
+    const prevTheme = localStorage.getItem("theme");
+
+    root.classList.add("dark");
+    setTheme("dark");
+
+    return () => {
+      if (prevTheme) {
+        setTheme(prevTheme);
+      }
+      if (!hadDarkClass) {
+        root.classList.remove("dark");
+      }
+    };
+  }, [setTheme]);
 
   useEffect(() => {
     if (user) {
