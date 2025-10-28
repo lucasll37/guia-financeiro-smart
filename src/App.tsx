@@ -15,7 +15,8 @@ import Dashboard from "./pages/Dashboard";
 import AccountsList from "./pages/AccountsList";
 import AccountDetails from "./pages/AccountDetails";
 import Goals from "./pages/Goals";
-import Investments from "./pages/Investments";
+import InvestmentsList from "./pages/InvestmentsList";
+import InvestmentDetails from "./pages/InvestmentDetails";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Conta from "./pages/Conta";
@@ -69,7 +70,8 @@ const App = () => (
                 <Route path="contas" element={<AccountsList />} />
                 <Route path="contas/:accountId" element={<AccountDetails />} />
                 <Route path="metas" element={<Goals />} />
-                <Route path="investimentos" element={<Investments />} />
+                <Route path="investimentos" element={<InvestmentsList />} />
+                <Route path="investimentos/:investmentId" element={<InvestmentDetails />} />
                 <Route path="configuracoes" element={<Settings />} />
                 <Route path="conta" element={<Conta />} />
                 <Route path="planos" element={<Planos />} />
