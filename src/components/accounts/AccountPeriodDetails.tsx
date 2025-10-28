@@ -157,7 +157,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
     };
   }, [periodTransactions, forecasts, periodStart, categories]);
 
-  const balance = totalIncome - totalExpense;
+  const balance = previousBalance + totalIncome - totalExpense;
 
   const handlePreviousPeriod = () => {
     setCurrentDate(prev => addMonths(prev, -1));
@@ -216,41 +216,6 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
       </div>
 
       <div className="space-y-4">
-        {/* Saldo Remanescente */}
-        <div className="border rounded-lg overflow-hidden">
-          <div className="bg-blue-50 dark:bg-blue-950/20 px-4 py-2 border-b">
-            <h3 className="font-semibold text-blue-700 dark:text-blue-400">Saldo Remanescente</h3>
-          </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Descrição</TableHead>
-                <TableHead className="text-right w-[140px]">Previsto</TableHead>
-                <TableHead className="text-right w-[140px]">Realizado</TableHead>
-                <TableHead className="text-right w-[140px]">Diferença</TableHead>
-                <TableHead className="text-right w-[120px]">% Variação</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell className="w-[300px]">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 flex-shrink-0" />
-                    <div className="w-3 h-3 rounded-full flex-shrink-0 bg-blue-500" />
-                    <span className="truncate">Saldo do período anterior</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-right w-[140px]">-</TableCell>
-                <TableCell className="text-right font-medium w-[140px]">
-                  {formatCurrency(previousBalance)}
-                </TableCell>
-                <TableCell className="text-right w-[140px]">-</TableCell>
-                <TableCell className="text-right w-[120px]">-</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </div>
-
         {/* Receitas */}
         {Object.keys(incomeTotals).length > 0 && (
           <div className="border rounded-lg overflow-hidden">
@@ -486,6 +451,41 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
             </Table>
           </div>
         )}
+
+        {/* Saldo Remanescente */}
+        <div className="border rounded-lg overflow-hidden">
+          <div className="bg-blue-50 dark:bg-blue-950/20 px-4 py-2 border-b">
+            <h3 className="font-semibold text-blue-700 dark:text-blue-400">Saldo Remanescente</h3>
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[300px]">Descrição</TableHead>
+                <TableHead className="text-right w-[140px]">Previsto</TableHead>
+                <TableHead className="text-right w-[140px]">Realizado</TableHead>
+                <TableHead className="text-right w-[140px]">Diferença</TableHead>
+                <TableHead className="text-right w-[120px]">% Variação</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell className="w-[300px]">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 flex-shrink-0" />
+                    <div className="w-3 h-3 rounded-full flex-shrink-0 bg-blue-500" />
+                    <span className="truncate">Saldo do período anterior</span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-right w-[140px]">-</TableCell>
+                <TableCell className="text-right font-medium w-[140px]">
+                  {formatCurrency(previousBalance)}
+                </TableCell>
+                <TableCell className="text-right w-[140px]">-</TableCell>
+                <TableCell className="text-right w-[120px]">-</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
 
         {/* Saldo */}
         <div className="border rounded-lg bg-muted/50">
