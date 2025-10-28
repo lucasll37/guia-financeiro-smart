@@ -72,10 +72,9 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "onboarding@resend.dev",
+        from: "Prospera <noreply@prospera.lucaslima.ai>",
         to: [email],
         subject: "⚠️ Confirmação de Exclusão de Conta",
-        reply_to: email,
         html: `
           <!DOCTYPE html>
           <html>
