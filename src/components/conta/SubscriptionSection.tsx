@@ -58,9 +58,6 @@ export function SubscriptionSection() {
       "Tema claro ou escuro",
       "Contas compartilhadas com repartição proporcional",
       "Geração de relatórios",
-      "Análises avançadas",
-      "Previsões financeiras",
-      "Suporte prioritário",
     ],
   };
 
