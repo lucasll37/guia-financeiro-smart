@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useMemo } from "react";
 import { ResponsiveTable } from "@/components/ui/responsive-table";
 import {
+  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -37,29 +38,92 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
     return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 ml-1" /> : <ArrowDown className="h-4 w-4 ml-1" />;
   };
 
-  const sortedForecasts = useMemo(() => {
-    if (!sortField) return forecasts;
+  // Separar e ordenar previsões por tipo
+  const { incomeForecasts, expenseForecasts, totalIncome, totalExpense } = useMemo(() => {
+    const income = forecasts.filter((f) => f.categories?.type === "receita");
+    const expense = forecasts.filter((f) => f.categories?.type === "despesa");
     
-    return [...forecasts].sort((a, b) => {
-      let comparison = 0;
+    const sortForecasts = (fcs: any[]) => {
+      if (!sortField) return fcs;
       
-      if (sortField === 'account') {
-        const aName = (a.accounts as any)?.name || '';
-        const bName = (b.accounts as any)?.name || '';
-        comparison = aName.localeCompare(bName);
-      } else if (sortField === 'category') {
-        const aName = (a.categories as any)?.name || '';
-        const bName = (b.categories as any)?.name || '';
-        comparison = aName.localeCompare(bName);
-      } else if (sortField === 'amount') {
-        comparison = Number(a.forecasted_amount) - Number(b.forecasted_amount);
-      }
-      
-      return sortDirection === 'asc' ? comparison : -comparison;
-    });
+      return [...fcs].sort((a, b) => {
+        let comparison = 0;
+        
+        if (sortField === 'account') {
+          const aName = (a.accounts as any)?.name || '';
+          const bName = (b.accounts as any)?.name || '';
+          comparison = aName.localeCompare(bName);
+        } else if (sortField === 'category') {
+          const aName = (a.categories as any)?.name || '';
+          const bName = (b.categories as any)?.name || '';
+          comparison = aName.localeCompare(bName);
+        } else if (sortField === 'amount') {
+          comparison = Number(a.forecasted_amount) - Number(b.forecasted_amount);
+        }
+        
+        return sortDirection === 'asc' ? comparison : -comparison;
+      });
+    };
+    
+    const incomeTotal = income.reduce((sum, f) => sum + Number(f.forecasted_amount), 0);
+    const expenseTotal = expense.reduce((sum, f) => sum + Number(f.forecasted_amount), 0);
+    
+    return {
+      incomeForecasts: sortForecasts(income),
+      expenseForecasts: sortForecasts(expense),
+      totalIncome: incomeTotal,
+      totalExpense: expenseTotal,
+    };
   }, [forecasts, sortField, sortDirection]);
 
-  if (sortedForecasts.length === 0) {
+  const balance = totalIncome - totalExpense;
+
+  const renderForecastRow = (forecast: any) => {
+    return (
+      <TableRow key={forecast.id}>
+        {showAccountName && (
+          <TableCell className="font-medium">
+            {(forecast.accounts as any)?.name || "Sem conta"}
+          </TableCell>
+        )}
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: (forecast.categories as any)?.color || "#6366f1" }}
+            />
+            <span>{(forecast.categories as any)?.name || "Sem categoria"}</span>
+          </div>
+        </TableCell>
+        <TableCell className="text-right font-medium">
+          {formatCurrency(Number(forecast.forecasted_amount))}
+        </TableCell>
+        <TableCell className="text-muted-foreground">
+          {forecast.notes || "-"}
+        </TableCell>
+        <TableCell className="text-right">
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onEdit(forecast)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onDelete(forecast.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </TableCell>
+      </TableRow>
+    );
+  };
+
+  if (forecasts.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground border rounded-lg">
         Nenhuma previsão cadastrada para este mês
@@ -68,77 +132,118 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
   }
 
   return (
-    <ResponsiveTable>
-      <TableHeader>
-        <TableRow>
-          {showAccountName && (
-            <TableHead>
-              <Button variant="ghost" size="sm" onClick={() => handleSort('account')} className="flex items-center gap-1 p-0 h-auto font-medium">
-                Conta
-                {renderSortIcon('account')}
-              </Button>
-            </TableHead>
-          )}
-          <TableHead>
-            <Button variant="ghost" size="sm" onClick={() => handleSort('category')} className="flex items-center gap-1 p-0 h-auto font-medium">
-              Categoria
-              {renderSortIcon('category')}
-            </Button>
-          </TableHead>
-          <TableHead className="text-right">
-            <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
-              Valor Previsto
-              {renderSortIcon('amount')}
-            </Button>
-          </TableHead>
-          <TableHead>Observações</TableHead>
-          <TableHead className="text-right">Ações</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {sortedForecasts.map((forecast) => (
-          <TableRow key={forecast.id}>
-            {showAccountName && (
-              <TableCell className="font-medium">
-                {(forecast.accounts as any)?.name || "Sem conta"}
-              </TableCell>
-            )}
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: (forecast.categories as any)?.color || "#6366f1" }}
-                />
-                <span>{(forecast.categories as any)?.name || "Sem categoria"}</span>
-              </div>
-            </TableCell>
-            <TableCell className="text-right font-medium">
-              {formatCurrency(Number(forecast.forecasted_amount))}
-            </TableCell>
-            <TableCell className="text-muted-foreground">
-              {forecast.notes || "-"}
-            </TableCell>
-            <TableCell className="text-right">
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onEdit(forecast)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onDelete(forecast.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </ResponsiveTable>
+    <div className="space-y-4">
+      {/* Receitas */}
+      {incomeForecasts.length > 0 && (
+        <div className="border rounded-lg">
+          <div className="bg-green-50 dark:bg-green-950/20 px-4 py-2 border-b">
+            <h3 className="font-semibold text-green-700 dark:text-green-400">Receitas Previstas</h3>
+          </div>
+          <ResponsiveTable>
+            <TableHeader>
+              <TableRow>
+                {showAccountName && (
+                  <TableHead>
+                    <Button variant="ghost" size="sm" onClick={() => handleSort('account')} className="flex items-center gap-1 p-0 h-auto font-medium">
+                      Conta
+                      {renderSortIcon('account')}
+                    </Button>
+                  </TableHead>
+                )}
+                <TableHead>
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('category')} className="flex items-center gap-1 p-0 h-auto font-medium">
+                    Categoria
+                    {renderSortIcon('category')}
+                  </Button>
+                </TableHead>
+                <TableHead className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
+                    Valor Previsto
+                    {renderSortIcon('amount')}
+                  </Button>
+                </TableHead>
+                <TableHead>Observações</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {incomeForecasts.map(renderForecastRow)}
+              <TableRow className="bg-green-50/50 dark:bg-green-950/10 font-semibold">
+                <TableCell colSpan={showAccountName ? 2 : 1} className="text-right">
+                  Total de Receitas:
+                </TableCell>
+                <TableCell className="text-right text-green-600">
+                  + {formatCurrency(totalIncome)}
+                </TableCell>
+                <TableCell colSpan={2} />
+              </TableRow>
+            </TableBody>
+          </ResponsiveTable>
+        </div>
+      )}
+
+      {/* Despesas */}
+      {expenseForecasts.length > 0 && (
+        <div className="border rounded-lg">
+          <div className="bg-red-50 dark:bg-red-950/20 px-4 py-2 border-b">
+            <h3 className="font-semibold text-red-700 dark:text-red-400">Despesas Previstas</h3>
+          </div>
+          <ResponsiveTable>
+            <TableHeader>
+              <TableRow>
+                {showAccountName && (
+                  <TableHead>
+                    <Button variant="ghost" size="sm" onClick={() => handleSort('account')} className="flex items-center gap-1 p-0 h-auto font-medium">
+                      Conta
+                      {renderSortIcon('account')}
+                    </Button>
+                  </TableHead>
+                )}
+                <TableHead>
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('category')} className="flex items-center gap-1 p-0 h-auto font-medium">
+                    Categoria
+                    {renderSortIcon('category')}
+                  </Button>
+                </TableHead>
+                <TableHead className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
+                    Valor Previsto
+                    {renderSortIcon('amount')}
+                  </Button>
+                </TableHead>
+                <TableHead>Observações</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {expenseForecasts.map(renderForecastRow)}
+              <TableRow className="bg-red-50/50 dark:bg-red-950/10 font-semibold">
+                <TableCell colSpan={showAccountName ? 2 : 1} className="text-right">
+                  Total de Despesas:
+                </TableCell>
+                <TableCell className="text-right text-destructive">
+                  - {formatCurrency(totalExpense)}
+                </TableCell>
+                <TableCell colSpan={2} />
+              </TableRow>
+            </TableBody>
+          </ResponsiveTable>
+        </div>
+      )}
+
+      {/* Saldo */}
+      {(incomeForecasts.length > 0 || expenseForecasts.length > 0) && (
+        <div className="border rounded-lg bg-muted/50">
+          <div className="px-4 py-3">
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-semibold">Saldo Previsto:</span>
+              <span className={`text-xl font-bold ${balance >= 0 ? "text-green-600" : "text-destructive"}`}>
+                {formatCurrency(balance)}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
