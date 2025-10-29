@@ -468,29 +468,26 @@ export function SeedCategoriesManager() {
                 <div className="ml-6 border-l-2 pl-4">
                   {addingChild === parent.id ? (
                     <div className="space-y-4">
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label>Nome</Label>
-                          <Input
-                            value={editForm.name}
-                            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                            placeholder="Nome da subcategoria"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Cor</Label>
-                          <Input
-                            type="color"
-                            value={editForm.color}
-                            onChange={(e) => setEditForm({ ...editForm, color: e.target.value })}
-                          />
-                        </div>
+                      <div className="space-y-2">
+                        <Label>Nome</Label>
+                        <Input
+                          value={editForm.name}
+                          onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                          placeholder="Nome da subcategoria"
+                        />
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-4 h-4 rounded"
+                            style={{ backgroundColor: parent.color }}
+                          />
+                          <span className="text-muted-foreground">Cor herdada</span>
+                        </div>
                         <Badge variant={parent.type === "receita" ? "default" : "secondary"}>
-                          Tipo: {parent.type === "receita" ? "Receita" : "Despesa"}
+                          {parent.type === "receita" ? "Receita" : "Despesa"}
                         </Badge>
-                        <span>(herdado da categoria pai)</span>
+                        <span className="text-muted-foreground text-xs">(herdados da categoria pai)</span>
                       </div>
                       <div className="flex gap-2">
                         <Button onClick={() => handleAddChild(parent.id)} size="sm">
