@@ -312,6 +312,8 @@ const Home = () => {
           <Carousel
             plugins={[plugin.current]}
             className="w-full"
+            onMouseEnter={() => plugin.current.stop()}
+            onMouseLeave={() => plugin.current.play()}
           >
             <CarouselContent>
               {testimonials.map((testimonial, index) => (
