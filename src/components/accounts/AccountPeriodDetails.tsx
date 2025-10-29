@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { format, addMonths, startOfMonth, endOfMonth, addDays } from "date-fns";
+import { format, addMonths, startOfMonth, endOfMonth, addDays, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -328,8 +328,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                                  {data.transactions.map((t) => {
                                    // Para transações de cartão, usar payment_month; caso contrário, usar date
                                    const displayDate = t.credit_card_id && t.payment_month 
-                                     ? new Date(t.payment_month as string)
-                                     : new Date(t.date);
+                                     ? parseISO(t.payment_month as string)
+                                     : parseISO(t.date);
                                    
                                    return (
                                      <div 
@@ -472,8 +472,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                                  {data.transactions.map((t) => {
                                    // Para transações de cartão, usar payment_month; caso contrário, usar date
                                    const displayDate = t.credit_card_id && t.payment_month 
-                                     ? new Date(t.payment_month as string)
-                                     : new Date(t.date);
+                                     ? parseISO(t.payment_month as string)
+                                     : parseISO(t.date);
                                    
                                    return (
                                      <div 
