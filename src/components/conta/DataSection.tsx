@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Download, Trash2, Loader2, AlertTriangle } from "lucide-react";
+import { Download, Trash2, Loader2, AlertTriangle, TrendingUp } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +22,7 @@ export function DataSection() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [downloading, setDownloading] = useState(false);
+  const [downloadingInvestments, setDownloadingInvestments] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -116,6 +117,111 @@ export function DataSection() {
     }
   };
 
+  const handleDownloadInvestments = async () => {
+    if (!user?.id) return;
+    
+    setDownloadingInvestments(true);
+    try {
+      // Buscar todos os investimentos do usuário
+      const { data: investments, error: investmentsError } = await supabase
+        .from("investment_assets")
+        .select("*")
+        .eq("owner_id", user.id)
+        .order("name");
+
+      if (investmentsError) throw investmentsError;
+
+      if (!investments || investments.length === 0) {
+        toast({
+          title: "Nenhum investimento encontrado",
+          description: "Você ainda não possui investimentos para exportar",
+        });
+        return;
+      }
+
+      // Criar workbook
+      const wb = XLSX.utils.book_new();
+
+      // Para cada investimento, criar uma guia
+      for (const investment of investments) {
+        // Buscar retornos mensais deste investimento
+        const { data: returns, error: returnsError } = await supabase
+          .from("investment_monthly_returns")
+          .select("*")
+          .eq("investment_id", investment.id)
+          .order("month", { ascending: false });
+
+        if (returnsError) console.error("Erro ao buscar retornos:", returnsError);
+
+        // Dados do investimento
+        const investmentData = [{
+          "Nome": investment.name,
+          "Tipo": investment.type,
+          "Saldo Inicial": Number(investment.balance),
+          "Taxa Mensal (%)": Number(investment.monthly_rate),
+          "Taxa (%)": Number(investment.fees),
+          "Mês Inicial": investment.initial_month ? format(new Date(investment.initial_month), "MM/yyyy") : "",
+          "Criado em": format(new Date(investment.created_at), "dd/MM/yyyy HH:mm"),
+        }];
+
+        // Criar array de dados combinado
+        const allData: any[] = [...investmentData];
+        
+        // Adicionar linha vazia
+        allData.push({});
+        
+        // Adicionar cabeçalho de retornos mensais
+        allData.push({ "Nome": "Retornos Mensais:" });
+
+        // Adicionar retornos mensais se existirem
+        if (returns && returns.length > 0) {
+          const returnsData = returns.map(r => ({
+            "Mês": format(new Date(r.month), "MM/yyyy"),
+            "Contribuição": Number(r.contribution),
+            "Retorno Real (%)": Number(r.actual_return),
+            "Taxa Inflação (%)": Number(r.inflation_rate),
+            "Saldo Após": Number(r.balance_after),
+            "Observações": r.notes || "",
+          }));
+          allData.push(...returnsData);
+        }
+
+        const ws = XLSX.utils.json_to_sheet(allData, { skipHeader: false });
+
+        // Ajustar largura das colunas
+        ws["!cols"] = [
+          { wch: 25 },
+          { wch: 15 },
+          { wch: 15 },
+          { wch: 15 },
+          { wch: 15 },
+          { wch: 30 },
+        ];
+
+        // Nome da guia (limitado a 31 caracteres)
+        const sheetName = investment.name.substring(0, 31);
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+      }
+
+      // Download
+      const fileName = `investimentos_${format(new Date(), "yyyy-MM-dd_HHmm")}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+
+      toast({
+        title: "Download concluído",
+        description: `${investments.length} investimento(s) exportado(s) com sucesso`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao exportar investimentos",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setDownloadingInvestments(false);
+    }
+  };
+
   const handleRequestDeleteAccount = async () => {
     if (!user?.email) return;
     
@@ -168,6 +274,30 @@ export function DataSection() {
                 variant="outline"
               >
                 {downloading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4 mr-2" />
+                )}
+                Baixar Excel
+              </Button>
+            </div>
+
+            <div className="flex items-start justify-between p-4 border rounded-lg">
+              <div className="space-y-1">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-primary" />
+                  Exportar Investimentos
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Faça download de todos os seus investimentos (um por guia)
+                </p>
+              </div>
+              <Button
+                onClick={handleDownloadInvestments}
+                disabled={downloadingInvestments}
+                variant="outline"
+              >
+                {downloadingInvestments ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
                   <Download className="h-4 w-4 mr-2" />
