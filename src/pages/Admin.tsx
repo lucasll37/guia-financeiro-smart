@@ -28,7 +28,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown, Bell, Send, CreditCard, Settings, FileText, AlertTriangle, Loader2, Copy, MessageSquare } from "lucide-react";
+import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown, Bell, Send, CreditCard, Settings, FileText, AlertTriangle, Loader2, Copy, MessageSquare, FolderTree } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { z } from "zod";
 import { UserGrowthChart } from "@/components/admin/UserGrowthChart";
@@ -40,6 +40,7 @@ import { UserActionLogs } from "@/components/admin/UserActionLogs";
 import { NotificationCreator } from "@/components/admin/NotificationCreator";
 import { LogRetentionSettings } from "@/components/admin/LogRetentionSettings";
 import { FeedbackManager } from "@/components/admin/FeedbackManager";
+import { SeedCategoriesManager } from "@/components/admin/SeedCategoriesManager";
 
 const couponSchema = z.object({
   code: z.string().trim().min(3, "Código deve ter no mínimo 3 caracteres").max(50, "Código muito longo"),
@@ -415,6 +416,10 @@ export default function Admin() {
               <TabsTrigger value="limits" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
                 <span className="hidden sm:inline">Limites</span>
+              </TabsTrigger>
+              <TabsTrigger value="categories" className="flex items-center gap-2">
+                <FolderTree className="h-4 w-4" />
+                <span className="hidden sm:inline">Categorias Seed</span>
               </TabsTrigger>
               <TabsTrigger value="logs" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
@@ -974,6 +979,11 @@ export default function Admin() {
         {/* Plan Limits Tab */}
         <TabsContent value="limits" className="space-y-4">
           <PlanLimitsManager />
+        </TabsContent>
+
+        {/* Seed Categories Tab */}
+        <TabsContent value="categories" className="space-y-4">
+          <SeedCategoriesManager />
         </TabsContent>
 
         {/* Subscriptions Tab */}
