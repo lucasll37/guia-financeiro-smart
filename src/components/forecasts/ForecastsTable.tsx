@@ -223,10 +223,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
               {showAccountName && <TableCell />}
               <TableCell className="pl-12">
                 <div className="flex items-center gap-2">
-                  <div
-                    className="w-0.5 h-4 rounded-full"
-                    style={{ backgroundColor: (forecast.categories as any)?.color || "#6366f1" }}
-                  />
+                  <div className="w-0.5 h-8 bg-primary/30" />
                   <span className="text-sm">
                     {format(new Date(forecast.period_start), "MMMM 'de' yyyy", { locale: ptBR })}
                   </span>
