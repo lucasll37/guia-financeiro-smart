@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Upload, X } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { SecuritySection } from "./SecuritySection";
 
 export function ProfileSection() {
   const { user } = useAuth();
@@ -206,11 +207,12 @@ export function ProfileSection() {
     .slice(0, 2);
 
   return (
-    <Card className="animate-fade-in">
-      <CardHeader>
-        <CardTitle>Informações Pessoais</CardTitle>
-        <CardDescription>Gerencie suas informações de perfil</CardDescription>
-      </CardHeader>
+    <div className="space-y-6">
+      <Card className="animate-fade-in">
+        <CardHeader>
+          <CardTitle>Informações Pessoais</CardTitle>
+          <CardDescription>Gerencie suas informações de perfil</CardDescription>
+        </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-start gap-6">
           <div className="relative">
@@ -301,5 +303,8 @@ export function ProfileSection() {
         </div>
       </CardContent>
     </Card>
+    
+    <SecuritySection />
+  </div>
   );
 }
