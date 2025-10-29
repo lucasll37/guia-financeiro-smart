@@ -40,20 +40,14 @@ export function AccountCard({
     const currentPeriod = format(now, "MMMM 'de' yyyy", {
       locale: ptBR
     });
-    
     const periodStart = format(monthStart, "yyyy-MM-dd");
-    
     const accountTransactions = transactions?.filter(t => t.account_id === account.id && new Date(t.date) >= monthStart && new Date(t.date) <= monthEnd) || [];
     const revenue = accountTransactions.filter(t => Number(t.amount) > 0).reduce((sum, t) => sum + Number(t.amount), 0);
     const expenses = accountTransactions.filter(t => Number(t.amount) < 0).reduce((sum, t) => sum + Math.abs(Number(t.amount)), 0);
     const balance = revenue - expenses;
 
     // Calculate forecast total for current period (only expenses)
-    const accountForecasts = forecasts?.filter(f => 
-      f.account_id === account.id && 
-      f.period_start === periodStart &&
-      Number(f.forecasted_amount) < 0
-    ) || [];
+    const accountForecasts = forecasts?.filter(f => f.account_id === account.id && f.period_start === periodStart && Number(f.forecasted_amount) < 0) || [];
     const budgetTotal = accountForecasts.reduce((sum, f) => sum + Math.abs(Number(f.forecasted_amount)), 0);
     const completion = budgetTotal > 0 ? expenses / budgetTotal * 100 : 0;
     return {
@@ -85,7 +79,7 @@ export function AccountCard({
 
         <div className="space-y-3">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Total Previsto</span>
+            <span className="text-muted-foreground">Despesas Previstas</span>
             <span className="font-medium">
               {maskValue(new Intl.NumberFormat("pt-BR", {
               style: "currency",
@@ -95,7 +89,7 @@ export function AccountCard({
           </div>
           
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Total Pago</span>
+            <span className="text-muted-foreground">Despesas Pagas</span>
             <span className="font-medium">
               {maskValue(new Intl.NumberFormat("pt-BR", {
               style: "currency",
