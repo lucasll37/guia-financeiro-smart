@@ -167,10 +167,12 @@ export function NotificationPanel({ userId, onOpenPreferences }: NotificationPan
                     <div className="space-y-1">
                       {groupNotifications.map((notification) => {
                         const metadata = notification.metadata as any;
+                        const isInviteCancelled = metadata?.invite_cancelled === true;
                         const isInvitePending = notification.type === "invite" && 
                           (metadata?.account_id || metadata?.investment_id) && 
                           metadata?.invited_by &&
-                          !metadata?.status;
+                          !metadata?.status &&
+                          !isInviteCancelled;
 
                         return (
                           <DropdownMenuItem
@@ -205,9 +207,16 @@ export function NotificationPanel({ userId, onOpenPreferences }: NotificationPan
                               </Badge>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-2">
-                                  <p className="text-sm font-medium leading-snug">
-                                    {notification.message}
-                                  </p>
+                                  <div className="flex-1">
+                                    <p className="text-sm font-medium leading-snug">
+                                      {notification.message}
+                                    </p>
+                                    {isInviteCancelled && (
+                                      <p className="text-xs text-muted-foreground mt-1 italic">
+                                        Este convite foi cancelado
+                                      </p>
+                                    )}
+                                  </div>
                                   <Button
                                     variant="ghost"
                                     size="icon"
@@ -227,6 +236,11 @@ export function NotificationPanel({ userId, onOpenPreferences }: NotificationPan
                                   {!notification.read && (
                                     <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">
                                       Não lida
+                                    </Badge>
+                                  )}
+                                  {isInviteCancelled && (
+                                    <Badge variant="outline" className="h-4 px-1.5 text-[10px] text-muted-foreground">
+                                      Cancelado
                                     </Badge>
                                   )}
                                 </div>

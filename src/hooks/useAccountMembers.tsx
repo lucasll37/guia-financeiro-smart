@@ -123,15 +123,39 @@ export function useAccountMembers(accountId?: string) {
 
   const removeMember = useMutation({
     mutationFn: async (id: string) => {
+      // Get member info before deleting to update notification
+      const { data: member } = await supabase
+        .from("account_members")
+        .select("user_id, status")
+        .eq("id", id)
+        .single();
+
       const { error } = await supabase
         .from("account_members")
         .delete()
         .eq("id", id);
 
       if (error) throw error;
+
+      // If member was pending, invalidate their notification
+      if (member?.status === "pending") {
+        await supabase
+          .from("notifications")
+          .update({ 
+            metadata: { 
+              ...{} as any,
+              invite_cancelled: true,
+              cancelled_at: new Date().toISOString()
+            } 
+          })
+          .eq("type", "invite")
+          .eq("user_id", member.user_id)
+          .contains("metadata", { invite_id: id });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["account_members"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
       toast({
         title: "Membro removido",
         description: "O membro foi removido da conta",
