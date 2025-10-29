@@ -364,7 +364,8 @@ export function BudgetWizard({
                             return (
                               <div
                                 key={sub.id}
-                                className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3 rounded-lg border bg-card"
+                                className="grid gap-3 p-3 rounded-lg border bg-card"
+                                style={{ gridTemplateColumns: "25% 50% 25%" }}
                               >
                                 <div className="flex items-center gap-2">
                                   <div
@@ -382,6 +383,7 @@ export function BudgetWizard({
                                   onChange={(e) =>
                                     updateEntry(sub.id, "notes", e.target.value, true)
                                   }
+                                  className="text-sm"
                                 />
                                 <Input
                                   type="text"
@@ -396,7 +398,7 @@ export function BudgetWizard({
                                       true
                                     )
                                   }
-                                  className="text-right font-semibold"
+                                  className="text-right font-semibold text-sm"
                                 />
                               </div>
                             );
@@ -596,7 +598,8 @@ export function BudgetWizard({
                                   return (
                                     <div
                                       key={sub.id}
-                                      className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3 rounded-lg border bg-card"
+                                      className="grid gap-3 p-3 rounded-lg border bg-card"
+                                      style={{ gridTemplateColumns: "25% 50% 25%" }}
                                     >
                                       <div className="flex items-center gap-2">
                                         <div
@@ -614,6 +617,7 @@ export function BudgetWizard({
                                         onChange={(e) =>
                                           updateEntry(sub.id, "notes", e.target.value, false)
                                         }
+                                        className="text-sm"
                                       />
                                       <Input
                                         type="text"
@@ -628,7 +632,7 @@ export function BudgetWizard({
                                             false
                                           )
                                         }
-                                        className="text-right font-semibold"
+                                        className="text-right font-semibold text-sm"
                                       />
                                     </div>
                                   );
