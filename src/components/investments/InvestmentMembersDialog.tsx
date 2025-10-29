@@ -20,8 +20,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useInvestmentMembers } from "@/hooks/useInvestmentMembers";
-import { UserPlus, Trash2, Check, X } from "lucide-react";
+import { UserPlus, Trash2, Check, X, LogOut } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
+import { useAuth } from "@/hooks/useAuth";
 
 type Investment = Database["public"]["Tables"]["investment_assets"]["Row"];
 
@@ -38,11 +39,15 @@ export function InvestmentMembersDialog({
   investment,
   ownerId,
 }: InvestmentMembersDialogProps) {
+  const { user } = useAuth();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"viewer" | "editor">("viewer");
   const { members, inviteMember, updateMemberStatus, removeMember } = useInvestmentMembers(
     investment?.id
   );
+  
+  const isOwner = user?.id === ownerId;
+  const currentUserMembership = members?.find(m => m.user_id === user?.id);
 
   // Query to find user by email
   const { data: searchedUser, refetch: searchUser } = useQuery({
@@ -96,6 +101,19 @@ export function InvestmentMembersDialog({
     setRole("viewer");
   };
 
+  const handleLeaveInvestment = async () => {
+    if (!currentUserMembership) return;
+    
+    const confirmed = confirm(
+      "Tem certeza que deseja abandonar este investimento? Você perderá o acesso a todas as informações."
+    );
+    
+    if (confirmed) {
+      await removeMember.mutateAsync(currentUserMembership.id);
+      onOpenChange(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "accepted":
@@ -123,13 +141,40 @@ export function InvestmentMembersDialog({
         <DialogHeader>
           <DialogTitle>Gerenciar Membros</DialogTitle>
           <DialogDescription>
-            Convide usuários para compartilhar o investimento "{investment?.name}"
+            {isOwner 
+              ? `Convide usuários para compartilhar o investimento "${investment?.name}"`
+              : `Membros do investimento "${investment?.name}"`
+            }
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Invite Form */}
-          <div className="space-y-4 border-b pb-4">
+          {/* Leave Investment Button (for non-owners) */}
+          {!isOwner && currentUserMembership && (
+            <div className="p-4 border border-destructive/20 bg-destructive/5 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Abandonar Investimento</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Você perderá o acesso a este investimento
+                  </p>
+                </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleLeaveInvestment}
+                  disabled={removeMember.isPending}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sair
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Invite Form (only for owners) */}
+          {isOwner && (
+            <div className="space-y-4 border-b pb-4">
             <div className="grid gap-4">
               <div className="space-y-2">
                 <Label htmlFor="email">E-mail do usuário</Label>
@@ -161,6 +206,7 @@ export function InvestmentMembersDialog({
               Enviar Convite
             </Button>
           </div>
+          )}
 
           {/* Members List */}
           <div className="space-y-4">
@@ -177,18 +223,20 @@ export function InvestmentMembersDialog({
                       <p className="text-sm text-muted-foreground">{member.profiles?.email}</p>
                       <div className="flex gap-2 mt-2">
                         {getStatusBadge(member.status)}
-                        {getRoleBadge(member.role)}
+                       {getRoleBadge(member.role)}
                       </div>
                     </div>
 
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeMember.mutate(member.id)}
-                      disabled={removeMember.isPending}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    {isOwner && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeMember.mutate(member.id)}
+                        disabled={removeMember.isPending}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>

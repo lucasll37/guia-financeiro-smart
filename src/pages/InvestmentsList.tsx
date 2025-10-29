@@ -347,22 +347,30 @@ function InvestmentCard({
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
-            <CardTitle className="text-xl">{investment.name}</CardTitle>
+            <div className="flex items-center gap-2 mb-1">
+              <CardTitle className="text-xl">{investment.name}</CardTitle>
+              {!isOwner && (
+                <Badge variant="secondary" className="text-xs">
+                  <Users className="h-3 w-3 mr-1" />
+                  Compartilhado
+                </Badge>
+              )}
+            </div>
             <Badge variant="outline">
               {getTypeLabel(investment.type)}
             </Badge>
           </div>
           <div className="flex gap-1 shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => onManageMembers(e, investment)}
+              title={isOwner ? "Gerenciar Membros" : "Ver Membros"}
+            >
+              <Users className="h-4 w-4" />
+            </Button>
             {isOwner && (
               <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => onManageMembers(e, investment)}
-                  title="Gerenciar Membros"
-                >
-                  <Users className="h-4 w-4" />
-                </Button>
                 <Button
                   variant="ghost"
                   size="icon"

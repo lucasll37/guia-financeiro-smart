@@ -75,6 +75,7 @@ export function useInvestmentMembers(investmentId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["investment-members"] });
+      queryClient.invalidateQueries({ queryKey: ["investments"] });
       toast({
         title: "Status atualizado",
         description: "O status do membro foi atualizado",
@@ -100,6 +101,7 @@ export function useInvestmentMembers(investmentId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["investment-members"] });
+      queryClient.invalidateQueries({ queryKey: ["investments"] });
       toast({
         title: "Membro removido",
         description: "O membro foi removido do investimento",

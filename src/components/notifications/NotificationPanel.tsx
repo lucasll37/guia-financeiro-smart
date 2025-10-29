@@ -168,7 +168,7 @@ export function NotificationPanel({ userId, onOpenPreferences }: NotificationPan
                       {groupNotifications.map((notification) => {
                         const metadata = notification.metadata as any;
                         const isInvitePending = notification.type === "invite" && 
-                          metadata?.account_id && 
+                          (metadata?.account_id || metadata?.investment_id) && 
                           metadata?.invited_by &&
                           !metadata?.status;
 
@@ -234,6 +234,7 @@ export function NotificationPanel({ userId, onOpenPreferences }: NotificationPan
                                   <InviteActions
                                     inviteId={metadata.invite_id}
                                     accountId={metadata.account_id}
+                                    investmentId={metadata.investment_id}
                                     invitedBy={metadata.invited_by}
                                     onComplete={() => setOpen(false)}
                                   />
