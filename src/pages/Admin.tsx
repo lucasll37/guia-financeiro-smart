@@ -997,32 +997,6 @@ export default function Admin() {
               <p>
                 <strong className="text-destructive">ATENÇÃO:</strong> Esta ação é permanente e irreversível.
               </p>
-              <div className="space-y-2">
-                <Label className="text-sm">Email do usuário a ser excluído:</Label>
-                <div className="flex gap-2">
-                  <Input
-                    readOnly
-                    value={userToDelete?.email || ""}
-                    className="font-mono text-sm bg-muted flex-1"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      if (userToDelete?.email) {
-                        navigator.clipboard.writeText(userToDelete.email);
-                        toast({
-                          title: "Email copiado",
-                          description: "O email foi copiado para a área de transferência",
-                        });
-                      }
-                    }}
-                  >
-                    Copiar
-                  </Button>
-                </div>
-              </div>
               <div className="bg-destructive/10 p-3 rounded-md border border-destructive/30">
                 <p className="text-destructive font-semibold text-sm mb-2">
                   Todos os dados serão permanentemente excluídos:
@@ -1036,18 +1010,46 @@ export default function Admin() {
                   <li>Dados de autenticação</li>
                 </ul>
               </div>
-              <div className="space-y-2 pt-2">
-                <Label htmlFor="confirmEmail" className="text-sm font-semibold">
-                  Digite o email do usuário para confirmar:
-                </Label>
-                <Input
-                  id="confirmEmail"
-                  type="email"
-                  placeholder={userToDelete?.email || ""}
-                  value={deleteConfirmEmail}
-                  onChange={(e) => setDeleteConfirmEmail(e.target.value)}
-                  className="font-mono text-sm"
-                />
+              <div className="space-y-3 pt-2">
+                <div className="space-y-2">
+                  <Label className="text-sm">Email do usuário:</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      readOnly
+                      value={userToDelete?.email || ""}
+                      className="font-mono text-sm bg-muted flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (userToDelete?.email) {
+                          navigator.clipboard.writeText(userToDelete.email);
+                          toast({
+                            title: "Email copiado",
+                            description: "Cole no campo abaixo para confirmar",
+                          });
+                        }
+                      }}
+                    >
+                      Copiar
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmEmail" className="text-sm font-semibold">
+                    Cole o email acima para confirmar a exclusão:
+                  </Label>
+                  <Input
+                    id="confirmEmail"
+                    type="email"
+                    placeholder="Cole o email aqui"
+                    value={deleteConfirmEmail}
+                    onChange={(e) => setDeleteConfirmEmail(e.target.value)}
+                    className="font-mono text-sm"
+                  />
+                </div>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
