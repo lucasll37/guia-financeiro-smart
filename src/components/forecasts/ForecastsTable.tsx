@@ -156,7 +156,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
                     {renderSortIcon('category')}
                   </Button>
                 </TableHead>
-                <TableHead>Observações</TableHead>
+                <TableHead>Descrição</TableHead>
                 <TableHead className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Valor Previsto
@@ -206,7 +206,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
                     {renderSortIcon('category')}
                   </Button>
                 </TableHead>
-                <TableHead>Observações</TableHead>
+                <TableHead>Descrição</TableHead>
                 <TableHead className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Valor Previsto
