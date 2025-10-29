@@ -118,6 +118,12 @@ export function TransactionsTable({
     const isExpense = transaction.categories?.type === "despesa";
     const isCreditCard = !!transaction.credit_card_id;
     
+    // Buscar categoria pai se existir
+    const currentCategory = categories.find(c => c.id === transaction.category_id);
+    const parentCategory = currentCategory?.parent_id 
+      ? categories.find(c => c.id === currentCategory.parent_id)
+      : null;
+    
     return (
       <TableRow key={transaction.id}>
         <TableCell>
@@ -130,7 +136,15 @@ export function TransactionsTable({
                 className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: transaction.categories.color }}
               />
-              <span>{transaction.categories.name}</span>
+              <div className="flex items-center gap-1">
+                {parentCategory && (
+                  <>
+                    <span className="text-xs text-muted-foreground">{parentCategory.name}</span>
+                    <span className="text-xs text-muted-foreground">›</span>
+                  </>
+                )}
+                <span>{transaction.categories.name}</span>
+              </div>
             </div>
           )}
         </TableCell>
