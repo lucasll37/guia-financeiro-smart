@@ -46,12 +46,14 @@ export function CategoryStackedBarChart({
   const chartData = useMemo(() => {
     if (!categories || !transactions || !forecasts) return [];
 
-    const periodForecasts = forecasts.filter((f) => f.period_start === periodStart);
+    const periodForecasts = forecasts.filter((f) => {
+      const fDateStr = (f.period_start || "").slice(0, 10);
+      return fDateStr >= periodStart && fDateStr <= periodEnd;
+    });
+    
     const periodTransactions = transactions.filter((t) => {
-      const tDate = new Date(t.date);
-      const start = new Date(periodStart);
-      const end = new Date(periodEnd);
-      return tDate >= start && tDate <= end;
+      const tDateStr = (t.date || "").slice(0, 10);
+      return tDateStr >= periodStart && tDateStr <= periodEnd;
     });
 
     const result: any[] = [];
