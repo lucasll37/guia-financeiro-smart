@@ -48,12 +48,21 @@ export function useForecasts(accountId?: string | null) {
         description: "Sua previsão foi criada com sucesso",
       });
     },
-    onError: (error: Error) => {
-      toast({
-        title: "Erro ao criar previsão",
-        description: error.message,
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      // Check if it's a unique constraint violation
+      if (error.code === '23505' || error.message?.includes('unique_forecast_per_category_period')) {
+        toast({
+          title: "Previsão já existe",
+          description: "Já existe uma previsão para esta subcategoria neste mês. Edite a previsão existente.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erro ao criar previsão",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -76,12 +85,21 @@ export function useForecasts(accountId?: string | null) {
         description: "Sua previsão foi atualizada com sucesso",
       });
     },
-    onError: (error: Error) => {
-      toast({
-        title: "Erro ao atualizar previsão",
-        description: error.message,
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      // Check if it's a unique constraint violation
+      if (error.code === '23505' || error.message?.includes('unique_forecast_per_category_period')) {
+        toast({
+          title: "Previsão já existe",
+          description: "Já existe uma previsão para esta subcategoria neste mês.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erro ao atualizar previsão",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     },
   });
 
