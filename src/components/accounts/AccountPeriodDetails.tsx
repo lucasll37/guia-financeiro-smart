@@ -315,8 +315,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                       {hasTransactions && isExpanded && (
                         <TableRow>
                           <TableCell colSpan={6} className="bg-muted/20 p-0">
-                            <div className="pl-16 pr-6 py-2 animate-accordion-down">
-                              <div className="border-l-2 border-primary/30 pl-4">
+                            <div className="pl-24 pr-6 py-2 animate-accordion-down">
+                              <div className="border-l-2 border-primary/30 pl-6">
                                 {data.transactions.map((t) => (
                                   <div 
                                     key={t.id} 
@@ -452,8 +452,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                       {hasTransactions && isExpanded && (
                         <TableRow>
                           <TableCell colSpan={6} className="bg-muted/20 p-0">
-                            <div className="pl-16 pr-6 py-2 animate-accordion-down">
-                              <div className="border-l-2 border-primary/30 pl-4">
+                            <div className="pl-24 pr-6 py-2 animate-accordion-down">
+                              <div className="border-l-2 border-primary/30 pl-6">
                                 {data.transactions.map((t) => (
                                   <div 
                                     key={t.id} 
