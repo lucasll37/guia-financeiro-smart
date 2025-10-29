@@ -1,47 +1,94 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Check } from "lucide-react";
+import { z } from "zod";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+
+const notificationSchema = z.object({
+  email: z.string().trim().email({ message: "Email inválido" }).max(255),
+  type: z.enum(["budget_alert", "goal", "invite", "system", "transaction"]),
+  message: z.string().trim().min(1, "Mensagem obrigatória").max(500, "Mensagem muito longa"),
+});
 
 export function NotificationCreator() {
   const { toast } = useToast();
   const { createNotification } = useNotifications();
-  const [selectedUser, setSelectedUser] = useState<string>("");
+  const [open, setOpen] = useState(false);
+  const [emailInput, setEmailInput] = useState("");
+  const [selectedEmail, setSelectedEmail] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState("");
   const [notificationType, setNotificationType] = useState<"budget_alert" | "goal" | "invite" | "system" | "transaction">("system");
   const [message, setMessage] = useState("");
 
-  // Fetch all users
+  // Fetch users matching email search
   const { data: users, isLoading } = useQuery({
-    queryKey: ["admin-users-list"],
+    queryKey: ["admin-users-search", emailInput],
     queryFn: async () => {
+      if (!emailInput || emailInput.length < 2) return [];
+      
       const { data, error } = await supabase
         .from("profiles")
         .select("id, name, email")
-        .order("name");
+        .ilike("email", `%${emailInput}%`)
+        .limit(10)
+        .order("email");
 
       if (error) throw error;
       return data;
     },
+    enabled: emailInput.length >= 2,
   });
 
+  // Reset user selection when email input changes
+  useEffect(() => {
+    if (emailInput !== selectedEmail) {
+      setSelectedUserId("");
+      setSelectedEmail("");
+    }
+  }, [emailInput, selectedEmail]);
+
   const handleSendNotification = async () => {
-    if (!selectedUser || !message.trim()) {
+    // Validate form
+    const validation = notificationSchema.safeParse({
+      email: selectedEmail,
+      type: notificationType,
+      message: message,
+    });
+
+    if (!validation.success) {
       toast({
-        title: "Campos obrigatórios",
-        description: "Selecione um usuário e escreva uma mensagem",
+        title: "Erro de validação",
+        description: validation.error.errors[0].message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!selectedUserId) {
+      toast({
+        title: "Usuário não selecionado",
+        description: "Selecione um usuário válido da lista",
         variant: "destructive",
       });
       return;
@@ -49,18 +96,20 @@ export function NotificationCreator() {
 
     try {
       await createNotification.mutateAsync({
-        user_id: selectedUser,
+        user_id: selectedUserId,
         type: notificationType,
         message: message.trim(),
       });
 
       toast({
         title: "Notificação enviada!",
-        description: "O usuário receberá a notificação no painel dele",
+        description: `Notificação enviada para ${selectedEmail}`,
       });
 
       // Reset form
-      setSelectedUser("");
+      setEmailInput("");
+      setSelectedEmail("");
+      setSelectedUserId("");
       setMessage("");
     } catch (error: any) {
       toast({
@@ -69,6 +118,13 @@ export function NotificationCreator() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleSelectUser = (user: { id: string; email: string; name: string | null }) => {
+    setSelectedUserId(user.id);
+    setSelectedEmail(user.email);
+    setEmailInput(user.email);
+    setOpen(false);
   };
 
   return (
@@ -85,48 +141,82 @@ export function NotificationCreator() {
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="user-select">Usuário</Label>
-            <Select value={selectedUser} onValueChange={setSelectedUser}>
-              <SelectTrigger id="user-select">
-                <SelectValue placeholder="Selecione um usuário" />
-              </SelectTrigger>
-              <SelectContent>
-                {isLoading ? (
-                  <SelectItem value="loading" disabled>
-                    Carregando usuários...
-                  </SelectItem>
-                ) : users && users.length > 0 ? (
-                  users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.name || user.email || "Sem nome"}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <SelectItem value="none" disabled>
-                    Nenhum usuário encontrado
-                  </SelectItem>
-                )}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="user-email">Email do Usuário</Label>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className={cn(
+                    "w-full justify-between",
+                    !selectedEmail && "text-muted-foreground"
+                  )}
+                >
+                  {selectedEmail || "Digite o email do usuário..."}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[400px] p-0">
+                <Command>
+                  <CommandInput
+                    placeholder="Digite o email..."
+                    value={emailInput}
+                    onValueChange={setEmailInput}
+                  />
+                  <CommandList>
+                    <CommandEmpty>
+                      {emailInput.length < 2
+                        ? "Digite pelo menos 2 caracteres"
+                        : "Nenhum usuário encontrado"}
+                    </CommandEmpty>
+                    {users && users.length > 0 && (
+                      <CommandGroup>
+                        {users.map((user) => (
+                          <CommandItem
+                            key={user.id}
+                            value={user.email}
+                            onSelect={() => handleSelectUser(user)}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedEmail === user.email
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            <div className="flex flex-col">
+                              <span className="font-medium">{user.email}</span>
+                              {user.name && (
+                                <span className="text-xs text-muted-foreground">
+                                  {user.name}
+                                </span>
+                              )}
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    )}
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="notification-type">Tipo de Notificação</Label>
-            <Select
+            <select
+              id="notification-type"
               value={notificationType}
-              onValueChange={(value: any) => setNotificationType(value)}
+              onChange={(e) => setNotificationType(e.target.value as any)}
+              className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
-              <SelectTrigger id="notification-type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="system">Sistema</SelectItem>
-                <SelectItem value="budget_alert">Alerta de Orçamento</SelectItem>
-                <SelectItem value="goal">Meta</SelectItem>
-                <SelectItem value="transaction">Transação</SelectItem>
-                <SelectItem value="invite">Convite</SelectItem>
-              </SelectContent>
-            </Select>
+              <option value="system">Sistema</option>
+              <option value="budget_alert">Alerta de Orçamento</option>
+              <option value="goal">Meta</option>
+              <option value="transaction">Transação</option>
+              <option value="invite">Convite</option>
+            </select>
           </div>
         </div>
 
@@ -143,7 +233,7 @@ export function NotificationCreator() {
 
         <Button
           onClick={handleSendNotification}
-          disabled={!selectedUser || !message.trim() || createNotification.isPending}
+          disabled={!selectedUserId || !message.trim() || createNotification.isPending}
           className="w-full"
         >
           {createNotification.isPending ? "Enviando..." : "Enviar Notificação"}
