@@ -120,7 +120,25 @@ export function AccumulatedBalanceChart({
     if (!active || !payload?.length) return null;
     const data = payload[0].payload;
     return <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg p-4 shadow-lg">
-...
+        <p className="font-semibold mb-2 pb-2 border-b">
+          {format(parseISO(data.date), "dd 'de' MMMM", {
+          locale: ptBR
+        })}
+        </p>
+        <div className="space-y-1.5 text-sm">
+          <div className="flex justify-between gap-4">
+            <span className="text-muted-foreground">Saldo Acumulado:</span>
+            <span className={`font-bold ${data.saldo >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
+              {maskValue(formatCurrency(data.saldo))}
+            </span>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span className="text-muted-foreground">Variação do Dia:</span>
+            <span className={`font-semibold ${data.variacao >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
+              {data.variacao >= 0 ? '+' : ''}{maskValue(formatCurrency(data.variacao))}
+            </span>
+          </div>
+        </div>
       </div>;
   };
   if (chartData.length === 0) {
