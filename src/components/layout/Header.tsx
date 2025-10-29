@@ -171,7 +171,7 @@ export const Header = () => {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/app/conta")}>Minha Conta</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/app/conta")}>Minha Conta Prospere</DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/app/planos")}>
                 {plan === "pro" ? "Planos e Pagamento" : "Upgrade para Pro"}
               </DropdownMenuItem>
