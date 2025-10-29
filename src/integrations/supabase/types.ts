@@ -984,7 +984,7 @@ export type Database = {
         Returns: boolean
       }
       user_has_investment_access: {
-        Args: { investment_uuid: string; user_uuid: string }
+        Args: { _user_id: string; investment_id: string }
         Returns: boolean
       }
       user_has_plan: {
