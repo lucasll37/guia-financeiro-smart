@@ -280,7 +280,7 @@ export function InvestmentMembersDialog({
                       </div>
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">
-                      {format(new Date(currentUserMembership.created_at || ""), "'Há' d 'dias'", { locale: ptBR })}
+                      Há {differenceInDays(new Date(), new Date(currentUserMembership.created_at))} dias
                     </p>
                   </CardContent>
                 </Card>
