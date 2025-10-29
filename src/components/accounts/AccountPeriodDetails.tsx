@@ -261,7 +261,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 {Object.entries(incomeTotals).map(([categoryId, data]) => {
                   const difference = data.forecasted - data.actual;
                   const completion = data.forecasted > 0 
-                    ? Math.min(100, Math.max(0, (data.actual / data.forecasted) * 100)) 
+                    ? (data.actual / data.forecasted) * 100
                     : 0;
                   const percentage = data.forecasted !== 0 
                     ? ((difference / data.forecasted) * 100).toFixed(1)
@@ -447,7 +447,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 {Object.entries(expenseTotals).map(([categoryId, data]) => {
                     const difference = data.forecasted - data.actual;
                     const completion = data.forecasted > 0 
-                      ? Math.min(100, Math.max(0, (data.actual / data.forecasted) * 100)) 
+                      ? (data.actual / data.forecasted) * 100
                       : 0;
                     const percentage = data.forecasted !== 0 
                       ? ((difference / data.forecasted) * 100).toFixed(1)
