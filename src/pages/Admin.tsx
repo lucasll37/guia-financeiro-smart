@@ -997,10 +997,15 @@ export default function Admin() {
               <p>
                 <strong className="text-destructive">ATENÇÃO:</strong> Esta ação é permanente e irreversível.
               </p>
-              <p>
-                Você está prestes a excluir permanentemente a conta de{" "}
-                <strong className="text-foreground">{userToDelete?.email}</strong>
-              </p>
+              <div className="space-y-2">
+                <Label className="text-sm">Email do usuário a ser excluído:</Label>
+                <Input
+                  readOnly
+                  value={userToDelete?.email || ""}
+                  className="font-mono text-sm bg-muted cursor-text select-all"
+                  onClick={(e) => e.currentTarget.select()}
+                />
+              </div>
               <div className="bg-destructive/10 p-3 rounded-md border border-destructive/30">
                 <p className="text-destructive font-semibold text-sm mb-2">
                   Todos os dados serão permanentemente excluídos:
