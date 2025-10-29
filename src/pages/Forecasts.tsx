@@ -169,6 +169,8 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             onEdit={handleEditForecast}
             onDelete={handleDeleteForecast}
             showAccountName={filters.accountId === "all"}
+            viewMode={filters.viewMode}
+            categories={categories || []}
           />
         )}
       </div>

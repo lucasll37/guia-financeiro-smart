@@ -18,14 +18,17 @@ interface ForecastsTableProps {
   onEdit: (forecast: any) => void;
   onDelete: (id: string) => void;
   showAccountName?: boolean;
+  viewMode?: "monthly" | "custom";
+  categories?: any[];
 }
 
-export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }: ForecastsTableProps) {
+export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, viewMode = "monthly", categories = [] }: ForecastsTableProps) {
   const { formatCurrency } = useUserPreferences();
   const [sortField, setSortField] = useState<'account' | 'category' | 'amount' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [incomeExpanded, setIncomeExpanded] = useState(true);
   const [expenseExpanded, setExpenseExpanded] = useState(true);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   const handleSort = (field: 'account' | 'category' | 'amount') => {
     if (sortField === field) {
@@ -36,13 +39,25 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
     }
   };
 
+  const toggleCategoryExpansion = (categoryId: string) => {
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryId)) {
+        newSet.delete(categoryId);
+      } else {
+        newSet.add(categoryId);
+      }
+      return newSet;
+    });
+  };
+
   const renderSortIcon = (field: 'account' | 'category' | 'amount') => {
     if (sortField !== field) return <ArrowUpDown className="h-4 w-4 ml-1" />;
     return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 ml-1" /> : <ArrowDown className="h-4 w-4 ml-1" />;
   };
 
-  // Separar e ordenar previsões por tipo
-  const { incomeForecasts, expenseForecasts, totalIncome, totalExpense } = useMemo(() => {
+  // Separar e ordenar previsões por tipo e agrupar por categoria pai no modo custom
+  const { incomeForecasts, expenseForecasts, totalIncome, totalExpense, incomeByParent, expenseByParent } = useMemo(() => {
     const income = forecasts.filter((f) => f.categories?.type === "receita");
     const expense = forecasts.filter((f) => f.categories?.type === "despesa");
     
@@ -68,6 +83,33 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
       });
     };
     
+    // Agrupar por categoria pai no modo custom
+    const groupByParent = (fcs: any[]) => {
+      const grouped: Record<string, { parent: any; children: any[]; total: number }> = {};
+      
+      fcs.forEach(forecast => {
+        const category = forecast.categories;
+        const parentId = category?.parent_id || forecast.category_id;
+        
+        if (!grouped[parentId]) {
+          const parentCategory = category?.parent_id 
+            ? categories.find(c => c.id === category.parent_id)
+            : category;
+          
+          grouped[parentId] = {
+            parent: parentCategory || category,
+            children: [],
+            total: 0
+          };
+        }
+        
+        grouped[parentId].children.push(forecast);
+        grouped[parentId].total += Number(forecast.forecasted_amount);
+      });
+      
+      return grouped;
+    };
+    
     const incomeTotal = income.reduce((sum, f) => sum + Number(f.forecasted_amount), 0);
     const expenseTotal = expense.reduce((sum, f) => sum + Number(f.forecasted_amount), 0);
     
@@ -76,8 +118,10 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
       expenseForecasts: sortForecasts(expense),
       totalIncome: incomeTotal,
       totalExpense: expenseTotal,
+      incomeByParent: viewMode === "custom" ? groupByParent(income) : {},
+      expenseByParent: viewMode === "custom" ? groupByParent(expense) : {},
     };
-  }, [forecasts, sortField, sortDirection]);
+  }, [forecasts, sortField, sortDirection, viewMode, categories]);
 
   const balance = totalIncome - totalExpense;
 
@@ -124,6 +168,123 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
         </TableCell>
       </TableRow>
     );
+  };
+
+  const renderGroupedForecasts = (groupedData: Record<string, { parent: any; children: any[]; total: number }>) => {
+    return Object.entries(groupedData).map(([parentId, data]) => {
+      const isExpanded = expandedCategories.has(parentId);
+      const hasMultipleChildren = data.children.length > 1;
+      
+      return (
+        <>
+          {/* Categoria Pai */}
+          <TableRow 
+            key={parentId} 
+            className={hasMultipleChildren ? "cursor-pointer hover:bg-muted/50 font-medium" : "font-medium"}
+            onClick={hasMultipleChildren ? () => toggleCategoryExpansion(parentId) : undefined}
+          >
+            {showAccountName && <TableCell />}
+            <TableCell>
+              <div className="flex items-center gap-2">
+                {hasMultipleChildren && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-6 w-6 p-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleCategoryExpansion(parentId);
+                    }}
+                  >
+                    {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </Button>
+                )}
+                <div
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: data.parent?.color || "#6366f1" }}
+                />
+                <span>{data.parent?.name || "Sem categoria"}</span>
+                {hasMultipleChildren && (
+                  <span className="text-xs text-muted-foreground">({data.children.length})</span>
+                )}
+              </div>
+            </TableCell>
+            <TableCell className="text-muted-foreground">
+              {!hasMultipleChildren && (data.children[0]?.notes || "-")}
+            </TableCell>
+            <TableCell className="text-right font-medium">
+              {formatCurrency(data.total)}
+            </TableCell>
+            <TableCell className="text-right">
+              {!hasMultipleChildren && (
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(data.children[0]);
+                    }}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(data.children[0].id);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </TableCell>
+          </TableRow>
+          
+          {/* Subcategorias */}
+          {hasMultipleChildren && isExpanded && data.children.map((forecast) => (
+            <TableRow key={forecast.id} className="bg-muted/20">
+              {showAccountName && <TableCell />}
+              <TableCell className="pl-12">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: (forecast.categories as any)?.color || "#6366f1" }}
+                  />
+                  <span className="text-sm">{(forecast.categories as any)?.name || "Sem categoria"}</span>
+                </div>
+              </TableCell>
+              <TableCell className="text-muted-foreground text-sm">
+                {forecast.notes || "-"}
+              </TableCell>
+              <TableCell className="text-right text-sm">
+                {formatCurrency(Number(forecast.forecasted_amount))}
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onEdit(forecast)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onDelete(forecast.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </>
+      );
+    });
   };
 
   if (forecasts.length === 0) {
@@ -179,7 +340,9 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
               </TableRow>
             </TableHeader>
             <TableBody>
-              {incomeForecasts.map(renderForecastRow)}
+              {viewMode === "custom" && Object.keys(incomeByParent).length > 0
+                ? renderGroupedForecasts(incomeByParent)
+                : incomeForecasts.map(renderForecastRow)}
                <TableRow className="bg-green-50/50 dark:bg-green-950/10 font-semibold">
                 <TableCell colSpan={showAccountName ? 2 : 1} className="text-right">
                   Total de Receitas:
@@ -240,7 +403,9 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
               </TableRow>
             </TableHeader>
             <TableBody>
-              {expenseForecasts.map(renderForecastRow)}
+              {viewMode === "custom" && Object.keys(expenseByParent).length > 0
+                ? renderGroupedForecasts(expenseByParent)
+                : expenseForecasts.map(renderForecastRow)}
                <TableRow className="bg-red-50/50 dark:bg-red-950/10 font-semibold">
                 <TableCell colSpan={showAccountName ? 2 : 1} className="text-right">
                   Total de Despesas:
