@@ -313,18 +313,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                           <TableCell className="text-right w-[180px]">
                             <div className="space-y-1">
                               <div className="flex justify-between text-xs mb-1">
-                                <span
-                                  className={cn(
-                                    "font-semibold",
-                                    completion > 100
-                                      ? "text-red-600 dark:text-red-400"
-                                      : "text-green-600 dark:text-green-400"
-                                  )}
-                                >
-                                  {Math.round(completion)}%
-                                </span>
                                 <span className="text-muted-foreground">
-                                  {maskValue(formatCurrency(data.forecasted))}
+                                  {maskValue(formatCurrency(data.actual))} / {maskValue(formatCurrency(data.forecasted))}
                                 </span>
                               </div>
                               
@@ -353,8 +343,13 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                                 )}
                                 
                                 <div className="absolute inset-0 flex items-center justify-center z-10">
-                                  <span className="text-xs font-semibold text-foreground drop-shadow-lg">
-                                    {maskValue(formatCurrency(data.actual))}
+                                  <span className={cn(
+                                    "text-xs font-semibold drop-shadow-lg",
+                                    completion > 100
+                                      ? "text-white"
+                                      : "text-white"
+                                  )}>
+                                    {Math.round(completion)}%
                                   </span>
                                 </div>
                               </div>
@@ -499,18 +494,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                         <TableCell className="text-right w-[180px]">
                           <div className="space-y-1">
                             <div className="flex justify-between text-xs mb-1">
-                              <span
-                                className={cn(
-                                  "font-semibold",
-                                  completion > 100
-                                    ? "text-red-600 dark:text-red-400"
-                                    : "text-green-600 dark:text-green-400"
-                                )}
-                              >
-                                {Math.round(completion)}%
-                              </span>
                               <span className="text-muted-foreground">
-                                {maskValue(formatCurrency(data.forecasted))}
+                                {maskValue(formatCurrency(data.actual))} / {maskValue(formatCurrency(data.forecasted))}
                               </span>
                             </div>
                             
@@ -539,8 +524,13 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                               )}
                               
                               <div className="absolute inset-0 flex items-center justify-center z-10">
-                                <span className="text-xs font-semibold text-foreground drop-shadow-lg">
-                                  {maskValue(formatCurrency(data.actual))}
+                                <span className={cn(
+                                  "text-xs font-semibold drop-shadow-lg",
+                                  completion > 100
+                                    ? "text-white"
+                                    : "text-white"
+                                )}>
+                                  {Math.round(completion)}%
                                 </span>
                               </div>
                             </div>
