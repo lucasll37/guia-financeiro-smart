@@ -61,6 +61,7 @@ export function AccountCard({
     // Transações do período selecionado
     const periodTransactions = transactions?.filter(t => {
       if (t.account_id !== account.id) return false;
+      if (t.description === "Saldo Anterior") return false; // evitar duplicidade do saldo anterior
       if (t.credit_card_id && t.payment_month) {
         const txMonth = format(parseISO(t.payment_month as string), "yyyy-MM");
         return txMonth === periodMonth;

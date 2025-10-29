@@ -78,6 +78,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
     const periodMonth = format(periodEnd, "yyyy-MM");
     
     return transactions.filter(t => {
+      // Ignorar lançamentos de Saldo Anterior para não duplicar saldos
+      if (t.description === "Saldo Anterior") return false;
       if (t.credit_card_id && t.payment_month) {
         // Para transações de cartão, comparar payment_month normalizado (YYYY-MM)
         const pm = format(parseISO(t.payment_month as string), "yyyy-MM");
