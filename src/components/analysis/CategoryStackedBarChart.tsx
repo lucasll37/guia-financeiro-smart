@@ -89,17 +89,25 @@ export function CategoryStackedBarChart({
     return result.sort((a, b) => (b.Previsto + b.Realizado) - (a.Previsto + a.Realizado));
   }, [categories, transactions, forecasts, periodStart, periodEnd, parentCategories]);
 
-  const CustomTooltip = ({ active, payload, type }: any) => {
+  const CustomTooltip = ({ active, payload, type, total }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
-      const value = type === 'previsto' ? data.Previsto : data.Realizado;
+      const value = data.value;
+      const percent = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
       
       return (
-        <div className="bg-background border border-border p-3 rounded-lg shadow-lg">
-          <p className="font-semibold mb-2">{data.categoria}</p>
-          <p className="text-sm">
-            {maskValue(formatCurrency(value))}
-          </p>
+        <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg p-4 shadow-lg">
+          <p className="font-semibold mb-2 pb-2 border-b">{data.categoria}</p>
+          <div className="space-y-1 text-sm">
+            <div className="flex justify-between gap-4">
+              <span className="text-muted-foreground">Valor:</span>
+              <span className="font-semibold">{maskValue(formatCurrency(value))}</span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="text-muted-foreground">Percentual:</span>
+              <span className="font-semibold">{percent}%</span>
+            </div>
+          </div>
         </div>
       );
     }
@@ -140,38 +148,52 @@ export function CategoryStackedBarChart({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Gráfico Previsto */}
-      <Card className="animate-fade-in">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card className="animate-fade-in overflow-hidden">
+        <CardHeader className="bg-gradient-to-br from-primary/10 to-primary/5 border-b">
+          <CardTitle className="flex items-center gap-2 text-xl">
             <div className="w-3 h-3 rounded-full bg-primary" />
-            Composição Prevista por Categoria
+            Composição Prevista
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Total: {maskValue(formatCurrency(totalForecasted))}
+          <p className="text-sm text-muted-foreground mt-1">
+            Total: <span className="font-semibold">{maskValue(formatCurrency(totalForecasted))}</span>
           </p>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={Math.max(400, forecastedData.length * 50)}>
-            <BarChart data={forecastedData} layout="vertical" margin={{ left: 10, right: 30 }}>
-              <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-              <XAxis type="number" tickFormatter={(value) => formatCurrency(value)} />
-              <YAxis type="category" dataKey="categoria" width={110} />
-              <Tooltip content={(props) => <CustomTooltip {...props} type="previsto" />} />
-              <Legend 
-                formatter={(value, entry: any) => {
-                  const percent = totalForecasted > 0 ? ((entry.payload.value / totalForecasted) * 100).toFixed(1) : '0';
-                  return `${entry.payload.categoria} - ${percent}%`;
-                }}
+        <CardContent className="pt-6">
+          <ResponsiveContainer width="100%" height={Math.max(450, forecastedData.length * 55)}>
+            <BarChart data={forecastedData} layout="vertical" margin={{ left: 10, right: 30, top: 10, bottom: 10 }}>
+              <defs>
+                {forecastedData.map((entry, index) => (
+                  <linearGradient key={`gradient-${index}`} id={`gradient-previsto-${index}`} x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="5%" stopColor={entry.color} stopOpacity={0.9}/>
+                    <stop offset="95%" stopColor={entry.color} stopOpacity={0.6}/>
+                  </linearGradient>
+                ))}
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} className="stroke-muted" />
+              <XAxis 
+                type="number" 
+                tickFormatter={(value) => formatCurrency(value)}
+                tick={{ fontSize: 12 }}
+                tickLine={{ stroke: 'hsl(var(--border))' }}
               />
+              <YAxis 
+                type="category" 
+                dataKey="categoria" 
+                width={120}
+                tick={{ fontSize: 12 }}
+                tickLine={{ stroke: 'hsl(var(--border))' }}
+              />
+              <Tooltip content={(props) => <CustomTooltip {...props} type="previsto" total={totalForecasted} />} />
               <Bar
                 dataKey="value" 
                 fill="hsl(var(--primary))"
-                radius={[0, 4, 4, 0]}
+                radius={[0, 8, 8, 0]}
                 animationBegin={0}
                 animationDuration={800}
+                maxBarSize={40}
               >
                 {forecastedData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                  <Cell key={`cell-${index}`} fill={`url(#gradient-previsto-${index})`} />
                 ))}
               </Bar>
             </BarChart>
@@ -180,38 +202,52 @@ export function CategoryStackedBarChart({
       </Card>
 
       {/* Gráfico Realizado */}
-      <Card className="animate-fade-in" style={{ animationDelay: "100ms" }}>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card className="animate-fade-in overflow-hidden" style={{ animationDelay: "100ms" }}>
+        <CardHeader className="bg-gradient-to-br from-chart-2/10 to-chart-2/5 border-b">
+          <CardTitle className="flex items-center gap-2 text-xl">
             <div className="w-3 h-3 rounded-full bg-chart-2" />
-            Composição Realizada por Categoria
+            Composição Realizada
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Total: {maskValue(formatCurrency(totalActual))}
+          <p className="text-sm text-muted-foreground mt-1">
+            Total: <span className="font-semibold">{maskValue(formatCurrency(totalActual))}</span>
           </p>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={Math.max(400, actualData.length * 50)}>
-            <BarChart data={actualData} layout="vertical" margin={{ left: 10, right: 30 }}>
-              <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-              <XAxis type="number" tickFormatter={(value) => formatCurrency(value)} />
-              <YAxis type="category" dataKey="categoria" width={110} />
-              <Tooltip content={(props) => <CustomTooltip {...props} type="realizado" />} />
-              <Legend 
-                formatter={(value, entry: any) => {
-                  const percent = totalActual > 0 ? ((entry.payload.value / totalActual) * 100).toFixed(1) : '0';
-                  return `${entry.payload.categoria} - ${percent}%`;
-                }}
+        <CardContent className="pt-6">
+          <ResponsiveContainer width="100%" height={Math.max(450, actualData.length * 55)}>
+            <BarChart data={actualData} layout="vertical" margin={{ left: 10, right: 30, top: 10, bottom: 10 }}>
+              <defs>
+                {actualData.map((entry, index) => (
+                  <linearGradient key={`gradient-${index}`} id={`gradient-realizado-${index}`} x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="5%" stopColor={entry.color} stopOpacity={0.9}/>
+                    <stop offset="95%" stopColor={entry.color} stopOpacity={0.6}/>
+                  </linearGradient>
+                ))}
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} className="stroke-muted" />
+              <XAxis 
+                type="number" 
+                tickFormatter={(value) => formatCurrency(value)}
+                tick={{ fontSize: 12 }}
+                tickLine={{ stroke: 'hsl(var(--border))' }}
               />
+              <YAxis 
+                type="category" 
+                dataKey="categoria" 
+                width={120}
+                tick={{ fontSize: 12 }}
+                tickLine={{ stroke: 'hsl(var(--border))' }}
+              />
+              <Tooltip content={(props) => <CustomTooltip {...props} type="realizado" total={totalActual} />} />
               <Bar
                 dataKey="value" 
                 fill="hsl(var(--chart-2))"
-                radius={[0, 4, 4, 0]}
+                radius={[0, 8, 8, 0]}
                 animationBegin={100}
                 animationDuration={800}
+                maxBarSize={40}
               >
                 {actualData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                  <Cell key={`cell-${index}`} fill={`url(#gradient-realizado-${index})`} />
                 ))}
               </Bar>
             </BarChart>

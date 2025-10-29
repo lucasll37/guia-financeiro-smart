@@ -51,16 +51,23 @@ export function CategoryPieCharts({ data, accountId }: CategoryPieChartsProps) {
   const totalForecasted = forecastedData.reduce((sum, item) => sum + item.value, 0);
   const totalActual = actualData.reduce((sum, item) => sum + item.value, 0);
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload, total }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0];
-      const total = data.name.includes('Previsto') ? totalForecasted : totalActual;
+      const percent = total > 0 ? ((data.value / total) * 100).toFixed(1) : '0';
       return (
-        <div className="bg-background border border-border p-3 rounded-lg shadow-lg">
-          <p className="font-semibold">{data.payload.name}</p>
-          <p className="text-sm">
-            {maskValue(formatCurrency(data.value))} ({formatPercent(data.value, total)})
-          </p>
+        <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg p-4 shadow-lg">
+          <p className="font-semibold mb-2">{data.payload.name}</p>
+          <div className="space-y-1 text-sm">
+            <div className="flex justify-between gap-4">
+              <span className="text-muted-foreground">Valor:</span>
+              <span className="font-semibold">{maskValue(formatCurrency(data.value))}</span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="text-muted-foreground">Percentual:</span>
+              <span className="font-semibold">{percent}%</span>
+            </div>
+          </div>
         </div>
       );
     }
@@ -95,20 +102,20 @@ export function CategoryPieCharts({ data, accountId }: CategoryPieChartsProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Gráfico Previsto */}
-      <Card className="animate-fade-in">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card className="animate-fade-in overflow-hidden">
+        <CardHeader className="bg-gradient-to-br from-primary/10 to-primary/5 border-b">
+          <CardTitle className="flex items-center gap-2 text-xl">
             <div className="w-3 h-3 rounded-full bg-primary" />
-            Gastos Previstos por Categoria
+            Gastos Previstos
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Total: {maskValue(formatCurrency(totalForecasted))}
+          <p className="text-sm text-muted-foreground mt-1">
+            Total: <span className="font-semibold">{maskValue(formatCurrency(totalForecasted))}</span>
           </p>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={350}>
+        <CardContent className="pt-6">
+          <ResponsiveContainer width="100%" height={400}>
             <PieChart>
               <Pie
                 data={forecastedData}
@@ -116,26 +123,29 @@ export function CategoryPieCharts({ data, accountId }: CategoryPieChartsProps) {
                 cy="50%"
                 labelLine={false}
                 label={renderCustomLabel}
-                outerRadius={120}
-                innerRadius={60}
+                outerRadius={130}
+                innerRadius={70}
                 fill="#8884d8"
                 dataKey="value"
                 animationBegin={0}
                 animationDuration={800}
+                strokeWidth={2}
+                stroke="hsl(var(--background))"
               >
                 {forecastedData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={(props) => <CustomTooltip {...props} total={totalForecasted} />} />
               <Legend 
                 verticalAlign="bottom" 
-                height={36}
+                height={40}
+                iconType="circle"
                 formatter={(value, entry: any) => {
                   const percent = totalForecasted > 0 ? ((entry.payload.value / totalForecasted) * 100).toFixed(1) : '0';
                   return (
-                    <span className="text-sm">
-                      {entry.payload.name}: {maskValue(formatCurrency(entry.payload.value))} ({percent}%)
+                    <span className="text-xs">
+                      {entry.payload.name} ({percent}%)
                     </span>
                   );
                 }}
@@ -146,18 +156,18 @@ export function CategoryPieCharts({ data, accountId }: CategoryPieChartsProps) {
       </Card>
 
       {/* Gráfico Realizado */}
-      <Card className="animate-fade-in" style={{ animationDelay: "100ms" }}>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card className="animate-fade-in overflow-hidden" style={{ animationDelay: "100ms" }}>
+        <CardHeader className="bg-gradient-to-br from-chart-2/10 to-chart-2/5 border-b">
+          <CardTitle className="flex items-center gap-2 text-xl">
             <div className="w-3 h-3 rounded-full bg-chart-2" />
-            Gastos Realizados por Categoria
+            Gastos Realizados
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Total: {maskValue(formatCurrency(totalActual))}
+          <p className="text-sm text-muted-foreground mt-1">
+            Total: <span className="font-semibold">{maskValue(formatCurrency(totalActual))}</span>
           </p>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={350}>
+        <CardContent className="pt-6">
+          <ResponsiveContainer width="100%" height={400}>
             <PieChart>
               <Pie
                 data={actualData}
@@ -165,26 +175,29 @@ export function CategoryPieCharts({ data, accountId }: CategoryPieChartsProps) {
                 cy="50%"
                 labelLine={false}
                 label={renderCustomLabel}
-                outerRadius={120}
-                innerRadius={60}
+                outerRadius={130}
+                innerRadius={70}
                 fill="#8884d8"
                 dataKey="value"
                 animationBegin={100}
                 animationDuration={800}
+                strokeWidth={2}
+                stroke="hsl(var(--background))"
               >
                 {actualData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={(props) => <CustomTooltip {...props} total={totalActual} />} />
               <Legend 
                 verticalAlign="bottom" 
-                height={36}
+                height={40}
+                iconType="circle"
                 formatter={(value, entry: any) => {
                   const percent = totalActual > 0 ? ((entry.payload.value / totalActual) * 100).toFixed(1) : '0';
                   return (
-                    <span className="text-sm">
-                      {entry.payload.name}: {maskValue(formatCurrency(entry.payload.value))} ({percent}%)
+                    <span className="text-xs">
+                      {entry.payload.name} ({percent}%)
                     </span>
                   );
                 }}
