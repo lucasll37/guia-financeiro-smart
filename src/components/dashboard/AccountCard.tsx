@@ -40,14 +40,15 @@ export function AccountCard({
     const now = currentDate;
     const monthStart = startOfMonth(now);
     const monthEnd = endOfMonth(now);
-    const currentPeriod = format(now, "MMMM 'de' yyyy", { locale: ptBR });
+    const currentPeriod = format(now, "MMMM 'de' yyyy", {
+      locale: ptBR
+    });
     const periodMonth = format(monthEnd, "yyyy-MM");
     const periodEndStr = format(monthEnd, "yyyy-MM-dd");
-    
+
     // Transactions of selected period (considering credit card payment_month)
     const periodTransactions = transactions?.filter(t => {
       if (t.account_id !== account.id) return false;
-      
       if (t.credit_card_id && t.payment_month) {
         const txMonth = format(parseISO(t.payment_month as string), "yyyy-MM");
         return txMonth === periodMonth;
@@ -56,51 +57,37 @@ export function AccountCard({
         return txMonth === periodMonth;
       }
     }) || [];
-    
+
     // Balance in the selected period (revenues - expenses)
     const balance = periodTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-    
+
     // Expenses paid in the selected period (absolute)
-    const expenses = periodTransactions
-      .filter(t => Number(t.amount) < 0)
-      .reduce((sum, t) => sum + Math.abs(Number(t.amount)), 0);
+    const expenses = periodTransactions.filter(t => Number(t.amount) < 0).reduce((sum, t) => sum + Math.abs(Number(t.amount)), 0);
 
     // Forecast total for selected period (only expenses)
-    const accountForecasts = forecasts?.filter(
-      f => f.account_id === account.id && 
-           f.period_end === periodEndStr && 
-           Number(f.forecasted_amount) < 0
-    ) || [];
-
+    const accountForecasts = forecasts?.filter(f => f.account_id === account.id && f.period_end === periodEndStr && Number(f.forecasted_amount) < 0) || [];
     const budgetTotal = accountForecasts.reduce((sum, f) => sum + Math.abs(Number(f.forecasted_amount)), 0);
-    const completion = budgetTotal > 0 ? (expenses / budgetTotal) * 100 : 0;
-
-    return { balance, spent: expenses, budgetTotal, currentPeriod, completion };
+    const completion = budgetTotal > 0 ? expenses / budgetTotal * 100 : 0;
+    return {
+      balance,
+      spent: expenses,
+      budgetTotal,
+      currentPeriod,
+      completion
+    };
   }, [transactions, forecasts, account.id, currentDate]);
   return <Card className="group relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl border-2 hover:border-primary/50" onClick={() => navigate(`/app/contas/${account.id}`)}>
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-20"
-        onClick={(e) => {
-          e.stopPropagation();
-          setCurrentDate((prev) => addMonths(prev, -1));
-        }}
-        aria-label="Período anterior"
-      >
+      <Button variant="ghost" size="icon" className="absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-20" onClick={e => {
+      e.stopPropagation();
+      setCurrentDate(prev => addMonths(prev, -1));
+    }} aria-label="Período anterior">
         <ChevronLeft className="h-4 w-4" />
       </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-20"
-        onClick={(e) => {
-          e.stopPropagation();
-          setCurrentDate((prev) => addMonths(prev, 1));
-        }}
-        aria-label="Próximo período"
-      >
+      <Button variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-20" onClick={e => {
+      e.stopPropagation();
+      setCurrentDate(prev => addMonths(prev, 1));
+    }} aria-label="Próximo período">
         <ChevronRight className="h-4 w-4" />
       </Button>
       <CardHeader className="pb-3 relative z-10">
@@ -115,14 +102,14 @@ export function AccountCard({
       <CardContent className="relative z-10 space-y-4">
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Período Corrente</span>
+            <span className="text-muted-foreground">Período</span>
             <span className="font-medium capitalize">{currentPeriod}</span>
           </div>
         </div>
 
         <div className="space-y-3">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Despesas Previstas</span>
+            <span className="text-muted-foreground">Gastos Previstos</span>
             <span className="font-medium">
               {maskValue(new Intl.NumberFormat("pt-BR", {
               style: "currency",
@@ -132,7 +119,7 @@ export function AccountCard({
           </div>
           
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Despesas Pagas</span>
+            <span className="text-muted-foreground">Gastos Realizados</span>
             <span className="font-medium">
               {maskValue(new Intl.NumberFormat("pt-BR", {
               style: "currency",
