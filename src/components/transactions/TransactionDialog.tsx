@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -261,6 +261,24 @@ export function TransactionDialog({
   const filteredCategories = categories.filter((c) => 
     c.account_id === formData.account_id && c.parent_id !== null
   );
+  
+  // Agrupar subcategorias por categoria pai
+  const groupedSubcategories = useMemo(() => {
+    const groups: Record<string, { parent: Category; subcategories: Category[] }> = {};
+    
+    filteredCategories.forEach((subcat) => {
+      const parent = categories.find((c) => c.id === subcat.parent_id);
+      if (parent) {
+        if (!groups[parent.id]) {
+          groups[parent.id] = { parent, subcategories: [] };
+        }
+        groups[parent.id].subcategories.push(subcat);
+      }
+    });
+    
+    return Object.values(groups).sort((a, b) => a.parent.name.localeCompare(b.parent.name));
+  }, [filteredCategories, categories]);
+  
   const filteredCreditCards = creditCards?.filter((c) => c.account_id === formData.account_id) || [];
 
   return (
@@ -307,21 +325,32 @@ export function TransactionDialog({
                   <SelectValue placeholder="Selecione a subcategoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  {filteredCategories.length === 0 ? (
+                  {groupedSubcategories.length === 0 ? (
                     <div className="px-2 py-1.5 text-sm text-muted-foreground">
                       Nenhuma subcategoria disponível. Crie subcategorias primeiro.
                     </div>
                   ) : (
-                    filteredCategories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        <div className="flex items-center gap-2">
+                    groupedSubcategories.map(({ parent, subcategories }) => (
+                      <div key={parent.id}>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground flex items-center gap-2">
                           <div
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: category.color }}
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: parent.color }}
                           />
-                          {category.name}
+                          {parent.name}
                         </div>
-                      </SelectItem>
+                        {subcategories.map((category) => (
+                          <SelectItem key={category.id} value={category.id} className="pl-6">
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="w-3 h-3 rounded-full"
+                                style={{ backgroundColor: category.color }}
+                              />
+                              {category.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </div>
                     ))
                   )}
                 </SelectContent>
