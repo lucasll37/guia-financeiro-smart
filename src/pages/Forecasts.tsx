@@ -146,33 +146,27 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             Gerencie suas previsões de receitas e despesas por mês
           </p>
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground hidden sm:block">
-              Nova previsão:
-            </span>
-            <Button
-              variant="default"
-              size={isMobile ? "sm" : "default"}
-              onClick={() => setWizardOpen(true)}
-              disabled={filters.accountId === "all"}
-              className="gap-2"
-            >
-              <Sparkles className="h-4 w-4" />
-              <span>Assistente de Lançamento</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              size={isMobile ? "sm" : "default"}
-              onClick={handleCreateForecast} 
-              disabled={filters.accountId === "all"}
-              className="gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Manual</span>
-            </Button>
-          </div>
-          
+        <div className="flex items-center gap-2">
+          <Button
+            variant="default"
+            size={isMobile ? "sm" : "default"}
+            onClick={() => setWizardOpen(true)}
+            disabled={filters.accountId === "all"}
+            className="gap-2"
+          >
+            <Sparkles className="h-4 w-4" />
+            {!isMobile && <span>Assistente</span>}
+          </Button>
+          <Button 
+            variant="outline" 
+            size={isMobile ? "sm" : "default"}
+            onClick={handleCreateForecast} 
+            disabled={filters.accountId === "all"}
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            {!isMobile && <span>Manual</span>}
+          </Button>
           {filters.viewMode === "monthly" && (
             <Button
               variant="outline"
@@ -182,7 +176,7 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
               className="gap-2"
             >
               <Copy className="h-4 w-4" />
-              <span>Copiar Mês</span>
+              {!isMobile && <span>Copiar</span>}
             </Button>
           )}
         </div>
