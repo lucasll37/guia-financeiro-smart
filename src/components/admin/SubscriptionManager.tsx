@@ -164,6 +164,7 @@ export function SubscriptionManager() {
                       size="sm"
                       onClick={() => handlePromote(user.profile.id)}
                       disabled={updateSubscription.isPending}
+                      className="bg-green-600 hover:bg-green-700 text-white"
                     >
                       <ArrowUpCircle className="h-4 w-4" />
                       {!isMobile && <span className="ml-2">Promover para Pro</span>}
@@ -177,6 +178,7 @@ export function SubscriptionManager() {
                       variant="outline"
                       onClick={() => handleDemote(user.profile.id)}
                       disabled={updateSubscription.isPending}
+                      className="border-orange-500 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950"
                     >
                       <ArrowDownCircle className="h-4 w-4" />
                       {!isMobile && <span className="ml-2">Rebaixar para Free</span>}
