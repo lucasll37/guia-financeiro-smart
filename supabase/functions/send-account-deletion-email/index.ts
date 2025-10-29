@@ -40,6 +40,15 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Usuário não encontrado");
     }
 
+    // Buscar nome do usuário
+    const { data: profile } = await supabaseClient
+      .from("profiles")
+      .select("name")
+      .eq("id", user.id)
+      .single();
+
+    const userName = profile?.name || email.split('@')[0];
+
     // Gerar token de confirmação (válido por 1 hora)
     const token = crypto.randomUUID();
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
@@ -106,7 +115,7 @@ const handler = async (req: Request): Promise<Response> => {
                       <tr>
                         <td style="padding: 40px;">
                           <p style="margin: 0 0 24px; color: #374151; font-size: 16px; line-height: 1.6;">
-                            Olá! 👋
+                            Olá, <strong>${userName}</strong>! 👋
                           </p>
                           <p style="margin: 0 0 24px; color: #374151; font-size: 16px; line-height: 1.6;">
                             Recebemos uma solicitação para excluir permanentemente sua conta no Prospera.

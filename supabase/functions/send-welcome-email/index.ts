@@ -15,7 +15,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 });
 
 // Template de email elegante em HTML
-const createWelcomeEmailHTML = (confirmationUrl: string, userEmail: string): string => {
+const createWelcomeEmailHTML = (confirmationUrl: string, userName: string): string => {
   return `
     <!DOCTYPE html>
     <html lang="pt-BR">
@@ -47,7 +47,7 @@ const createWelcomeEmailHTML = (confirmationUrl: string, userEmail: string): str
                 <tr>
                   <td style="padding: 40px;">
                     <p style="margin: 0 0 24px; color: #374151; font-size: 16px; line-height: 1.6;">
-                      Olá <strong>${userEmail}</strong>! 👋
+                      Olá, <strong>${userName}</strong>! 👋
                     </p>
                     <p style="margin: 0 0 24px; color: #374151; font-size: 16px; line-height: 1.6;">
                       Estamos muito felizes em tê-lo(a) conosco! O Prospera é a sua nova ferramenta de gestão financeira pessoal e familiar.
@@ -181,13 +181,22 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("User ID found:", userId);
     }
 
+    // Buscar nome do usuário
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("name")
+      .eq("id", userId)
+      .single();
+
+    const userName = profile?.name || user.email.split('@')[0];
+
     // Gerar link de confirmação/magic link usando Supabase Admin
     // Nota: magiclink faz login automático, então redirecionamos para página de confirmação
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
       email: user.email,
       options: {
-        redirectTo: `${supabaseUrl}/auth?confirmed=true`
+        redirectTo: 'https://prospera.lucaslima.ai/auth?confirmed=true'
       }
     });
 
@@ -200,7 +209,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Confirmation URL generated successfully");
 
     // Gerar HTML do email
-    const html = createWelcomeEmailHTML(confirmationUrl, user.email);
+    const html = createWelcomeEmailHTML(confirmationUrl, userName);
 
     // Enviar email via Resend
     const emailResponse = await resend.emails.send({

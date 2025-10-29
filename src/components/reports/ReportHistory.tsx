@@ -47,10 +47,20 @@ export function ReportHistory({
         return;
       }
 
+      // Get user profile for name
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("name")
+        .eq("id", user.id)
+        .single();
+
+      const userName = profile?.name || user.email.split('@')[0];
+
       // Call edge function to send email
       const { error } = await supabase.functions.invoke("send-report-email", {
         body: {
           email: user.email,
+          userName,
           reportName: report.name,
           reportPeriod: report.period,
           reportType: report.type,

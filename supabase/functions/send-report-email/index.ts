@@ -8,6 +8,7 @@ const corsHeaders = {
 
 interface ReportEmailRequest {
   email: string;
+  userName: string;
   reportName: string;
   reportPeriod: string;
   reportType: string;
@@ -20,11 +21,12 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, reportName, reportPeriod, reportType }: ReportEmailRequest =
+    const { email, userName, reportName, reportPeriod, reportType }: ReportEmailRequest =
       await req.json();
 
     console.log("Sending report email:", {
       to: email,
+      userName,
       reportName,
       reportPeriod,
       reportType,
@@ -77,7 +79,7 @@ const handler = async (req: Request): Promise<Response> => {
                       <tr>
                         <td style="padding: 40px;">
                           <p style="margin: 0 0 24px; color: #374151; font-size: 16px; line-height: 1.6;">
-                            Olá! 👋
+                            Olá, <strong>${userName}</strong>! 👋
                           </p>
                           <p style="margin: 0 0 24px; color: #374151; font-size: 16px; line-height: 1.6;">
                             Seu relatório financeiro foi gerado com sucesso e está disponível para visualização na plataforma.

@@ -53,8 +53,17 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Buscar nome do usuário
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("name")
+      .eq("id", user.id)
+      .single();
+
+    const userName = profile?.name || email.split('@')[0];
+
     // Gerar link de reset usando generateLink
-    const redirectUrl = `${Deno.env.get('SUPABASE_URL')?.replace('https://', 'https://').replace('.supabase.co', '')}.lovableproject.com/reset-password`;
+    const redirectUrl = 'https://prospera.lucaslima.ai/reset-password';
     
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
       type: 'recovery',
@@ -107,7 +116,7 @@ const handler = async (req: Request): Promise<Response> => {
                     <tr>
                       <td style="padding: 40px;">
                         <p style="margin: 0 0 24px; color: #374151; font-size: 16px; line-height: 1.6;">
-                          Olá! 👋
+                          Olá, <strong>${userName}</strong>! 👋
                         </p>
                         <p style="margin: 0 0 24px; color: #374151; font-size: 16px; line-height: 1.6;">
                           Você solicitou a redefinição da sua senha. Clique no botão abaixo para criar uma nova senha:
