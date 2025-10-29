@@ -615,7 +615,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                     <TableHead className="text-right w-[140px]">Previsto</TableHead>
                     <TableHead className="text-right w-[140px]">Realizado</TableHead>
                     <TableHead className="text-right w-[140px]">Diferença</TableHead>
-                    <TableHead className="text-right w-[120px]">% Variação</TableHead>
+                    <TableHead className="text-right w-[180px]">Progresso</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -632,7 +632,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                       {maskValue(formatCurrency(previousBalance))}
                     </TableCell>
                     <TableCell className="text-right w-[140px]">-</TableCell>
-                    <TableCell className="text-right w-[120px]">-</TableCell>
+                    <TableCell className="text-right w-[180px]">-</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
