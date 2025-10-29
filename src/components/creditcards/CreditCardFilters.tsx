@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar, CalendarIcon, TrendingUp } from "lucide-react";
+import { Calendar, CalendarIcon } from "lucide-react";
 import { format, startOfMonth, endOfMonth, addYears } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMemo } from "react";
@@ -23,10 +23,9 @@ interface CreditCardFiltersProps {
   };
   onFilterChange: (filters: any) => void;
   accountId?: string;
-  onShowForecast?: () => void;
 }
 
-export function CreditCardFilters({ accounts, filters, onFilterChange, accountId, onShowForecast }: CreditCardFiltersProps) {
+export function CreditCardFilters({ accounts, filters, onFilterChange, accountId }: CreditCardFiltersProps) {
   // Generate month options (6 months before and after current month)
   const monthOptions = useMemo(() => {
     const options = [];
@@ -91,25 +90,13 @@ export function CreditCardFilters({ accounts, filters, onFilterChange, accountId
             {filters.viewMode === "monthly" ? "Visualização Mensal" : "Período Personalizado"}
           </span>
         </div>
-        <div className="flex gap-2">
-          {onShowForecast && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onShowForecast}
-            >
-              <TrendingUp className="h-4 w-4 mr-2" />
-              Projeção Completa
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={toggleViewMode}
-          >
-            {filters.viewMode === "monthly" ? "Personalizar Período" : "Voltar para Mensal"}
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={toggleViewMode}
+        >
+          {filters.viewMode === "monthly" ? "Personalizar Período" : "Voltar para Mensal"}
+        </Button>
       </div>
 
       <div className={`grid gap-4 p-4 border rounded-lg bg-card ${accountId ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>

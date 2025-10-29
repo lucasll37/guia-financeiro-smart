@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { format, startOfMonth, endOfMonth, addMonths } from "date-fns";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useCreditCards } from "@/hooks/useCreditCards";
@@ -109,81 +109,6 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
     await deleteCreditCard.mutateAsync(id);
   };
 
-  const handleShowForecast = () => {
-    if (!transactions || transactions.length === 0) {
-      toast({
-        title: "Sem lançamentos",
-        description: "Não há lançamentos para visualizar",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Find the earliest and latest transaction dates
-    const cardTransactions = transactions.filter(t => t.credit_card_id);
-    
-    if (cardTransactions.length === 0) {
-      toast({
-        title: "Sem lançamentos",
-        description: "Não há lançamentos de cartão para visualizar",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Get all payment months
-    const paymentMonths = cardTransactions
-      .filter(t => t.payment_month)
-      .map(t => new Date(t.payment_month!));
-
-    // Also include transaction dates for transactions without payment_month
-    const transactionDates = cardTransactions
-      .filter(t => !t.payment_month)
-      .map(t => new Date(t.date));
-
-    const allDates = [...paymentMonths, ...transactionDates];
-    
-    if (allDates.length === 0) {
-      toast({
-        title: "Sem datas",
-        description: "Não há datas de pagamento para visualizar",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const earliestDate = new Date(Math.min(...allDates.map(d => d.getTime())));
-    const latestDate = new Date(Math.max(...allDates.map(d => d.getTime())));
-
-    // Check if there are recurring transactions
-    const hasRecurring = cardTransactions.some(t => t.is_recurring);
-    
-    // If there are recurring transactions, add 6 months to the latest date
-    const endDate = hasRecurring 
-      ? addMonths(latestDate, 6)
-      : latestDate;
-
-    const startDate = format(startOfMonth(earliestDate), "yyyy-MM-dd");
-    const finalEndDate = format(endOfMonth(endDate), "yyyy-MM-dd");
-    
-    setFilters({
-      ...filters,
-      viewMode: "custom",
-      startDate,
-      endDate: finalEndDate,
-    });
-
-    // Calculate months difference properly
-    const startMonth = earliestDate.getFullYear() * 12 + earliestDate.getMonth();
-    const endMonth = endDate.getFullYear() * 12 + endDate.getMonth();
-    const monthsDiff = endMonth - startMonth + 1; // +1 to include both start and end months
-    
-    toast({
-      title: "Projeção expandida",
-      description: `Visualizando ${monthsDiff} ${monthsDiff === 1 ? 'mês' : 'meses'} de lançamentos${hasRecurring ? ' (incluindo projeção de recorrentes)' : ''}`,
-    });
-  };
-
   if (!user) return null;
 
   return (
@@ -206,7 +131,6 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
         filters={filters}
         onFilterChange={setFilters}
         accountId={propAccountId}
-        onShowForecast={handleShowForecast}
       />
 
       {isLoading ? (
