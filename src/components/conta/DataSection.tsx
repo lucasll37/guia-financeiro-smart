@@ -4,17 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Download, Trash2, Loader2, AlertTriangle, TrendingUp, FileSpreadsheet } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Download, Loader2, TrendingUp, FileSpreadsheet } from "lucide-react";
 import * as XLSX from "xlsx";
 import { format } from "date-fns";
 
@@ -23,8 +13,6 @@ export function DataSection() {
   const { toast } = useToast();
   const [downloading, setDownloading] = useState(false);
   const [downloadingInvestments, setDownloadingInvestments] = useState(false);
-  const [sendingEmail, setSendingEmail] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handleDownloadExcel = async () => {
     if (!user?.id) return;
@@ -418,34 +406,6 @@ export function DataSection() {
     }
   };
 
-  const handleRequestDeleteAccount = async () => {
-    if (!user?.email) return;
-    
-    setSendingEmail(true);
-    try {
-      const { error } = await supabase.functions.invoke("send-account-deletion-email", {
-        body: { email: user.email },
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Email enviado",
-        description: "Verifique seu email para confirmar a exclusão da conta",
-      });
-      
-      setShowDeleteDialog(false);
-    } catch (error: any) {
-      toast({
-        title: "Erro ao enviar email",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setSendingEmail(false);
-    }
-  };
-
   return (
     <>
       <Card className="animate-fade-in">
@@ -504,76 +464,9 @@ export function DataSection() {
                 Baixar Excel
               </Button>
             </div>
-
-            <div className="flex items-start justify-between p-4 border rounded-lg border-destructive/50 bg-destructive/5">
-              <div className="space-y-1 flex-1">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-destructive" />
-                  <h3 className="font-semibold text-destructive">Excluir Conta</h3>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Esta ação é irreversível. Todos os seus dados serão permanentemente excluídos
-                  sem possibilidade de recuperação.
-                </p>
-              </div>
-              <Button
-                onClick={() => setShowDeleteDialog(true)}
-                variant="destructive"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Excluir Conta
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
-
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-              Confirmar Exclusão de Conta
-            </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
-              <p>
-                <strong>ATENÇÃO:</strong> Esta ação é permanente e irreversível.
-              </p>
-              <p>
-                Enviaremos um email de confirmação para <strong>{user?.email}</strong> com
-                instruções para concluir a exclusão da sua conta.
-              </p>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-
-          <div className="space-y-4 py-4">
-            <div className="bg-destructive/10 p-3 rounded-md border border-destructive/30">
-              <p className="text-destructive font-semibold text-sm mb-2">
-                Todos os seus dados serão permanentemente excluídos:
-              </p>
-              <ul className="list-disc list-inside space-y-1 text-xs">
-                <li>Todas as contas e lançamentos</li>
-                <li>Categorias e subcategorias personalizadas</li>
-                <li>Previsões e orçamentos</li>
-                <li>Investimentos e metas</li>
-                <li>Configurações e preferências</li>
-              </ul>
-            </div>
-          </div>
-
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleRequestDeleteAccount}
-              disabled={sendingEmail}
-              className="bg-destructive hover:bg-destructive/90"
-            >
-              {sendingEmail && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Enviar Email de Confirmação
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }
