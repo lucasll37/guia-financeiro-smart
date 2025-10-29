@@ -35,7 +35,7 @@ const Home = () => {
   const ctaSection = useScrollAnimation(0.1);
   
   const plugin = useRef(
-    Autoplay({ delay: 3000, stopOnInteraction: true })
+    Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: true })
   );
 
   // Forçar tema dark na Landing Page e restaurar tema anterior ao sair
@@ -318,10 +318,8 @@ const Home = () => {
                 <CarouselItem 
                   key={index} 
                   className="md:basis-1/2 lg:basis-1/3"
-                  onMouseEnter={() => plugin.current.stop()}
-                  onMouseLeave={() => plugin.current.reset()}
                 >
-                  <Card className="border-primary/10 h-full">
+                  <Card className="border-primary/10 h-full hover:border-primary/30 transition-colors">
                     <CardContent className="pt-6 space-y-4">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
