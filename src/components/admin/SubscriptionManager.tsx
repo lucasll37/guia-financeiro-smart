@@ -121,24 +121,24 @@ export function SubscriptionManager() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-3 md:pb-6">
         <div className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
-          <CardTitle>Gerenciar Assinaturas</CardTitle>
+          <Users className="h-4 w-4 md:h-5 md:w-5" />
+          <CardTitle className="text-base md:text-lg">Gerenciar Assinaturas</CardTitle>
         </div>
-        <CardDescription>
+        <CardDescription className="text-xs md:text-sm">
           Promova ou rebaixe usuários entre os planos Free e Pro
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-3 md:space-y-4">
           <div className="flex gap-2">
             <input
               type="text"
               placeholder="Buscar por email..."
               value={searchEmail}
               onChange={(e) => setSearchEmail(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-9 md:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs md:text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
 
@@ -146,16 +146,16 @@ export function SubscriptionManager() {
             {filteredUsers?.map((user) => (
               <div
                 key={user.profile.id}
-                className="flex items-center justify-between p-4 border rounded-lg"
+                className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-3 md:p-4 border rounded-lg"
               >
-                <div className="flex-1">
-                  <div className="font-medium">{user.profile.name || "Sem nome"}</div>
-                  <div className="text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-sm md:text-base truncate">{user.profile.name || "Sem nome"}</div>
+                  <div className="text-xs md:text-sm text-muted-foreground truncate">
                     {user.profile.email}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 md:gap-3 justify-between md:justify-end">
                   {getPlanBadge(user.subscription?.plan || "free")}
                   
                   {/* Só mostrar botão de promover se o plano for free */}
@@ -164,9 +164,9 @@ export function SubscriptionManager() {
                       size="sm"
                       onClick={() => handlePromote(user.profile.id)}
                       disabled={updateSubscription.isPending}
-                      className="bg-green-600 hover:bg-green-700 text-white"
+                      className="bg-green-600 hover:bg-green-700 text-white text-xs md:text-sm h-8 md:h-9"
                     >
-                      <ArrowUpCircle className="h-4 w-4" />
+                      <ArrowUpCircle className="h-3 w-3 md:h-4 md:w-4" />
                       {!isMobile && <span className="ml-2">Promover para Pro</span>}
                     </Button>
                   )}
@@ -177,9 +177,9 @@ export function SubscriptionManager() {
                       size="sm"
                       onClick={() => handleDemote(user.profile.id)}
                       disabled={updateSubscription.isPending}
-                      className="bg-orange-600 hover:bg-orange-700 text-white"
+                      className="bg-orange-600 hover:bg-orange-700 text-white text-xs md:text-sm h-8 md:h-9"
                     >
-                      <ArrowDownCircle className="h-4 w-4" />
+                      <ArrowDownCircle className="h-3 w-3 md:h-4 md:w-4" />
                       {!isMobile && <span className="ml-2">Rebaixar para Free</span>}
                     </Button>
                   )}
@@ -189,7 +189,7 @@ export function SubscriptionManager() {
           </div>
 
           {filteredUsers?.length === 0 && (
-            <p className="text-center text-muted-foreground py-8">
+            <p className="text-center text-muted-foreground py-6 md:py-8 text-xs md:text-sm">
               Nenhum usuário encontrado
             </p>
           )}

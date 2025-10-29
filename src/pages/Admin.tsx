@@ -356,42 +356,42 @@ export default function Admin() {
   };
 
   return (
-    <div className="container max-w-7xl py-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Users className="h-8 w-8" />
+    <div className="container max-w-7xl py-4 md:py-8 px-4">
+      <div className="mb-4 md:mb-6">
+        <h1 className="text-xl md:text-3xl font-bold flex items-center gap-2">
+          <Users className="h-6 w-6 md:h-8 md:w-8" />
           Painel de Administração
         </h1>
-        <p className="text-muted-foreground">Gerencie usuários e cupons promocionais</p>
+        <p className="text-sm md:text-base text-muted-foreground">Gerencie usuários e cupons promocionais</p>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="overview" className="flex items-center gap-2">
+      <Tabs defaultValue="overview" className="space-y-4 md:space-y-6">
+        <TabsList className="w-full md:w-auto grid grid-cols-4 md:inline-flex gap-1">
+          <TabsTrigger value="overview" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 md:px-3">
             <BarChart className="h-4 w-4" />
             {!isMobile && <span>Visão Geral</span>}
           </TabsTrigger>
-          <TabsTrigger value="users" className="flex items-center gap-2">
+          <TabsTrigger value="users" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 md:px-3">
             <Users className="h-4 w-4" />
             {!isMobile && <span>Usuários</span>}
           </TabsTrigger>
-          <TabsTrigger value="subscriptions" className="flex items-center gap-2">
+          <TabsTrigger value="subscriptions" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 md:px-3">
             <CreditCard className="h-4 w-4" />
             {!isMobile && <span>Assinaturas</span>}
           </TabsTrigger>
-          <TabsTrigger value="coupons" className="flex items-center gap-2">
+          <TabsTrigger value="coupons" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 md:px-3">
             <Gift className="h-4 w-4" />
             {!isMobile && <span>Cupons</span>}
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
+          <TabsTrigger value="notifications" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 md:px-3">
             <Bell className="h-4 w-4" />
             {!isMobile && <span>Notificações</span>}
           </TabsTrigger>
-          <TabsTrigger value="limits" className="flex items-center gap-2">
+          <TabsTrigger value="limits" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 md:px-3">
             <Settings className="h-4 w-4" />
             {!isMobile && <span>Limites de Planos</span>}
           </TabsTrigger>
-          <TabsTrigger value="logs" className="flex items-center gap-2">
+          <TabsTrigger value="logs" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 md:px-3">
             <FileText className="h-4 w-4" />
             {!isMobile && <span>Logs de Ações</span>}
           </TabsTrigger>
