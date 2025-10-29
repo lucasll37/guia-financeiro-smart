@@ -146,32 +146,40 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             Gerencie suas previsões de receitas e despesas por mês
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {filters.viewMode === "monthly" && (
-            <>
-              <Button
-                variant="outline"
-                onClick={() => setWizardOpen(true)}
-                disabled={filters.accountId === "all"}
-                className="gap-2"
-              >
-                <Sparkles className="h-4 w-4" />
-                {!isMobile && <span>Assistente</span>}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setCopyDialogOpen(true)}
-                disabled={filters.accountId === "all" || filteredForecasts.length === 0}
-              >
-                <Copy className="h-4 w-4" />
-                {!isMobile && <span className="ml-2">Copiar Mês</span>}
-              </Button>
-            </>
+            <Button
+              variant="outline"
+              onClick={() => setCopyDialogOpen(true)}
+              disabled={filters.accountId === "all" || filteredForecasts.length === 0}
+            >
+              <Copy className="h-4 w-4" />
+              {!isMobile && <span className="ml-2">Copiar Mês</span>}
+            </Button>
           )}
-          <Button onClick={handleCreateForecast} disabled={filters.accountId === "all"}>
-            <Plus className="h-4 w-4" />
-            {!isMobile && <span className="ml-2">Nova Previsão</span>}
-          </Button>
+          
+          <div className="flex gap-2 border-l pl-3">
+            <Button
+              variant="default"
+              onClick={() => setWizardOpen(true)}
+              disabled={filters.accountId === "all"}
+              className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+            >
+              <Sparkles className="h-4 w-4" />
+              {!isMobile && <span>Assistente de Orçamento</span>}
+              {isMobile && <span>Assistente</span>}
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleCreateForecast} 
+              disabled={filters.accountId === "all"}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              {!isMobile && <span>Lançamento Manual</span>}
+              {isMobile && <span>Manual</span>}
+            </Button>
+          </div>
         </div>
       </div>
 
