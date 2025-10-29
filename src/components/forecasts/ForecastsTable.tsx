@@ -175,78 +175,50 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
   const renderGroupedForecasts = (groupedData: Record<string, { parent: any; children: any[]; total: number }>) => {
     return Object.entries(groupedData).map(([parentId, data]) => {
       const isExpanded = expandedCategories.has(parentId);
-      const hasMultipleChildren = data.children.length > 1;
       
       return (
         <>
           {/* Categoria Pai */}
           <TableRow 
             key={parentId} 
-            className={hasMultipleChildren ? "cursor-pointer hover:bg-muted/50 font-medium" : "font-medium"}
-            onClick={hasMultipleChildren ? () => toggleCategoryExpansion(parentId) : undefined}
+            className="cursor-pointer hover:bg-muted/50 font-medium"
+            onClick={() => toggleCategoryExpansion(parentId)}
           >
             {showAccountName && <TableCell />}
             <TableCell>
               <div className="flex items-center gap-2">
-                {hasMultipleChildren && (
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-6 w-6 p-0"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleCategoryExpansion(parentId);
-                    }}
-                  >
-                    {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                  </Button>
-                )}
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6 p-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleCategoryExpansion(parentId);
+                  }}
+                >
+                  {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                </Button>
                 <div
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: data.parent?.color || "#6366f1" }}
                 />
                 <span>{data.parent?.name || "Sem categoria"}</span>
-                {hasMultipleChildren && (
-                  <span className="text-xs text-muted-foreground">({data.children.length})</span>
-                )}
+                <span className="text-xs text-muted-foreground">({data.children.length})</span>
               </div>
             </TableCell>
             <TableCell className="text-muted-foreground">
-              {!hasMultipleChildren && (data.children[0]?.notes || "-")}
+              {/* Vazio para categorias agrupadas */}
             </TableCell>
             <TableCell className="text-right font-medium">
               {formatCurrency(data.total)}
             </TableCell>
             <TableCell className="text-right">
-              {!hasMultipleChildren && (
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit(data.children[0]);
-                    }}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete(data.children[0].id);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
+              {/* Ações disponíveis apenas nas subcategorias */}
             </TableCell>
           </TableRow>
           
           {/* Subcategorias */}
-          {hasMultipleChildren && isExpanded && data.children.map((forecast) => (
+          {isExpanded && data.children.map((forecast) => (
             <TableRow key={forecast.id} className="bg-muted/20">
               {showAccountName && <TableCell />}
               <TableCell className="pl-12">
