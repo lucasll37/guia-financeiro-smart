@@ -8,7 +8,12 @@ export const useIsAdmin = () => {
   return useQuery({
     queryKey: ["is-admin", user?.id],
     queryFn: async () => {
-      if (!user?.id) return false;
+      if (!user?.id) {
+        console.log("useIsAdmin: No user ID");
+        return false;
+      }
+
+      console.log("useIsAdmin: Checking for user", user.id);
 
       const { data, error } = await supabase
         .from("user_roles")
@@ -22,6 +27,7 @@ export const useIsAdmin = () => {
         return false;
       }
 
+      console.log("useIsAdmin: Result", { data, isAdmin: !!data });
       return !!data;
     },
     enabled: !!user?.id,
