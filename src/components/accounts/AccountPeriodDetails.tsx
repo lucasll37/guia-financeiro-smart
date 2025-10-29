@@ -314,38 +314,28 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                       {/* Subtabela de transações */}
                       {hasTransactions && isExpanded && (
                         <TableRow>
-                          <TableCell colSpan={6} className="bg-gradient-to-br from-muted/50 to-muted/30 p-0 border-t border-border/50">
-                            <div className="px-6 py-4 animate-accordion-down">
-                              <div className="space-y-2">
-                                {data.transactions.map((t, idx) => (
+                          <TableCell colSpan={6} className="bg-muted/20 p-0">
+                            <div className="pl-16 pr-6 py-2 animate-accordion-down">
+                              <div className="border-l-2 border-primary/30 pl-4">
+                                {data.transactions.map((t) => (
                                   <div 
                                     key={t.id} 
-                                    className="group flex items-center justify-between py-3 px-4 rounded-lg bg-background/80 backdrop-blur-sm border border-border/50 hover:border-primary/40 hover:bg-accent/50 hover:shadow-sm transition-all duration-200"
+                                    className="flex items-center justify-between py-2 border-b border-border/30 last:border-b-0 hover:bg-accent/30 transition-colors"
                                   >
                                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                                      <div className="flex items-center gap-2 min-w-[60px]">
-                                        <span className="text-xs font-semibold text-foreground/70 bg-muted/80 px-2.5 py-1.5 rounded-md flex-shrink-0 border border-border/30">
-                                          {format(new Date(t.date), "dd/MM")}
-                                        </span>
-                                      </div>
-                                      <div className="flex-1 min-w-0">
-                                        <div className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
-                                          {t.description}
-                                        </div>
-                                        {t.credit_card_id && t.credit_cards && (
-                                          <div className="flex items-center gap-1 mt-1">
-                                            <span className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-950/30 px-2 py-0.5 rounded-md border border-blue-200/20 dark:border-blue-800/30">
-                                              💳 {t.credit_cards.name}
-                                            </span>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                    <div className="flex-shrink-0 ml-4">
-                                      <span className="font-bold text-base text-foreground group-hover:text-primary transition-colors">
-                                        {maskValue(formatCurrency(Number(t.amount)))}
+                                      <span className="text-xs text-muted-foreground w-10 flex-shrink-0">
+                                        {format(new Date(t.date), "dd/MM")}
                                       </span>
+                                      <span className="text-sm truncate">{t.description}</span>
+                                      {t.credit_card_id && t.credit_cards && (
+                                        <span className="text-xs text-muted-foreground flex-shrink-0">
+                                          ({t.credit_cards.name})
+                                        </span>
+                                      )}
                                     </div>
+                                    <span className="text-sm font-medium flex-shrink-0 ml-4">
+                                      {maskValue(formatCurrency(Number(t.amount)))}
+                                    </span>
                                   </div>
                                 ))}
                               </div>
@@ -461,38 +451,28 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                       {/* Subtabela de transações */}
                       {hasTransactions && isExpanded && (
                         <TableRow>
-                          <TableCell colSpan={6} className="bg-gradient-to-br from-muted/50 to-muted/30 p-0 border-t border-border/50">
-                            <div className="px-6 py-4 animate-accordion-down">
-                              <div className="space-y-2">
-                                {data.transactions.map((t, idx) => (
+                          <TableCell colSpan={6} className="bg-muted/20 p-0">
+                            <div className="pl-16 pr-6 py-2 animate-accordion-down">
+                              <div className="border-l-2 border-primary/30 pl-4">
+                                {data.transactions.map((t) => (
                                   <div 
                                     key={t.id} 
-                                    className="group flex items-center justify-between py-3 px-4 rounded-lg bg-background/80 backdrop-blur-sm border border-border/50 hover:border-primary/40 hover:bg-accent/50 hover:shadow-sm transition-all duration-200"
+                                    className="flex items-center justify-between py-2 border-b border-border/30 last:border-b-0 hover:bg-accent/30 transition-colors"
                                   >
                                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                                      <div className="flex items-center gap-2 min-w-[60px]">
-                                        <span className="text-xs font-semibold text-foreground/70 bg-muted/80 px-2.5 py-1.5 rounded-md flex-shrink-0 border border-border/30">
-                                          {format(new Date(t.date), "dd/MM")}
-                                        </span>
-                                      </div>
-                                      <div className="flex-1 min-w-0">
-                                        <div className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
-                                          {t.description}
-                                        </div>
-                                        {t.credit_card_id && t.credit_cards && (
-                                          <div className="flex items-center gap-1 mt-1">
-                                            <span className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-950/30 px-2 py-0.5 rounded-md border border-blue-200/20 dark:border-blue-800/30">
-                                              💳 {t.credit_cards.name}
-                                            </span>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                    <div className="flex-shrink-0 ml-4">
-                                      <span className="font-bold text-base text-foreground group-hover:text-primary transition-colors">
-                                        {maskValue(formatCurrency(Number(t.amount)))}
+                                      <span className="text-xs text-muted-foreground w-10 flex-shrink-0">
+                                        {format(new Date(t.date), "dd/MM")}
                                       </span>
+                                      <span className="text-sm truncate">{t.description}</span>
+                                      {t.credit_card_id && t.credit_cards && (
+                                        <span className="text-xs text-muted-foreground flex-shrink-0">
+                                          ({t.credit_cards.name})
+                                        </span>
+                                      )}
                                     </div>
+                                    <span className="text-sm font-medium flex-shrink-0 ml-4">
+                                      {maskValue(formatCurrency(Number(t.amount)))}
+                                    </span>
                                   </div>
                                 ))}
                               </div>
