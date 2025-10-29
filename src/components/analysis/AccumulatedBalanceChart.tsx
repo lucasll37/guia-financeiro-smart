@@ -157,7 +157,23 @@ export function AccumulatedBalanceChart({
   return <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className={`border-chart-2/20 bg-gradient-to-br ${balanceMetrics.finalBalance >= 0 ? 'from-chart-2/5 to-chart-2/10' : 'from-destructive/5 to-destructive/10'}`}>
+        <Card className={`border-chart-2/20 bg-gradient-to-br ${balanceMetrics.initialBalance >= 0 ? 'from-chart-2/5 to-chart-2/10' : 'from-destructive/5 to-destructive/10'}`}>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Saldo Inicial</p>
+                <p className={`text-2xl font-bold mt-1 ${balanceMetrics.initialBalance >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
+                  {maskValue(formatCurrency(balanceMetrics.initialBalance))}
+                </p>
+              </div>
+              <div className={`h-12 w-12 rounded-full flex items-center justify-center ${balanceMetrics.initialBalance >= 0 ? 'bg-chart-2/10' : 'bg-destructive/10'}`}>
+                {balanceMetrics.initialBalance >= 0 ? <TrendingUp className="h-6 w-6 text-chart-2" /> : <TrendingDown className="h-6 w-6 text-destructive" />}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className={`border-chart-3/20 bg-gradient-to-br ${balanceMetrics.finalBalance >= 0 ? 'from-chart-2/5 to-chart-2/10' : 'from-destructive/5 to-destructive/10'}`}>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -168,22 +184,6 @@ export function AccumulatedBalanceChart({
               </div>
               <div className={`h-12 w-12 rounded-full flex items-center justify-center ${balanceMetrics.finalBalance >= 0 ? 'bg-chart-2/10' : 'bg-destructive/10'}`}>
                 {balanceMetrics.finalBalance >= 0 ? <TrendingUp className="h-6 w-6 text-chart-2" /> : <TrendingDown className="h-6 w-6 text-destructive" />}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className={`border-chart-3/20 bg-gradient-to-br ${balanceMetrics.totalVariation >= 0 ? 'from-chart-2/5 to-chart-2/10' : 'from-destructive/5 to-destructive/10'}`}>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Variação Total</p>
-                <p className={`text-2xl font-bold mt-1 ${balanceMetrics.totalVariation >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
-                  {balanceMetrics.totalVariation >= 0 ? '+' : ''}{maskValue(formatCurrency(balanceMetrics.totalVariation))}
-                </p>
-              </div>
-              <div className={`h-12 w-12 rounded-full flex items-center justify-center ${balanceMetrics.totalVariation >= 0 ? 'bg-chart-2/10' : 'bg-destructive/10'}`}>
-                {balanceMetrics.totalVariation >= 0 ? <TrendingUp className="h-6 w-6 text-chart-2" /> : <TrendingDown className="h-6 w-6 text-destructive" />}
               </div>
             </div>
           </CardContent>
