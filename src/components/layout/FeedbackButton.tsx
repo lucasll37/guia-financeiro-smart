@@ -93,7 +93,7 @@ export function FeedbackButton() {
           <DropdownMenuTrigger asChild>
             <Button
               size="lg"
-              className="h-16 w-16 rounded-full shadow-2xl hover:shadow-purple-500/30 dark:hover:shadow-purple-400/30 hover:scale-110 transition-all duration-300 bg-gradient-to-br from-purple-600 via-purple-500 to-purple-600 dark:from-purple-500 dark:via-purple-400 dark:to-purple-500 border-2 border-background group animate-fade-in text-white"
+              className="h-16 w-16 rounded-full shadow-2xl hover:shadow-primary/50 hover:scale-110 transition-all duration-300 bg-gradient-to-br from-primary via-primary to-primary/80 border-2 border-background group animate-fade-in"
             >
               <MessageSquare className="h-7 w-7 transition-transform group-hover:rotate-12" />
             </Button>
