@@ -996,6 +996,20 @@ export default function Admin() {
           </AlertDialogHeader>
           
           <div className="space-y-4 py-4">
+            <div className="bg-destructive/10 p-3 rounded-md border border-destructive/30">
+              <p className="text-destructive font-semibold text-sm mb-2">
+                Todos os dados serão permanentemente excluídos:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-xs">
+                <li>Todas as contas e lançamentos</li>
+                <li>Categorias e subcategorias personalizadas</li>
+                <li>Previsões e orçamentos</li>
+                <li>Investimentos e retornos mensais</li>
+                <li>Metas e configurações</li>
+                <li>Dados de autenticação</li>
+              </ul>
+            </div>
+
             <div className="flex items-center gap-2">
               <div className="flex-1 p-3 bg-muted rounded-md font-mono text-sm">
                 {userToDelete?.email}
