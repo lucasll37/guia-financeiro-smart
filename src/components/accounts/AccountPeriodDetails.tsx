@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChevronLeft, ChevronRight, ChevronDown, ChevronRight as ChevronRightIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useCategories } from "@/hooks/useCategories";
 import { useForecasts } from "@/hooks/useForecasts";
@@ -39,6 +40,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
   const closingDay = account.closing_day || 1;
   const [currentDate, setCurrentDate] = useState(new Date());
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [incomeExpanded, setIncomeExpanded] = useState(true);
+  const [expenseExpanded, setExpenseExpanded] = useState(true);
   const { maskValue } = useMaskValues();
   
   const toggleCategoryExpansion = (categoryKey: string) => {
@@ -220,20 +223,29 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
       <div className="space-y-4">
         {/* Receitas */}
         {Object.keys(incomeTotals).length > 0 && (
-          <div className="border rounded-lg overflow-hidden">
-            <div className="bg-green-50 dark:bg-green-950/20 px-4 py-2 border-b">
-              <h3 className="font-semibold text-green-700 dark:text-green-400">Receitas</h3>
-            </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[300px]">Categoria</TableHead>
-                  <TableHead className="text-right w-[140px]">Previsto</TableHead>
-                  <TableHead className="text-right w-[140px]">Realizado</TableHead>
-                  <TableHead className="text-right w-[140px]">Diferença</TableHead>
-                  <TableHead className="text-right w-[120px]">% Variação</TableHead>
-                </TableRow>
-              </TableHeader>
+          <Collapsible open={incomeExpanded} onOpenChange={setIncomeExpanded}>
+            <div className="border rounded-lg overflow-hidden">
+              <CollapsibleTrigger asChild>
+                <div className="bg-green-50 dark:bg-green-950/20 px-4 py-2 border-b cursor-pointer hover:bg-green-100 dark:hover:bg-green-950/30 transition-colors flex items-center justify-between">
+                  <h3 className="font-semibold text-green-700 dark:text-green-400">Receitas</h3>
+                  {incomeExpanded ? (
+                    <ChevronDown className="h-4 w-4 text-green-700 dark:text-green-400" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-green-700 dark:text-green-400" />
+                  )}
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[200px]">Categoria</TableHead>
+                      <TableHead className="text-right w-[140px]">Previsto</TableHead>
+                      <TableHead className="text-right w-[140px]">Realizado</TableHead>
+                      <TableHead className="text-right w-[140px]">Diferença</TableHead>
+                      <TableHead className="text-right w-[120px]">% Variação</TableHead>
+                    </TableRow>
+                  </TableHeader>
               <TableBody>
                 {Object.entries(incomeTotals).map(([categoryId, data]) => {
                   const difference = data.forecasted - data.actual;
@@ -249,7 +261,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   return (
                     <>
                       <TableRow key={categoryId} className={hasMultipleTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
-                        <TableCell onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined} className="w-[300px]">
+                        <TableCell onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined} className="w-[200px]">
                           <div className="flex items-center gap-2">
                             <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                               {hasMultipleTransactions && (
@@ -333,25 +345,36 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 </TableRow>
               </TableBody>
             </Table>
+              </CollapsibleContent>
           </div>
+          </Collapsible>
         )}
 
         {/* Despesas */}
         {Object.keys(expenseTotals).length > 0 && (
-          <div className="border rounded-lg overflow-hidden">
-            <div className="bg-red-50 dark:bg-red-950/20 px-4 py-2 border-b">
-              <h3 className="font-semibold text-red-700 dark:text-red-400">Despesas</h3>
-            </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[300px]">Categoria</TableHead>
-                  <TableHead className="text-right w-[140px]">Previsto</TableHead>
-                  <TableHead className="text-right w-[140px]">Realizado</TableHead>
-                  <TableHead className="text-right w-[140px]">Diferença</TableHead>
-                  <TableHead className="text-right w-[120px]">% Variação</TableHead>
-                </TableRow>
-              </TableHeader>
+          <Collapsible open={expenseExpanded} onOpenChange={setExpenseExpanded}>
+            <div className="border rounded-lg overflow-hidden">
+              <CollapsibleTrigger asChild>
+                <div className="bg-red-50 dark:bg-red-950/20 px-4 py-2 border-b cursor-pointer hover:bg-red-100 dark:hover:bg-red-950/30 transition-colors flex items-center justify-between">
+                  <h3 className="font-semibold text-red-700 dark:text-red-400">Despesas</h3>
+                  {expenseExpanded ? (
+                    <ChevronDown className="h-4 w-4 text-red-700 dark:text-red-400" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-red-700 dark:text-red-400" />
+                  )}
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[200px]">Categoria</TableHead>
+                      <TableHead className="text-right w-[140px]">Previsto</TableHead>
+                      <TableHead className="text-right w-[140px]">Realizado</TableHead>
+                      <TableHead className="text-right w-[140px]">Diferença</TableHead>
+                      <TableHead className="text-right w-[120px]">% Variação</TableHead>
+                    </TableRow>
+                  </TableHeader>
               <TableBody>
                 {Object.entries(expenseTotals).map(([categoryId, data]) => {
                     const difference = data.forecasted - data.actual;
@@ -367,7 +390,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   return (
                     <>
                       <TableRow key={categoryId} className={hasMultipleTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
-                        <TableCell onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined} className="w-[300px]">
+                        <TableCell onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined} className="w-[200px]">
                           <div className="flex items-center gap-2">
                             <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                               {hasMultipleTransactions && (
@@ -451,7 +474,9 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 </TableRow>
               </TableBody>
             </Table>
+              </CollapsibleContent>
           </div>
+          </Collapsible>
         )}
 
         {/* Saldo Remanescente */}
@@ -462,7 +487,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[300px]">Descrição</TableHead>
+                <TableHead className="w-[200px]">Descrição</TableHead>
                 <TableHead className="text-right w-[140px]">Previsto</TableHead>
                 <TableHead className="text-right w-[140px]">Realizado</TableHead>
                 <TableHead className="text-right w-[140px]">Diferença</TableHead>
@@ -471,7 +496,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
             </TableHeader>
             <TableBody>
               <TableRow>
-                <TableCell className="w-[300px]">
+                <TableCell className="w-[200px]">
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 flex-shrink-0" />
                     <div className="w-3 h-3 rounded-full flex-shrink-0 bg-blue-500" />
