@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar, CalendarIcon } from "lucide-react";
-import { format, startOfYear, endOfYear, parse } from "date-fns";
+import { format, startOfYear, endOfYear, parse, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -26,24 +25,11 @@ interface AnalysisFiltersProps {
 }
 
 export function AnalysisFilters({ accounts, filters, onFilterChange, accountId }: AnalysisFiltersProps) {
-  // Generate month options (6 months before and after current month)
-  const monthOptions = useMemo(() => {
-    const options = [];
-    const current = new Date();
-    for (let i = -6; i <= 6; i++) {
-      const date = new Date(current.getFullYear(), current.getMonth() + i, 1);
-      options.push({
-        value: format(date, "yyyy-MM"),
-        label: format(date, "MMMM 'de' yyyy", { locale: ptBR }),
-      });
-    }
-    return options;
-  }, []);
-
-  const handleMonthChange = (month: string) => {
+  const handleMonthChange = (date: Date | undefined) => {
+    if (!date) return;
     onFilterChange({
       ...filters,
-      selectedMonth: month,
+      selectedMonth: format(date, "yyyy-MM"),
     });
   };
 
@@ -122,22 +108,34 @@ export function AnalysisFilters({ accounts, filters, onFilterChange, accountId }
 
       {filters.viewMode === "monthly" ? (
         <div className={`space-y-2 ${accountId ? 'md:col-span-3' : 'md:col-span-3'}`}>
-          <Label htmlFor="month-filter">Mês</Label>
-          <Select
-            value={filters.selectedMonth}
-            onValueChange={handleMonthChange}
-          >
-            <SelectTrigger id="month-filter">
-              <SelectValue placeholder="Selecione o mês" />
-            </SelectTrigger>
-            <SelectContent>
-              {monthOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label>Mês de Referência</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !filters.selectedMonth && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {filters.selectedMonth 
+                  ? format(parse(filters.selectedMonth, "yyyy-MM", new Date()), "MMMM 'de' yyyy", { locale: ptBR })
+                  : "Selecione o mês"
+                }
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <CalendarComponent
+                mode="single"
+                selected={parse(filters.selectedMonth, "yyyy-MM", new Date())}
+                onSelect={handleMonthChange}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+                locale={ptBR}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       ) : (
           <>
