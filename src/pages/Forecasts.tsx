@@ -9,7 +9,7 @@ import { useForecasts } from "@/hooks/useForecasts";
 import { ForecastsTable } from "@/components/forecasts/ForecastsTable";
 import { ForecastDialog } from "@/components/forecasts/ForecastDialog";
 import { ForecastFilters } from "@/components/forecasts/ForecastFilters";
-import { format, startOfMonth, endOfMonth } from "date-fns";
+import { format, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   AlertDialog,
@@ -29,10 +29,14 @@ interface ForecastsProps {
 export default function Forecasts({ accountId: propAccountId }: ForecastsProps) {
   const { accounts } = useAccounts();
   const isMobile = useIsMobile();
-  const currentMonth = format(new Date(), "yyyy-MM");
+  const today = new Date();
+  const currentMonth = format(today, "yyyy-MM");
   
   const [filters, setFilters] = useState({
     accountId: propAccountId || "all",
+    startDate: format(startOfMonth(today), "yyyy-MM-dd"),
+    endDate: format(endOfMonth(today), "yyyy-MM-dd"),
+    viewMode: "monthly" as "monthly" | "custom",
     selectedMonth: currentMonth,
   });
   
@@ -67,12 +71,18 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
     return options;
   }, []);
 
-  // Filter forecasts by selected month
+  // Filter forecasts by selected period
   const filteredForecasts = useMemo(() => {
     if (!forecasts) return [];
-    const periodStart = format(startOfMonth(new Date(filters.selectedMonth + "-01")), "yyyy-MM-dd");
-    return forecasts.filter((f) => f.period_start === periodStart);
-  }, [forecasts, filters.selectedMonth]);
+    
+    const startDate = new Date(filters.startDate);
+    const endDate = new Date(filters.endDate);
+    
+    return forecasts.filter((f) => {
+      const forecastStart = new Date(f.period_start);
+      return forecastStart >= startDate && forecastStart <= endDate;
+    });
+  }, [forecasts, filters.startDate, filters.endDate]);
 
   const handleCreateForecast = () => {
     setSelectedForecast(null);
