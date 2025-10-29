@@ -228,7 +228,7 @@ export function FeedbackManager() {
                         </div>
                       </TableCell>
                       <TableCell className="max-w-md">
-                        <div className="truncate" title={feedback.message}>
+                        <div className="whitespace-normal break-words max-w-md">
                           {feedback.message}
                         </div>
                       </TableCell>
