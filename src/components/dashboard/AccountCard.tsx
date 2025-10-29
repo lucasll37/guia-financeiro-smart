@@ -5,7 +5,8 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useBudgets } from "@/hooks/useBudgets";
 import { useMaskValues } from "@/hooks/useMaskValues";
-import { startOfMonth, endOfMonth } from "date-fns";
+import { startOfMonth, endOfMonth, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface AccountCardProps {
   account: {
@@ -21,10 +22,11 @@ export function AccountCard({ account }: AccountCardProps) {
   const { budgets } = useBudgets();
   const { maskValue } = useMaskValues();
 
-  const { balance, spent, budgetTotal, chartData } = useMemo(() => {
+  const { balance, spent, budgetTotal, chartData, currentPeriod } = useMemo(() => {
     const now = new Date();
     const monthStart = startOfMonth(now);
     const monthEnd = endOfMonth(now);
+    const currentPeriod = format(now, "MMMM 'de' yyyy", { locale: ptBR });
 
     const accountTransactions = transactions?.filter(
       (t) =>
@@ -59,7 +61,7 @@ export function AccountCard({ account }: AccountCardProps) {
       { name: "Disponível", value: remaining, color: "hsl(var(--primary))" },
     ];
 
-    return { balance, spent: expenses, budgetTotal, chartData };
+    return { balance, spent: expenses, budgetTotal, chartData, currentPeriod };
   }, [transactions, budgets, account.id]);
 
   const percentage = budgetTotal > 0 ? (spent / budgetTotal) * 100 : 0;
@@ -109,16 +111,25 @@ export function AccountCard({ account }: AccountCardProps) {
         </div>
         <div className="mt-3 space-y-1 text-sm">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Realizado</span>
-            <span className="font-medium">{percentage.toFixed(1)}%</span>
+            <span className="text-muted-foreground">Período Corrente</span>
+            <span className="font-medium capitalize">{currentPeriod}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Orçado</span>
+            <span className="text-muted-foreground">Total Previsto</span>
             <span className="font-medium">
               {maskValue(new Intl.NumberFormat("pt-BR", {
                 style: "currency",
                 currency: account.currency,
               }).format(budgetTotal))}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Total Realizado</span>
+            <span className="font-medium">
+              {maskValue(new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: account.currency,
+              }).format(spent))}
             </span>
           </div>
         </div>
