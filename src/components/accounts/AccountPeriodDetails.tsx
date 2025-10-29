@@ -42,6 +42,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [incomeExpanded, setIncomeExpanded] = useState(true);
   const [expenseExpanded, setExpenseExpanded] = useState(true);
+  const [balanceExpanded, setBalanceExpanded] = useState(true);
   const { maskValue } = useMaskValues();
   
   const toggleCategoryExpansion = (categoryKey: string) => {
@@ -239,7 +240,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[200px] hidden lg:table-cell">Categoria</TableHead>
+                      <TableHead className="w-[40px] hidden lg:table-cell"></TableHead>
+                      <TableHead className="w-[250px] hidden lg:table-cell">Categoria</TableHead>
                       <TableHead className="text-right w-[140px]">Previsto</TableHead>
                       <TableHead className="text-right w-[140px]">Realizado</TableHead>
                       <TableHead className="text-right w-[140px]">Diferença</TableHead>
@@ -261,23 +263,25 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   return (
                     <>
                       <TableRow key={categoryId} className={hasMultipleTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
-                        <TableCell onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined} className="w-[200px] hidden lg:table-cell">
+                        <TableCell className="w-[40px] hidden lg:table-cell" onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
+                          <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                            {hasMultipleTransactions && (
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-6 w-6 p-0"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleCategoryExpansion(categoryId);
+                                }}
+                              >
+                                {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="w-[250px] hidden lg:table-cell" onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
-                              {hasMultipleTransactions && (
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="h-6 w-6 p-0"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleCategoryExpansion(categoryId);
-                                  }}
-                                >
-                                  {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
-                                </Button>
-                              )}
-                            </div>
                             <div 
                               className="w-3 h-3 rounded-full flex-shrink-0" 
                               style={{ backgroundColor: data.categoryColor }}
@@ -316,7 +320,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                       {/* Subtabela de transações */}
                       {hasMultipleTransactions && isExpanded && (
                         <TableRow>
-                          <TableCell colSpan={5} className="bg-muted/30 p-0">
+                          <TableCell colSpan={6} className="bg-muted/30 p-0">
                             <div className="p-4 space-y-1">
                               {data.transactions.map(t => (
                                 <div key={t.id} className="flex justify-between text-sm py-1 px-2 hover:bg-background rounded">
@@ -338,8 +342,12 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   );
                 })}
                 <TableRow className="bg-green-50/50 dark:bg-green-950/10 font-semibold">
-                  <TableCell>Total de Receitas</TableCell>
-                  <TableCell colSpan={4} className="text-right text-green-600">
+                  <TableCell colSpan={2} className="text-right hidden lg:table-cell">Total de Receitas</TableCell>
+                  <TableCell colSpan={4} className="text-right text-green-600 lg:hidden">Total de Receitas</TableCell>
+                  <TableCell colSpan={4} className="text-right text-green-600 hidden lg:table-cell">
+                    {maskValue(formatCurrency(totalIncome))}
+                  </TableCell>
+                  <TableCell className="text-right text-green-600 lg:hidden">
                     {maskValue(formatCurrency(totalIncome))}
                   </TableCell>
                 </TableRow>
@@ -368,7 +376,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[200px] hidden lg:table-cell">Categoria</TableHead>
+                      <TableHead className="w-[40px] hidden lg:table-cell"></TableHead>
+                      <TableHead className="w-[250px] hidden lg:table-cell">Categoria</TableHead>
                       <TableHead className="text-right w-[140px]">Previsto</TableHead>
                       <TableHead className="text-right w-[140px]">Realizado</TableHead>
                       <TableHead className="text-right w-[140px]">Diferença</TableHead>
@@ -390,23 +399,25 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   return (
                     <>
                       <TableRow key={categoryId} className={hasMultipleTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
-                        <TableCell onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined} className="w-[200px] hidden lg:table-cell">
+                        <TableCell className="w-[40px] hidden lg:table-cell" onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
+                          <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                            {hasMultipleTransactions && (
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-6 w-6 p-0"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleCategoryExpansion(categoryId);
+                                }}
+                              >
+                                {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="w-[250px] hidden lg:table-cell" onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
-                              {hasMultipleTransactions && (
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="h-6 w-6 p-0"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleCategoryExpansion(categoryId);
-                                  }}
-                                >
-                                  {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
-                                </Button>
-                              )}
-                            </div>
                             <div 
                               className="w-3 h-3 rounded-full flex-shrink-0" 
                               style={{ backgroundColor: data.categoryColor }}
@@ -445,7 +456,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                       {/* Subtabela de transações */}
                       {hasMultipleTransactions && isExpanded && (
                         <TableRow>
-                          <TableCell colSpan={5} className="bg-muted/30 p-0">
+                          <TableCell colSpan={6} className="bg-muted/30 p-0">
                             <div className="p-4 space-y-1">
                               {data.transactions.map(t => (
                                 <div key={t.id} className="flex justify-between text-sm py-1 px-2 hover:bg-background rounded">
@@ -467,8 +478,12 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   );
                 })}
                 <TableRow className="bg-red-50/50 dark:bg-red-950/10 font-semibold">
-                  <TableCell>Total de Despesas</TableCell>
-                  <TableCell colSpan={4} className="text-right text-destructive">
+                  <TableCell colSpan={2} className="text-right hidden lg:table-cell">Total de Despesas</TableCell>
+                  <TableCell colSpan={4} className="text-right text-destructive lg:hidden">Total de Despesas</TableCell>
+                  <TableCell colSpan={4} className="text-right text-destructive hidden lg:table-cell">
+                    {maskValue(formatCurrency(totalExpense))}
+                  </TableCell>
+                  <TableCell className="text-right text-destructive lg:hidden">
                     {maskValue(formatCurrency(totalExpense))}
                   </TableCell>
                 </TableRow>
@@ -480,39 +495,51 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
         )}
 
         {/* Saldo Remanescente */}
-        <div className="border rounded-lg overflow-hidden">
-          <div className="bg-blue-50 dark:bg-blue-950/20 px-4 py-2 border-b">
-            <h3 className="font-semibold text-blue-700 dark:text-blue-400">Saldo Remanescente</h3>
+        <Collapsible open={balanceExpanded} onOpenChange={setBalanceExpanded}>
+          <div className="border rounded-lg overflow-hidden">
+            <CollapsibleTrigger asChild>
+              <div className="bg-blue-50 dark:bg-blue-950/20 px-4 py-2 border-b cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-950/30 transition-colors flex items-center justify-between">
+                <h3 className="font-semibold text-blue-700 dark:text-blue-400">Saldo Remanescente</h3>
+                {balanceExpanded ? (
+                  <ChevronDown className="h-4 w-4 text-blue-700 dark:text-blue-400" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 text-blue-700 dark:text-blue-400" />
+                )}
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[40px] hidden lg:table-cell"></TableHead>
+                    <TableHead className="w-[250px] hidden lg:table-cell">Descrição</TableHead>
+                    <TableHead className="text-right w-[140px]">Previsto</TableHead>
+                    <TableHead className="text-right w-[140px]">Realizado</TableHead>
+                    <TableHead className="text-right w-[140px]">Diferença</TableHead>
+                    <TableHead className="text-right w-[120px]">% Variação</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="w-[40px] hidden lg:table-cell"></TableCell>
+                    <TableCell className="w-[250px] hidden lg:table-cell">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full flex-shrink-0 bg-blue-500" />
+                        <span className="truncate">Saldo do período anterior</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right w-[140px]">-</TableCell>
+                    <TableCell className="text-right font-medium w-[140px]">
+                      {maskValue(formatCurrency(previousBalance))}
+                    </TableCell>
+                    <TableCell className="text-right w-[140px]">-</TableCell>
+                    <TableCell className="text-right w-[120px]">-</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </CollapsibleContent>
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[200px] hidden lg:table-cell">Descrição</TableHead>
-                <TableHead className="text-right w-[140px]">Previsto</TableHead>
-                <TableHead className="text-right w-[140px]">Realizado</TableHead>
-                <TableHead className="text-right w-[140px]">Diferença</TableHead>
-                <TableHead className="text-right w-[120px]">% Variação</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell className="w-[200px] hidden lg:table-cell">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 flex-shrink-0" />
-                    <div className="w-3 h-3 rounded-full flex-shrink-0 bg-blue-500" />
-                    <span className="truncate">Saldo do período anterior</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-right w-[140px]">-</TableCell>
-                <TableCell className="text-right font-medium w-[140px]">
-                  {maskValue(formatCurrency(previousBalance))}
-                </TableCell>
-                <TableCell className="text-right w-[140px]">-</TableCell>
-                <TableCell className="text-right w-[120px]">-</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </div>
+        </Collapsible>
 
         {/* Saldo */}
         <div className="border rounded-lg bg-muted/50">
