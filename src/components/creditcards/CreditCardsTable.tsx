@@ -21,7 +21,6 @@ interface CreditCardsTableProps {
   transactions: Transaction[];
   onEdit: (creditCard: CreditCard) => void;
   onDelete: (id: string) => void;
-  expandAll?: boolean;
 }
 
 export function CreditCardsTable({
@@ -29,7 +28,6 @@ export function CreditCardsTable({
   transactions,
   onEdit,
   onDelete,
-  expandAll = false,
 }: CreditCardsTableProps) {
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [sortField, setSortField] = useState<'name' | 'total' | null>(null);
@@ -65,7 +63,7 @@ export function CreditCardsTable({
   };
 
   const isCardExpanded = (cardId: string) => {
-    return expandAll || expandedCards.has(cardId);
+    return expandedCards.has(cardId);
   };
 
   const getCardTransactions = (cardId: string) => {

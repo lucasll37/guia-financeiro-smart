@@ -40,8 +40,6 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
     selectedMonth: currentMonth,
   });
   
-  const [expandAll, setExpandAll] = useState(false);
-  
   // Update filters when propAccountId changes
   useEffect(() => {
     if (propAccountId) {
@@ -132,8 +130,6 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
         accounts={accounts || []}
         filters={filters}
         onFilterChange={setFilters}
-        expandAll={expandAll}
-        onToggleExpandAll={() => setExpandAll(!expandAll)}
         accountId={propAccountId}
       />
 
@@ -145,7 +141,6 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
           transactions={filteredTransactions}
           onEdit={handleEditCard}
           onDelete={handleDeleteCard}
-          expandAll={expandAll}
         />
       )}
 
