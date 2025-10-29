@@ -28,7 +28,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown, Bell, Send } from "lucide-react";
+import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown, Bell, Send, CreditCard, Settings, FileText } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { z } from "zod";
 import { UserGrowthChart } from "@/components/admin/UserGrowthChart";
 import { AccessActivityChart } from "@/components/admin/AccessActivityChart";
@@ -63,6 +64,7 @@ interface UserFilters {
 export default function Admin() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
@@ -365,13 +367,34 @@ export default function Admin() {
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-          <TabsTrigger value="users">Usuários</TabsTrigger>
-          <TabsTrigger value="subscriptions">Assinaturas</TabsTrigger>
-          <TabsTrigger value="coupons">Cupons</TabsTrigger>
-          <TabsTrigger value="notifications">Notificações</TabsTrigger>
-          <TabsTrigger value="limits">Limites de Planos</TabsTrigger>
-          <TabsTrigger value="logs">Logs de Ações</TabsTrigger>
+          <TabsTrigger value="overview" className="flex items-center gap-2">
+            <BarChart className="h-4 w-4" />
+            {!isMobile && <span>Visão Geral</span>}
+          </TabsTrigger>
+          <TabsTrigger value="users" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            {!isMobile && <span>Usuários</span>}
+          </TabsTrigger>
+          <TabsTrigger value="subscriptions" className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4" />
+            {!isMobile && <span>Assinaturas</span>}
+          </TabsTrigger>
+          <TabsTrigger value="coupons" className="flex items-center gap-2">
+            <Gift className="h-4 w-4" />
+            {!isMobile && <span>Cupons</span>}
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="flex items-center gap-2">
+            <Bell className="h-4 w-4" />
+            {!isMobile && <span>Notificações</span>}
+          </TabsTrigger>
+          <TabsTrigger value="limits" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            {!isMobile && <span>Limites de Planos</span>}
+          </TabsTrigger>
+          <TabsTrigger value="logs" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            {!isMobile && <span>Logs de Ações</span>}
+          </TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
