@@ -139,52 +139,50 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Previsões</h1>
           <p className="text-muted-foreground">
             Gerencie suas previsões de receitas e despesas por mês
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-sm text-muted-foreground hidden sm:inline">
+            Nova previsão:
+          </span>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">
-              Nova previsão:
-            </span>
             <Button
-              variant="default"
-              size={isMobile ? "sm" : "default"}
               onClick={() => setWizardOpen(true)}
               disabled={filters.accountId === "all"}
               className="gap-2"
+              size={isMobile ? "sm" : "default"}
             >
               <Sparkles className="h-4 w-4" />
-              {!isMobile && <span>Assistente de Lançamento</span>}
-              {isMobile && <span>Assistente</span>}
+              <span>Assistente de Lançamento</span>
             </Button>
             <Button 
               variant="outline" 
-              size={isMobile ? "sm" : "default"}
               onClick={handleCreateForecast} 
               disabled={filters.accountId === "all"}
               className="gap-2"
+              size={isMobile ? "sm" : "default"}
             >
               <Plus className="h-4 w-4" />
-              {!isMobile && <span>Manual</span>}
+              <span>Manual</span>
             </Button>
+            {filters.viewMode === "monthly" && (
+              <Button
+                variant="outline"
+                onClick={() => setCopyDialogOpen(true)}
+                disabled={filters.accountId === "all" || filteredForecasts.length === 0}
+                className="gap-2"
+                size={isMobile ? "sm" : "default"}
+              >
+                <Copy className="h-4 w-4" />
+                <span>Copiar</span>
+              </Button>
+            )}
           </div>
-          {filters.viewMode === "monthly" && (
-            <Button
-              variant="outline"
-              size={isMobile ? "sm" : "default"}
-              onClick={() => setCopyDialogOpen(true)}
-              disabled={filters.accountId === "all" || filteredForecasts.length === 0}
-              className="gap-2"
-            >
-              <Copy className="h-4 w-4" />
-              {!isMobile && <span>Copiar</span>}
-            </Button>
-          )}
         </div>
       </div>
 
