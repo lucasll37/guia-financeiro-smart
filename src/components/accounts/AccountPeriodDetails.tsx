@@ -316,11 +316,9 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                                 <span
                                   className={cn(
                                     "font-semibold",
-                                    completion > 100
+                                    completion >= 100
                                       ? "text-red-600 dark:text-red-400"
-                                      : completion === 100
-                                      ? "text-green-600 dark:text-green-400"
-                                      : "text-primary"
+                                      : "text-green-600 dark:text-green-400"
                                   )}
                                 >
                                   {Math.round(completion)}%
@@ -330,20 +328,16 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                                 </span>
                               </div>
                               
-                              <div className="relative h-6 bg-muted rounded-full overflow-hidden border">
-                                <div className="absolute inset-0 bg-gradient-to-r from-muted to-muted" />
-                                
+                              <div className="relative h-6 bg-muted rounded-full overflow-hidden">
                                 <div
                                   className={cn(
-                                    "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full",
-                                    completion > 100
-                                      ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500"
-                                      : completion === 100
-                                      ? "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500"
-                                      : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500"
+                                    "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full border-2",
+                                    completion >= 100
+                                      ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500 border-red-600 dark:border-red-500"
+                                      : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500 border-green-600 dark:border-green-500"
                                   )}
                                   style={{
-                                    width: `${Math.min(completion, 100)}%`,
+                                    width: `${Math.min(completion, 150)}%`,
                                   }}
                                 >
                                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -351,14 +345,14 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                                 
                                 {completion > 100 && (
                                   <div
-                                    className="absolute inset-y-0 w-0.5 bg-white/50"
+                                    className="absolute inset-y-0 w-0.5 bg-foreground z-10"
                                     style={{
-                                      left: `${(data.forecasted / data.actual) * 100}%`,
+                                      left: `${(100 / Math.min(completion, 150)) * 100}%`,
                                     }}
                                   />
                                 )}
                                 
-                                <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="absolute inset-0 flex items-center justify-center z-10">
                                   <span className="text-xs font-semibold text-foreground drop-shadow-lg">
                                     {maskValue(formatCurrency(data.actual))}
                                   </span>
@@ -508,11 +502,9 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                               <span
                                 className={cn(
                                   "font-semibold",
-                                  completion > 100
+                                  completion >= 100
                                     ? "text-red-600 dark:text-red-400"
-                                    : completion === 100
-                                    ? "text-green-600 dark:text-green-400"
-                                    : "text-primary"
+                                    : "text-green-600 dark:text-green-400"
                                 )}
                               >
                                 {Math.round(completion)}%
@@ -522,20 +514,16 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                               </span>
                             </div>
                             
-                            <div className="relative h-6 bg-muted rounded-full overflow-hidden border">
-                              <div className="absolute inset-0 bg-gradient-to-r from-muted to-muted" />
-                              
+                            <div className="relative h-6 bg-muted rounded-full overflow-hidden">
                               <div
                                 className={cn(
-                                  "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full",
-                                  completion > 100
-                                    ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500"
-                                    : completion === 100
-                                    ? "bg-gradient-to-r from-amber-500 to-amber-600 dark:from-amber-400 dark:to-amber-500"
-                                    : "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500"
+                                  "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full border-2",
+                                  completion >= 100
+                                    ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500 border-red-600 dark:border-red-500"
+                                    : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500 border-green-600 dark:border-green-500"
                                 )}
                                 style={{
-                                  width: `${Math.min(completion, 100)}%`,
+                                  width: `${Math.min(completion, 150)}%`,
                                 }}
                               >
                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -543,14 +531,14 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                               
                               {completion > 100 && (
                                 <div
-                                  className="absolute inset-y-0 w-0.5 bg-white/50"
+                                  className="absolute inset-y-0 w-0.5 bg-foreground z-10"
                                   style={{
-                                    left: `${(data.forecasted / data.actual) * 100}%`,
+                                    left: `${(100 / Math.min(completion, 150)) * 100}%`,
                                   }}
                                 />
                               )}
                               
-                              <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="absolute inset-0 flex items-center justify-center z-10">
                                 <span className="text-xs font-semibold text-foreground drop-shadow-lg">
                                   {maskValue(formatCurrency(data.actual))}
                                 </span>
