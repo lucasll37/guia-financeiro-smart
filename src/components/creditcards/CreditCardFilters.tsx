@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar, CalendarIcon, TrendingUp } from "lucide-react";
-import { format, startOfMonth, endOfMonth } from "date-fns";
+import { format, startOfMonth, endOfMonth, addYears } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -61,6 +61,19 @@ export function CreditCardFilters({ accounts, filters, onFilterChange, accountId
       // Reset to current month when switching back to monthly view
       const currentMonth = format(new Date(), "yyyy-MM");
       handleMonthChange(currentMonth);
+    } else {
+      // When switching to custom view, set start date to first day of current month
+      // and end date to 5 years in the future
+      const startDate = format(startOfMonth(new Date()), "yyyy-MM-dd");
+      const endDate = format(addYears(new Date(), 5), "yyyy-MM-dd");
+      
+      onFilterChange({
+        ...filters,
+        viewMode: newMode,
+        startDate,
+        endDate,
+      });
+      return;
     }
     
     onFilterChange({
