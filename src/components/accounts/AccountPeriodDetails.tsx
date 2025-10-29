@@ -644,7 +644,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
         <div className="border rounded-lg bg-muted/50">
           <div className="px-4 py-3">
             <div className="flex items-center justify-between">
-              <span className="text-lg font-semibold">Saldo do Período:</span>
+              <span className="text-lg font-semibold">Saldo:</span>
               <span className={`text-xl font-bold ${balance >= 0 ? "text-green-600" : "text-destructive"}`}>
                 {maskValue(formatCurrency(balance))}
               </span>
