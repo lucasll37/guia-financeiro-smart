@@ -175,10 +175,9 @@ export function SubscriptionManager() {
                   {user.subscription?.plan === "pro" && (
                     <Button
                       size="sm"
-                      variant="outline"
                       onClick={() => handleDemote(user.profile.id)}
                       disabled={updateSubscription.isPending}
-                      className="border-orange-500 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950"
+                      className="bg-orange-600 hover:bg-orange-700 text-white"
                     >
                       <ArrowDownCircle className="h-4 w-4" />
                       {!isMobile && <span className="ml-2">Rebaixar para Free</span>}
