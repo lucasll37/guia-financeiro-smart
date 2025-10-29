@@ -141,7 +141,10 @@ const handler = async (req: Request): Promise<Response> => {
                     <tr>
                       <td style="padding: 30px 40px; background: #f9fafb; border-top: 1px solid #e5e7eb;">
                         <p style="margin: 0 0 8px; color: #6b7280; font-size: 13px; text-align: center; line-height: 1.5;">
-                          Controle Financeiro - Seu assistente pessoal de finanças
+                          <strong>Prospera</strong> - Gestão Financeira Inteligente
+                        </p>
+                        <p style="margin: 0 0 8px; color: #667eea; font-size: 12px; text-align: center;">
+                          <a href="https://prospera.lucaslima.ai" style="color: #667eea; text-decoration: none;">prospera.lucaslima.ai</a>
                         </p>
                         <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center; line-height: 1.5;">
                           Este é um email automático, por favor não responda.

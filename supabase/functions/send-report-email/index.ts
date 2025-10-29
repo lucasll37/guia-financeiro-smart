@@ -46,133 +46,98 @@ const handler = async (req: Request): Promise<Response> => {
         from: "Prospera <noreply@prospera.lucaslima.ai>",
         to: [email],
         subject: `📊 Seu Relatório Financeiro - ${reportPeriod}`,
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-              body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-                line-height: 1.6;
-                color: #333;
-                max-width: 600px;
-                margin: 0 auto;
-                padding: 20px;
-              }
-              .header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 30px;
-                border-radius: 10px 10px 0 0;
-                text-align: center;
-              }
-              .header h1 {
-                margin: 0;
-                font-size: 28px;
-              }
-              .content {
-                background: #f8f9fa;
-                padding: 30px;
-                border-radius: 0 0 10px 10px;
-              }
-              .report-details {
-                background: white;
-                padding: 20px;
-                border-radius: 8px;
-                margin: 20px 0;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-              }
-              .detail-row {
-                display: flex;
-                justify-content: space-between;
-                padding: 10px 0;
-                border-bottom: 1px solid #e9ecef;
-              }
-              .detail-row:last-child {
-                border-bottom: none;
-              }
-              .detail-label {
-                font-weight: 600;
-                color: #667eea;
-              }
-              .detail-value {
-                color: #495057;
-              }
-              .info-box {
-                background: #e7f3ff;
-                border-left: 4px solid #667eea;
-                padding: 15px;
-                margin: 20px 0;
-                border-radius: 4px;
-              }
-              .footer {
-                text-align: center;
-                padding: 20px;
-                color: #6c757d;
-                font-size: 14px;
-              }
-              .footer a {
-                color: #667eea;
-                text-decoration: none;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <h1>📊 Prospera</h1>
-              <p style="margin: 10px 0 0 0; opacity: 0.9;">Gestão Financeira Inteligente</p>
-            </div>
-            
-            <div class="content">
-              <h2 style="color: #333; margin-top: 0;">Olá!</h2>
-              
-              <p>Seu relatório financeiro foi gerado com sucesso e está disponível para visualização na plataforma.</p>
-              
-              <div class="report-details">
-                <h3 style="margin-top: 0; color: #667eea;">📄 Detalhes do Relatório</h3>
-                
-                <div class="detail-row">
-                  <span class="detail-label">Nome do arquivo:</span>
-                  <span class="detail-value">${reportName}</span>
-                </div>
-                
-                <div class="detail-row">
-                  <span class="detail-label">Período:</span>
-                  <span class="detail-value">${reportPeriod}</span>
-                </div>
-                
-                <div class="detail-row">
-                  <span class="detail-label">Tipo:</span>
-                  <span class="detail-value">${reportType.toUpperCase()}</span>
-                </div>
-              </div>
-              
-              <div class="info-box">
-                <strong>💡 Como acessar:</strong>
-                <p style="margin: 10px 0 0 0;">
-                  O relatório está disponível na seção <strong>Relatórios</strong> da sua conta. 
-                  Você pode visualizar, baixar ou compartilhar o relatório a qualquer momento.
-                </p>
-              </div>
-              
-              <p style="color: #6c757d; font-size: 14px; margin-top: 30px;">
-                Este relatório contém informações detalhadas sobre suas finanças no período selecionado.
-              </p>
-            </div>
-            
-            <div class="footer">
-              <p>
-                <strong>Prospera</strong> - Gestão Financeira<br>
-                <a href="https://prospera.lucaslima.ai">prospera.lucaslima.ai</a>
-              </p>
-              <p style="color: #adb5bd; font-size: 12px; margin-top: 15px;">
-                Este é um email automático, por favor não responda.
-              </p>
-            </div>
-          </body>
-        </html>
+        html: `
+          <!DOCTYPE html>
+          <html lang="pt-BR">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Relatório Financeiro</title>
+            </head>
+            <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
+              <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 0; padding: 40px 20px;">
+                <tr>
+                  <td align="center">
+                    <table role="presentation" style="width: 100%; max-width: 600px; border-collapse: collapse; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden;">
+                      
+                      <!-- Header com gradiente -->
+                      <tr>
+                        <td style="padding: 0;">
+                          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 40px 60px; text-align: center;">
+                            <div style="width: 80px; height: 80px; margin: 0 auto 20px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+                              <span style="font-size: 40px;">📊</span>
+                            </div>
+                            <h1 style="margin: 0; color: white; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Relatório Financeiro</h1>
+                            <p style="margin: 12px 0 0; color: rgba(255,255,255,0.9); font-size: 16px; line-height: 1.5;">Seu relatório está pronto</p>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <!-- Conteúdo principal -->
+                      <tr>
+                        <td style="padding: 40px;">
+                          <p style="margin: 0 0 24px; color: #374151; font-size: 16px; line-height: 1.6;">
+                            Olá! 👋
+                          </p>
+                          <p style="margin: 0 0 24px; color: #374151; font-size: 16px; line-height: 1.6;">
+                            Seu relatório financeiro foi gerado com sucesso e está disponível para visualização na plataforma.
+                          </p>
+
+                          <!-- Detalhes do relatório -->
+                          <div style="background: #f9fafb; border-radius: 12px; padding: 24px; margin: 24px 0;">
+                            <h3 style="margin: 0 0 20px; color: #667eea; font-size: 18px; font-weight: 600;">📄 Detalhes do Relatório</h3>
+                            
+                            <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #e5e7eb;">
+                              <div style="color: #667eea; font-weight: 600; font-size: 14px; margin-bottom: 4px;">Nome do arquivo:</div>
+                              <div style="color: #374151; font-size: 15px;">${reportName}</div>
+                            </div>
+                            
+                            <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #e5e7eb;">
+                              <div style="color: #667eea; font-weight: 600; font-size: 14px; margin-bottom: 4px;">Período:</div>
+                              <div style="color: #374151; font-size: 15px;">${reportPeriod}</div>
+                            </div>
+                            
+                            <div>
+                              <div style="color: #667eea; font-weight: 600; font-size: 14px; margin-bottom: 4px;">Tipo:</div>
+                              <div style="color: #374151; font-size: 15px;">${reportType.toUpperCase()}</div>
+                            </div>
+                          </div>
+
+                          <div style="margin: 32px 0; padding: 20px; background: #eff6ff; border-left: 4px solid #667eea; border-radius: 8px;">
+                            <p style="margin: 0; color: #1e40af; font-size: 14px; line-height: 1.5;">
+                              💡 <strong>Como acessar:</strong><br>
+                              O relatório está disponível na seção <strong>Relatórios</strong> da sua conta. 
+                              Você pode visualizar, baixar ou compartilhar o relatório a qualquer momento.
+                            </p>
+                          </div>
+
+                          <p style="margin: 24px 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                            Este relatório contém informações detalhadas sobre suas finanças no período selecionado.
+                          </p>
+                        </td>
+                      </tr>
+
+                      <!-- Footer -->
+                      <tr>
+                        <td style="padding: 30px 40px; background: #f9fafb; border-top: 1px solid #e5e7eb;">
+                          <p style="margin: 0 0 8px; color: #6b7280; font-size: 13px; text-align: center; line-height: 1.5;">
+                            <strong>Prospera</strong> - Gestão Financeira Inteligente
+                          </p>
+                          <p style="margin: 0 0 8px; color: #667eea; font-size: 12px; text-align: center;">
+                            <a href="https://prospera.lucaslima.ai" style="color: #667eea; text-decoration: none;">prospera.lucaslima.ai</a>
+                          </p>
+                          <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center; line-height: 1.5;">
+                            Este é um email automático, por favor não responda.
+                          </p>
+                        </td>
+                      </tr>
+
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+          </html>
         `,
       }),
     });

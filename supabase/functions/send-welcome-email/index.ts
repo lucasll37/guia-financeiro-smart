@@ -17,110 +17,123 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 // Template de email elegante em HTML
 const createWelcomeEmailHTML = (confirmationUrl: string, userEmail: string): string => {
   return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bem-vindo ao Prospera</title>
-</head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; background-color: #f6f9fc;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f6f9fc; padding: 20px 0;">
-    <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; max-width: 600px; margin: 0 auto;">
-          <!-- Header -->
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bem-vindo ao Prospera</title>
+      </head>
+      <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
+        <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 0; padding: 40px 20px;">
           <tr>
-            <td style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 40px; text-align: center;">
-              <h1 style="color: #ffffff; font-size: 32px; font-weight: 700; margin: 0; padding: 0;">
-                🎉 Bem-vindo ao Prospera!
-              </h1>
-            </td>
-          </tr>
-          
-          <!-- Content -->
-          <tr>
-            <td style="padding: 40px;">
-              <p style="color: #525f7f; font-size: 16px; line-height: 24px; margin: 0 0 16px 0;">
-                Olá <strong>${userEmail}</strong>,
-              </p>
-              
-              <p style="color: #525f7f; font-size: 16px; line-height: 24px; margin: 0 0 16px 0;">
-                Estamos muito felizes em tê-lo(a) conosco! O Prospera é a sua nova ferramenta de gestão financeira pessoal e familiar.
-              </p>
-
-              <p style="color: #525f7f; font-size: 16px; line-height: 24px; margin: 0 0 24px 0;">
-                Para começar a usar todas as funcionalidades, precisamos confirmar seu endereço de email. É rápido e simples:
-              </p>
-
-              <!-- Button -->
-              <table width="100%" cellpadding="0" cellspacing="0">
+            <td align="center">
+              <table role="presentation" style="width: 100%; max-width: 600px; border-collapse: collapse; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden;">
+                
+                <!-- Header com gradiente -->
                 <tr>
-                  <td align="center" style="padding: 16px 0 32px 0;">
-                    <a href="${confirmationUrl}" style="background-color: #6366f1; border-radius: 8px; color: #ffffff; display: inline-block; font-size: 16px; font-weight: 600; padding: 14px 32px; text-decoration: none; text-align: center;">
-                      ✓ Confirmar Email
-                    </a>
+                  <td style="padding: 0;">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 40px 60px; text-align: center;">
+                      <div style="width: 80px; height: 80px; margin: 0 auto 20px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+                        <span style="font-size: 40px;">🎉</span>
+                      </div>
+                      <h1 style="margin: 0; color: white; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Bem-vindo ao Prospera!</h1>
+                      <p style="margin: 12px 0 0; color: rgba(255,255,255,0.9); font-size: 16px; line-height: 1.5;">Sua jornada financeira começa agora</p>
+                    </div>
                   </td>
                 </tr>
+
+                <!-- Conteúdo principal -->
+                <tr>
+                  <td style="padding: 40px;">
+                    <p style="margin: 0 0 24px; color: #374151; font-size: 16px; line-height: 1.6;">
+                      Olá <strong>${userEmail}</strong>! 👋
+                    </p>
+                    <p style="margin: 0 0 24px; color: #374151; font-size: 16px; line-height: 1.6;">
+                      Estamos muito felizes em tê-lo(a) conosco! O Prospera é a sua nova ferramenta de gestão financeira pessoal e familiar.
+                    </p>
+                    <p style="margin: 0 0 32px; color: #374151; font-size: 16px; line-height: 1.6;">
+                      Para começar a usar todas as funcionalidades, precisamos confirmar seu endereço de email. É rápido e simples:
+                    </p>
+
+                    <!-- Botão de ação -->
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 32px 0;">
+                      <tr>
+                        <td align="center">
+                          <a href="${confirmationUrl}" 
+                             style="display: inline-block; padding: 16px 48px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);">
+                            ✓ Confirmar Email
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <p style="margin: 24px 0 8px; color: #6b7280; font-size: 13px; text-align: center;">
+                      Ou copie e cole este link no seu navegador:
+                    </p>
+                    <p style="margin: 0 0 32px; color: #9ca3af; font-size: 11px; word-break: break-all; text-align: center; background: #f9fafb; padding: 12px; border-radius: 6px;">
+                      ${confirmationUrl}
+                    </p>
+
+                    <div style="border-top: 1px solid #e5e7eb; margin: 32px 0; padding-top: 32px;">
+                      <h3 style="margin: 0 0 20px; color: #374151; font-size: 18px; font-weight: 600;">O que você pode fazer no Prospera:</h3>
+                      
+                      <div style="margin-bottom: 12px; padding-left: 16px;">
+                        <span style="color: #667eea; font-size: 20px; margin-right: 8px;">💰</span>
+                        <span style="color: #6b7280; font-size: 15px;">Gerenciar suas contas financeiras</span>
+                      </div>
+                      <div style="margin-bottom: 12px; padding-left: 16px;">
+                        <span style="color: #667eea; font-size: 20px; margin-right: 8px;">📊</span>
+                        <span style="color: #6b7280; font-size: 15px;">Acompanhar investimentos em tempo real</span>
+                      </div>
+                      <div style="margin-bottom: 12px; padding-left: 16px;">
+                        <span style="color: #667eea; font-size: 20px; margin-right: 8px;">🎯</span>
+                        <span style="color: #6b7280; font-size: 15px;">Definir e alcançar metas financeiras</span>
+                      </div>
+                      <div style="margin-bottom: 12px; padding-left: 16px;">
+                        <span style="color: #667eea; font-size: 20px; margin-right: 8px;">👨‍👩‍👧‍👦</span>
+                        <span style="color: #6b7280; font-size: 15px;">Compartilhar contas com familiares</span>
+                      </div>
+                      <div style="margin-bottom: 12px; padding-left: 16px;">
+                        <span style="color: #667eea; font-size: 20px; margin-right: 8px;">💳</span>
+                        <span style="color: #6b7280; font-size: 15px;">Controlar cartões de crédito</span>
+                      </div>
+                    </div>
+
+                    <div style="margin: 32px 0 0; padding: 20px; background: #f9fafb; border-radius: 8px;">
+                      <p style="margin: 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                        Se você não criou uma conta no Prospera, pode ignorar este email com segurança.
+                      </p>
+                    </div>
+
+                    <p style="margin: 24px 0 0; color: #374151; font-size: 14px; line-height: 1.6;">
+                      Atenciosamente,<br>
+                      <strong>Equipe Prospera</strong>
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                  <td style="padding: 30px 40px; background: #f9fafb; border-top: 1px solid #e5e7eb;">
+                    <p style="margin: 0 0 8px; color: #6b7280; font-size: 13px; text-align: center; line-height: 1.5;">
+                      <strong>Prospera</strong> - Gestão Financeira Inteligente
+                    </p>
+                    <p style="margin: 0 0 8px; color: #667eea; font-size: 12px; text-align: center;">
+                      <a href="https://prospera.lucaslima.ai" style="color: #667eea; text-decoration: none;">prospera.lucaslima.ai</a>
+                    </p>
+                    <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center; line-height: 1.5;">
+                      Este é um email automático, por favor não responda.
+                    </p>
+                  </td>
+                </tr>
+
               </table>
-
-              <p style="color: #8898aa; font-size: 14px; line-height: 20px; margin: 0 0 8px 0; text-align: center;">
-                Ou copie e cole este link no seu navegador:
-              </p>
-              
-              <p style="color: #6366f1; font-size: 12px; line-height: 18px; word-break: break-all; margin: 0 0 32px 0; text-align: center;">
-                ${confirmationUrl}
-              </p>
-
-              <hr style="border: none; border-top: 1px solid #e6ebf1; margin: 32px 0;">
-
-              <p style="color: #525f7f; font-size: 16px; line-height: 24px; margin: 0 0 16px 0;">
-                <strong>O que você pode fazer no Prospera:</strong>
-              </p>
-              
-              <p style="color: #525f7f; font-size: 15px; line-height: 28px; margin: 0 0 4px 0; padding-left: 20px;">
-                💰 Gerenciar suas contas financeiras
-              </p>
-              <p style="color: #525f7f; font-size: 15px; line-height: 28px; margin: 0 0 4px 0; padding-left: 20px;">
-                📊 Acompanhar investimentos em tempo real
-              </p>
-              <p style="color: #525f7f; font-size: 15px; line-height: 28px; margin: 0 0 4px 0; padding-left: 20px;">
-                🎯 Definir e alcançar metas financeiras
-              </p>
-              <p style="color: #525f7f; font-size: 15px; line-height: 28px; margin: 0 0 4px 0; padding-left: 20px;">
-                👨‍👩‍👧‍👦 Compartilhar contas com familiares
-              </p>
-              <p style="color: #525f7f; font-size: 15px; line-height: 28px; margin: 0 0 4px 0; padding-left: 20px;">
-                💳 Controlar cartões de crédito
-              </p>
-
-              <hr style="border: none; border-top: 1px solid #e6ebf1; margin: 32px 0;">
-
-              <p style="color: #8898aa; font-size: 14px; line-height: 22px; margin: 16px 0;">
-                Se você não criou uma conta no Prospera, pode ignorar este email com segurança.
-              </p>
-              
-              <p style="color: #525f7f; font-size: 14px; line-height: 22px; margin: 16px 0;">
-                Atenciosamente,<br />
-                <strong>Equipe Prospera</strong>
-              </p>
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style="padding: 20px 40px; text-align: center; background-color: #f6f9fc;">
-              <p style="color: #8898aa; font-size: 12px; line-height: 16px; margin: 0;">
-                © ${new Date().getFullYear()} Prospera. Todos os direitos reservados.
-              </p>
             </td>
           </tr>
         </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>
+      </body>
+    </html>
   `;
 };
 

@@ -74,108 +74,124 @@ const handler = async (req: Request): Promise<Response> => {
       body: JSON.stringify({
         from: "Prospera <noreply@prospera.lucaslima.ai>",
         to: [email],
-        subject: "⚠️ Confirmação de Exclusão de Conta",
+        subject: "⚠️ Confirmação de Exclusão de Conta - Prospera",
         html: `
           <!DOCTYPE html>
-          <html>
+          <html lang="pt-BR">
             <head>
-              <meta charset="utf-8">
-              <style>
-                body {
-                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-                  line-height: 1.6;
-                  color: #333;
-                  max-width: 600px;
-                  margin: 0 auto;
-                  padding: 20px;
-                }
-                .container {
-                  background-color: #f9fafb;
-                  border-radius: 8px;
-                  padding: 32px;
-                  margin: 20px 0;
-                }
-                .warning {
-                  background-color: #fee;
-                  border-left: 4px solid #dc2626;
-                  padding: 16px;
-                  margin: 24px 0;
-                  border-radius: 4px;
-                }
-                .button {
-                  display: inline-block;
-                  background-color: #dc2626;
-                  color: white;
-                  padding: 12px 24px;
-                  text-decoration: none;
-                  border-radius: 6px;
-                  font-weight: 600;
-                  margin: 24px 0;
-                }
-                .footer {
-                  color: #6b7280;
-                  font-size: 14px;
-                  margin-top: 32px;
-                  padding-top: 16px;
-                  border-top: 1px solid #e5e7eb;
-                }
-                ul {
-                  padding-left: 20px;
-                }
-                li {
-                  margin: 8px 0;
-                }
-              </style>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Confirmação de Exclusão de Conta</title>
             </head>
-            <body>
-              <div class="container">
-                <h1 style="color: #dc2626;">⚠️ Confirmação de Exclusão de Conta</h1>
-                
-                <p>Olá,</p>
-                
-                <p>Recebemos uma solicitação para excluir permanentemente sua conta no Controle Financeiro.</p>
-                
-                <div class="warning">
-                  <strong>⚠️ ATENÇÃO: ESTA AÇÃO É IRREVERSÍVEL</strong>
-                  <p style="margin-top: 8px;">
-                    Ao confirmar, todos os seus dados serão permanentemente excluídos sem possibilidade de recuperação ou backup.
-                  </p>
-                </div>
-                
-                <h3>Os seguintes dados serão excluídos:</h3>
-                <ul>
-                  <li>Todas as contas e lançamentos financeiros</li>
-                  <li>Categorias e subcategorias personalizadas</li>
-                  <li>Previsões e orçamentos</li>
-                  <li>Investimentos e metas</li>
-                  <li>Cartões de crédito cadastrados</li>
-                  <li>Configurações e preferências</li>
-                  <li>Seu perfil e dados pessoais</li>
-                </ul>
-                
-                <p><strong>Este link é válido por 1 hora.</strong></p>
-                
-                <p>Se você tem certeza que deseja excluir sua conta permanentemente, clique no botão abaixo:</p>
-                
-                <a href="${confirmUrl}" class="button" style="color: white;">
-                  Confirmar Exclusão de Conta
-                </a>
-                
-                <p style="margin-top: 24px;">
-                  Ou copie e cole este link no seu navegador:<br>
-                  <code style="background-color: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 12px; word-break: break-all;">
-                    ${confirmUrl}
-                  </code>
-                </p>
-                
-                <div class="footer">
-                  <p>
-                    <strong>Não solicitou esta exclusão?</strong><br>
-                    Se você não solicitou a exclusão da sua conta, ignore este email. 
-                    Sua conta permanecerá ativa e segura. Este link expirará automaticamente em 1 hora.
-                  </p>
-                </div>
-              </div>
+            <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); min-height: 100vh;">
+              <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 0; padding: 40px 20px;">
+                <tr>
+                  <td align="center">
+                    <table role="presentation" style="width: 100%; max-width: 600px; border-collapse: collapse; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden;">
+                      
+                      <!-- Header com gradiente -->
+                      <tr>
+                        <td style="padding: 0;">
+                          <div style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 40px 40px 60px; text-align: center;">
+                            <div style="width: 80px; height: 80px; margin: 0 auto 20px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+                              <span style="font-size: 40px;">⚠️</span>
+                            </div>
+                            <h1 style="margin: 0; color: white; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Exclusão de Conta</h1>
+                            <p style="margin: 12px 0 0; color: rgba(255,255,255,0.9); font-size: 16px; line-height: 1.5;">Confirme para prosseguir</p>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <!-- Conteúdo principal -->
+                      <tr>
+                        <td style="padding: 40px;">
+                          <p style="margin: 0 0 24px; color: #374151; font-size: 16px; line-height: 1.6;">
+                            Olá! 👋
+                          </p>
+                          <p style="margin: 0 0 24px; color: #374151; font-size: 16px; line-height: 1.6;">
+                            Recebemos uma solicitação para excluir permanentemente sua conta no Prospera.
+                          </p>
+
+                          <div style="margin: 32px 0; padding: 20px; background: #fee2e2; border-left: 4px solid #dc2626; border-radius: 8px;">
+                            <p style="margin: 0 0 8px; color: #991b1b; font-size: 16px; font-weight: 700;">
+                              ⚠️ ATENÇÃO: ESTA AÇÃO É IRREVERSÍVEL
+                            </p>
+                            <p style="margin: 0; color: #991b1b; font-size: 14px; line-height: 1.5;">
+                              Ao confirmar, todos os seus dados serão permanentemente excluídos sem possibilidade de recuperação ou backup.
+                            </p>
+                          </div>
+
+                          <h3 style="color: #374151; font-size: 18px; font-weight: 600; margin: 24px 0 16px;">Os seguintes dados serão excluídos:</h3>
+                          <ul style="color: #6b7280; font-size: 15px; line-height: 1.8; margin: 0 0 24px; padding-left: 24px;">
+                            <li>Todas as contas e lançamentos financeiros</li>
+                            <li>Categorias e subcategorias personalizadas</li>
+                            <li>Previsões e orçamentos</li>
+                            <li>Investimentos e metas</li>
+                            <li>Cartões de crédito cadastrados</li>
+                            <li>Configurações e preferências</li>
+                            <li>Seu perfil e dados pessoais</li>
+                          </ul>
+
+                          <div style="margin: 32px 0; padding: 20px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 8px;">
+                            <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.5;">
+                              ⚠️ <strong>Importante:</strong> Este link expira em 1 hora por questões de segurança.
+                            </p>
+                          </div>
+
+                          <p style="margin: 0 0 16px; color: #374151; font-size: 16px; line-height: 1.6;">
+                            Se você tem certeza que deseja excluir sua conta permanentemente, clique no botão abaixo:
+                          </p>
+
+                          <!-- Botão de ação -->
+                          <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 32px 0;">
+                            <tr>
+                              <td align="center">
+                                <a href="${confirmUrl}" 
+                                   style="display: inline-block; padding: 16px 48px; background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);">
+                                  Confirmar Exclusão de Conta
+                                </a>
+                              </td>
+                            </tr>
+                          </table>
+
+                          <p style="margin: 24px 0 8px; color: #6b7280; font-size: 13px; text-align: center;">
+                            Ou copie e cole este link no seu navegador:
+                          </p>
+                          <p style="margin: 0; color: #9ca3af; font-size: 11px; word-break: break-all; text-align: center; background: #f9fafb; padding: 12px; border-radius: 6px;">
+                            ${confirmUrl}
+                          </p>
+
+                          <div style="margin: 32px 0 0; padding: 20px; background: #f9fafb; border-radius: 8px;">
+                            <p style="margin: 0 0 8px; color: #374151; font-size: 15px; font-weight: 600;">
+                              Não solicitou esta exclusão?
+                            </p>
+                            <p style="margin: 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                              Se você não solicitou a exclusão da sua conta, ignore este email com segurança. 
+                              Sua conta permanecerá ativa e protegida. Este link expirará automaticamente em 1 hora.
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <!-- Footer -->
+                      <tr>
+                        <td style="padding: 30px 40px; background: #f9fafb; border-top: 1px solid #e5e7eb;">
+                          <p style="margin: 0 0 8px; color: #6b7280; font-size: 13px; text-align: center; line-height: 1.5;">
+                            <strong>Prospera</strong> - Gestão Financeira Inteligente
+                          </p>
+                          <p style="margin: 0 0 8px; color: #667eea; font-size: 12px; text-align: center;">
+                            <a href="https://prospera.lucaslima.ai" style="color: #667eea; text-decoration: none;">prospera.lucaslima.ai</a>
+                          </p>
+                          <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center; line-height: 1.5;">
+                            Este é um email automático, por favor não responda.
+                          </p>
+                        </td>
+                      </tr>
+
+                    </table>
+                  </td>
+                </tr>
+              </table>
             </body>
           </html>
         `,
