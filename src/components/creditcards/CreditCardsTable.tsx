@@ -212,40 +212,39 @@ export function CreditCardsTable({
                                       </div>
                                     </AccordionTrigger>
                                     <AccordionContent className="p-0">
-                                      <div className="border-t">
+                                      <div className="border-t pl-8">
                                         <Table>
                                           <TableHeader>
-                                            <TableRow className="bg-muted/50">
-                                              <TableHead className="w-[120px]">Data</TableHead>
-                                              <TableHead>Descrição</TableHead>
-                                              <TableHead className="w-[180px]">Categoria</TableHead>
-                                              <TableHead className="text-right w-[140px]">Valor</TableHead>
+                                            <TableRow className="bg-muted/30 hover:bg-muted/30">
+                                              <TableHead className="h-9 text-xs">Data</TableHead>
+                                              <TableHead className="h-9 text-xs">Descrição</TableHead>
+                                              <TableHead className="h-9 text-xs">Categoria</TableHead>
+                                              <TableHead className="h-9 text-xs text-right">Valor</TableHead>
                                             </TableRow>
                                           </TableHeader>
                                           <TableBody>
                                             {txs.map(t => (
-                                              <TableRow key={t.id} className="hover:bg-muted/30">
-                                                <TableCell className="font-medium text-sm">
+                                              <TableRow key={t.id} className="hover:bg-muted/20">
+                                                <TableCell className="text-xs py-2">
                                                   {new Date(t.date).toLocaleDateString('pt-BR')}
                                                 </TableCell>
-                                                <TableCell className="font-medium">
+                                                <TableCell className="text-sm py-2">
                                                   {t.description}
                                                 </TableCell>
-                                                <TableCell>
+                                                <TableCell className="py-2">
                                                   {t.categories && (
-                                                    <Badge 
-                                                      variant="outline" 
-                                                      className="text-xs"
-                                                      style={{ 
-                                                        borderColor: t.categories.color,
-                                                        color: t.categories.color 
-                                                      }}
-                                                    >
-                                                      {t.categories.name}
-                                                    </Badge>
+                                                    <div className="flex items-center gap-2">
+                                                      <div 
+                                                        className="h-3 w-3 rounded-full flex-shrink-0" 
+                                                        style={{ backgroundColor: t.categories.color }}
+                                                      />
+                                                      <span className="text-xs text-muted-foreground truncate">
+                                                        {t.categories.name}
+                                                      </span>
+                                                    </div>
                                                   )}
                                                 </TableCell>
-                                                <TableCell className="text-right font-semibold">
+                                                <TableCell className="text-right text-sm font-medium py-2">
                                                   {formatCurrency(Number(t.amount))}
                                                 </TableCell>
                                               </TableRow>
