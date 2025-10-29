@@ -138,14 +138,16 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setCopyDialogOpen(true)}
-            disabled={filters.accountId === "all" || filteredForecasts.length === 0}
-          >
-            <Copy className="h-4 w-4" />
-            {!isMobile && <span className="ml-2">Copiar Mês</span>}
-          </Button>
+          {filters.viewMode === "monthly" && (
+            <Button
+              variant="outline"
+              onClick={() => setCopyDialogOpen(true)}
+              disabled={filters.accountId === "all" || filteredForecasts.length === 0}
+            >
+              <Copy className="h-4 w-4" />
+              {!isMobile && <span className="ml-2">Copiar Mês</span>}
+            </Button>
+          )}
           <Button onClick={handleCreateForecast} disabled={filters.accountId === "all"}>
             <Plus className="h-4 w-4" />
             {!isMobile && <span className="ml-2">Nova Previsão</span>}
