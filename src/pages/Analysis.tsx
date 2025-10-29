@@ -7,7 +7,7 @@ import { ComparisonChart } from "@/components/analysis/ComparisonChart";
 import { CategoryPieCharts } from "@/components/analysis/CategoryPieCharts";
 import { CategoryStackedBarChart } from "@/components/analysis/CategoryStackedBarChart";
 import { AnalysisFilters } from "@/components/analysis/AnalysisFilters";
-import { format, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
+import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, parse } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface AnalysisProps {
@@ -63,8 +63,9 @@ export default function Analysis({ accountId: propAccountId }: AnalysisProps) {
       periodStart = filters.startDate;
       periodEnd = filters.endDate;
     } else {
-      periodStart = format(startOfMonth(new Date(filters.selectedMonth + "-01")), "yyyy-MM-dd");
-      periodEnd = format(endOfMonth(new Date(filters.selectedMonth + "-01")), "yyyy-MM-dd");
+      const monthDate = parse(filters.selectedMonth, "yyyy-MM", new Date());
+      periodStart = format(startOfMonth(monthDate), "yyyy-MM-dd");
+      periodEnd = format(endOfMonth(monthDate), "yyyy-MM-dd");
     }
 
     // Get forecasts for the period (use string compare for month range)
@@ -125,8 +126,8 @@ export default function Analysis({ accountId: propAccountId }: AnalysisProps) {
       };
     }
     return {
-      start: format(startOfMonth(new Date(filters.selectedMonth + "-01")), "yyyy-MM-dd"),
-      end: format(endOfMonth(new Date(filters.selectedMonth + "-01")), "yyyy-MM-dd"),
+      start: format(startOfMonth(parse(filters.selectedMonth, "yyyy-MM", new Date())), "yyyy-MM-dd"),
+      end: format(endOfMonth(parse(filters.selectedMonth, "yyyy-MM", new Date())), "yyyy-MM-dd"),
     };
   }, [filters]);
 
