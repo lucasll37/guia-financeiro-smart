@@ -6,6 +6,7 @@ import { useForecasts } from "@/hooks/useForecasts";
 import { ComparisonChart } from "@/components/analysis/ComparisonChart";
 import { CategoryPieCharts } from "@/components/analysis/CategoryPieCharts";
 import { CategoryStackedBarChart } from "@/components/analysis/CategoryStackedBarChart";
+import { AccumulatedBalanceChart } from "@/components/analysis/AccumulatedBalanceChart";
 import { AnalysisFilters } from "@/components/analysis/AnalysisFilters";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, parse } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -155,10 +156,11 @@ export default function Analysis({ accountId: propAccountId }: AnalysisProps) {
         </div>
       ) : (
         <Tabs defaultValue="comparison" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 max-w-2xl mx-auto">
+          <TabsList className="grid w-full grid-cols-4 max-w-3xl mx-auto">
             <TabsTrigger value="comparison">Comparativo</TabsTrigger>
             <TabsTrigger value="distribution">Distribuição</TabsTrigger>
             <TabsTrigger value="composition">Composição</TabsTrigger>
+            <TabsTrigger value="balance">Saldo</TabsTrigger>
           </TabsList>
 
           <TabsContent value="comparison" className="mt-6">
@@ -175,6 +177,14 @@ export default function Analysis({ accountId: propAccountId }: AnalysisProps) {
               periodStart={periodDates.start}
               periodEnd={periodDates.end}
               parentCategories={comparisonData}
+            />
+          </TabsContent>
+
+          <TabsContent value="balance" className="mt-6">
+            <AccumulatedBalanceChart
+              accountId={filters.accountId}
+              periodStart={periodDates.start}
+              periodEnd={periodDates.end}
             />
           </TabsContent>
         </Tabs>
