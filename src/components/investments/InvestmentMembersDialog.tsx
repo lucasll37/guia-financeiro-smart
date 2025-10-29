@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -40,6 +41,7 @@ export function InvestmentMembersDialog({
   ownerId,
 }: InvestmentMembersDialogProps) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"viewer" | "editor">("viewer");
   const { members, inviteMember, updateMemberStatus, removeMember } = useInvestmentMembers(
@@ -125,8 +127,14 @@ export function InvestmentMembersDialog({
     );
     
     if (confirmed) {
-      await removeMember.mutateAsync(currentUserMembership.id);
-      onOpenChange(false);
+      try {
+        await removeMember.mutateAsync(currentUserMembership.id);
+        onOpenChange(false);
+        // Redirect to investments list after leaving
+        navigate("/app/investimentos");
+      } catch (error) {
+        console.error("Error leaving investment:", error);
+      }
     }
   };
 

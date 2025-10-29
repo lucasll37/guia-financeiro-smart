@@ -121,7 +121,9 @@ export function useInvestmentMembers(investmentId?: string) {
 
   const removeMember = useMutation({
     mutationFn: async (id: string) => {
-      // Get member info before deleting to update notification
+      // Get current user and member info before deleting
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      
       const { data: member } = await supabase
         .from("investment_members")
         .select("user_id, status")
@@ -150,14 +152,23 @@ export function useInvestmentMembers(investmentId?: string) {
           .eq("user_id", member.user_id)
           .contains("metadata", { invite_id: id });
       }
+
+      return { 
+        userId: member?.user_id,
+        isCurrentUser: member?.user_id === currentUser?.id 
+      };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["investment-members"] });
       queryClient.invalidateQueries({ queryKey: ["investments"] });
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      
+      // Show appropriate message based on who was removed
       toast({
-        title: "Membro removido",
-        description: "O membro foi removido do investimento",
+        title: data.isCurrentUser ? "Você saiu do investimento" : "Membro removido",
+        description: data.isCurrentUser 
+          ? "Você não tem mais acesso a este investimento"
+          : "O membro foi removido do investimento",
       });
     },
     onError: (error: any) => {
