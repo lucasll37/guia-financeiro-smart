@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Copy } from "lucide-react";
+import { Plus, Copy, Sparkles } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAccounts } from "@/hooks/useAccounts";
@@ -9,6 +9,7 @@ import { useForecasts } from "@/hooks/useForecasts";
 import { ForecastsTable } from "@/components/forecasts/ForecastsTable";
 import { ForecastDialog } from "@/components/forecasts/ForecastDialog";
 import { ForecastFilters } from "@/components/forecasts/ForecastFilters";
+import { BudgetWizard } from "@/components/forecasts/BudgetWizard";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -44,6 +45,7 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
   const [selectedForecast, setSelectedForecast] = useState<any>(null);
   const [copyDialogOpen, setCopyDialogOpen] = useState(false);
   const [copyTargetMonth, setCopyTargetMonth] = useState<string>("");
+  const [wizardOpen, setWizardOpen] = useState(false);
   
   // Update filters when propAccountId changes
   useEffect(() => {
@@ -128,6 +130,13 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
     setCopyTargetMonth("");
   };
 
+  const handleWizardSave = async (forecasts: any[]) => {
+    // Criar todas as previsões em lote
+    for (const forecast of forecasts) {
+      await createForecast.mutateAsync(forecast);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -139,14 +148,25 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
         </div>
         <div className="flex gap-2">
           {filters.viewMode === "monthly" && (
-            <Button
-              variant="outline"
-              onClick={() => setCopyDialogOpen(true)}
-              disabled={filters.accountId === "all" || filteredForecasts.length === 0}
-            >
-              <Copy className="h-4 w-4" />
-              {!isMobile && <span className="ml-2">Copiar Mês</span>}
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setWizardOpen(true)}
+                disabled={filters.accountId === "all"}
+                className="gap-2"
+              >
+                <Sparkles className="h-4 w-4" />
+                {!isMobile && <span>Assistente</span>}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setCopyDialogOpen(true)}
+                disabled={filters.accountId === "all" || filteredForecasts.length === 0}
+              >
+                <Copy className="h-4 w-4" />
+                {!isMobile && <span className="ml-2">Copiar Mês</span>}
+              </Button>
+            </>
           )}
           <Button onClick={handleCreateForecast} disabled={filters.accountId === "all"}>
             <Plus className="h-4 w-4" />
@@ -182,6 +202,15 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
         onOpenChange={setDialogOpen}
         onSave={handleSaveForecast}
         forecast={selectedForecast}
+        accountId={filters.accountId !== "all" ? filters.accountId : ""}
+        categories={categories || []}
+        selectedMonth={filters.selectedMonth}
+      />
+
+      <BudgetWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        onSave={handleWizardSave}
         accountId={filters.accountId !== "all" ? filters.accountId : ""}
         categories={categories || []}
         selectedMonth={filters.selectedMonth}
