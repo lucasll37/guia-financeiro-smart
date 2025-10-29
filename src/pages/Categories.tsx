@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus, TreePine } from "lucide-react";
+import { Plus, TreePine, Crown } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCategories } from "@/hooks/useCategories";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useTransactions } from "@/hooks/useTransactions";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { CategoryTree } from "@/components/categories/CategoryTree";
 import { CategoryDialog } from "@/components/categories/CategoryDialog";
 import { useToast } from "@/hooks/use-toast";
@@ -22,7 +24,9 @@ interface CategoriesProps {
 
 export default function Categories({ accountId: propAccountId }: CategoriesProps) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { accounts } = useAccounts();
+  const { canEditCategories } = usePlanLimits();
   const isMobile = useIsMobile();
   const [selectedAccountId, setSelectedAccountId] = useState<string>(propAccountId || "");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -196,6 +200,26 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
               ))}
             </SelectContent>
           </Select>
+        </div>
+      )}
+
+      {!canEditCategories && (
+        <div className="p-4 bg-muted rounded-lg border border-primary/20">
+          <div className="flex items-start gap-3">
+            <Crown className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium mb-1">Recurso exclusivo do plano Pro</p>
+              <p className="text-sm text-muted-foreground mb-3">
+                A edição de categorias está disponível apenas para assinantes Pro.
+              </p>
+              <Button 
+                size="sm" 
+                onClick={() => navigate("/app/planos")}
+              >
+                Fazer Upgrade
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 
