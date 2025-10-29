@@ -354,7 +354,7 @@ export function ProfileSection() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-start justify-between p-4 border rounded-lg">
+        <div className="flex items-start justify-between p-4 border border-destructive/50 rounded-lg bg-destructive/5">
           <div className="space-y-1 flex-1">
             <h3 className="font-semibold">Excluir Conta Permanentemente</h3>
             <p className="text-sm text-muted-foreground">
