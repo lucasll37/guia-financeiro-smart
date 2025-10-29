@@ -146,24 +146,11 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             Gerencie suas previsões de receitas e despesas por mês
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {filters.viewMode === "monthly" && (
-            <Button
-              variant="outline"
-              size={isMobile ? "sm" : "default"}
-              onClick={() => setCopyDialogOpen(true)}
-              disabled={filters.accountId === "all" || filteredForecasts.length === 0}
-              className="gap-2"
-            >
-              <Copy className="h-4 w-4" />
-              {!isMobile && <span>Copiar Mês</span>}
-            </Button>
-          )}
-          
-          <div className="flex items-center gap-2 ml-auto">
-            <div className="text-xs text-muted-foreground hidden sm:block mr-2">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground hidden sm:block">
               Nova previsão:
-            </div>
+            </span>
             <Button
               variant="default"
               size={isMobile ? "sm" : "default"}
@@ -185,6 +172,19 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
               <span>Manual</span>
             </Button>
           </div>
+          
+          {filters.viewMode === "monthly" && (
+            <Button
+              variant="outline"
+              size={isMobile ? "sm" : "default"}
+              onClick={() => setCopyDialogOpen(true)}
+              disabled={filters.accountId === "all" || filteredForecasts.length === 0}
+              className="gap-2"
+            >
+              <Copy className="h-4 w-4" />
+              <span>Copiar Mês</span>
+            </Button>
+          )}
         </div>
       </div>
 
