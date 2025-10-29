@@ -80,12 +80,50 @@ export function useNotifications(userId?: string) {
     },
   });
 
+  const deleteNotification = useMutation({
+    mutationFn: async (notificationId: string) => {
+      const { error } = await supabase
+        .from("notifications")
+        .delete()
+        .eq("id", notificationId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+
+  const deleteAllRead = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("notifications")
+        .delete()
+        .eq("user_id", userId!)
+        .eq("read", true);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      toast({
+        title: "Notificações lidas removidas",
+        description: "Todas as notificações lidas foram excluídas com sucesso",
+      });
+    },
+  });
+
+  const readCount = notifications?.filter((n) => n.read).length || 0;
+
   return {
     notifications,
     isLoading,
     unreadCount,
+    readCount,
     markAsRead,
     markAllAsRead,
     createNotification,
+    deleteNotification,
+    deleteAllRead,
   };
 }
