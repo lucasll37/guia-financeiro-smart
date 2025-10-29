@@ -1,11 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, RefreshCw } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGoals } from "@/hooks/useGoals";
-import { useAccounts } from "@/hooks/useAccounts";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useMaskValues } from "@/hooks/useMaskValues";
@@ -15,37 +13,20 @@ import { evaluateNotifications } from "@/lib/notificationEvaluator";
 import type { Database } from "@/integrations/supabase/types";
 
 type Goal = Database["public"]["Tables"]["goals"]["Row"];
-type GoalInsert = Database["public"]["Tables"]["goals"]["Insert"];
+type GoalInsert = Omit<Database["public"]["Tables"]["goals"]["Insert"], "user_id">;
 
 export default function Goals() {
   const { user } = useAuth();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const { accounts } = useAccounts();
   const { maskValue } = useMaskValues();
-  const [selectedAccountId, setSelectedAccountId] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [evaluating, setEvaluating] = useState(false);
 
-  const { goals, isLoading, createGoal, updateGoal, deleteGoal } =
-    useGoals(selectedAccountId);
-
-  useEffect(() => {
-    if (accounts && accounts.length > 0 && !selectedAccountId) {
-      setSelectedAccountId(accounts[0].id);
-    }
-  }, [accounts, selectedAccountId]);
+  const { goals, isLoading, createGoal, updateGoal, deleteGoal } = useGoals();
 
   const handleCreateGoal = () => {
-    if (!selectedAccountId) {
-      toast({
-        title: "Selecione uma conta",
-        description: "Você precisa selecionar uma conta primeiro",
-        variant: "destructive",
-      });
-      return;
-    }
     setSelectedGoal(null);
     setDialogOpen(true);
   };
@@ -81,7 +62,6 @@ export default function Goals() {
     try {
       const count = await evaluateNotifications({
         userId: user.id,
-        accountId: selectedAccountId,
       });
 
       toast({
@@ -125,7 +105,7 @@ export default function Goals() {
           <Button
             variant="outline"
             onClick={handleEvaluateNotifications}
-            disabled={evaluating || !selectedAccountId}
+            disabled={evaluating}
           >
             <RefreshCw className={`h-4 w-4 ${evaluating ? "animate-spin" : ""}`} />
             {!isMobile && <span className="ml-2">Avaliar Alertas</span>}
@@ -137,24 +117,7 @@ export default function Goals() {
         </div>
       </div>
 
-      <div className="w-64">
-        <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione uma conta" />
-          </SelectTrigger>
-          <SelectContent>
-            {accounts?.map((account) => (
-              <SelectItem key={account.id} value={account.id}>
-                {account.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {selectedAccountId && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Metas Ativas</CardTitle>
@@ -201,47 +164,36 @@ export default function Goals() {
             </Card>
           </div>
 
-          {isLoading ? (
-            <p className="text-muted-foreground">Carregando metas...</p>
-          ) : goals && goals.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {goals.map((goal) => (
-                <GoalCard
-                  key={goal.id}
-                  goal={goal}
-                  onEdit={handleEditGoal}
-                  onDelete={handleDeleteGoal}
-                  onUpdateProgress={handleUpdateProgress}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 border rounded-lg">
-              <p className="text-muted-foreground mb-4">Nenhuma meta cadastrada</p>
-              <Button onClick={handleCreateGoal}>
-                <Plus className="h-4 w-4" />
-                {!isMobile && <span className="ml-2">Criar Primeira Meta</span>}
-              </Button>
-            </div>
-          )}
-        </>
-      )}
-
-      {!selectedAccountId && (
+      {isLoading ? (
+        <p className="text-muted-foreground">Carregando metas...</p>
+      ) : goals && goals.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {goals.map((goal) => (
+            <GoalCard
+              key={goal.id}
+              goal={goal}
+              onEdit={handleEditGoal}
+              onDelete={handleDeleteGoal}
+              onUpdateProgress={handleUpdateProgress}
+            />
+          ))}
+        </div>
+      ) : (
         <div className="text-center py-12 border rounded-lg">
-          <p className="text-muted-foreground">Selecione uma conta para ver as metas</p>
+          <p className="text-muted-foreground mb-4">Nenhuma meta cadastrada</p>
+          <Button onClick={handleCreateGoal}>
+            <Plus className="h-4 w-4" />
+            {!isMobile && <span className="ml-2">Criar Primeira Meta</span>}
+          </Button>
         </div>
       )}
 
-      {selectedAccountId && (
-        <GoalDialog
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          onSave={handleSaveGoal}
-          goal={selectedGoal}
-          accountId={selectedAccountId}
-        />
-      )}
+      <GoalDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSave={handleSaveGoal}
+        goal={selectedGoal}
+      />
     </div>
   );
 }

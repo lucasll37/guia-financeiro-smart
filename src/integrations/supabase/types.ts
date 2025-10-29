@@ -398,7 +398,7 @@ export type Database = {
       }
       goals: {
         Row: {
-          account_id: string
+          account_id: string | null
           created_at: string
           current_amount: number
           deadline: string | null
@@ -406,9 +406,10 @@ export type Database = {
           name: string
           target_amount: number
           updated_at: string
+          user_id: string
         }
         Insert: {
-          account_id: string
+          account_id?: string | null
           created_at?: string
           current_amount?: number
           deadline?: string | null
@@ -416,9 +417,10 @@ export type Database = {
           name: string
           target_amount: number
           updated_at?: string
+          user_id: string
         }
         Update: {
-          account_id?: string
+          account_id?: string | null
           created_at?: string
           current_amount?: number
           deadline?: string | null
@@ -426,6 +428,7 @@ export type Database = {
           name?: string
           target_amount?: number
           updated_at?: string
+          user_id?: string
         }
         Relationships: [
           {

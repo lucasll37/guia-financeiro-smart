@@ -1,40 +1,38 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import type { Database } from "@/integrations/supabase/types";
 
 type Goal = Database["public"]["Tables"]["goals"]["Row"];
-type GoalInsert = Database["public"]["Tables"]["goals"]["Insert"];
+type GoalInsert = Omit<Database["public"]["Tables"]["goals"]["Insert"], "user_id">;
 type GoalUpdate = Database["public"]["Tables"]["goals"]["Update"];
 
-export function useGoals(accountId?: string) {
+export function useGoals() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { data: goals, isLoading } = useQuery({
-    queryKey: ["goals", accountId],
+    queryKey: ["goals"],
     queryFn: async () => {
-      let query = supabase.from("goals").select("*");
-
-      if (accountId) {
-        query = query.eq("account_id", accountId);
-      }
-
-      const { data, error } = await query.order("created_at", {
-        ascending: false,
-      });
+      const { data, error } = await supabase
+        .from("goals")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data as Goal[];
     },
-    enabled: !!accountId || accountId === undefined,
   });
 
   const createGoal = useMutation({
     mutationFn: async (goal: GoalInsert) => {
+      if (!user) throw new Error("Usuário não autenticado");
+      
       const { data, error } = await supabase
         .from("goals")
-        .insert(goal)
+        .insert({ ...goal, user_id: user.id })
         .select()
         .single();
 

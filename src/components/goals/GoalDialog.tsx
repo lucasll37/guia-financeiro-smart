@@ -6,19 +6,17 @@ import { Label } from "@/components/ui/label";
 import type { Database } from "@/integrations/supabase/types";
 
 type Goal = Database["public"]["Tables"]["goals"]["Row"];
-type GoalInsert = Database["public"]["Tables"]["goals"]["Insert"];
+type GoalInsert = Omit<Database["public"]["Tables"]["goals"]["Insert"], "user_id">;
 
 interface GoalDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (goal: GoalInsert) => void;
   goal?: Goal | null;
-  accountId: string;
 }
 
-export function GoalDialog({ open, onOpenChange, onSave, goal, accountId }: GoalDialogProps) {
+export function GoalDialog({ open, onOpenChange, onSave, goal }: GoalDialogProps) {
   const [formData, setFormData] = useState<GoalInsert>({
-    account_id: accountId,
     name: "",
     target_amount: 0,
     current_amount: 0,
@@ -30,7 +28,6 @@ export function GoalDialog({ open, onOpenChange, onSave, goal, accountId }: Goal
   useEffect(() => {
     if (goal) {
       setFormData({
-        account_id: goal.account_id,
         name: goal.name,
         target_amount: goal.target_amount,
         current_amount: goal.current_amount,
@@ -38,7 +35,6 @@ export function GoalDialog({ open, onOpenChange, onSave, goal, accountId }: Goal
       });
     } else {
       setFormData({
-        account_id: accountId,
         name: "",
         target_amount: 0,
         current_amount: 0,
@@ -46,7 +42,7 @@ export function GoalDialog({ open, onOpenChange, onSave, goal, accountId }: Goal
       });
     }
     setErrors({});
-  }, [goal, accountId, open]);
+  }, [goal, open]);
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
