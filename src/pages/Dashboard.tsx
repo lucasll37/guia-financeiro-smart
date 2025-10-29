@@ -91,7 +91,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-8 pb-8">
+    <div className="space-y-8 pb-8 max-w-[1400px] mx-auto">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">
@@ -115,13 +115,15 @@ export default function Dashboard() {
             ))}
           </div>
         ) : (
-          <EmptyState
-            icon={Wallet}
-            title="Nenhuma conta cadastrada"
-            description="Crie sua primeira conta para começar a gerenciar suas finanças"
-            actionLabel="Criar Conta"
-            onAction={() => navigate("/app/contas")}
-          />
+          <div className="max-w-2xl mx-auto">
+            <EmptyState
+              icon={Wallet}
+              title="Nenhuma conta cadastrada"
+              description="Crie sua primeira conta para começar a gerenciar suas finanças"
+              actionLabel="Criar Conta"
+              onAction={() => navigate("/app/contas")}
+            />
+          </div>
         )}
       </section>
 
@@ -135,19 +137,21 @@ export default function Dashboard() {
             ))}
           </div>
         ) : investments && investments.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
             {investments.map((investment) => (
               <InvestmentCard key={investment.id} investment={investment} />
             ))}
           </div>
         ) : (
-          <EmptyState
-            icon={TrendingUp}
-            title="Nenhum investimento cadastrado"
-            description="Registre seus investimentos e acompanhe a evolução do seu patrimônio"
-            actionLabel="Criar Investimento"
-            onAction={() => navigate("/app/investimentos")}
-          />
+          <div className="max-w-2xl mx-auto">
+            <EmptyState
+              icon={TrendingUp}
+              title="Nenhum investimento cadastrado"
+              description="Registre seus investimentos e acompanhe a evolução do seu patrimônio"
+              actionLabel="Criar Investimento"
+              onAction={() => navigate("/app/investimentos")}
+            />
+          </div>
         )}
       </section>
 
@@ -161,19 +165,21 @@ export default function Dashboard() {
             ))}
           </div>
         ) : activeGoals.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
             {activeGoals.map((goal) => (
               <GoalProgressCard key={goal.id} goal={goal} />
             ))}
           </div>
         ) : (
-          <EmptyState
-            icon={Target}
-            title="Nenhuma meta em andamento"
-            description="Defina metas financeiras e acompanhe seu progresso para alcançá-las"
-            actionLabel="Criar Meta"
-            onAction={() => navigate("/app/metas")}
-          />
+          <div className="max-w-2xl mx-auto">
+            <EmptyState
+              icon={Target}
+              title="Nenhuma meta em andamento"
+              description="Defina metas financeiras e acompanhe seu progresso para alcançá-las"
+              actionLabel="Criar Meta"
+              onAction={() => navigate("/app/metas")}
+            />
+          </div>
         )}
       </section>
     </div>
