@@ -127,7 +127,9 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
           transactions: []
         };
       }
-      totals[t.category_id].actual += Number(t.amount);
+      // Para despesas, usar valor absoluto para exibição correta
+      const amount = Number(t.amount);
+      totals[t.category_id].actual += isIncome ? amount : Math.abs(amount);
       totals[t.category_id].transactions.push(t);
     });
 
@@ -162,6 +164,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
       Object.entries(expenseCategories).filter(([_, cat]) => cat.actual > 0 || cat.forecasted > 0)
     );
 
+    // totalIncome já é positivo, totalExpense já é positivo (valor absoluto)
     const incomeTotal = Object.values(filteredIncomeCategories).reduce((sum, cat) => sum + cat.actual, 0);
     const expenseTotal = Object.values(filteredExpenseCategories).reduce((sum, cat) => sum + cat.actual, 0);
 
@@ -174,7 +177,9 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
     };
   }, [periodTransactions, forecasts, periodStart, categories]);
 
-  // Saldo do período = Saldo Anterior + Receitas - Despesas
+  // Saldo do Período = Saldo Anterior + Receitas - Despesas
+  // previousBalance já considera todas as transações anteriores (receitas - despesas)
+  // totalIncome é positivo, totalExpense é positivo (valor absoluto)
   const balance = previousBalance + totalIncome - totalExpense;
 
   
