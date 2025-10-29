@@ -29,13 +29,13 @@ export function TransactionsTable({
   onEdit,
   onDelete,
 }: TransactionsTableProps) {
-  const [sortField, setSortField] = useState<'date' | 'description' | 'amount' | null>(null);
+  const [sortField, setSortField] = useState<'date' | 'description' | 'amount' | 'category' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [incomeExpanded, setIncomeExpanded] = useState(true);
   const [expenseExpanded, setExpenseExpanded] = useState(true);
   const { maskValue } = useMaskValues();
 
-  const handleSort = (field: 'date' | 'description' | 'amount') => {
+  const handleSort = (field: 'date' | 'description' | 'amount' | 'category') => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -44,7 +44,7 @@ export function TransactionsTable({
     }
   };
 
-  const renderSortIcon = (field: 'date' | 'description' | 'amount') => {
+  const renderSortIcon = (field: 'date' | 'description' | 'amount' | 'category') => {
     if (sortField !== field) return <ArrowUpDown className="h-4 w-4 ml-1" />;
     return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 ml-1" /> : <ArrowDown className="h-4 w-4 ml-1" />;
   };
@@ -73,6 +73,10 @@ export function TransactionsTable({
           comparison = a.description.localeCompare(b.description);
         } else if (sortField === 'amount') {
           comparison = a.amount - b.amount;
+        } else if (sortField === 'category') {
+          const catA = a.categories?.name || '';
+          const catB = b.categories?.name || '';
+          comparison = catA.localeCompare(catB);
         }
         
         return sortDirection === 'asc' ? comparison : -comparison;
@@ -195,7 +199,12 @@ export function TransactionsTable({
                     {renderSortIcon('date')}
                   </Button>
                 </TableHead>
-                <TableHead className="w-[200px]">Categoria</TableHead>
+                <TableHead className="w-[200px]">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('category')} className="flex items-center gap-1 p-0 h-auto font-medium">
+                    Categoria
+                    {renderSortIcon('category')}
+                  </Button>
+                </TableHead>
                 <TableHead>
                   <Button variant="ghost" size="sm" onClick={() => handleSort('description')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Descrição
@@ -253,7 +262,12 @@ export function TransactionsTable({
                     {renderSortIcon('date')}
                   </Button>
                 </TableHead>
-                <TableHead className="w-[200px]">Categoria</TableHead>
+                <TableHead className="w-[200px]">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('category')} className="flex items-center gap-1 p-0 h-auto font-medium">
+                    Categoria
+                    {renderSortIcon('category')}
+                  </Button>
+                </TableHead>
                 <TableHead>
                   <Button variant="ghost" size="sm" onClick={() => handleSort('description')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Descrição
