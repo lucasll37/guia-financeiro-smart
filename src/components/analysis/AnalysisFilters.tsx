@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar, CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { format, startOfYear, endOfYear, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -61,16 +61,27 @@ export function AnalysisFilters({ accounts, filters, onFilterChange, accountId }
         endDate: "",
       });
     } else {
+      // When switching to custom view, set start date to first day of current year
+      // and end date to last day of current year
+      const today = new Date();
+      const firstDayOfYear = startOfYear(today);
+      const lastDayOfYear = endOfYear(today);
+      
+      const startDate = format(firstDayOfYear, "yyyy-MM-dd");
+      const endDate = format(lastDayOfYear, "yyyy-MM-dd");
+      
       onFilterChange({
         ...filters,
         viewMode: newMode,
+        startDate,
+        endDate,
       });
     }
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm font-medium">
@@ -86,7 +97,7 @@ export function AnalysisFilters({ accounts, filters, onFilterChange, accountId }
         </Button>
       </div>
 
-      <div className={`grid gap-4 p-4 border rounded-lg bg-card ${accountId ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-3'}`}>
+      <div className={`grid gap-4 p-4 border rounded-lg bg-card ${accountId ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
         {!accountId && (
           <div className="space-y-2">
             <Label htmlFor="account-filter">Conta</Label>
@@ -109,26 +120,26 @@ export function AnalysisFilters({ accounts, filters, onFilterChange, accountId }
           </div>
         )}
 
-        {filters.viewMode === "monthly" ? (
-          <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="month-filter">Mês</Label>
-            <Select
-              value={filters.selectedMonth}
-              onValueChange={handleMonthChange}
-            >
-              <SelectTrigger id="month-filter">
-                <SelectValue placeholder="Selecione o mês" />
-              </SelectTrigger>
-              <SelectContent>
-                {monthOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        ) : (
+      {filters.viewMode === "monthly" ? (
+        <div className={`space-y-2 ${accountId ? 'md:col-span-3' : 'md:col-span-3'}`}>
+          <Label htmlFor="month-filter">Mês</Label>
+          <Select
+            value={filters.selectedMonth}
+            onValueChange={handleMonthChange}
+          >
+            <SelectTrigger id="month-filter">
+              <SelectValue placeholder="Selecione o mês" />
+            </SelectTrigger>
+            <SelectContent>
+              {monthOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      ) : (
           <>
             <div className="space-y-2">
               <Label>Data Início</Label>
@@ -142,13 +153,13 @@ export function AnalysisFilters({ accounts, filters, onFilterChange, accountId }
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filters.startDate ? format(new Date(filters.startDate), "dd/MM/yyyy") : "Selecione"}
+                    {filters.startDate ? format(parse(filters.startDate, "yyyy-MM-dd", new Date()), "dd/MM/yyyy") : "Selecione"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <CalendarComponent
                     mode="single"
-                    selected={filters.startDate ? new Date(filters.startDate) : undefined}
+                    selected={filters.startDate ? parse(filters.startDate, "yyyy-MM-dd", new Date()) : undefined}
                     onSelect={(date) => date && onFilterChange({ ...filters, startDate: format(date, "yyyy-MM-dd") })}
                     initialFocus
                     className={cn("p-3 pointer-events-auto")}
@@ -169,15 +180,15 @@ export function AnalysisFilters({ accounts, filters, onFilterChange, accountId }
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filters.endDate ? format(new Date(filters.endDate), "dd/MM/yyyy") : "Selecione"}
+                    {filters.endDate ? format(parse(filters.endDate, "yyyy-MM-dd", new Date()), "dd/MM/yyyy") : "Selecione"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <CalendarComponent
                     mode="single"
-                    selected={filters.endDate ? new Date(filters.endDate) : undefined}
+                    selected={filters.endDate ? parse(filters.endDate, "yyyy-MM-dd", new Date()) : undefined}
                     onSelect={(date) => date && onFilterChange({ ...filters, endDate: format(date, "yyyy-MM-dd") })}
-                    disabled={(date) => filters.startDate ? date < new Date(filters.startDate) : false}
+                    disabled={(date) => (filters.startDate ? date < parse(filters.startDate, "yyyy-MM-dd", new Date()) : false)}
                     initialFocus
                     className={cn("p-3 pointer-events-auto")}
                   />

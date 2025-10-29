@@ -7,7 +7,7 @@ import { ComparisonChart } from "@/components/analysis/ComparisonChart";
 import { CategoryPieCharts } from "@/components/analysis/CategoryPieCharts";
 import { CategoryStackedBarChart } from "@/components/analysis/CategoryStackedBarChart";
 import { AnalysisFilters } from "@/components/analysis/AnalysisFilters";
-import { format, startOfMonth, endOfMonth } from "date-fns";
+import { format, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface AnalysisProps {
@@ -16,12 +16,14 @@ interface AnalysisProps {
 
 export default function Analysis({ accountId: propAccountId }: AnalysisProps) {
   const { accounts } = useAccounts();
+  
+  const today = new Date();
   const [filters, setFilters] = useState({
     accountId: propAccountId || "all",
     viewMode: "monthly" as "monthly" | "custom",
     selectedMonth: format(new Date(), "yyyy-MM"),
-    startDate: "",
-    endDate: "",
+    startDate: format(startOfYear(today), "yyyy-MM-dd"),
+    endDate: format(endOfYear(today), "yyyy-MM-dd"),
   });
   
   // Update filters when propAccountId changes
