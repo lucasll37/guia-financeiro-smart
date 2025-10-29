@@ -46,6 +46,20 @@ export function AccountCard({
     const periodMonth = format(monthEnd, "yyyy-MM");
     const periodEndStr = format(monthEnd, "yyyy-MM-dd");
 
+    // Balance: all transactions up to the end of the selected period
+    const allTransactionsUntilPeriod = transactions?.filter(t => {
+      if (t.account_id !== account.id) return false;
+      if (t.credit_card_id && t.payment_month) {
+        const txDate = parseISO(t.payment_month as string);
+        return txDate <= monthEnd;
+      } else {
+        const txDate = parseISO(t.date);
+        return txDate <= monthEnd;
+      }
+    }) || [];
+    
+    const balance = allTransactionsUntilPeriod.reduce((sum, t) => sum + Number(t.amount), 0);
+
     // Transactions of selected period (considering credit card payment_month)
     const periodTransactions = transactions?.filter(t => {
       if (t.account_id !== account.id) return false;
@@ -57,9 +71,6 @@ export function AccountCard({
         return txMonth === periodMonth;
       }
     }) || [];
-
-    // Balance in the selected period (revenues - expenses)
-    const balance = periodTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
 
     // Expenses paid in the selected period (absolute)
     const expenses = periodTransactions.filter(t => Number(t.amount) < 0).reduce((sum, t) => sum + Math.abs(Number(t.amount)), 0);
