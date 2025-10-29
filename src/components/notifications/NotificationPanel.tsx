@@ -270,11 +270,15 @@ export function NotificationPanel({ userId, onOpenPreferences }: NotificationPan
                                 </div>
                                 {isInvitePending && (
                                   <InviteActions
-                                    inviteId={metadata.invite_id}
+                                    inviteId={notification.id}
+                                    membershipId={metadata.invite_id}
                                     accountId={metadata.account_id}
                                     investmentId={metadata.investment_id}
                                     invitedBy={metadata.invited_by}
-                                    onComplete={() => setOpen(false)}
+                                    onComplete={() => {
+                                      markAsRead.mutate(notification.id);
+                                      setOpen(false);
+                                    }}
                                   />
                                 )}
                               </div>
