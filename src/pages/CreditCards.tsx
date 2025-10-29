@@ -173,11 +173,14 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
       endDate: finalEndDate,
     });
 
-    const monthsDiff = Math.ceil((endDate.getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
+    // Calculate months difference properly
+    const startMonth = earliestDate.getFullYear() * 12 + earliestDate.getMonth();
+    const endMonth = endDate.getFullYear() * 12 + endDate.getMonth();
+    const monthsDiff = endMonth - startMonth + 1; // +1 to include both start and end months
     
     toast({
       title: "Projeção expandida",
-      description: `Visualizando ${monthsDiff} meses de lançamentos${hasRecurring ? ' (incluindo projeção de recorrentes)' : ''}`,
+      description: `Visualizando ${monthsDiff} ${monthsDiff === 1 ? 'mês' : 'meses'} de lançamentos${hasRecurring ? ' (incluindo projeção de recorrentes)' : ''}`,
     });
   };
 
