@@ -203,14 +203,14 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
         </div>
       )}
 
-      {!canEditCategories && (
+      {!canEditCategories ? (
         <div className="p-4 bg-muted rounded-lg border border-primary/20">
           <div className="flex items-start gap-3">
             <Crown className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
             <div className="flex-1">
               <p className="font-medium mb-1">Recurso exclusivo do plano Pro</p>
               <p className="text-sm text-muted-foreground mb-3">
-                A edição de categorias está disponível apenas para assinantes Pro.
+                A visualização e edição de categorias está disponível apenas para assinantes Pro.
               </p>
               <Button 
                 size="sm" 
@@ -221,9 +221,7 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
             </div>
           </div>
         </div>
-      )}
-
-      {!selectedAccountId ? (
+      ) : !selectedAccountId ? (
         <div className="text-center py-12 border rounded-lg">
           <p className="text-muted-foreground">Selecione uma conta para ver as categorias</p>
         </div>
