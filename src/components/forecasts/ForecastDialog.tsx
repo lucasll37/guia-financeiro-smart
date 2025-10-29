@@ -23,14 +23,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   category_id: z.string().min(1, "Subcategoria é obrigatória"),
   forecasted_amount: z.string().min(1, "Valor é obrigatório"),
+  selected_date: z.date({ required_error: "Mês é obrigatório" }),
   notes: z.string().optional(),
 });
 
@@ -60,6 +70,7 @@ export function ForecastDialog({
     defaultValues: {
       category_id: "",
       forecasted_amount: "",
+      selected_date: new Date(selectedMonth + "-01"),
       notes: "",
     },
   });
@@ -69,16 +80,18 @@ export function ForecastDialog({
       form.reset({
         category_id: forecast.category_id,
         forecasted_amount: String(forecast.forecasted_amount),
+        selected_date: new Date(forecast.period_start),
         notes: forecast.notes || "",
       });
     } else {
       form.reset({
         category_id: "",
         forecasted_amount: "",
+        selected_date: new Date(selectedMonth + "-01"),
         notes: "",
       });
     }
-  }, [forecast, form]);
+  }, [forecast, form, selectedMonth]);
 
   const handleSubmit = (data: FormData) => {
     // Validar se é subcategoria
@@ -91,9 +104,8 @@ export function ForecastDialog({
       return;
     }
     
-    const monthDate = new Date(selectedMonth + "-01");
-    const periodStart = format(startOfMonth(monthDate), "yyyy-MM-dd");
-    const periodEnd = format(endOfMonth(monthDate), "yyyy-MM-dd");
+    const periodStart = format(startOfMonth(data.selected_date), "yyyy-MM-dd");
+    const periodEnd = format(endOfMonth(data.selected_date), "yyyy-MM-dd");
 
     onSave({
       account_id: accountId,
@@ -116,6 +128,49 @@ export function ForecastDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="selected_date"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Mês de Referência</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "MMMM 'de' yyyy", { locale: ptBR })
+                          ) : (
+                            <span>Selecione o mês</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) =>
+                          date > new Date() || date < new Date("1900-01-01")
+                        }
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="category_id"
