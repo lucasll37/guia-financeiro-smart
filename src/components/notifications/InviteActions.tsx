@@ -17,38 +17,55 @@ export function InviteActions({ inviteId, accountId, investmentId, invitedBy, on
   const { updateMemberStatus: respondToInvestmentInvite } = useInvestmentMembers();
 
   const handleResponse = async (status: "accepted" | "rejected") => {
-    if (investmentId) {
-      // Responder a convite de investimento
-      await respondToInvestmentInvite.mutateAsync({
-        id: inviteId,
-        status: status === "accepted" ? "accepted" : "declined",
-      });
-    } else if (accountId) {
-      // Responder a convite de conta
-      await respondToAccountInvite.mutateAsync({
-        id: inviteId,
-        status,
-        accountId,
-        invitedBy,
-      });
+    console.log("Respondendo ao convite:", { inviteId, status, investmentId, accountId });
+    
+    try {
+      if (investmentId) {
+        // Responder a convite de investimento
+        console.log("Atualizando investment_members...");
+        await respondToInvestmentInvite.mutateAsync({
+          id: inviteId,
+          status: status === "accepted" ? "accepted" : "declined",
+        });
+      } else if (accountId) {
+        // Responder a convite de conta
+        console.log("Atualizando account_members...");
+        await respondToAccountInvite.mutateAsync({
+          id: inviteId,
+          status,
+          accountId,
+          invitedBy,
+        });
+      }
+      
+      // Atualizar a notificação para marcar como lida e adicionar o status da resposta
+      console.log("Atualizando notificação...");
+      const { data, error } = await supabase
+        .from("notifications")
+        .update({ 
+          read: true,
+          metadata: {
+            ...(investmentId ? { investment_id: investmentId } : { account_id: accountId }),
+            invite_id: inviteId,
+            invited_by: invitedBy,
+            status: status,
+            responded_at: new Date().toISOString()
+          }
+        })
+        .contains("metadata", { invite_id: inviteId })
+        .select();
+      
+      if (error) {
+        console.error("Erro ao atualizar notificação:", error);
+      } else {
+        console.log("Notificação atualizada:", data);
+      }
+      
+      onComplete?.();
+    } catch (error) {
+      console.error("Erro ao responder convite:", error);
+      throw error;
     }
-    
-    // Atualizar a notificação para marcar como lida e adicionar o status da resposta
-    await supabase
-      .from("notifications")
-      .update({ 
-        read: true,
-        metadata: {
-          ...(investmentId ? { investment_id: investmentId } : { account_id: accountId }),
-          invite_id: inviteId,
-          invited_by: invitedBy,
-          status: status,
-          responded_at: new Date().toISOString()
-        }
-      })
-      .contains("metadata", { invite_id: inviteId });
-    
-    onComplete?.();
   };
 
   const isLoading = respondToAccountInvite.isPending || respondToInvestmentInvite.isPending;

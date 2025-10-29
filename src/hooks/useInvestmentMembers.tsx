@@ -66,12 +66,22 @@ export function useInvestmentMembers(investmentId?: string) {
 
   const updateMemberStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: "accepted" | "declined" }) => {
-      const { error } = await supabase
+      console.log("Atualizando status do membro:", { id, status });
+      
+      const { data, error } = await supabase
         .from("investment_members")
         .update({ status })
-        .eq("id", id);
+        .eq("id", id)
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro ao atualizar status:", error);
+        throw error;
+      }
+      
+      console.log("Membro atualizado:", data);
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["investment-members"] });
