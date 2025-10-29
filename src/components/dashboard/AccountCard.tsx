@@ -78,18 +78,6 @@ export function AccountCard({
   }, [transactions, forecasts, account.id, currentDate]);
   return <Card className="group relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl border-2 hover:border-primary/50" onClick={() => navigate(`/app/contas/${account.id}`)}>
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      <Button variant="ghost" size="icon" className="absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-20" onClick={e => {
-      e.stopPropagation();
-      setCurrentDate(prev => addMonths(prev, -1));
-    }} aria-label="Período anterior">
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-20" onClick={e => {
-      e.stopPropagation();
-      setCurrentDate(prev => addMonths(prev, 1));
-    }} aria-label="Próximo período">
-        <ChevronRight className="h-4 w-4" />
-      </Button>
       <CardHeader className="pb-3 relative z-10">
         <CardTitle className="text-lg font-medium group-hover:text-primary transition-colors duration-300">{account.name}</CardTitle>
         <div className="text-2xl font-bold">
@@ -101,9 +89,23 @@ export function AccountCard({
       </CardHeader>
       <CardContent className="relative z-10 space-y-4">
         <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Período</span>
-            <span className="font-medium capitalize">{currentPeriod}</span>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={e => {
+                e.stopPropagation();
+                setCurrentDate(prev => addMonths(prev, -1));
+              }} aria-label="Período anterior">
+                <ChevronLeft className="h-3 w-3" />
+              </Button>
+              <span className="font-medium capitalize min-w-[140px] text-center">{currentPeriod}</span>
+              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={e => {
+                e.stopPropagation();
+                setCurrentDate(prev => addMonths(prev, 1));
+              }} aria-label="Próximo período">
+                <ChevronRight className="h-3 w-3" />
+              </Button>
+            </div>
           </div>
         </div>
 
