@@ -22,6 +22,12 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   ArrowRight,
   ArrowLeft,
@@ -38,6 +44,7 @@ import { cn } from "@/lib/utils";
 
 const step1Schema = z.object({
   total_income: z.string().min(1, "Receita total é obrigatória"),
+  selected_month: z.date({ required_error: "Mês é obrigatório" }),
 });
 
 interface BudgetWizardProps {
@@ -68,11 +75,13 @@ export function BudgetWizard({
   const [step, setStep] = useState(1);
   const [totalIncome, setTotalIncome] = useState(0);
   const [allocations, setAllocations] = useState<CategoryAllocation[]>([]);
+  const [workingMonth, setWorkingMonth] = useState(new Date(selectedMonth + "-01"));
 
   const form = useForm<z.infer<typeof step1Schema>>({
     resolver: zodResolver(step1Schema),
     defaultValues: {
       total_income: "",
+      selected_month: new Date(selectedMonth + "-01"),
     },
   });
 
@@ -111,6 +120,7 @@ export function BudgetWizard({
   const handleStep1Submit = (data: z.infer<typeof step1Schema>) => {
     const income = parseFloat(data.total_income);
     setTotalIncome(income);
+    setWorkingMonth(data.selected_month);
     setStep(2);
   };
 
@@ -156,14 +166,8 @@ export function BudgetWizard({
   };
 
   const handleFinish = () => {
-    const periodStart = format(
-      startOfMonth(new Date(selectedMonth + "-01")),
-      "yyyy-MM-dd"
-    );
-    const periodEnd = format(
-      endOfMonth(new Date(selectedMonth + "-01")),
-      "yyyy-MM-dd"
-    );
+    const periodStart = format(startOfMonth(workingMonth), "yyyy-MM-dd");
+    const periodEnd = format(endOfMonth(workingMonth), "yyyy-MM-dd");
 
     // Criar previsão de receita
     const incomeCategories = categories.filter(
@@ -206,7 +210,11 @@ export function BudgetWizard({
     setStep(1);
     setTotalIncome(0);
     setAllocations([]);
-    form.reset();
+    setWorkingMonth(new Date(selectedMonth + "-01"));
+    form.reset({
+      total_income: "",
+      selected_month: new Date(selectedMonth + "-01"),
+    });
     onOpenChange(false);
   };
 
@@ -218,10 +226,10 @@ export function BudgetWizard({
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-primary" />
-            Assistente de Orçamento Mensal
+            Assistente de Lançamento
           </DialogTitle>
           <DialogDescription>
-            Crie seu orçamento mensal de forma simples e visual
+            Crie as previsões do mês de forma simples e visual
           </DialogDescription>
         </DialogHeader>
 
@@ -260,12 +268,9 @@ export function BudgetWizard({
                   <TrendingUp className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold">Passo 1: Receita Total</h3>
+                  <h3 className="text-lg font-semibold">Passo 1: Mês e Receita</h3>
                   <p className="text-sm text-muted-foreground">
-                    Informe quanto você espera receber em{" "}
-                    {format(new Date(selectedMonth + "-01"), "MMMM 'de' yyyy", {
-                      locale: ptBR,
-                    })}
+                    Selecione o mês e informe a receita esperada
                   </p>
                 </div>
               </div>
@@ -275,6 +280,49 @@ export function BudgetWizard({
                   onSubmit={form.handleSubmit(handleStep1Submit)}
                   className="space-y-4"
                 >
+                  <FormField
+                    control={form.control}
+                    name="selected_month"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel className="flex items-center gap-2 text-base">
+                          <Calendar className="h-4 w-4" />
+                          Mês de Referência
+                        </FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "w-full justify-start text-left font-normal h-14 text-lg",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value ? (
+                                  format(field.value, "MMMM 'de' yyyy", { locale: ptBR })
+                                ) : (
+                                  <span>Selecione o mês</span>
+                                )}
+                                <Calendar className="ml-auto h-5 w-5 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              initialFocus
+                              className={cn("p-3 pointer-events-auto")}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   <FormField
                     control={form.control}
                     name="total_income"
@@ -321,7 +369,7 @@ export function BudgetWizard({
                 <div className="flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-primary" />
                   <span className="font-semibold">
-                    {format(new Date(selectedMonth + "-01"), "MMMM 'de' yyyy", {
+                    {format(workingMonth, "MMMM 'de' yyyy", {
                       locale: ptBR,
                     })}
                   </span>
@@ -482,11 +530,7 @@ export function BudgetWizard({
                       Mês de Referência
                     </p>
                     <p className="font-semibold">
-                      {format(
-                        new Date(selectedMonth + "-01"),
-                        "MMMM 'de' yyyy",
-                        { locale: ptBR }
-                      )}
+                      {format(workingMonth, "MMMM 'de' yyyy", { locale: ptBR })}
                     </p>
                   </div>
                   <div>

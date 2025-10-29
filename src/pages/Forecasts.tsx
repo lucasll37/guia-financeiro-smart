@@ -146,38 +146,43 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             Gerencie suas previsões de receitas e despesas por mês
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           {filters.viewMode === "monthly" && (
             <Button
               variant="outline"
+              size={isMobile ? "sm" : "default"}
               onClick={() => setCopyDialogOpen(true)}
               disabled={filters.accountId === "all" || filteredForecasts.length === 0}
+              className="gap-2"
             >
               <Copy className="h-4 w-4" />
-              {!isMobile && <span className="ml-2">Copiar Mês</span>}
+              {!isMobile && <span>Copiar Mês</span>}
             </Button>
           )}
           
-          <div className="flex gap-2 border-l pl-3">
+          <div className="flex items-center gap-2 ml-auto">
+            <div className="text-xs text-muted-foreground hidden sm:block mr-2">
+              Nova previsão:
+            </div>
             <Button
               variant="default"
+              size={isMobile ? "sm" : "default"}
               onClick={() => setWizardOpen(true)}
               disabled={filters.accountId === "all"}
-              className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+              className="gap-2"
             >
               <Sparkles className="h-4 w-4" />
-              {!isMobile && <span>Assistente de Orçamento</span>}
-              {isMobile && <span>Assistente</span>}
+              <span>Assistente de Lançamento</span>
             </Button>
             <Button 
               variant="outline" 
+              size={isMobile ? "sm" : "default"}
               onClick={handleCreateForecast} 
               disabled={filters.accountId === "all"}
               className="gap-2"
             >
               <Plus className="h-4 w-4" />
-              {!isMobile && <span>Lançamento Manual</span>}
-              {isMobile && <span>Manual</span>}
+              <span>Manual</span>
             </Button>
           </div>
         </div>
