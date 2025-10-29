@@ -404,17 +404,6 @@ export function InvestmentMembersDialog({
           </AlertDialogHeader>
           
           <div className="space-y-4">
-            {currentUserMembership && (
-              <div className="rounded-lg border bg-muted/50 p-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Compartilhado em</span>
-                  <span className="font-medium">
-                    {format(new Date(currentUserMembership.created_at), "dd/MM/yyyy", { locale: ptBR })}
-                  </span>
-                </div>
-              </div>
-            )}
-
             <div className="space-y-2">
               <div className="space-y-1.5">
                 <Label htmlFor="investment-name" className="text-sm font-normal text-muted-foreground">
