@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTransactions } from "@/hooks/useTransactions";
-import { useBudgets } from "@/hooks/useBudgets";
+import { useForecasts } from "@/hooks/useForecasts";
 import { useMaskValues } from "@/hooks/useMaskValues";
 import { startOfMonth, endOfMonth, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -22,8 +22,8 @@ export function AccountCard({
     transactions
   } = useTransactions();
   const {
-    budgets
-  } = useBudgets();
+    forecasts
+  } = useForecasts();
   const {
     maskValue
   } = useMaskValues();
@@ -40,14 +40,20 @@ export function AccountCard({
     const currentPeriod = format(now, "MMMM 'de' yyyy", {
       locale: ptBR
     });
+    
+    const periodStart = format(monthStart, "yyyy-MM-dd");
+    
     const accountTransactions = transactions?.filter(t => t.account_id === account.id && new Date(t.date) >= monthStart && new Date(t.date) <= monthEnd) || [];
     const revenue = accountTransactions.filter(t => Number(t.amount) > 0).reduce((sum, t) => sum + Number(t.amount), 0);
     const expenses = accountTransactions.filter(t => Number(t.amount) < 0).reduce((sum, t) => sum + Math.abs(Number(t.amount)), 0);
     const balance = revenue - expenses;
 
-    // Calculate budget total
-    const accountBudgets = budgets?.filter(b => b.account_id === account.id) || [];
-    const budgetTotal = accountBudgets.reduce((sum, b) => sum + Number(b.amount_planned), 0);
+    // Calculate forecast total for current period
+    const accountForecasts = forecasts?.filter(f => 
+      f.account_id === account.id && 
+      f.period_start === periodStart
+    ) || [];
+    const budgetTotal = accountForecasts.reduce((sum, f) => sum + Number(f.forecasted_amount), 0);
     const completion = budgetTotal > 0 ? expenses / budgetTotal * 100 : 0;
     return {
       balance,
@@ -56,7 +62,7 @@ export function AccountCard({
       currentPeriod,
       completion
     };
-  }, [transactions, budgets, account.id]);
+  }, [transactions, forecasts, account.id]);
   return <Card className="group relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl border-2 hover:border-primary/50" onClick={() => navigate(`/app/contas/${account.id}`)}>
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       <CardHeader className="pb-3 relative z-10">
