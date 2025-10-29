@@ -38,6 +38,7 @@ import { PlanLimitsManager } from "@/components/admin/PlanLimitsManager";
 import { SubscriptionManager } from "@/components/admin/SubscriptionManager";
 import { UserActionLogs } from "@/components/admin/UserActionLogs";
 import { NotificationCreator } from "@/components/admin/NotificationCreator";
+import { LogRetentionSettings } from "@/components/admin/LogRetentionSettings";
 
 const couponSchema = z.object({
   code: z.string().trim().min(3, "Código deve ter no mínimo 3 caracteres").max(50, "Código muito longo"),
@@ -973,6 +974,7 @@ export default function Admin() {
 
         {/* User Action Logs Tab */}
         <TabsContent value="logs" className="space-y-4">
+          <LogRetentionSettings />
           <UserActionLogs />
         </TabsContent>
       </Tabs>

@@ -194,6 +194,30 @@ export type Database = {
           },
         ]
       }
+      admin_settings: {
+        Row: {
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"]
@@ -799,6 +823,9 @@ export type Database = {
           entity_id: string | null
           entity_type: string | null
           id: string
+          ip_address: string | null
+          metadata: Json | null
+          user_agent: string | null
           user_id: string
         }
         Insert: {
@@ -807,6 +834,9 @@ export type Database = {
           entity_id?: string | null
           entity_type?: string | null
           id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          user_agent?: string | null
           user_id: string
         }
         Update: {
@@ -815,6 +845,9 @@ export type Database = {
           entity_id?: string | null
           entity_type?: string | null
           id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          user_agent?: string | null
           user_id?: string
         }
         Relationships: []

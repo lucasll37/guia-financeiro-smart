@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Activity, ChevronLeft, ChevronRight } from "lucide-react";
+import { Activity, ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUserActionLogs } from "@/hooks/useUserActionLogs";
 
@@ -53,6 +53,13 @@ export function UserActionLogs() {
 
   const uniqueActions = Object.keys(ACTION_LABELS);
 
+  const getActionDescription = (log: any) => {
+    const entityName = log.entity_type ? ENTITY_LABELS[log.entity_type] || log.entity_type : "Item";
+    const actionLabel = ACTION_LABELS[log.action]?.label || log.action;
+    
+    return `${actionLabel} - ${entityName}`;
+  };
+
   return (
     <div className="space-y-4">
       <Card>
@@ -62,7 +69,7 @@ export function UserActionLogs() {
             Logs de Ações dos Usuários
           </CardTitle>
           <CardDescription>
-            Visualize as ações realizadas pelos usuários nos últimos 7 dias
+            Histórico de ações dos usuários. Os logs são mantidos conforme configuração de retenção.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -111,10 +118,10 @@ export function UserActionLogs() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Data/Hora</TableHead>
+                      <TableHead className="w-[180px]">Data/Hora</TableHead>
                       <TableHead>Usuário</TableHead>
-                      <TableHead>Ação</TableHead>
-                      <TableHead>Tipo</TableHead>
+                      <TableHead className="w-[300px]">Descrição</TableHead>
+                      <TableHead className="w-[140px]">Ação</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -125,21 +132,22 @@ export function UserActionLogs() {
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col">
-                            <span className="font-medium">{log.profiles?.name || "N/A"}</span>
+                            <span className="font-medium text-sm">{log.profiles?.name || "N/A"}</span>
                             <span className="text-xs text-muted-foreground">
                               {log.profiles?.email || "N/A"}
                             </span>
                           </div>
                         </TableCell>
                         <TableCell>
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <span className="text-sm">{getActionDescription(log)}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
                           <Badge variant={ACTION_LABELS[log.action]?.variant || "default"}>
                             {ACTION_LABELS[log.action]?.label || log.action}
                           </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <span className="text-sm text-muted-foreground">
-                            {log.entity_type ? ENTITY_LABELS[log.entity_type] || log.entity_type : "-"}
-                          </span>
                         </TableCell>
                       </TableRow>
                     ))}
