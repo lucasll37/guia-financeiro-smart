@@ -159,9 +159,11 @@ export function useInvestmentMembers(investmentId?: string) {
       };
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["investment-members"] });
-      queryClient.invalidateQueries({ queryKey: ["investments"] });
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      // Remove all investment-related queries from cache
+      queryClient.removeQueries({ queryKey: ["investment-members"] });
+      queryClient.removeQueries({ queryKey: ["investments"] });
+      queryClient.removeQueries({ queryKey: ["notifications"] });
+      queryClient.removeQueries({ queryKey: ["investment-current-value"] });
       
       // Show appropriate message based on who was removed
       toast({
