@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Copy } from "lucide-react";
+import { Plus, Copy, Target, TrendingUp, CheckCircle2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -113,44 +113,48 @@ export default function Goals() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Metas Ativas</CardTitle>
+            <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent hover:shadow-md transition-all duration-300">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Metas Ativas</CardTitle>
+                <Target className="h-5 w-5 text-primary" />
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold">{activeGoals}</p>
-                <p className="text-sm text-muted-foreground">
+                <div className="text-3xl font-bold text-primary">{activeGoals}</div>
+                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3 text-green-600" />
                   {completedGoals} concluída(s)
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Total Alvo</CardTitle>
+            <Card className="border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent hover:shadow-md transition-all duration-300">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Alvo</CardTitle>
+                <TrendingUp className="h-5 w-5 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold">
+                <div className="text-3xl font-bold text-blue-600">
                   {maskValue(new Intl.NumberFormat("pt-BR", {
                     style: "currency",
                     currency: "BRL",
                   }).format(totalTarget))}
-                </p>
+                </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Total Acumulado</CardTitle>
+            <Card className="border-green-500/20 bg-gradient-to-br from-green-500/5 to-transparent hover:shadow-md transition-all duration-300">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Acumulado</CardTitle>
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold">
+                <div className="text-3xl font-bold text-green-600">
                   {maskValue(new Intl.NumberFormat("pt-BR", {
                     style: "currency",
                     currency: "BRL",
                   }).format(totalCurrent))}
-                </p>
-                <p className="text-sm text-muted-foreground">
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
                   {totalTarget > 0
                     ? `${maskValue(`${((totalCurrent / totalTarget) * 100).toFixed(1)}%`)} do total`
                     : ""}
