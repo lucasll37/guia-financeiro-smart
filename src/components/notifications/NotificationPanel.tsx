@@ -176,7 +176,7 @@ export function NotificationPanel({ userId, onOpenPreferences }: NotificationPan
                           <DropdownMenuItem
                             key={notification.id}
                             className={cn(
-                              "flex flex-col items-start gap-2 p-3 rounded-lg transition-all duration-200 animate-fade-in",
+                              "group flex flex-col items-start gap-2 p-3 rounded-lg transition-all duration-200 animate-fade-in",
                               isInvitePending ? "" : "cursor-pointer",
                               !notification.read 
                                 ? "bg-primary/5 hover:bg-primary/10 border-l-2 border-primary" 
