@@ -58,7 +58,7 @@ export function CategoryStackedBarChart({
 
     parentCategories.forEach(parent => {
       const parentCat = categories.find(c => c.name === parent.name && !c.parent_id);
-      if (!parentCat) return;
+      if (!parentCat || parentCat.type !== "despesa") return;
 
       const children = categories.filter(c => c.parent_id === parentCat.id);
       

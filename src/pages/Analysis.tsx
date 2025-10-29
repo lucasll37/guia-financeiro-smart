@@ -86,7 +86,7 @@ export default function Analysis({ accountId: propAccountId }: AnalysisProps) {
     // Add forecasts (group by parent)
     periodForecasts.forEach((f) => {
       const parentCategory = getParentCategory(f.category_id);
-      if (parentCategory) {
+      if (parentCategory && parentCategory.type === "despesa") {
         if (!categoryMap[parentCategory.id]) {
           categoryMap[parentCategory.id] = {
             name: parentCategory.name,
@@ -102,7 +102,7 @@ export default function Analysis({ accountId: propAccountId }: AnalysisProps) {
     // Add actuals (group by parent)
     periodTransactions.forEach((t) => {
       const parentCategory = getParentCategory(t.category_id);
-      if (parentCategory) {
+      if (parentCategory && parentCategory.type === "despesa") {
         if (!categoryMap[parentCategory.id]) {
           categoryMap[parentCategory.id] = {
             name: parentCategory.name,
