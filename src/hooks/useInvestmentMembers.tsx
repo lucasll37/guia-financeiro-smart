@@ -45,19 +45,21 @@ export function useInvestmentMembers(investmentId?: string) {
 
   const inviteMember = useMutation({
     mutationFn: async (data: InvestmentMemberInsert) => {
-      const { error } = await supabase.from("investment_members").insert(data);
+      const payload = { ...data, status: "accepted" as any };
+      const { error } = await supabase.from("investment_members").insert(payload);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["investment-members"] });
+      queryClient.invalidateQueries({ queryKey: ["investments"] });
       toast({
-        title: "Convite enviado",
-        description: "O usuário foi convidado para o investimento",
+        title: "Acesso concedido",
+        description: "O usuário agora tem acesso a este investimento",
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Erro ao enviar convite",
+        title: "Erro ao conceder acesso",
         description: error.message,
         variant: "destructive",
       });

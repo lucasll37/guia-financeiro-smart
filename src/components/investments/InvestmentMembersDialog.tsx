@@ -94,7 +94,7 @@ export function InvestmentMembersDialog({
       user_id: user.id,
       invited_by: ownerId,
       role,
-      status: "pending",
+      status: "accepted",
     });
 
     setEmail("");
