@@ -88,14 +88,15 @@ export function FeedbackButton() {
   return (
     <>
       {/* Botão flutuante */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-4 right-4 z-40">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              size="lg"
-              className="h-16 w-16 rounded-full shadow-2xl hover:shadow-primary/50 hover:scale-110 transition-all duration-300 bg-gradient-to-br from-primary via-primary to-primary/80 border-2 border-background group animate-fade-in"
+              size="icon"
+              variant="outline"
+              className="h-10 w-10 rounded-full shadow-md hover:shadow-lg opacity-60 hover:opacity-100 transition-all duration-200 bg-background/80 backdrop-blur-sm"
             >
-              <MessageSquare className="h-7 w-7 transition-transform group-hover:rotate-12" />
+              <MessageSquare className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
