@@ -121,21 +121,34 @@ export function useInvestmentMembers(investmentId?: string) {
 
   const removeMember = useMutation({
     mutationFn: async (id: string) => {
-      // Get current user and member info before deleting
+      // Get current user and member info before action
       const { data: { user: currentUser } } = await supabase.auth.getUser();
-      
-      const { data: member } = await supabase
+
+      const { data: member, error: memberError } = await supabase
         .from("investment_members")
         .select("user_id, status")
         .eq("id", id)
         .maybeSingle();
 
-      const { error } = await supabase
-        .from("investment_members")
-        .delete()
-        .eq("id", id);
+      if (memberError) throw memberError;
 
-      if (error) throw error;
+      // If the current user is leaving themselves, mark as declined instead of deleting
+      if (member?.user_id === currentUser?.id) {
+        const { error: updateError } = await supabase
+          .from("investment_members")
+          .update({ status: "declined" })
+          .eq("id", id);
+
+        if (updateError) throw updateError;
+      } else {
+        // Otherwise (owner removing someone), delete the membership
+        const { error: deleteError } = await supabase
+          .from("investment_members")
+          .delete()
+          .eq("id", id);
+
+        if (deleteError) throw deleteError;
+      }
 
       // If member was pending, invalidate their notification
       if (member?.status === "pending") {
