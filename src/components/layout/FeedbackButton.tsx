@@ -106,7 +106,7 @@ export function FeedbackButton() {
           >
             <DropdownMenuItem
               onClick={() => handleOpenDialog("bug")}
-              className="cursor-pointer gap-3 py-4 px-3 rounded-lg transition-all group hover:scale-[1.02]"
+              className="cursor-pointer gap-3 py-4 px-3 rounded-lg transition-all group hover:scale-[1.02] hover:bg-red-500/10 dark:hover:bg-red-400/10 focus:bg-red-500/10 dark:focus:bg-red-400/10"
             >
               <div className="h-10 w-10 rounded-full bg-gradient-to-br from-red-500/20 to-red-600/20 dark:from-red-400/20 dark:to-red-500/20 flex items-center justify-center group-hover:from-red-500/30 group-hover:to-red-600/30 dark:group-hover:from-red-400/30 dark:group-hover:to-red-500/30 transition-all shadow-sm">
                 <Bug className="h-5 w-5 text-red-600 dark:text-red-400" />
@@ -120,7 +120,7 @@ export function FeedbackButton() {
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => handleOpenDialog("suggestion")}
-              className="cursor-pointer gap-3 py-4 px-3 rounded-lg transition-all group hover:scale-[1.02]"
+              className="cursor-pointer gap-3 py-4 px-3 rounded-lg transition-all group hover:scale-[1.02] hover:bg-amber-500/10 dark:hover:bg-amber-400/10 focus:bg-amber-500/10 dark:focus:bg-amber-400/10"
             >
               <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-500/20 to-yellow-500/20 dark:from-amber-400/20 dark:to-yellow-400/20 flex items-center justify-center group-hover:from-amber-500/30 group-hover:to-yellow-500/30 dark:group-hover:from-amber-400/30 dark:group-hover:to-yellow-400/30 transition-all shadow-sm">
                 <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400" />
