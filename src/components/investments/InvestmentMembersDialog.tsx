@@ -405,17 +405,11 @@ export function InvestmentMembersDialog({
           
           <div className="space-y-4">
             {currentUserMembership && (
-              <div className="rounded-lg border bg-muted/50 p-3 space-y-2">
+              <div className="rounded-lg border bg-muted/50 p-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Compartilhado em</span>
                   <span className="font-medium">
                     {format(new Date(currentUserMembership.created_at), "dd/MM/yyyy", { locale: ptBR })}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Dias de acesso</span>
-                  <span className="font-medium">
-                    {differenceInDays(new Date(), new Date(currentUserMembership.created_at))} dias
                   </span>
                 </div>
               </div>
