@@ -67,20 +67,16 @@ export default function Analysis({ accountId: propAccountId }: AnalysisProps) {
       periodEnd = format(endOfMonth(new Date(filters.selectedMonth + "-01")), "yyyy-MM-dd");
     }
 
-    // Get forecasts for the period
+    // Get forecasts for the period (use string compare for month range)
     const periodForecasts = forecasts?.filter((f) => {
-      const fDate = new Date(f.period_start);
-      const start = new Date(periodStart);
-      const end = new Date(periodEnd);
-      return fDate >= start && fDate <= end;
+      const fDateStr = (f.period_start || "").slice(0, 10);
+      return fDateStr >= periodStart && fDateStr <= periodEnd;
     }) || [];
 
-    // Get transactions for the period
+    // Get transactions for the period (string compare avoids timezone issues)
     const periodTransactions = transactions?.filter((t) => {
-      const tDate = new Date(t.date);
-      const start = new Date(periodStart);
-      const end = new Date(periodEnd);
-      return tDate >= start && tDate <= end;
+      const tDateStr = (t.date || "").slice(0, 10); // yyyy-MM-dd
+      return tDateStr >= periodStart && tDateStr <= periodEnd;
     }) || [];
 
     // Group by parent category
