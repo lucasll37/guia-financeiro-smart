@@ -381,7 +381,7 @@ export default function Admin() {
           <Users className="h-8 w-8" />
           Painel de Administração
         </h1>
-        <p className="text-muted-foreground">Gerencie usuários, assinaturas, cupons, notificações e monitore feedbacks e logs do sistema</p>
+        <p className="text-muted-foreground">Controle total do sistema, usuários e configurações da plataforma</p>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
