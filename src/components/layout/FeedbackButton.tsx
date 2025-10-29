@@ -48,14 +48,20 @@ export function FeedbackButton() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
-      // Aqui você pode enviar para uma tabela no Supabase ou para um serviço externo
-      // Por enquanto, vou apenas mostrar um toast de sucesso
-      console.log({
-        type: feedbackType,
-        message,
-        userId: user?.id,
-        timestamp: new Date().toISOString(),
-      });
+      if (!user) {
+        throw new Error("Usuário não autenticado");
+      }
+
+      // Salvar feedback no banco de dados
+      const { error } = await supabase
+        .from("feedback")
+        .insert({
+          user_id: user.id,
+          type: feedbackType,
+          message: message.trim(),
+        });
+
+      if (error) throw error;
 
       toast({
         title: "Feedback enviado!",
@@ -68,6 +74,7 @@ export function FeedbackButton() {
       setIsOpen(false);
       setFeedbackType(null);
     } catch (error) {
+      console.error("Erro ao enviar feedback:", error);
       toast({
         title: "Erro ao enviar",
         description: "Não foi possível enviar seu feedback. Tente novamente.",
