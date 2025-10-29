@@ -3,6 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useGoals } from "@/hooks/useGoals";
 import { useAuth } from "@/hooks/useAuth";
 import { useMaskValues } from "@/hooks/useMaskValues";
@@ -18,6 +28,7 @@ export default function Goals() {
   const isMobile = useIsMobile();
   const { maskValue } = useMaskValues();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
 
   const { goals, isLoading, createGoal, updateGoal, deleteGoal } = useGoals();
@@ -42,9 +53,16 @@ export default function Goals() {
     setSelectedGoal(null);
   };
 
-  const handleDeleteGoal = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir esta meta?")) return;
-    await deleteGoal.mutateAsync(id);
+  const handleDeleteGoal = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedGoal) return;
+    await deleteGoal.mutateAsync(selectedGoal.id);
+    setDeleteDialogOpen(false);
+    setSelectedGoal(null);
   };
 
   const handleUpdateProgress = async (id: string, amount: number) => {
@@ -154,6 +172,26 @@ export default function Goals() {
         onSave={handleSaveGoal}
         goal={selectedGoal}
       />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tem certeza que deseja excluir esta meta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. O progresso da meta será permanentemente removido.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir Meta
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

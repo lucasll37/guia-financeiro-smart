@@ -13,7 +13,7 @@ type Goal = Database["public"]["Tables"]["goals"]["Row"];
 interface GoalCardProps {
   goal: Goal;
   onEdit: (goal: Goal) => void;
-  onDelete: (id: string) => void;
+  onDelete: (goal: Goal) => void;
   onUpdateProgress: (id: string, amount: number) => void;
 }
 
@@ -50,7 +50,7 @@ export function GoalCard({ goal, onEdit, onDelete, onUpdateProgress }: GoalCardP
             <Button variant="ghost" size="icon" onClick={() => onEdit(goal)}>
               <Edit className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => onDelete(goal.id)}>
+            <Button variant="ghost" size="icon" onClick={() => onDelete(goal)}>
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
