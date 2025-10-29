@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Users, ArrowRight, Edit, Trash2, TrendingUp } from "lucide-react";
+import { Plus, Users, ArrowRight, Edit, Trash2, TrendingUp, Crown } from "lucide-react";
 import { useInvestments } from "@/hooks/useInvestments";
 import { useAuth } from "@/hooks/useAuth";
 import { useMaskValues } from "@/hooks/useMaskValues";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { InvestmentDialog } from "@/components/investments/InvestmentDialog";
 import { InvestmentMembersDialog } from "@/components/investments/InvestmentMembersDialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,6 +38,7 @@ export default function InvestmentsList() {
   const isMobile = useIsMobile();
   const { investments, isLoading, createInvestment, updateInvestment, deleteInvestment } = useInvestments();
   const { toast } = useToast();
+  const { canCreateInvestment, maxInvestments, userPlan } = usePlanLimits();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [membersDialogOpen, setMembersDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -47,7 +49,30 @@ export default function InvestmentsList() {
     navigate(`/app/investimentos/${investmentId}`);
   };
 
-  const handleCreateClick = () => {
+  const handleCreateClick = async () => {
+    // Check if user can create more investments
+    const canCreate = await canCreateInvestment();
+    
+    if (!canCreate) {
+      toast({
+        title: "Limite atingido",
+        description: `Você atingiu o limite de ${maxInvestments} investimento(s) do plano ${userPlan === 'free' ? 'Free' : userPlan}. Faça upgrade para criar mais investimentos.`,
+        variant: "destructive",
+        action: (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/app/planos")}
+            className="gap-2"
+          >
+            <Crown className="h-4 w-4" />
+            Fazer Upgrade
+          </Button>
+        ),
+      });
+      return;
+    }
+
     setSelectedInvestment(null);
     setDialogOpen(true);
   };
