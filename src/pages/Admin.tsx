@@ -28,7 +28,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown, Bell, Send, CreditCard, Settings, FileText } from "lucide-react";
+import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown, Bell, Send, CreditCard, Settings, FileText, AlertTriangle, Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { z } from "zod";
 import { UserGrowthChart } from "@/components/admin/UserGrowthChart";
@@ -68,7 +68,8 @@ export default function Admin() {
   const isMobile = useIsMobile();
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [userToDelete, setUserToDelete] = useState<{ id: string; email: string } | null>(null);
+  const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("");
   const [userFilters, setUserFilters] = useState<UserFilters>({
     search: "",
     plan: "all",
@@ -244,6 +245,7 @@ export default function Admin() {
         description: "O usuário e todos os seus dados foram removidos com sucesso.",
       });
       setUserToDelete(null);
+      setDeleteConfirmEmail("");
     },
     onError: (error: any) => {
       toast({
@@ -251,9 +253,23 @@ export default function Admin() {
         description: error.message || "Ocorreu um erro ao tentar deletar o usuário.",
         variant: "destructive",
       });
-      setUserToDelete(null);
     },
   });
+
+  const handleDeleteUser = () => {
+    if (!userToDelete) return;
+    
+    if (deleteConfirmEmail !== userToDelete.email) {
+      toast({
+        title: "Email não corresponde",
+        description: "Digite o email correto do usuário para confirmar a exclusão.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    deleteUser.mutate(userToDelete.id);
+  };
 
   // Send bulk notifications mutation
   const sendBulkNotifications = useMutation({
@@ -626,7 +642,7 @@ export default function Admin() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => setUserToDelete(profile.id)}
+                                onClick={() => setUserToDelete({ id: profile.id, email: profile.email || "" })}
                               >
                                 <Trash2 className="h-4 w-4 text-red-500" />
                               </Button>
@@ -962,23 +978,75 @@ export default function Admin() {
       </Tabs>
 
       {/* Delete User Confirmation Dialog */}
-      <AlertDialog open={!!userToDelete} onOpenChange={() => setUserToDelete(null)}>
+      <AlertDialog 
+        open={!!userToDelete} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setUserToDelete(null);
+            setDeleteConfirmEmail("");
+          }
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir esta conta? Esta ação não pode ser desfeita e todos os
-              dados do usuário serão permanentemente removidos.
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Confirmar Exclusão de Usuário
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p>
+                <strong className="text-destructive">ATENÇÃO:</strong> Esta ação é permanente e irreversível.
+              </p>
+              <p>
+                Você está prestes a excluir permanentemente a conta de{" "}
+                <strong className="text-foreground">{userToDelete?.email}</strong>
+              </p>
+              <div className="bg-destructive/10 p-3 rounded-md border border-destructive/30">
+                <p className="text-destructive font-semibold text-sm mb-2">
+                  Todos os dados serão permanentemente excluídos:
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-xs">
+                  <li>Todas as contas e lançamentos</li>
+                  <li>Categorias e subcategorias personalizadas</li>
+                  <li>Previsões e orçamentos</li>
+                  <li>Investimentos e retornos mensais</li>
+                  <li>Metas e configurações</li>
+                  <li>Dados de autenticação</li>
+                </ul>
+              </div>
+              <div className="space-y-2 pt-2">
+                <Label htmlFor="confirmEmail" className="text-sm font-semibold">
+                  Digite o email do usuário para confirmar:
+                </Label>
+                <Input
+                  id="confirmEmail"
+                  type="email"
+                  placeholder={userToDelete?.email || ""}
+                  value={deleteConfirmEmail}
+                  onChange={(e) => setDeleteConfirmEmail(e.target.value)}
+                  className="font-mono text-sm"
+                />
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => userToDelete && deleteUser.mutate(userToDelete)}
-              className="bg-red-600 hover:bg-red-700"
+            <AlertDialogCancel onClick={() => setDeleteConfirmEmail("")}>
+              Cancelar
+            </AlertDialogCancel>
+            <Button
+              onClick={handleDeleteUser}
+              disabled={deleteUser.isPending || deleteConfirmEmail !== userToDelete?.email}
+              variant="destructive"
             >
-              Excluir
-            </AlertDialogAction>
+              {deleteUser.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Excluindo...
+                </>
+              ) : (
+                "Excluir Permanentemente"
+              )}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
