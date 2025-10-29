@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, TreePine } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCategories } from "@/hooks/useCategories";
@@ -22,6 +23,7 @@ interface CategoriesProps {
 export default function Categories({ accountId: propAccountId }: CategoriesProps) {
   const { toast } = useToast();
   const { accounts } = useAccounts();
+  const isMobile = useIsMobile();
   const [selectedAccountId, setSelectedAccountId] = useState<string>(propAccountId || "");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -169,13 +171,13 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
               disabled={seedingCategories}
               variant="outline"
             >
-              <TreePine className="h-4 w-4 mr-2" />
-              {seedingCategories ? "Criando..." : "Semear Categorias"}
+              <TreePine className="h-4 w-4" />
+              {!isMobile && <span className="ml-2">{seedingCategories ? "Criando..." : "Semear Categorias"}</span>}
             </Button>
           )}
           <Button onClick={handleCreateCategory}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nova Categoria
+            <Plus className="h-4 w-4" />
+            {!isMobile && <span className="ml-2">Nova Categoria</span>}
           </Button>
         </div>
       </div>

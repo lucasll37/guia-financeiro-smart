@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Users, ArrowRight, Edit, Trash2, Copy } from "lucide-react";
@@ -31,6 +32,7 @@ type Account = Database["public"]["Tables"]["accounts"]["Row"];
 export default function AccountsList() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const { accounts, isLoading, createAccount, updateAccount, deleteAccount } = useAccounts();
   const { toast } = useToast();
   const { canCreateAccount, maxAccounts, userPlan } = usePlanLimits();
@@ -131,8 +133,8 @@ export default function AccountsList() {
           </p>
         </div>
         <Button onClick={handleCreateClick}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nova Conta
+          <Plus className="h-4 w-4" />
+          {!isMobile && <span className="ml-2">Nova Conta</span>}
         </Button>
       </div>
 
@@ -246,8 +248,8 @@ export default function AccountsList() {
               Você ainda não possui contas cadastradas
             </p>
             <Button onClick={handleCreateClick}>
-              <Plus className="h-4 w-4 mr-2" />
-              Criar Primeira Conta
+              <Plus className="h-4 w-4" />
+              {!isMobile && <span className="ml-2">Criar Primeira Conta</span>}
             </Button>
           </CardContent>
         </Card>

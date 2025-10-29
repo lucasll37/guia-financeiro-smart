@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Users, ArrowRight, Edit, Trash2, TrendingUp } from "lucide-react";
@@ -30,6 +31,7 @@ type Investment = Database["public"]["Tables"]["investment_assets"]["Row"];
 export default function InvestmentsList() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const { investments, isLoading, createInvestment, updateInvestment, deleteInvestment } = useInvestments();
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -116,8 +118,8 @@ export default function InvestmentsList() {
           </p>
         </div>
         <Button onClick={handleCreateClick}>
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Investimento
+          <Plus className="h-4 w-4" />
+          {!isMobile && <span className="ml-2">Novo Investimento</span>}
         </Button>
       </div>
 

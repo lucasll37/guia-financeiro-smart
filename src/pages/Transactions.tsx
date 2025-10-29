@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { format, startOfMonth, endOfMonth, parse } from "date-fns";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useAccounts } from "@/hooks/useAccounts";
@@ -22,6 +23,7 @@ interface TransactionsProps {
 export default function Transactions({ accountId: propAccountId }: TransactionsProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const { accounts } = useAccounts();
   const { logAction } = useAuditLogs();
 
@@ -151,8 +153,8 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
           </p>
         </div>
         <Button onClick={handleCreateTransaction}>
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Lançamento
+          <Plus className="h-4 w-4" />
+          {!isMobile && <span className="ml-2">Novo Lançamento</span>}
         </Button>
       </div>
 

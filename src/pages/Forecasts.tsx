@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Copy } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useCategories } from "@/hooks/useCategories";
@@ -27,6 +28,7 @@ interface ForecastsProps {
 
 export default function Forecasts({ accountId: propAccountId }: ForecastsProps) {
   const { accounts } = useAccounts();
+  const isMobile = useIsMobile();
   const currentMonth = format(new Date(), "yyyy-MM");
   
   const [filters, setFilters] = useState({
@@ -131,12 +133,12 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             onClick={() => setCopyDialogOpen(true)}
             disabled={filters.accountId === "all" || filteredForecasts.length === 0}
           >
-            <Copy className="h-4 w-4 mr-2" />
-            Copiar Mês
+            <Copy className="h-4 w-4" />
+            {!isMobile && <span className="ml-2">Copiar Mês</span>}
           </Button>
           <Button onClick={handleCreateForecast} disabled={filters.accountId === "all"}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nova Previsão
+            <Plus className="h-4 w-4" />
+            {!isMobile && <span className="ml-2">Nova Previsão</span>}
           </Button>
         </div>
       </div>

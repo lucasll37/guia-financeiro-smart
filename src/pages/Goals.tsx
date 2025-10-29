@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, RefreshCw } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGoals } from "@/hooks/useGoals";
@@ -19,6 +20,7 @@ type GoalInsert = Database["public"]["Tables"]["goals"]["Insert"];
 export default function Goals() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const { accounts } = useAccounts();
   const { maskValue } = useMaskValues();
   const [selectedAccountId, setSelectedAccountId] = useState<string>("");
@@ -125,12 +127,12 @@ export default function Goals() {
             onClick={handleEvaluateNotifications}
             disabled={evaluating || !selectedAccountId}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${evaluating ? "animate-spin" : ""}`} />
-            Avaliar Alertas
+            <RefreshCw className={`h-4 w-4 ${evaluating ? "animate-spin" : ""}`} />
+            {!isMobile && <span className="ml-2">Avaliar Alertas</span>}
           </Button>
           <Button onClick={handleCreateGoal}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nova Meta
+            <Plus className="h-4 w-4" />
+            {!isMobile && <span className="ml-2">Nova Meta</span>}
           </Button>
         </div>
       </div>
@@ -217,8 +219,8 @@ export default function Goals() {
             <div className="text-center py-12 border rounded-lg">
               <p className="text-muted-foreground mb-4">Nenhuma meta cadastrada</p>
               <Button onClick={handleCreateGoal}>
-                <Plus className="h-4 w-4 mr-2" />
-                Criar Primeira Meta
+                <Plus className="h-4 w-4" />
+                {!isMobile && <span className="ml-2">Criar Primeira Meta</span>}
               </Button>
             </div>
           )}

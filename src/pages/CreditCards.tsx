@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { useAccounts } from "@/hooks/useAccounts";
@@ -22,6 +23,7 @@ interface CreditCardsProps {
 export default function CreditCards({ accountId: propAccountId }: CreditCardsProps) {
   const { user } = useAuth();
   const { accounts } = useAccounts();
+  const isMobile = useIsMobile();
   const { toast } = useToast();
   const { canCreateCreditCard, maxCreditCards, userPlan } = usePlanLimits();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -121,8 +123,8 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
           </p>
         </div>
         <Button onClick={handleCreateCard}>
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Cartão
+          <Plus className="h-4 w-4" />
+          {!isMobile && <span className="ml-2">Novo Cartão</span>}
         </Button>
       </div>
 
