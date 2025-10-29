@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -14,12 +15,19 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CalendarIcon, FileText, Download, Mail } from "lucide-react";
+import { CalendarIcon, FileText, Download, Crown } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import {
   generatePDFReport,
   generateCSVExport,
@@ -56,6 +64,8 @@ export function ReportGenerator({
   accountId,
 }: ReportGeneratorProps) {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { canGenerateReports } = usePlanLimits();
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
   const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>(
@@ -93,6 +103,11 @@ export function ReportGenerator({
   );
 
   const handleGeneratePDF = async () => {
+    if (!canGenerateReports) {
+      navigate("/app/planos");
+      return;
+    }
+
     if (selectedAccountIds.length === 0) {
       toast({
         title: "Selecione ao menos uma conta",
@@ -142,6 +157,11 @@ export function ReportGenerator({
   };
 
   const handleGenerateCSV = () => {
+    if (!canGenerateReports) {
+      navigate("/app/planos");
+      return;
+    }
+
     if (selectedAccountIds.length === 0) {
       toast({
         title: "Selecione ao menos uma conta",
@@ -191,6 +211,11 @@ export function ReportGenerator({
   };
 
   const handleGenerateExcel = () => {
+    if (!canGenerateReports) {
+      navigate("/app/planos");
+      return;
+    }
+
     if (selectedAccountIds.length === 0) {
       toast({
         title: "Selecione ao menos uma conta",
@@ -358,34 +383,101 @@ export function ReportGenerator({
         </div>
 
         <div className="pt-4 border-t">
+          {!canGenerateReports && (
+            <div className="mb-4 p-3 bg-muted rounded-lg border border-primary/20">
+              <div className="flex items-start gap-2">
+                <Crown className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium mb-1">Recurso exclusivo do plano Pro</p>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    A geração de relatórios está disponível apenas para assinantes Pro.
+                  </p>
+                  <Button 
+                    size="sm" 
+                    onClick={() => navigate("/app/planos")}
+                    className="h-7"
+                  >
+                    Fazer Upgrade
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
           <p className="text-sm text-muted-foreground mb-4">
             {filteredTransactions.length} transações no período selecionado
           </p>
-          <div className="grid gap-2 md:grid-cols-3">
-            <Button
-              onClick={handleGeneratePDF}
-              disabled={isGenerating || selectedAccountIds.length === 0}
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Gerar PDF
-            </Button>
-            <Button
-              onClick={handleGenerateCSV}
-              variant="outline"
-              disabled={selectedAccountIds.length === 0}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Exportar CSV
-            </Button>
-            <Button
-              onClick={handleGenerateExcel}
-              variant="outline"
-              disabled={selectedAccountIds.length === 0}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Exportar Excel
-            </Button>
-          </div>
+          <TooltipProvider>
+            <div className="grid gap-2 md:grid-cols-3">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative">
+                    <Button
+                      onClick={handleGeneratePDF}
+                      disabled={isGenerating || selectedAccountIds.length === 0 || !canGenerateReports}
+                      className="w-full"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Gerar PDF
+                      {!canGenerateReports && (
+                        <Crown className="h-3 w-3 ml-1" />
+                      )}
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                {!canGenerateReports && (
+                  <TooltipContent>
+                    <p className="text-xs">Exclusivo do plano Pro</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative">
+                    <Button
+                      onClick={handleGenerateCSV}
+                      variant="outline"
+                      disabled={selectedAccountIds.length === 0 || !canGenerateReports}
+                      className="w-full"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Exportar CSV
+                      {!canGenerateReports && (
+                        <Crown className="h-3 w-3 ml-1" />
+                      )}
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                {!canGenerateReports && (
+                  <TooltipContent>
+                    <p className="text-xs">Exclusivo do plano Pro</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative">
+                    <Button
+                      onClick={handleGenerateExcel}
+                      variant="outline"
+                      disabled={selectedAccountIds.length === 0 || !canGenerateReports}
+                      className="w-full"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Exportar Excel
+                      {!canGenerateReports && (
+                        <Crown className="h-3 w-3 ml-1" />
+                      )}
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                {!canGenerateReports && (
+                  <TooltipContent>
+                    <p className="text-xs">Exclusivo do plano Pro</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </div>
+          </TooltipProvider>
         </div>
       </CardContent>
     </Card>

@@ -1,6 +1,7 @@
-import { Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -9,6 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import type { Database } from "@/integrations/supabase/types";
 
 type Category = Database["public"]["Tables"]["categories"]["Row"];
@@ -20,6 +28,8 @@ interface CategoryTableProps {
 }
 
 export function CategoryTable({ categories, onEdit, onDelete }: CategoryTableProps) {
+  const navigate = useNavigate();
+  const { canEditCategories } = usePlanLimits();
   const [sortField, setSortField] = useState<'name' | 'type' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -116,24 +126,60 @@ export function CategoryTable({ categories, onEdit, onDelete }: CategoryTablePro
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                <div className="flex justify-end gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onEdit(category)}
-                    className="h-8 w-8"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onDelete(category.id)}
-                    className="h-8 w-8 text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+                <TooltipProvider>
+                  <div className="flex justify-end gap-1">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => canEditCategories ? onEdit(category) : navigate("/app/planos")}
+                            disabled={!canEditCategories}
+                            className="h-8 w-8 relative"
+                          >
+                            <Pencil className="h-4 w-4" />
+                            {!canEditCategories && (
+                              <Crown className="h-3 w-3 absolute -top-1 -right-1 text-primary" />
+                            )}
+                          </Button>
+                        </div>
+                      </TooltipTrigger>
+                      {!canEditCategories && (
+                        <TooltipContent>
+                          <p className="text-xs max-w-[200px]">
+                            Editar categorias é exclusivo do plano Pro. Clique para fazer upgrade.
+                          </p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => canEditCategories ? onDelete(category.id) : navigate("/app/planos")}
+                            disabled={!canEditCategories}
+                            className="h-8 w-8 text-destructive hover:text-destructive relative"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            {!canEditCategories && (
+                              <Crown className="h-3 w-3 absolute -top-1 -right-1 text-primary" />
+                            )}
+                          </Button>
+                        </div>
+                      </TooltipTrigger>
+                      {!canEditCategories && (
+                        <TooltipContent>
+                          <p className="text-xs max-w-[200px]">
+                            Deletar categorias é exclusivo do plano Pro. Clique para fazer upgrade.
+                          </p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </div>
+                </TooltipProvider>
               </TableCell>
             </TableRow>
           ))}
