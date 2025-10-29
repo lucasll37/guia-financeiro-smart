@@ -139,18 +139,18 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Previsões</h1>
-          <p className="text-muted-foreground">
-            Gerencie suas previsões de receitas e despesas por mês
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="text-sm text-muted-foreground hidden sm:inline">
-            Nova previsão:
-          </span>
-          <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Previsões</h1>
+            <p className="text-muted-foreground">
+              Gerencie suas previsões de receitas e despesas por mês
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 sm:justify-end">
+            <span className="text-sm text-muted-foreground hidden lg:inline">
+              Nova previsão:
+            </span>
             <Button
               onClick={() => setWizardOpen(true)}
               disabled={filters.accountId === "all"}
