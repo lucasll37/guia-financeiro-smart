@@ -87,6 +87,32 @@ export function AccumulatedBalanceChart({
     });
     return result;
   }, [transactions, categories, periodStart, periodEnd]);
+  const balanceMetrics = useMemo(() => {
+    if (chartData.length === 0) {
+      return {
+        finalBalance: 0,
+        initialBalance: 0,
+        totalVariation: 0,
+        minBalance: 0,
+        maxBalance: 0
+      };
+    }
+
+    const finalBalance = chartData[chartData.length - 1].saldo;
+    const initialBalance = chartData[0].saldo;
+    const totalVariation = finalBalance - initialBalance;
+    const minBalance = Math.min(...chartData.map(d => d.saldo), 0);
+    const maxBalance = Math.max(...chartData.map(d => d.saldo), 0);
+
+    return {
+      finalBalance,
+      initialBalance,
+      totalVariation,
+      minBalance,
+      maxBalance
+    };
+  }, [chartData]);
+
   const CustomTooltip = ({
     active,
     payload
@@ -94,32 +120,9 @@ export function AccumulatedBalanceChart({
     if (!active || !payload?.length) return null;
     const data = payload[0].payload;
     return <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg p-4 shadow-lg">
-        <p className="font-semibold mb-2 pb-2 border-b">
-          {format(parseISO(data.date), "dd 'de' MMMM", {
-          locale: ptBR
-        })}
-        </p>
-        <div className="space-y-1.5 text-sm">
-          <div className="flex justify-between gap-4">
-            <span className="text-muted-foreground">Saldo Acumulado:</span>
-            <span className={`font-bold ${data.saldo >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
-              {maskValue(formatCurrency(data.saldo))}
-            </span>
-          </div>
-          <div className="flex justify-between gap-4">
-            <span className="text-muted-foreground">Variação do Dia:</span>
-            <span className={`font-semibold ${data.variacao >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
-              {data.variacao >= 0 ? '+' : ''}{maskValue(formatCurrency(data.variacao))}
-            </span>
-          </div>
-        </div>
+...
       </div>;
   };
-  const finalBalance = chartData.length > 0 ? chartData[chartData.length - 1].saldo : 0;
-  const initialBalance = chartData.length > 0 ? chartData[0].saldo : 0;
-  const totalVariation = finalBalance - initialBalance;
-  const minBalance = Math.min(...chartData.map(d => d.saldo), 0);
-  const maxBalance = Math.max(...chartData.map(d => d.saldo), 0);
   if (chartData.length === 0) {
     return <Card>
         <CardHeader>
@@ -136,33 +139,33 @@ export function AccumulatedBalanceChart({
   return <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className={`border-chart-2/20 bg-gradient-to-br ${finalBalance >= 0 ? 'from-chart-2/5 to-chart-2/10' : 'from-destructive/5 to-destructive/10'}`}>
+        <Card className={`border-chart-2/20 bg-gradient-to-br ${balanceMetrics.finalBalance >= 0 ? 'from-chart-2/5 to-chart-2/10' : 'from-destructive/5 to-destructive/10'}`}>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Saldo Final</p>
-                <p className={`text-2xl font-bold mt-1 ${finalBalance >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
-                  {maskValue(formatCurrency(finalBalance))}
+                <p className={`text-2xl font-bold mt-1 ${balanceMetrics.finalBalance >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
+                  {maskValue(formatCurrency(balanceMetrics.finalBalance))}
                 </p>
               </div>
-              <div className={`h-12 w-12 rounded-full flex items-center justify-center ${finalBalance >= 0 ? 'bg-chart-2/10' : 'bg-destructive/10'}`}>
-                {finalBalance >= 0 ? <TrendingUp className="h-6 w-6 text-chart-2" /> : <TrendingDown className="h-6 w-6 text-destructive" />}
+              <div className={`h-12 w-12 rounded-full flex items-center justify-center ${balanceMetrics.finalBalance >= 0 ? 'bg-chart-2/10' : 'bg-destructive/10'}`}>
+                {balanceMetrics.finalBalance >= 0 ? <TrendingUp className="h-6 w-6 text-chart-2" /> : <TrendingDown className="h-6 w-6 text-destructive" />}
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className={`border-chart-3/20 bg-gradient-to-br ${totalVariation >= 0 ? 'from-chart-2/5 to-chart-2/10' : 'from-destructive/5 to-destructive/10'}`}>
+        <Card className={`border-chart-3/20 bg-gradient-to-br ${balanceMetrics.totalVariation >= 0 ? 'from-chart-2/5 to-chart-2/10' : 'from-destructive/5 to-destructive/10'}`}>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Variação Total</p>
-                <p className={`text-2xl font-bold mt-1 ${totalVariation >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
-                  {totalVariation >= 0 ? '+' : ''}{maskValue(formatCurrency(totalVariation))}
+                <p className={`text-2xl font-bold mt-1 ${balanceMetrics.totalVariation >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
+                  {balanceMetrics.totalVariation >= 0 ? '+' : ''}{maskValue(formatCurrency(balanceMetrics.totalVariation))}
                 </p>
               </div>
-              <div className={`h-12 w-12 rounded-full flex items-center justify-center ${totalVariation >= 0 ? 'bg-chart-2/10' : 'bg-destructive/10'}`}>
-                {totalVariation >= 0 ? <TrendingUp className="h-6 w-6 text-chart-2" /> : <TrendingDown className="h-6 w-6 text-destructive" />}
+              <div className={`h-12 w-12 rounded-full flex items-center justify-center ${balanceMetrics.totalVariation >= 0 ? 'bg-chart-2/10' : 'bg-destructive/10'}`}>
+                {balanceMetrics.totalVariation >= 0 ? <TrendingUp className="h-6 w-6 text-chart-2" /> : <TrendingDown className="h-6 w-6 text-destructive" />}
               </div>
             </div>
           </CardContent>
@@ -201,7 +204,7 @@ export function AccumulatedBalanceChart({
               fontSize: 11
             }} tickLine={{
               stroke: 'hsl(var(--border))'
-            }} domain={[minBalance - Math.abs(minBalance) * 0.1, maxBalance + Math.abs(maxBalance) * 0.1]} />
+            }} domain={[balanceMetrics.minBalance - Math.abs(balanceMetrics.minBalance) * 0.1, balanceMetrics.maxBalance + Math.abs(balanceMetrics.maxBalance) * 0.1]} />
               <Tooltip content={<CustomTooltip />} />
               <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" label={{
               value: "Zero",
