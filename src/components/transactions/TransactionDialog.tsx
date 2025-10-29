@@ -273,27 +273,28 @@ export function TransactionDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="account">Conta *</Label>
-              <Select
-                value={formData.account_id}
-                onValueChange={(value) => setFormData({ ...formData, account_id: value, category_id: "" })}
-                disabled={!!defaultAccountId}
-              >
-                <SelectTrigger id="account">
-                  <SelectValue placeholder="Selecione a conta" />
-                </SelectTrigger>
-                <SelectContent>
-                  {accounts.map((account) => (
-                    <SelectItem key={account.id} value={account.id}>
-                      {account.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.account && <p className="text-sm text-destructive">{errors.account}</p>}
-            </div>
+          <div className={cn("grid gap-4", defaultAccountId ? "grid-cols-1" : "grid-cols-2")}>
+            {!defaultAccountId && (
+              <div className="space-y-2">
+                <Label htmlFor="account">Conta *</Label>
+                <Select
+                  value={formData.account_id}
+                  onValueChange={(value) => setFormData({ ...formData, account_id: value, category_id: "" })}
+                >
+                  <SelectTrigger id="account">
+                    <SelectValue placeholder="Selecione a conta" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {accounts.map((account) => (
+                      <SelectItem key={account.id} value={account.id}>
+                        {account.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.account && <p className="text-sm text-destructive">{errors.account}</p>}
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="category">Subcategoria *</Label>
