@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Download, Trash2, Loader2, AlertTriangle, TrendingUp } from "lucide-react";
+import { Download, Trash2, Loader2, AlertTriangle, TrendingUp, FileSpreadsheet } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -459,7 +459,10 @@ export function DataSection() {
           <div className="space-y-4">
             <div className="flex items-start justify-between p-4 border rounded-lg">
               <div className="space-y-1">
-                <h3 className="font-semibold">Exportar Lançamentos</h3>
+                <h3 className="font-semibold flex items-center gap-2">
+                  <FileSpreadsheet className="h-4 w-4 text-primary" />
+                  Exportar Lançamentos
+                </h3>
                 <p className="text-sm text-muted-foreground">
                   Faça download de todos os seus lançamentos em formato Excel
                 </p>
