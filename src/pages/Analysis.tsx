@@ -68,7 +68,12 @@ export default function Analysis({ accountId: propAccountId }: AnalysisProps) {
     }
 
     // Get forecasts for the period
-    const periodForecasts = forecasts?.filter((f) => f.period_start === periodStart) || [];
+    const periodForecasts = forecasts?.filter((f) => {
+      const fDate = new Date(f.period_start);
+      const start = new Date(periodStart);
+      const end = new Date(periodEnd);
+      return fDate >= start && fDate <= end;
+    }) || [];
 
     // Get transactions for the period
     const periodTransactions = transactions?.filter((t) => {
