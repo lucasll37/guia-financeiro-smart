@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { useState, useMemo } from "react";
 import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import {
   Table,
   TableBody,
@@ -253,7 +255,9 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                     className="w-2 h-2 rounded-full"
                     style={{ backgroundColor: (forecast.categories as any)?.color || "#6366f1" }}
                   />
-                  <span className="text-sm">{(forecast.categories as any)?.name || "Sem categoria"}</span>
+                  <span className="text-sm">
+                    {format(new Date(forecast.period_start), "MMMM 'de' yyyy", { locale: ptBR })}
+                  </span>
                 </div>
               </TableCell>
               <TableCell className="text-muted-foreground text-sm">
