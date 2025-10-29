@@ -215,10 +215,25 @@ export function TransactionDialog({
       }
     } else {
       // Lançamento único
-      await onSave({
+      let transactionData = {
         ...formData,
         split_override: isShared && useCustomSplit ? (splitMembers as any) : null,
-      });
+      };
+
+      // Se for compra de cartão de crédito, adicionar data real na descrição e usar primeiro dia do mês de pagamento
+      if (formData.credit_card_id && formData.payment_month) {
+        const selectedCard = creditCards?.find(c => c.id === formData.credit_card_id);
+        const cardName = selectedCard?.name || "Cartão";
+        const purchaseDate = format(new Date(formData.date), "dd/MM/yyyy");
+        
+        transactionData = {
+          ...transactionData,
+          description: `${formData.description} - ${cardName} (Compra em ${purchaseDate})`,
+          date: formData.payment_month, // Usar primeiro dia do mês de pagamento
+        };
+      }
+
+      await onSave(transactionData);
     }
     
     onOpenChange(false);
