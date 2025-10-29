@@ -232,10 +232,6 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
     }).format(value);
   };
 
-  const hasNoData = Object.keys(incomeTotals).length === 0 && Object.keys(expenseTotals).length === 0;
-  const hasNoForecasts = !forecasts || forecasts.length === 0;
-  const showSuggestion = hasNoData && hasNoForecasts;
-
   return (
     <div className="p-4 bg-muted/30 space-y-4">
       <div className="flex items-center justify-between">
@@ -251,96 +247,6 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
           </Button>
         </div>
       </div>
-
-      {showSuggestion && (
-        <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Lightbulb className="h-5 w-5 text-primary" />
-              <CardTitle className="text-lg">Como usar esta conta</CardTitle>
-            </div>
-            <CardDescription>
-              Siga estes passos para ter controle total das suas finanças
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3">
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold flex-shrink-0">
-                  1
-                </div>
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-primary" />
-                    <h4 className="font-medium">Crie suas previsões</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Defina quanto espera receber e gastar em cada categoria para planejar seu período
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold flex-shrink-0">
-                  2
-                </div>
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Receipt className="h-4 w-4 text-primary" />
-                    <h4 className="font-medium">Registre seus lançamentos</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Adicione suas receitas e despesas conforme acontecem no dia a dia
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold flex-shrink-0">
-                  3
-                </div>
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4 text-primary" />
-                    <h4 className="font-medium">Acompanhe a evolução</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Veja aqui a comparação entre previsto x realizado e seu saldo do período
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              <Button 
-                className="flex-1"
-                onClick={() => {
-                  // Navegar para a aba de previsões
-                  const currentUrl = window.location.pathname;
-                  const baseUrl = currentUrl.split('?')[0];
-                  navigate(`${baseUrl}?tab=previsoes`);
-                }}
-              >
-                <TrendingUp className="h-4 w-4 mr-2" />
-                Criar Previsões
-              </Button>
-              <Button 
-                variant="outline"
-                className="flex-1"
-                onClick={() => {
-                  // Navegar para a aba de lançamentos
-                  const currentUrl = window.location.pathname;
-                  const baseUrl = currentUrl.split('?')[0];
-                  navigate(`${baseUrl}?tab=lancamentos`);
-                }}
-              >
-                <Receipt className="h-4 w-4 mr-2" />
-                Adicionar Lançamento
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       <div className="space-y-4">
         {/* Receitas */}
