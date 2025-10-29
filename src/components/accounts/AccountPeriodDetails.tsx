@@ -316,7 +316,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                                 <span
                                   className={cn(
                                     "font-semibold",
-                                    completion >= 100
+                                    completion > 100
                                       ? "text-red-600 dark:text-red-400"
                                       : "text-green-600 dark:text-green-400"
                                   )}
@@ -328,19 +328,19 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                                 </span>
                               </div>
                               
-                              <div className="relative h-6 bg-muted rounded-full overflow-hidden">
+                              <div className="relative h-6 bg-muted rounded-full overflow-visible">
                                 <div
                                   className={cn(
-                                    "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full border-2",
-                                    completion >= 100
-                                      ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500 border-red-600 dark:border-red-500"
-                                      : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500 border-green-600 dark:border-green-500"
+                                    "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full",
+                                    completion > 100
+                                      ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500 border-2 border-red-600 dark:border-red-500"
+                                      : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500 border-2 border-green-600 dark:border-green-500"
                                   )}
                                   style={{
                                     width: `${Math.min(completion, 150)}%`,
                                   }}
                                 >
-                                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full" />
                                 </div>
                                 
                                 {completion > 100 && (
@@ -502,7 +502,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                               <span
                                 className={cn(
                                   "font-semibold",
-                                  completion >= 100
+                                  completion > 100
                                     ? "text-red-600 dark:text-red-400"
                                     : "text-green-600 dark:text-green-400"
                                 )}
@@ -514,19 +514,19 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                               </span>
                             </div>
                             
-                            <div className="relative h-6 bg-muted rounded-full overflow-hidden">
+                            <div className="relative h-6 bg-muted rounded-full overflow-visible">
                               <div
                                 className={cn(
-                                  "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full border-2",
-                                  completion >= 100
-                                    ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500 border-red-600 dark:border-red-500"
-                                    : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500 border-green-600 dark:border-green-500"
+                                  "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full",
+                                  completion > 100
+                                    ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500 border-2 border-red-600 dark:border-red-500"
+                                    : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500 border-2 border-green-600 dark:border-green-500"
                                 )}
                                 style={{
                                   width: `${Math.min(completion, 150)}%`,
                                 }}
                               >
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full" />
                               </div>
                               
                               {completion > 100 && (
