@@ -2,6 +2,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { Header } from "./Header";
 import { FeedbackButton } from "./FeedbackButton";
+import { AssistantFAB } from "@/components/assistant/AssistantFAB";
 import { Outlet } from "react-router-dom";
 
 export const DashboardLayout = () => {
@@ -16,6 +17,7 @@ export const DashboardLayout = () => {
           </main>
         </div>
         <FeedbackButton />
+        <AssistantFAB />
       </div>
     </SidebarProvider>
   );

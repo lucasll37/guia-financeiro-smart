@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.send-reset-password-email]
 verify_jwt = false
+
+[functions.financial-assistant]
+verify_jwt = true
