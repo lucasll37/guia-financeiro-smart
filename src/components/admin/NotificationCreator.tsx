@@ -184,22 +184,22 @@ export function NotificationCreator() {
                             value={user.email}
                             onSelect={() => handleSelectUser(user)}
                             className={cn(
-                              "flex items-center gap-3 px-3 py-3 rounded-md cursor-pointer transition-colors",
-                              "hover:bg-accent hover:text-accent-foreground",
-                              "data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground",
-                              selectedEmail === user.email && "bg-accent/50"
+                              "flex items-center gap-3 px-3 py-3 rounded-md cursor-pointer",
+                              "hover:bg-secondary",
+                              "aria-selected:bg-secondary",
+                              selectedEmail === user.email && "bg-secondary/70"
                             )}
                           >
                             <Check
                               className={cn(
-                                "h-4 w-4 shrink-0 transition-opacity",
+                                "h-4 w-4 shrink-0",
                                 selectedEmail === user.email
                                   ? "opacity-100 text-primary"
                                   : "opacity-0"
                               )}
                             />
                             <div className="flex flex-col gap-1 flex-1 min-w-0">
-                              <span className="font-medium text-sm truncate">
+                              <span className="font-medium text-sm truncate text-foreground">
                                 {user.email}
                               </span>
                               {user.name && (
