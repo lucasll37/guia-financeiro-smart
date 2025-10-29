@@ -21,10 +21,11 @@ type MonthlyReturn = Database["public"]["Tables"]["investment_monthly_returns"][
 
 interface MonthlyReturnsTableProps {
   returns: MonthlyReturn[];
-  onEdit: (returnData: MonthlyReturn) => void;
-  onDelete: (id: string) => void;
-  onNew: () => void;
+  onEdit?: (returnData: MonthlyReturn) => void;
+  onDelete?: (id: string) => void;
+  onNew?: () => void;
   investmentName: string;
+  readOnly?: boolean;
 }
 
 export function MonthlyReturnsTable({
@@ -33,6 +34,7 @@ export function MonthlyReturnsTable({
   onDelete,
   onNew,
   investmentName,
+  readOnly = false,
 }: MonthlyReturnsTableProps) {
   const [sortField, setSortField] = useState<'month' | 'return' | 'contribution' | 'balance' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -116,10 +118,12 @@ export function MonthlyReturnsTable({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Rendimentos Mensais - {investmentName}</CardTitle>
-        <Button onClick={onNew} size="sm">
-          <Plus className="h-4 w-4" />
-          {!isMobile && <span className="ml-2">Registrar Rendimento</span>}
-        </Button>
+        {!readOnly && onNew && (
+          <Button onClick={onNew} size="sm">
+            <Plus className="h-4 w-4" />
+            {!isMobile && <span className="ml-2">Registrar Rendimento</span>}
+          </Button>
+        )}
       </CardHeader>
       <CardContent className="space-y-4">
         <Collapsible open={isExplanationOpen} onOpenChange={setIsExplanationOpen}>
@@ -195,7 +199,7 @@ export function MonthlyReturnsTable({
                 </TableHead>
                 <TableHead className="text-right">Inflação Acumulada</TableHead>
                 <TableHead>Observações</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                {!readOnly && <TableHead className="text-right">Ações</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -245,24 +249,26 @@ export function MonthlyReturnsTable({
                     <TableCell className="max-w-xs truncate">
                       {returnData.notes || "-"}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => onEdit(returnData)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => onDelete(returnData.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+                    {!readOnly && onEdit && onDelete && (
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onEdit(returnData)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onDelete(returnData.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))
               )}

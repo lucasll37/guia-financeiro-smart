@@ -5,6 +5,7 @@ import { ArrowLeft, Calendar, LineChart, TrendingDown } from "lucide-react";
 import { useInvestments } from "@/hooks/useInvestments";
 import { useMonthlyReturns } from "@/hooks/useMonthlyReturns";
 import { useInvestmentCurrentValue } from "@/hooks/useInvestmentCurrentValue";
+import { useInvestmentPermissions } from "@/hooks/useInvestmentPermissions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MonthlyReturnsTable } from "@/components/investments/MonthlyReturnsTable";
 import { InvestmentCharts } from "@/components/investments/InvestmentCharts";
@@ -12,6 +13,8 @@ import { MonthlyReturnsDialog } from "@/components/investments/MonthlyReturnsDia
 import { ProjectionTable } from "@/components/investments/ProjectionTable";
 import { addMonths } from "date-fns";
 import { useState, useMemo } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Eye, Edit, Crown } from "lucide-react";
 
 import type { Database } from "@/integrations/supabase/types";
 
@@ -30,6 +33,7 @@ export default function InvestmentDetails() {
 
   const investment = investments?.find((inv) => inv.id === investmentId);
   const { data: currentValue } = useInvestmentCurrentValue(investmentId || "");
+  const { canEdit, role } = useInvestmentPermissions(investment);
 
   const {
     returns,
@@ -144,8 +148,28 @@ export default function InvestmentDetails() {
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{investment.name}</h1>
+        <div className="flex-1">
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold tracking-tight">{investment.name}</h1>
+            {role === "owner" && (
+              <Badge variant="default" className="flex items-center gap-1">
+                <Crown className="h-3 w-3" />
+                Proprietário
+              </Badge>
+            )}
+            {role === "editor" && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Edit className="h-3 w-3" />
+                Editor
+              </Badge>
+            )}
+            {role === "viewer" && (
+              <Badge variant="outline" className="flex items-center gap-1">
+                <Eye className="h-3 w-3" />
+                Visualizador
+              </Badge>
+            )}
+          </div>
         </div>
       </div>
 
@@ -168,10 +192,11 @@ export default function InvestmentDetails() {
         <TabsContent value="rendimentos">
           <MonthlyReturnsTable
             returns={returns || []}
-            onEdit={handleEditReturn}
-            onDelete={handleDeleteReturn}
-            onNew={handleNewReturn}
+            onEdit={canEdit ? handleEditReturn : undefined}
+            onDelete={canEdit ? handleDeleteReturn : undefined}
+            onNew={canEdit ? handleNewReturn : undefined}
             investmentName={investment.name}
+            readOnly={!canEdit}
           />
         </TabsContent>
 
