@@ -20,39 +20,59 @@ export function InviteActions({ inviteId, accountId, investmentId, invitedBy, on
     console.log("Respondendo ao convite:", { inviteId, status, investmentId, accountId });
     
     try {
+      // 1) Buscar a notificação para obter o verdadeiro ID do convite (membership)
+      const { data: notif } = await supabase
+        .from("notifications")
+        .select("metadata")
+        .eq("id", inviteId)
+        .maybeSingle();
+
+      const memberId = (notif as any)?.metadata?.invite_id as string | undefined;
+      if (!memberId) {
+        console.warn("Não foi possível determinar o ID do convite a partir da notificação. Usando inviteId recebido.");
+      }
+
       if (investmentId) {
         // Responder a convite de investimento
         console.log("Atualizando investment_members...");
         await respondToInvestmentInvite.mutateAsync({
-          id: inviteId,
+          id: memberId || inviteId,
           status: status === "accepted" ? "accepted" : "declined",
         });
       } else if (accountId) {
         // Responder a convite de conta
         console.log("Atualizando account_members...");
         await respondToAccountInvite.mutateAsync({
-          id: inviteId,
+          id: memberId || inviteId,
           status,
           accountId,
           invitedBy,
         });
       }
       
-      // Atualizar a notificação para marcar como lida (não precisa de .select())
+      // 2) Marcar a notificação específica como lida e complementar metadados (sem sobrescrever tudo)
       console.log("Atualizando notificação...");
+      const { data: currentNotif } = await supabase
+        .from("notifications")
+        .select("metadata")
+        .eq("id", inviteId)
+        .maybeSingle();
+
+      const currentMeta = (currentNotif as any)?.metadata || {};
+
       const { error } = await supabase
         .from("notifications")
         .update({ 
           read: true,
           metadata: {
-            ...(investmentId ? { investment_id: investmentId } : { account_id: accountId }),
-            invite_id: inviteId,
-            invited_by: invitedBy,
-            status: status,
-            responded_at: new Date().toISOString()
+            ...currentMeta,
+            ...(investmentId ? { investment_id: investmentId } : {}),
+            ...(accountId ? { account_id: accountId } : {}),
+            responded_at: new Date().toISOString(),
+            status
           }
         })
-        .contains("metadata", { invite_id: inviteId });
+        .eq("id", inviteId);
       
       if (error) {
         console.error("Erro ao atualizar notificação:", error);
