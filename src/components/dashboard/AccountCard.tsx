@@ -46,21 +46,19 @@ export function AccountCard({
     const periodMonth = format(monthEnd, "yyyy-MM");
     const periodEndStr = format(monthEnd, "yyyy-MM-dd");
 
-    // Balance: all transactions up to the end of the selected period
-    const allTransactionsUntilPeriod = transactions?.filter(t => {
+    // Saldo anterior: transações até o início do período
+    const previousBalance = transactions?.filter(t => {
       if (t.account_id !== account.id) return false;
       if (t.credit_card_id && t.payment_month) {
         const txDate = parseISO(t.payment_month as string);
-        return txDate <= monthEnd;
+        return txDate < monthStart;
       } else {
         const txDate = parseISO(t.date);
-        return txDate <= monthEnd;
+        return txDate < monthStart;
       }
-    }) || [];
-    
-    const balance = allTransactionsUntilPeriod.reduce((sum, t) => sum + Number(t.amount), 0);
+    }).reduce((sum, t) => sum + Number(t.amount), 0) || 0;
 
-    // Transactions of selected period (considering credit card payment_month)
+    // Transações do período selecionado
     const periodTransactions = transactions?.filter(t => {
       if (t.account_id !== account.id) return false;
       if (t.credit_card_id && t.payment_month) {
@@ -72,8 +70,18 @@ export function AccountCard({
       }
     }) || [];
 
-    // Expenses paid in the selected period (absolute)
-    const expenses = periodTransactions.filter(t => Number(t.amount) < 0).reduce((sum, t) => sum + Math.abs(Number(t.amount)), 0);
+    // Receitas do período (valores positivos)
+    const periodIncome = periodTransactions
+      .filter(t => Number(t.amount) > 0)
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+
+    // Despesas do período (valores negativos, mas usamos em valor absoluto)
+    const expenses = periodTransactions
+      .filter(t => Number(t.amount) < 0)
+      .reduce((sum, t) => sum + Math.abs(Number(t.amount)), 0);
+
+    // Saldo do período = Saldo Anterior + Receitas - Despesas
+    const balance = previousBalance + periodIncome - expenses;
 
     // Forecast total for selected period (only expenses)
     const accountForecasts = forecasts?.filter(f => f.account_id === account.id && f.period_end === periodEndStr && Number(f.forecasted_amount) < 0) || [];

@@ -107,23 +107,6 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
       .reduce((sum, t) => sum + Number(t.amount), 0);
   }, [transactions, periodStart]);
 
-  // Calcular saldo até o final do período
-  const balance = useMemo(() => {
-    if (!transactions) return 0;
-    
-    return transactions
-      .filter(t => {
-        if (t.credit_card_id && t.payment_month) {
-          const txDate = parseISO(t.payment_month as string);
-          return txDate <= periodEnd;
-        } else {
-          const txDate = parseISO(t.date);
-          return txDate <= periodEnd;
-        }
-      })
-      .reduce((sum, t) => sum + Number(t.amount), 0);
-  }, [transactions, periodEnd]);
-
   // Agrupar por categoria e tipo
   const { incomeTotals, expenseTotals, totalIncome, totalExpense, categoryTransactionsMap } = useMemo(() => {
     const incomeCategories: Record<string, { actual: number; forecasted: number; categoryName: string; categoryColor: string; categoryId: string; transactions: any[] }> = {};
@@ -190,6 +173,9 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
       categoryTransactionsMap: new Map(Object.entries({ ...filteredIncomeCategories, ...filteredExpenseCategories }).map(([k, v]) => [k, v.transactions])),
     };
   }, [periodTransactions, forecasts, periodStart, categories]);
+
+  // Saldo do período = Saldo Anterior + Receitas - Despesas
+  const balance = previousBalance + totalIncome - totalExpense;
 
   
 
