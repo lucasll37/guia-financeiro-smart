@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -21,9 +22,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useInvestmentMembers } from "@/hooks/useInvestmentMembers";
-import { UserPlus, Trash2, Check, X, LogOut, Crown } from "lucide-react";
+import { UserPlus, Trash2, Check, X, LogOut, Crown, Shield, Eye, Edit, Calendar } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 type Investment = Database["public"]["Tables"]["investment_assets"]["Row"];
 
@@ -151,12 +154,22 @@ export function InvestmentMembersDialog({
     }
   };
 
-  const getRoleBadge = (role: string) => {
+  const getRoleIcon = (role: string) => {
     return role === "editor" ? (
-      <Badge variant="outline">Editor</Badge>
+      <Edit className="h-4 w-4" />
     ) : (
-      <Badge variant="outline">Visualizador</Badge>
+      <Eye className="h-4 w-4" />
     );
+  };
+
+  const getRoleLabel = (role: string) => {
+    return role === "editor" ? "Editor" : "Visualizador";
+  };
+
+  const getRoleDescription = (role: string) => {
+    return role === "editor" 
+      ? "Pode registrar rendimentos e criar projeções"
+      : "Pode apenas visualizar informações";
   };
 
   return (
@@ -175,32 +188,84 @@ export function InvestmentMembersDialog({
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* For non-owners: Show owner info and leave button */}
-          {!isOwner && (
+          {/* For non-owners: Show enhanced info card */}
+          {!isOwner && currentUserMembership && (
             <div className="space-y-4">
-              {/* Owner Information */}
-              <div className="p-4 border rounded-lg bg-muted/30">
-                <div className="flex items-center gap-2 mb-2">
-                  <Crown className="h-4 w-4 text-yellow-600" />
-                  <h3 className="font-semibold">Proprietário</h3>
-                </div>
-                {ownerProfile && (
-                  <div className="space-y-1">
-                    <p className="font-medium">{ownerProfile.name || "Sem nome"}</p>
-                    <p className="text-sm text-muted-foreground">{ownerProfile.email}</p>
+              {/* Owner Information Card */}
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-full bg-yellow-500/10">
+                      <Crown className="h-6 w-6 text-yellow-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-muted-foreground mb-1">Proprietário</p>
+                      <p className="font-semibold text-lg">{ownerProfile?.name || "Sem nome"}</p>
+                      <p className="text-sm text-muted-foreground">{ownerProfile?.email}</p>
+                    </div>
                   </div>
-                )}
+                </CardContent>
+              </Card>
+
+              {/* Access Information Cards */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Access Type Card */}
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className={`p-2 rounded-lg ${
+                        currentUserMembership.role === "editor" 
+                          ? "bg-blue-500/10" 
+                          : "bg-gray-500/10"
+                      }`}>
+                        {getRoleIcon(currentUserMembership.role)}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs text-muted-foreground">Tipo de Acesso</p>
+                        <p className="font-semibold text-sm">
+                          {getRoleLabel(currentUserMembership.role)}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {getRoleDescription(currentUserMembership.role)}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Shared Since Card */}
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="p-2 rounded-lg bg-purple-500/10">
+                        <Calendar className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs text-muted-foreground">Compartilhado desde</p>
+                        <p className="font-semibold text-sm">
+                          {format(new Date(currentUserMembership.created_at || ""), "dd/MM/yyyy", { locale: ptBR })}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {format(new Date(currentUserMembership.created_at || ""), "'Há' d 'dias'", { locale: ptBR })}
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
 
-              {/* Leave Investment Button */}
-              {currentUserMembership && (
-                <div className="p-4 border border-destructive/20 bg-destructive/5 rounded-lg">
+              {/* Leave Investment Card */}
+              <Card className="border-destructive/20 bg-destructive/5">
+                <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-sm">Abandonar Investimento</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Você perderá o acesso a este investimento
-                      </p>
+                    <div className="flex items-start gap-3">
+                      <LogOut className="h-5 w-5 text-destructive mt-0.5" />
+                      <div>
+                        <p className="font-medium text-sm">Abandonar Investimento</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Você perderá o acesso a este investimento
+                        </p>
+                      </div>
                     </div>
                     <Button
                       variant="destructive"
@@ -208,12 +273,11 @@ export function InvestmentMembersDialog({
                       onClick={handleLeaveInvestment}
                       disabled={removeMember.isPending}
                     >
-                      <LogOut className="h-4 w-4 mr-2" />
                       Sair
                     </Button>
                   </div>
-                </div>
-              )}
+                </CardContent>
+              </Card>
             </div>
           )}
 
@@ -269,7 +333,10 @@ export function InvestmentMembersDialog({
                         <p className="text-sm text-muted-foreground">{member.profiles?.email}</p>
                         <div className="flex gap-2 mt-2">
                           {getStatusBadge(member.status)}
-                          {getRoleBadge(member.role)}
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            {getRoleIcon(member.role)}
+                            {getRoleLabel(member.role)}
+                          </Badge>
                         </div>
                       </div>
 
