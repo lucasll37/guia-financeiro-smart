@@ -293,13 +293,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                           </div>
                         </TableCell>
                         <TableCell className="text-right w-[140px]">
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={data.forecasted || ""}
-                            onChange={(e) => handleForecastChange(categoryId, e.target.value)}
-                            className="w-32 ml-auto text-right"
-                          />
+                          <span className="font-medium">{maskValue(formatCurrency(data.forecasted))}</span>
                         </TableCell>
                         <TableCell className="text-right font-medium w-[140px]">
                           {maskValue(formatCurrency(data.actual))}
@@ -429,13 +423,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                           </div>
                         </TableCell>
                         <TableCell className="text-right w-[140px]">
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={data.forecasted || ""}
-                            onChange={(e) => handleForecastChange(categoryId, e.target.value)}
-                            className="w-32 ml-auto text-right"
-                          />
+                          <span className="font-medium">{maskValue(formatCurrency(data.forecasted))}</span>
                         </TableCell>
                         <TableCell className="text-right font-medium w-[140px]">
                           {maskValue(formatCurrency(data.actual))}
