@@ -999,12 +999,29 @@ export default function Admin() {
               </p>
               <div className="space-y-2">
                 <Label className="text-sm">Email do usuário a ser excluído:</Label>
-                <Input
-                  readOnly
-                  value={userToDelete?.email || ""}
-                  className="font-mono text-sm bg-muted cursor-text select-all"
-                  onClick={(e) => e.currentTarget.select()}
-                />
+                <div className="flex gap-2">
+                  <Input
+                    readOnly
+                    value={userToDelete?.email || ""}
+                    className="font-mono text-sm bg-muted flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (userToDelete?.email) {
+                        navigator.clipboard.writeText(userToDelete.email);
+                        toast({
+                          title: "Email copiado",
+                          description: "O email foi copiado para a área de transferência",
+                        });
+                      }
+                    }}
+                  >
+                    Copiar
+                  </Button>
+                </div>
               </div>
               <div className="bg-destructive/10 p-3 rounded-md border border-destructive/30">
                 <p className="text-destructive font-semibold text-sm mb-2">
