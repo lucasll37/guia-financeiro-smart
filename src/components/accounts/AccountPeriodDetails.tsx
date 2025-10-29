@@ -79,11 +79,11 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
     return transactions.filter(t => {
       if (t.credit_card_id && t.payment_month) {
         // Para transações de cartão, comparar payment_month normalizado (YYYY-MM)
-        const pm = format(new Date(t.payment_month as string), "yyyy-MM");
+        const pm = format(parseISO(t.payment_month as string), "yyyy-MM");
         return pm === periodMonth;
       } else {
         // Para transações normais, comparar o mês calendário da data com o mês de referência do período
-        const txMonth = format(new Date(t.date), "yyyy-MM");
+        const txMonth = format(parseISO(t.date), "yyyy-MM");
         return txMonth === periodMonth;
       }
     });
@@ -95,7 +95,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
     
     return transactions
       .filter(t => {
-        const txDate = new Date(t.date);
+        const txDate = parseISO(t.date);
         return txDate < periodStart;
       })
       .reduce((sum, t) => {
