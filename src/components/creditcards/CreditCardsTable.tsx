@@ -122,7 +122,7 @@ export function CreditCardsTable({
             <TableHead className="text-right">Limite</TableHead>
             <TableHead className="text-right">
               <Button variant="ghost" size="sm" onClick={() => handleSort('total')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
-                Total a Pagar
+                Total Gasto
                 {renderSortIcon('total')}
               </Button>
             </TableHead>
