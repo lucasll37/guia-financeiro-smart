@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState, useMemo } from "react";
 import { useMaskValues } from "@/hooks/useMaskValues";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { Database } from "@/integrations/supabase/types";
 
 type MonthlyReturn = Database["public"]["Tables"]["investment_monthly_returns"]["Row"];
@@ -37,6 +38,7 @@ export function MonthlyReturnsTable({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [isExplanationOpen, setIsExplanationOpen] = useState(false);
   const { maskValue } = useMaskValues();
+  const isMobile = useIsMobile();
 
   const handleSort = (field: 'month' | 'return' | 'contribution' | 'balance') => {
     if (sortField === field) {
@@ -115,8 +117,8 @@ export function MonthlyReturnsTable({
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Rendimentos Mensais - {investmentName}</CardTitle>
         <Button onClick={onNew} size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          Registrar Rendimento
+          <Plus className="h-4 w-4" />
+          {!isMobile && <span className="ml-2">Registrar Rendimento</span>}
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
