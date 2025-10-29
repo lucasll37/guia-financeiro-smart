@@ -56,19 +56,8 @@ export default function InvestmentsList() {
     if (!canCreate) {
       toast({
         title: "Limite atingido",
-        description: `Você atingiu o limite de ${maxInvestments} investimento(s) do plano ${userPlan === 'free' ? 'Free' : userPlan}. Faça upgrade para criar mais investimentos.`,
+        description: `Seu plano ${userPlan === 'free' ? 'FREE' : userPlan.toUpperCase()} permite até ${maxInvestments} investimento${maxInvestments > 1 ? 's' : ''}. Faça upgrade para criar mais investimentos.`,
         variant: "destructive",
-        action: (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate("/app/planos")}
-            className="gap-2"
-          >
-            <Crown className="h-4 w-4" />
-            Fazer Upgrade
-          </Button>
-        ),
       });
       return;
     }
