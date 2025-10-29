@@ -307,8 +307,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                         <TableCell className="text-right font-medium w-[140px]">
                           {maskValue(formatCurrency(data.actual))}
                         </TableCell>
-                          <TableCell className={`text-right w-[140px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {maskValue(formatCurrency(Math.abs(difference)))}
+                        <TableCell className={`text-right w-[140px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {maskValue(formatCurrency(difference))}
                         </TableCell>
                           <TableCell className="text-right w-[180px]">
                             <div className="space-y-1">
@@ -494,7 +494,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                           {maskValue(formatCurrency(data.actual))}
                         </TableCell>
                         <TableCell className={`text-right w-[140px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {maskValue(formatCurrency(Math.abs(difference)))}
+                          {maskValue(formatCurrency(difference))}
                         </TableCell>
                         <TableCell className="text-right w-[180px]">
                           <div className="space-y-1">
