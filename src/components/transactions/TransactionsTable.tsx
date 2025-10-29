@@ -112,7 +112,7 @@ export function TransactionsTable({
             </div>
           )}
         </TableCell>
-        <TableCell className="hidden md:table-cell">
+        <TableCell>
           <div className="flex flex-col gap-1">
             <span>{transaction.description}</span>
           </div>
@@ -152,7 +152,7 @@ export function TransactionsTable({
             <TableRow>
               <TableHead className="w-[120px]">Data</TableHead>
               <TableHead className="w-[200px]">Categoria</TableHead>
-              <TableHead className="hidden md:table-cell">Descrição</TableHead>
+              <TableHead>Descrição</TableHead>
               <TableHead className="text-right w-[150px]">Valor</TableHead>
               <TableHead className="text-right w-[100px]">Ações</TableHead>
             </TableRow>
@@ -196,7 +196,7 @@ export function TransactionsTable({
                   </Button>
                 </TableHead>
                 <TableHead className="w-[200px]">Categoria</TableHead>
-                <TableHead className="hidden md:table-cell">
+                <TableHead>
                   <Button variant="ghost" size="sm" onClick={() => handleSort('description')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Descrição
                     {renderSortIcon('description')}
@@ -254,7 +254,7 @@ export function TransactionsTable({
                   </Button>
                 </TableHead>
                 <TableHead className="w-[200px]">Categoria</TableHead>
-                <TableHead className="hidden md:table-cell">
+                <TableHead>
                   <Button variant="ghost" size="sm" onClick={() => handleSort('description')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Descrição
                     {renderSortIcon('description')}

@@ -98,7 +98,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
             <span>{(forecast.categories as any)?.name || "Sem categoria"}</span>
           </div>
         </TableCell>
-        <TableCell className="text-muted-foreground hidden md:table-cell">
+        <TableCell className="text-muted-foreground">
           {forecast.notes || "-"}
         </TableCell>
         <TableCell className="text-right font-medium">
@@ -168,7 +168,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
                     {renderSortIcon('category')}
                   </Button>
                 </TableHead>
-                <TableHead className="hidden md:table-cell">Descrição</TableHead>
+                <TableHead>Descrição</TableHead>
                 <TableHead className="text-right w-[150px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Valor Previsto
@@ -184,7 +184,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
                 <TableCell colSpan={showAccountName ? 2 : 1} className="text-right">
                   Total de Receitas:
                 </TableCell>
-                <TableCell className="hidden md:table-cell" />
+                <TableCell />
                 <TableCell className="text-right text-green-600">
                   + {formatCurrency(totalIncome)}
                 </TableCell>
@@ -229,7 +229,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
                     {renderSortIcon('category')}
                   </Button>
                 </TableHead>
-                <TableHead className="hidden md:table-cell">Descrição</TableHead>
+                <TableHead>Descrição</TableHead>
                 <TableHead className="text-right w-[150px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Valor Previsto
@@ -245,7 +245,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
                 <TableCell colSpan={showAccountName ? 2 : 1} className="text-right">
                   Total de Despesas:
                 </TableCell>
-                <TableCell className="hidden md:table-cell" />
+                <TableCell />
                 <TableCell className="text-right text-destructive">
                   - {formatCurrency(totalExpense)}
                 </TableCell>

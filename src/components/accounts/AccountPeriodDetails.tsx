@@ -240,8 +240,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[40px] hidden lg:table-cell"></TableHead>
-                      <TableHead className="w-[250px] hidden lg:table-cell">Categoria</TableHead>
+                      <TableHead className="w-[40px]"></TableHead>
+                      <TableHead className="w-[250px]">Categoria</TableHead>
                       <TableHead className="text-right w-[140px]">Previsto</TableHead>
                       <TableHead className="text-right w-[140px]">Realizado</TableHead>
                       <TableHead className="text-right w-[140px]">Diferença</TableHead>
@@ -263,7 +263,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   return (
                     <>
                       <TableRow key={categoryId} className={hasMultipleTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
-                        <TableCell className="w-[40px] hidden lg:table-cell" onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
+                        <TableCell className="w-[40px]" onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
                           <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                             {hasMultipleTransactions && (
                               <Button 
@@ -280,7 +280,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="w-[250px] hidden lg:table-cell" onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
+                        <TableCell className="w-[250px]" onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
                           <div className="flex items-center gap-2">
                             <div 
                               className="w-3 h-3 rounded-full flex-shrink-0" 
@@ -347,12 +347,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   );
                 })}
                 <TableRow className="bg-green-50/50 dark:bg-green-950/10 font-semibold">
-                  <TableCell colSpan={2} className="text-right hidden lg:table-cell">Total de Receitas</TableCell>
-                  <TableCell colSpan={4} className="text-right text-green-600 lg:hidden">Total de Receitas</TableCell>
-                  <TableCell colSpan={4} className="text-right text-green-600 hidden lg:table-cell">
-                    {maskValue(formatCurrency(totalIncome))}
-                  </TableCell>
-                  <TableCell className="text-right text-green-600 lg:hidden">
+                  <TableCell colSpan={2} className="text-right">Total de Receitas</TableCell>
+                  <TableCell colSpan={4} className="text-right text-green-600">
                     {maskValue(formatCurrency(totalIncome))}
                   </TableCell>
                 </TableRow>
@@ -381,8 +377,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[40px] hidden lg:table-cell"></TableHead>
-                      <TableHead className="w-[250px] hidden lg:table-cell">Categoria</TableHead>
+                      <TableHead className="w-[40px]"></TableHead>
+                      <TableHead className="w-[250px]">Categoria</TableHead>
                       <TableHead className="text-right w-[140px]">Previsto</TableHead>
                       <TableHead className="text-right w-[140px]">Realizado</TableHead>
                       <TableHead className="text-right w-[140px]">Diferença</TableHead>
@@ -404,7 +400,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   return (
                     <>
                       <TableRow key={categoryId} className={hasMultipleTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
-                        <TableCell className="w-[40px] hidden lg:table-cell" onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
+                        <TableCell className="w-[40px]" onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
                           <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                             {hasMultipleTransactions && (
                               <Button 
@@ -421,7 +417,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="w-[250px] hidden lg:table-cell" onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
+                        <TableCell className="w-[250px]" onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
                           <div className="flex items-center gap-2">
                             <div 
                               className="w-3 h-3 rounded-full flex-shrink-0" 
@@ -488,12 +484,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   );
                 })}
                 <TableRow className="bg-red-50/50 dark:bg-red-950/10 font-semibold">
-                  <TableCell colSpan={2} className="text-right hidden lg:table-cell">Total de Despesas</TableCell>
-                  <TableCell colSpan={4} className="text-right text-destructive lg:hidden">Total de Despesas</TableCell>
-                  <TableCell colSpan={4} className="text-right text-destructive hidden lg:table-cell">
-                    {maskValue(formatCurrency(totalExpense))}
-                  </TableCell>
-                  <TableCell className="text-right text-destructive lg:hidden">
+                  <TableCell colSpan={2} className="text-right">Total de Despesas</TableCell>
+                  <TableCell colSpan={4} className="text-right text-destructive">
                     {maskValue(formatCurrency(totalExpense))}
                   </TableCell>
                 </TableRow>
@@ -521,8 +513,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[40px] hidden lg:table-cell"></TableHead>
-                    <TableHead className="w-[250px] hidden lg:table-cell">Descrição</TableHead>
+                    <TableHead className="w-[40px]"></TableHead>
+                    <TableHead className="w-[250px]">Descrição</TableHead>
                     <TableHead className="text-right w-[140px]">Previsto</TableHead>
                     <TableHead className="text-right w-[140px]">Realizado</TableHead>
                     <TableHead className="text-right w-[140px]">Diferença</TableHead>
@@ -531,8 +523,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell className="w-[40px] hidden lg:table-cell"></TableCell>
-                    <TableCell className="w-[250px] hidden lg:table-cell">
+                    <TableCell className="w-[40px]"></TableCell>
+                    <TableCell className="w-[250px]">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full flex-shrink-0 bg-blue-500" />
                         <span className="break-words">Saldo do período anterior</span>
