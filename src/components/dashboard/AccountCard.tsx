@@ -40,20 +40,41 @@ export function AccountCard({
     const currentPeriod = format(now, "MMMM 'de' yyyy", {
       locale: ptBR
     });
-    const periodStart = format(monthStart, "yyyy-MM-dd");
+    const periodMonth = format(monthEnd, "yyyy-MM");
+    const periodEndStr = format(monthEnd, "yyyy-MM-dd");
     
     // Calculate total account balance (all transactions)
     const allAccountTransactions = transactions?.filter(t => t.account_id === account.id) || [];
     const balance = allAccountTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
     
-    // Calculate expenses for current period only
-    const currentPeriodTransactions = transactions?.filter(t => t.account_id === account.id && new Date(t.date) >= monthStart && new Date(t.date) <= monthEnd) || [];
-    const expenses = currentPeriodTransactions.filter(t => Number(t.amount) < 0).reduce((sum, t) => sum + Math.abs(Number(t.amount)), 0);
+    // Calculate expenses for current period (considering both regular and credit card transactions)
+    const periodTransactions = transactions?.filter(t => {
+      if (t.account_id !== account.id) return false;
+      
+      if (t.credit_card_id && t.payment_month) {
+        // For credit card transactions, compare payment_month
+        const txMonth = format(new Date(t.payment_month as string), "yyyy-MM");
+        return txMonth === periodMonth;
+      } else {
+        // For regular transactions, compare date month
+        const txMonth = format(new Date(t.date), "yyyy-MM");
+        return txMonth === periodMonth;
+      }
+    }) || [];
+    
+    const expenses = periodTransactions
+      .filter(t => Number(t.amount) < 0)
+      .reduce((sum, t) => sum + Math.abs(Number(t.amount)), 0);
 
     // Calculate forecast total for current period (only expenses)
-    const accountForecasts = forecasts?.filter(f => f.account_id === account.id && f.period_start === periodStart && Number(f.forecasted_amount) < 0) || [];
+    const accountForecasts = forecasts?.filter(
+      f => f.account_id === account.id && 
+      f.period_end === periodEndStr && 
+      Number(f.forecasted_amount) < 0
+    ) || [];
     const budgetTotal = accountForecasts.reduce((sum, f) => sum + Math.abs(Number(f.forecasted_amount)), 0);
     const completion = budgetTotal > 0 ? expenses / budgetTotal * 100 : 0;
+    
     return {
       balance,
       spent: expenses,
