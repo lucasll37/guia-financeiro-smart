@@ -21,7 +21,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Bug, Lightbulb, CheckCircle2, Clock, PlayCircle, XCircle } from "lucide-react";
+import { Bug, Lightbulb, CheckCircle2, Clock, PlayCircle, XCircle, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { useState } from "react";
 
 interface Feedback {
@@ -41,9 +41,11 @@ export function FeedbackManager() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<"user" | "type" | "status" | "date">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const { data: feedbacks, isLoading } = useQuery({
-    queryKey: ["admin-feedbacks", statusFilter],
+    queryKey: ["admin-feedbacks", statusFilter, sortBy, sortOrder],
     queryFn: async () => {
       let query = supabase
         .from("feedback")
@@ -65,10 +67,34 @@ export function FeedbackManager() {
         .in("id", userIds);
 
       // Combinar feedbacks com profiles
-      const feedbacksWithProfiles = feedbackData?.map((feedback) => ({
+      let feedbacksWithProfiles = feedbackData?.map((feedback) => ({
         ...feedback,
         profiles: profilesData?.find((p) => p.id === feedback.user_id),
-      }));
+      })) || [];
+
+      // Ordenar localmente
+      feedbacksWithProfiles.sort((a, b) => {
+        let comparison = 0;
+
+        switch (sortBy) {
+          case "user":
+            const nameA = a.profiles?.name || "";
+            const nameB = b.profiles?.name || "";
+            comparison = nameA.localeCompare(nameB);
+            break;
+          case "type":
+            comparison = a.type.localeCompare(b.type);
+            break;
+          case "status":
+            comparison = a.status.localeCompare(b.status);
+            break;
+          case "date":
+            comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+            break;
+        }
+
+        return sortOrder === "asc" ? comparison : -comparison;
+      });
 
       return feedbacksWithProfiles as Feedback[];
     },
@@ -94,6 +120,26 @@ export function FeedbackManager() {
       });
     },
   });
+
+  const handleSort = (column: "user" | "type" | "status" | "date") => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(column);
+      setSortOrder("asc");
+    }
+  };
+
+  const getSortIcon = (column: "user" | "type" | "status" | "date") => {
+    if (sortBy !== column) {
+      return <ArrowUpDown className="h-4 w-4 ml-1" />;
+    }
+    return sortOrder === "asc" ? (
+      <ArrowUp className="h-4 w-4 ml-1" />
+    ) : (
+      <ArrowDown className="h-4 w-4 ml-1" />
+    );
+  };
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -207,11 +253,51 @@ export function FeedbackManager() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Usuário</TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleSort("type")}
+                        className="flex items-center p-0 h-auto font-semibold hover:bg-transparent"
+                      >
+                        Tipo
+                        {getSortIcon("type")}
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleSort("user")}
+                        className="flex items-center p-0 h-auto font-semibold hover:bg-transparent"
+                      >
+                        Usuário
+                        {getSortIcon("user")}
+                      </Button>
+                    </TableHead>
                     <TableHead className="max-w-md">Mensagem</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Data</TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleSort("status")}
+                        className="flex items-center p-0 h-auto font-semibold hover:bg-transparent"
+                      >
+                        Status
+                        {getSortIcon("status")}
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleSort("date")}
+                        className="flex items-center p-0 h-auto font-semibold hover:bg-transparent"
+                      >
+                        Data
+                        {getSortIcon("date")}
+                      </Button>
+                    </TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
