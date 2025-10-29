@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
 import { useAccountMembers } from "@/hooks/useAccountMembers";
 import { useInvestmentMembers } from "@/hooks/useInvestmentMembers";
+import { supabase } from "@/integrations/supabase/client";
 
 interface InviteActionsProps {
   inviteId: string;
@@ -31,6 +32,22 @@ export function InviteActions({ inviteId, accountId, investmentId, invitedBy, on
         invitedBy,
       });
     }
+    
+    // Atualizar a notificação para marcar como lida e adicionar o status da resposta
+    await supabase
+      .from("notifications")
+      .update({ 
+        read: true,
+        metadata: {
+          ...(investmentId ? { investment_id: investmentId } : { account_id: accountId }),
+          invite_id: inviteId,
+          invited_by: invitedBy,
+          status: status,
+          responded_at: new Date().toISOString()
+        }
+      })
+      .contains("metadata", { invite_id: inviteId });
+    
     onComplete?.();
   };
 

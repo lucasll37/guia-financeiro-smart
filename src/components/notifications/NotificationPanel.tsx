@@ -168,10 +168,11 @@ export function NotificationPanel({ userId, onOpenPreferences }: NotificationPan
                       {groupNotifications.map((notification) => {
                         const metadata = notification.metadata as any;
                         const isInviteCancelled = metadata?.invite_cancelled === true;
+                        const hasResponded = metadata?.status && metadata?.responded_at;
                         const isInvitePending = notification.type === "invite" && 
                           (metadata?.account_id || metadata?.investment_id) && 
                           metadata?.invited_by &&
-                          !metadata?.status &&
+                          !hasResponded &&
                           !isInviteCancelled;
 
                         return (
@@ -216,6 +217,16 @@ export function NotificationPanel({ userId, onOpenPreferences }: NotificationPan
                                         Este convite foi cancelado
                                       </p>
                                     )}
+                                    {hasResponded && (
+                                      <p className={cn(
+                                        "text-xs mt-1 font-medium",
+                                        metadata.status === "accepted" 
+                                          ? "text-green-600 dark:text-green-400" 
+                                          : "text-red-600 dark:text-red-400"
+                                      )}>
+                                        Você {metadata.status === "accepted" ? "aceitou" : "recusou"} este convite
+                                      </p>
+                                    )}
                                   </div>
                                   <Button
                                     variant="ghost"
@@ -233,7 +244,7 @@ export function NotificationPanel({ userId, onOpenPreferences }: NotificationPan
                                       locale: ptBR,
                                     })}
                                   </p>
-                                  {!notification.read && (
+                                  {!notification.read && !hasResponded && (
                                     <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">
                                       Não lida
                                     </Badge>
@@ -241,6 +252,19 @@ export function NotificationPanel({ userId, onOpenPreferences }: NotificationPan
                                   {isInviteCancelled && (
                                     <Badge variant="outline" className="h-4 px-1.5 text-[10px] text-muted-foreground">
                                       Cancelado
+                                    </Badge>
+                                  )}
+                                  {hasResponded && (
+                                    <Badge 
+                                      variant="outline" 
+                                      className={cn(
+                                        "h-4 px-1.5 text-[10px]",
+                                        metadata.status === "accepted" 
+                                          ? "border-green-600 text-green-600 dark:border-green-400 dark:text-green-400" 
+                                          : "border-red-600 text-red-600 dark:border-red-400 dark:text-red-400"
+                                      )}
+                                    >
+                                      {metadata.status === "accepted" ? "Aceito" : "Recusado"}
                                     </Badge>
                                   )}
                                 </div>
