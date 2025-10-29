@@ -18,18 +18,23 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { t } from "@/lib/i18n";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 const menuItems = [
   { title: t("nav.dashboard"), url: "/app/dashboard", icon: LayoutDashboard },
   { title: "Contas", url: "/app/contas", icon: Wallet },
   { title: t("nav.goals"), url: "/app/metas", icon: Target },
   { title: t("nav.investments"), url: "/app/investimentos", icon: TrendingUp },
-  { title: "Admin", url: "/app/admin", icon: ShieldCheck },
 ];
+
+const adminMenuItem = { title: "Admin", url: "/app/admin", icon: ShieldCheck };
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const { data: isAdmin } = useIsAdmin();
+  
+  const visibleMenuItems = isAdmin ? [...menuItems, adminMenuItem] : menuItems;
 
   return (
     <Sidebar collapsible="icon" className="z-50">
@@ -38,7 +43,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {visibleMenuItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <NavLink

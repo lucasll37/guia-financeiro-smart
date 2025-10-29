@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { MaskValuesProvider } from "@/hooks/useMaskValues";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageMeta } from "@/components/seo/PageMeta";
 import Auth from "./pages/Auth";
@@ -43,6 +44,29 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  const { data: isAdmin, isLoading: isCheckingAdmin } = useIsAdmin();
+
+  if (loading || isCheckingAdmin) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-lg">Carregando...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/app/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
@@ -75,7 +99,7 @@ const App = () => (
                 <Route path="configuracoes" element={<Settings />} />
                 <Route path="conta" element={<Conta />} />
                 <Route path="planos" element={<Planos />} />
-                <Route path="admin" element={<Admin />} />
+                <Route path="admin" element={<AdminRoute><Admin /></AdminRoute>} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
