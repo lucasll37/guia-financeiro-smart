@@ -377,6 +377,14 @@ export function BudgetWizard({
                                 </div>
                                 <Input
                                   type="text"
+                                  placeholder="Descrição..."
+                                  value={entry.notes}
+                                  onChange={(e) =>
+                                    updateEntry(sub.id, "notes", e.target.value, true)
+                                  }
+                                />
+                                <Input
+                                  type="text"
                                   inputMode="decimal"
                                   placeholder="R$ 0.00"
                                   value={entry.amount}
@@ -389,14 +397,6 @@ export function BudgetWizard({
                                     )
                                   }
                                   className="text-right font-semibold"
-                                />
-                                <Input
-                                  type="text"
-                                  placeholder="Observações..."
-                                  value={entry.notes}
-                                  onChange={(e) =>
-                                    updateEntry(sub.id, "notes", e.target.value, true)
-                                  }
                                 />
                               </div>
                             );
@@ -512,6 +512,14 @@ export function BudgetWizard({
                                       </div>
                                       <Input
                                         type="text"
+                                        placeholder="Descrição..."
+                                        value={entry.notes}
+                                        onChange={(e) =>
+                                          updateEntry(sub.id, "notes", e.target.value, false)
+                                        }
+                                      />
+                                      <Input
+                                        type="text"
                                         inputMode="decimal"
                                         placeholder="R$ 0.00"
                                         value={entry.amount}
@@ -524,14 +532,6 @@ export function BudgetWizard({
                                           )
                                         }
                                         className="text-right font-semibold"
-                                      />
-                                      <Input
-                                        type="text"
-                                        placeholder="Observações..."
-                                        value={entry.notes}
-                                        onChange={(e) =>
-                                          updateEntry(sub.id, "notes", e.target.value, false)
-                                        }
                                       />
                                     </div>
                                   );
