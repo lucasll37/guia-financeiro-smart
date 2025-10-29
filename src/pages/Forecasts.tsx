@@ -146,27 +146,33 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             Gerencie suas previsões de receitas e despesas por mês
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="default"
-            size={isMobile ? "sm" : "default"}
-            onClick={() => setWizardOpen(true)}
-            disabled={filters.accountId === "all"}
-            className="gap-2"
-          >
-            <Sparkles className="h-4 w-4" />
-            {!isMobile && <span>Assistente</span>}
-          </Button>
-          <Button 
-            variant="outline" 
-            size={isMobile ? "sm" : "default"}
-            onClick={handleCreateForecast} 
-            disabled={filters.accountId === "all"}
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            {!isMobile && <span>Manual</span>}
-          </Button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              Nova previsão:
+            </span>
+            <Button
+              variant="default"
+              size={isMobile ? "sm" : "default"}
+              onClick={() => setWizardOpen(true)}
+              disabled={filters.accountId === "all"}
+              className="gap-2"
+            >
+              <Sparkles className="h-4 w-4" />
+              {!isMobile && <span>Assistente de Lançamento</span>}
+              {isMobile && <span>Assistente</span>}
+            </Button>
+            <Button 
+              variant="outline" 
+              size={isMobile ? "sm" : "default"}
+              onClick={handleCreateForecast} 
+              disabled={filters.accountId === "all"}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              {!isMobile && <span>Manual</span>}
+            </Button>
+          </div>
           {filters.viewMode === "monthly" && (
             <Button
               variant="outline"
