@@ -286,7 +286,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                               className="w-3 h-3 rounded-full flex-shrink-0" 
                               style={{ backgroundColor: data.categoryColor }}
                             />
-                            <span className="truncate">{data.categoryName}</span>
+                            <span className="break-words">{data.categoryName}</span>
                             {hasMultipleTransactions && (
                               <span className="text-xs text-muted-foreground flex-shrink-0">({data.transactions.length})</span>
                             )}
@@ -416,7 +416,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                               className="w-3 h-3 rounded-full flex-shrink-0" 
                               style={{ backgroundColor: data.categoryColor }}
                             />
-                            <span className="truncate">{data.categoryName}</span>
+                            <span className="break-words">{data.categoryName}</span>
                             {hasMultipleTransactions && (
                               <span className="text-xs text-muted-foreground flex-shrink-0">({data.transactions.length})</span>
                             )}
@@ -513,7 +513,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                     <TableCell className="w-[250px] hidden lg:table-cell">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full flex-shrink-0 bg-blue-500" />
-                        <span className="truncate">Saldo do período anterior</span>
+                        <span className="break-words">Saldo do período anterior</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-right w-[140px]">-</TableCell>
