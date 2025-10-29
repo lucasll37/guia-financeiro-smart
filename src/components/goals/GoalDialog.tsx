@@ -3,6 +3,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
 
 type Goal = Database["public"]["Tables"]["goals"]["Row"];
@@ -22,6 +27,7 @@ export function GoalDialog({ open, onOpenChange, onSave, goal }: GoalDialogProps
     current_amount: 0,
     deadline: null,
   });
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -33,6 +39,7 @@ export function GoalDialog({ open, onOpenChange, onSave, goal }: GoalDialogProps
         current_amount: goal.current_amount,
         deadline: goal.deadline,
       });
+      setSelectedDate(goal.deadline ? new Date(goal.deadline) : undefined);
     } else {
       setFormData({
         name: "",
@@ -40,6 +47,7 @@ export function GoalDialog({ open, onOpenChange, onSave, goal }: GoalDialogProps
         current_amount: 0,
         deadline: null,
       });
+      setSelectedDate(undefined);
     }
     setErrors({});
   }, [goal, open]);
@@ -122,15 +130,36 @@ export function GoalDialog({ open, onOpenChange, onSave, goal }: GoalDialogProps
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="deadline">Prazo (Opcional)</Label>
-            <Input
-              id="deadline"
-              type="date"
-              value={formData.deadline || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, deadline: e.target.value || null })
-              }
-            />
+            <Label>Prazo (Opcional)</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !selectedDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate ? format(selectedDate, "dd/MM/yyyy") : <span>Selecione uma data</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => {
+                    setSelectedDate(date);
+                    setFormData({ 
+                      ...formData, 
+                      deadline: date ? format(date, "yyyy-MM-dd") : null 
+                    });
+                  }}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
