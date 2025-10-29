@@ -93,36 +93,41 @@ export function FeedbackButton() {
           <DropdownMenuTrigger asChild>
             <Button
               size="lg"
-              className="h-14 w-14 rounded-full shadow-lg hover:scale-110 transition-transform bg-gradient-to-br from-primary to-primary/80"
+              className="h-16 w-16 rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 bg-gradient-to-br from-primary via-primary to-primary/80 border-2 border-primary/20"
             >
-              <MessageSquare className="h-6 w-6" />
+              <MessageSquare className="h-7 w-7" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
             side="top"
-            className="w-56 bg-background border-border z-[100]"
+            sideOffset={12}
+            className="w-64 bg-background/95 backdrop-blur-sm border-border shadow-xl z-[100] p-2 animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2"
           >
             <DropdownMenuItem
               onClick={() => handleOpenDialog("bug")}
-              className="cursor-pointer gap-2 py-3"
+              className="cursor-pointer gap-3 py-4 px-3 rounded-md hover:bg-accent/80 transition-colors group"
             >
-              <Bug className="h-5 w-5 text-destructive" />
-              <div>
-                <p className="font-medium">Reportar Bug</p>
-                <p className="text-xs text-muted-foreground">
+              <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center group-hover:bg-destructive/20 transition-colors">
+                <Bug className="h-5 w-5 text-destructive" />
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-sm">Reportar Bug</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Encontrou um problema?
                 </p>
               </div>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => handleOpenDialog("suggestion")}
-              className="cursor-pointer gap-2 py-3"
+              className="cursor-pointer gap-3 py-4 px-3 rounded-md hover:bg-accent/80 transition-colors group"
             >
-              <Lightbulb className="h-5 w-5 text-chart-3" />
-              <div>
-                <p className="font-medium">Sugestão</p>
-                <p className="text-xs text-muted-foreground">
+              <div className="h-10 w-10 rounded-full bg-chart-3/10 flex items-center justify-center group-hover:bg-chart-3/20 transition-colors">
+                <Lightbulb className="h-5 w-5 text-chart-3" />
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-sm">Sugestão</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Compartilhe suas ideias
                 </p>
               </div>
