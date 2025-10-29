@@ -38,9 +38,9 @@ export function InviteActions({ inviteId, accountId, investmentId, invitedBy, on
         });
       }
       
-      // Atualizar a notificação para marcar como lida e adicionar o status da resposta
+      // Atualizar a notificação para marcar como lida (não precisa de .select())
       console.log("Atualizando notificação...");
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("notifications")
         .update({ 
           read: true,
@@ -52,13 +52,12 @@ export function InviteActions({ inviteId, accountId, investmentId, invitedBy, on
             responded_at: new Date().toISOString()
           }
         })
-        .contains("metadata", { invite_id: inviteId })
-        .select();
+        .contains("metadata", { invite_id: inviteId });
       
       if (error) {
         console.error("Erro ao atualizar notificação:", error);
       } else {
-        console.log("Notificação atualizada:", data);
+        console.log("Notificação atualizada com sucesso");
       }
       
       onComplete?.();

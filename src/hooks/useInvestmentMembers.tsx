@@ -68,12 +68,29 @@ export function useInvestmentMembers(investmentId?: string) {
     mutationFn: async ({ id, status }: { id: string; status: "accepted" | "declined" }) => {
       console.log("Atualizando status do membro:", { id, status });
       
+      // Se for recusar, deletar o registro ao invés de atualizar
+      if (status === "declined") {
+        const { error } = await supabase
+          .from("investment_members")
+          .delete()
+          .eq("id", id);
+
+        if (error) {
+          console.error("Erro ao deletar membro:", error);
+          throw error;
+        }
+        
+        console.log("Convite recusado e registro deletado");
+        return { id, status: "declined" };
+      }
+      
+      // Se for aceitar, atualizar o status
       const { data, error } = await supabase
         .from("investment_members")
-        .update({ status })
+        .update({ status: "accepted" })
         .eq("id", id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Erro ao atualizar status:", error);
@@ -107,7 +124,7 @@ export function useInvestmentMembers(investmentId?: string) {
         .from("investment_members")
         .select("user_id, status")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       const { error } = await supabase
         .from("investment_members")

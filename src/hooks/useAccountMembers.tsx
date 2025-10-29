@@ -93,9 +93,21 @@ export function useAccountMembers(accountId?: string) {
       accountId: string;
       invitedBy: string;
     }) => {
+      // Se for recusar, deletar o registro ao invés de atualizar
+      if (status === "rejected") {
+        const { error } = await supabase
+          .from("account_members")
+          .delete()
+          .eq("id", id);
+
+        if (error) throw error;
+        return { id, status: "rejected" };
+      }
+      
+      // Se for aceitar, atualizar o status
       const { data, error } = await supabase
         .from("account_members")
-        .update({ status })
+        .update({ status: "accepted" })
         .eq("id", id)
         .select()
         .maybeSingle();
@@ -128,7 +140,7 @@ export function useAccountMembers(accountId?: string) {
         .from("account_members")
         .select("user_id, status")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       const { error } = await supabase
         .from("account_members")
