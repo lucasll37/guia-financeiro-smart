@@ -99,11 +99,6 @@ export function TransactionsTable({
           {format(parse(String(transaction.date), "yyyy-MM-dd", new Date()), "dd/MM/yyyy")}
         </TableCell>
         <TableCell>
-          <div className="flex flex-col gap-1">
-            <span>{transaction.description}</span>
-          </div>
-        </TableCell>
-        <TableCell>
           {transaction.categories && (
             <div className="flex items-center gap-2">
               <div
@@ -113,6 +108,11 @@ export function TransactionsTable({
               <span>{transaction.categories.name}</span>
             </div>
           )}
+        </TableCell>
+        <TableCell>
+          <div className="flex flex-col gap-1">
+            <span>{transaction.description}</span>
+          </div>
         </TableCell>
         <TableCell className="text-right">
           <span className={isExpense ? "text-destructive" : "text-green-600"}>
@@ -148,8 +148,8 @@ export function TransactionsTable({
           <TableHeader>
             <TableRow>
               <TableHead>Data</TableHead>
-              <TableHead>Descrição</TableHead>
               <TableHead>Categoria</TableHead>
+              <TableHead>Descrição</TableHead>
               <TableHead className="text-right">Valor</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
@@ -183,13 +183,13 @@ export function TransactionsTable({
                     {renderSortIcon('date')}
                   </Button>
                 </TableHead>
+                <TableHead>Categoria</TableHead>
                 <TableHead>
                   <Button variant="ghost" size="sm" onClick={() => handleSort('description')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Descrição
                     {renderSortIcon('description')}
                   </Button>
                 </TableHead>
-                <TableHead>Categoria</TableHead>
                 <TableHead className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Valor
@@ -230,13 +230,13 @@ export function TransactionsTable({
                     {renderSortIcon('date')}
                   </Button>
                 </TableHead>
+                <TableHead>Categoria</TableHead>
                 <TableHead>
                   <Button variant="ghost" size="sm" onClick={() => handleSort('description')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Descrição
                     {renderSortIcon('description')}
                   </Button>
                 </TableHead>
-                <TableHead>Categoria</TableHead>
                 <TableHead className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Valor
