@@ -181,7 +181,8 @@ export function NotificationCreator() {
                         {users.map((user) => (
                           <CommandItem
                             key={user.id}
-                            value={user.email}
+                            value={`${user.id}-${user.email}`}
+                            keywords={[user.email, user.name || ""]}
                             onSelect={() => handleSelectUser(user)}
                             className={cn(
                               "flex items-center gap-3 px-3 py-3 rounded-md cursor-pointer",
@@ -198,13 +199,13 @@ export function NotificationCreator() {
                                   : "opacity-0"
                               )}
                             />
-                            <div className="flex flex-col gap-1 flex-1 min-w-0">
+                            <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                               <span className="font-medium text-sm truncate text-foreground">
                                 {user.email}
                               </span>
                               {user.name && (
                                 <span className="text-xs text-muted-foreground truncate">
-                                  {user.name}
+                                  Nome: {user.name}
                                 </span>
                               )}
                             </div>
