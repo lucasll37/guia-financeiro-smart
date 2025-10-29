@@ -12,6 +12,7 @@ import { ForecastFilters } from "@/components/forecasts/ForecastFilters";
 import { BudgetWizard } from "@/components/forecasts/BudgetWizard";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useSearchParams } from "react-router-dom";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +31,7 @@ interface ForecastsProps {
 export default function Forecasts({ accountId: propAccountId }: ForecastsProps) {
   const { accounts } = useAccounts();
   const isMobile = useIsMobile();
+  const [searchParams, setSearchParams] = useSearchParams();
   const today = new Date();
   const currentMonth = format(today, "yyyy-MM");
   
@@ -53,6 +55,16 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
       setFilters(prev => ({ ...prev, accountId: propAccountId }));
     }
   }, [propAccountId]);
+
+  // Check if should auto-open wizard from URL parameter
+  useEffect(() => {
+    const shouldCreate = searchParams.get('create');
+    if (shouldCreate === 'true') {
+      setWizardOpen(true);
+      searchParams.delete('create');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const { categories } = useCategories(filters.accountId !== "all" ? filters.accountId : undefined);
   const { forecasts, isLoading, createForecast, updateForecast, deleteForecast, copyForecast } = useForecasts(

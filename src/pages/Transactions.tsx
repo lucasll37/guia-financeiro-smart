@@ -9,6 +9,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuditLogs } from "@/hooks/useAuditLogs";
 import { useToast } from "@/hooks/use-toast";
+import { useSearchParams } from "react-router-dom";
 import { TransactionFilters } from "@/components/transactions/TransactionFilters";
 import { TransactionsTable } from "@/components/transactions/TransactionsTable";
 import { TransactionDialog } from "@/components/transactions/TransactionDialog";
@@ -26,6 +27,7 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
   const isMobile = useIsMobile();
   const { accounts } = useAccounts();
   const { logAction } = useAuditLogs();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const currentMonth = format(new Date(), "yyyy-MM");
   const currentMonthStart = format(startOfMonth(new Date()), "yyyy-MM-dd");
@@ -51,6 +53,17 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
       setFilters(prev => ({ ...prev, accountId: propAccountId }));
     }
   }, [propAccountId]);
+
+  // Check if should auto-open dialog from URL parameter
+  useEffect(() => {
+    const shouldCreate = searchParams.get('create');
+    if (shouldCreate === 'true') {
+      setDialogOpen(true);
+      setSelectedTransaction(null);
+      searchParams.delete('create');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const { transactions, isLoading, createTransaction, updateTransaction, deleteTransaction } =
     useTransactions(filters.accountId !== "all" ? filters.accountId : undefined);

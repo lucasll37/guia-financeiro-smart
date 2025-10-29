@@ -1,10 +1,11 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, LayoutDashboard, Receipt, FolderTree, CreditCard, TrendingUp, PieChart, FileText } from "lucide-react";
 import { AccountPeriodDetails } from "@/components/accounts/AccountPeriodDetails";
 import { useAccounts } from "@/hooks/useAccounts";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect } from "react";
 
 // Import existing page components (we'll refactor these into tab components)
 import Transactions from "./Transactions";
@@ -17,9 +18,23 @@ import Reports from "./Reports";
 export default function AccountDetails() {
   const { accountId } = useParams<{ accountId: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { accounts, isLoading } = useAccounts();
 
   const account = accounts?.find((a) => a.id === accountId);
+  const tabParam = searchParams.get('tab');
+
+  // Remove o parâmetro tab da URL ao carregar
+  useEffect(() => {
+    if (tabParam) {
+      // Remove o parâmetro após a navegação inicial
+      const timer = setTimeout(() => {
+        searchParams.delete('tab');
+        setSearchParams(searchParams, { replace: true });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [tabParam]);
 
   if (isLoading) {
     return (
@@ -62,7 +77,7 @@ export default function AccountDetails() {
         </div>
       </div>
 
-      <Tabs defaultValue="visao-geral" className="space-y-6">
+      <Tabs defaultValue={tabParam || "visao-geral"} className="space-y-6">
         <TabsList className="grid w-full grid-cols-7 h-auto">
           <TabsTrigger value="visao-geral" className="flex items-center gap-2">
             <LayoutDashboard className="h-4 w-4" />
