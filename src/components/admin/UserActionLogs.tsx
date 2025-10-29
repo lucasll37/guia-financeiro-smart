@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,11 +12,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Activity, ChevronLeft, ChevronRight, FileText } from "lucide-react";
+import { Activity, ChevronLeft, ChevronRight, FileText, Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUserActionLogs } from "@/hooks/useUserActionLogs";
+import { cn } from "@/lib/utils";
 
 const ITEMS_PER_PAGE = 50;
 
@@ -40,7 +55,30 @@ const ENTITY_LABELS: Record<string, string> = {
 export function UserActionLogs() {
   const [page, setPage] = useState(1);
   const [searchEmail, setSearchEmail] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [actionFilter, setActionFilter] = useState("all");
+  const [open, setOpen] = useState(false);
+
+  const { data: users } = useQuery({
+    queryKey: ["admin-users-search", searchEmail],
+    queryFn: async () => {
+      if (!searchEmail || searchEmail.length < 2) return [];
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, email, name")
+        .ilike("email", `%${searchEmail}%`)
+        .limit(10);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: searchEmail.length >= 2,
+  });
+
+  useEffect(() => {
+    setSelectedUserId("");
+  }, [searchEmail]);
 
   const { data: logsData, isLoading } = useUserActionLogs({
     page,
@@ -76,16 +114,66 @@ export function UserActionLogs() {
           {/* Filtros */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="searchEmail">Buscar por Email</Label>
-              <Input
-                id="searchEmail"
-                placeholder="Digite o email..."
-                value={searchEmail}
-                onChange={(e) => {
-                  setSearchEmail(e.target.value);
-                  setPage(1);
-                }}
-              />
+              <Label>Buscar por Email</Label>
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="w-full justify-between"
+                  >
+                    {selectedUserId && users?.find((u) => u.id === selectedUserId)
+                      ? users.find((u) => u.id === selectedUserId)?.email
+                      : "Buscar por email..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[400px] p-0" align="start">
+                  <Command>
+                    <CommandInput
+                      placeholder="Digite o email do usuário..."
+                      value={searchEmail}
+                      onValueChange={(value) => {
+                        setSearchEmail(value);
+                        setPage(1);
+                      }}
+                    />
+                    <CommandList>
+                      <CommandEmpty>Nenhum usuário encontrado.</CommandEmpty>
+                      <CommandGroup>
+                        {users?.map((user) => (
+                          <CommandItem
+                            key={user.id}
+                            value={user.email}
+                            onSelect={() => {
+                              setSelectedUserId(user.id);
+                              setSearchEmail(user.email || "");
+                              setOpen(false);
+                              setPage(1);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedUserId === user.id ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            <div className="flex flex-col">
+                              <span>{user.email}</span>
+                              {user.name && (
+                                <span className="text-sm text-muted-foreground">
+                                  {user.name}
+                                </span>
+                              )}
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-2">
