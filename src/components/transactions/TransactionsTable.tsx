@@ -22,12 +22,14 @@ interface TransactionsTableProps {
   transactions: Transaction[];
   onEdit: (transaction: Transaction) => void;
   onDelete: (id: string) => void;
+  categories?: any[]; // Lista completa de categorias para resolver hierarquia
 }
 
 export function TransactionsTable({
   transactions,
   onEdit,
   onDelete,
+  categories = [],
 }: TransactionsTableProps) {
   const [sortField, setSortField] = useState<'date' | 'description' | 'amount' | 'category' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -74,9 +76,25 @@ export function TransactionsTable({
         } else if (sortField === 'amount') {
           comparison = a.amount - b.amount;
         } else if (sortField === 'category') {
-          const catA = a.categories?.name || '';
-          const catB = b.categories?.name || '';
-          comparison = catA.localeCompare(catB);
+          // Buscar categoria pai para agrupar
+          const catA = categories.find(c => c.id === a.category_id);
+          const catB = categories.find(c => c.id === b.category_id);
+          
+          const parentA = catA?.parent_id ? categories.find(c => c.id === catA.parent_id) : null;
+          const parentB = catB?.parent_id ? categories.find(c => c.id === catB.parent_id) : null;
+          
+          // Primeiro comparar por categoria pai
+          const parentNameA = parentA?.name || catA?.name || '';
+          const parentNameB = parentB?.name || catB?.name || '';
+          
+          comparison = parentNameA.localeCompare(parentNameB);
+          
+          // Se mesma categoria pai, ordenar por subcategoria
+          if (comparison === 0) {
+            const subNameA = catA?.name || '';
+            const subNameB = catB?.name || '';
+            comparison = subNameA.localeCompare(subNameB);
+          }
         }
         
         return sortDirection === 'asc' ? comparison : -comparison;

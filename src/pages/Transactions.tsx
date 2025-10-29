@@ -173,6 +173,7 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
           transactions={filteredTransactions}
           onEdit={handleEditTransaction}
           onDelete={handleDeleteTransaction}
+          categories={categories || []}
         />
       )}
 
