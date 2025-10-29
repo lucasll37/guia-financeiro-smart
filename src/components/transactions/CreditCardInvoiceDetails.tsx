@@ -41,7 +41,6 @@ export function CreditCardInvoiceDetails({ transactions }: CreditCardInvoiceDeta
               <TableCell className="text-sm">
                 {format(new Date(transaction.date), "dd/MM/yyyy")}
               </TableCell>
-              <TableCell className="text-sm">{transaction.description}</TableCell>
               <TableCell className="text-sm">
                 {transaction.categories && (
                   <div className="flex items-center gap-2">
@@ -53,6 +52,7 @@ export function CreditCardInvoiceDetails({ transactions }: CreditCardInvoiceDeta
                   </div>
                 )}
               </TableCell>
+              <TableCell className="text-sm">{transaction.description}</TableCell>
               <TableCell className="text-right text-sm text-destructive">
                 - {formatCurrency(transaction.amount)}
               </TableCell>

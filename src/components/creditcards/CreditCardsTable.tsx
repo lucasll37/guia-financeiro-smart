@@ -217,8 +217,8 @@ export function CreditCardsTable({
                                           <TableHeader>
                                             <TableRow className="bg-muted/30 hover:bg-muted/30">
                                               <TableHead className="h-9 text-xs">Data</TableHead>
-                                              <TableHead className="h-9 text-xs">Descrição</TableHead>
                                               <TableHead className="h-9 text-xs">Categoria</TableHead>
+                                              <TableHead className="h-9 text-xs">Descrição</TableHead>
                                               <TableHead className="h-9 text-xs text-right">Valor</TableHead>
                                             </TableRow>
                                           </TableHeader>
@@ -227,9 +227,6 @@ export function CreditCardsTable({
                                               <TableRow key={t.id} className="hover:bg-muted/20">
                                                 <TableCell className="text-xs py-2">
                                                   {new Date(t.date).toLocaleDateString('pt-BR')}
-                                                </TableCell>
-                                                <TableCell className="text-sm py-2">
-                                                  {t.description}
                                                 </TableCell>
                                                 <TableCell className="py-2">
                                                   {t.categories && (
@@ -243,6 +240,9 @@ export function CreditCardsTable({
                                                       </span>
                                                     </div>
                                                   )}
+                                                </TableCell>
+                                                <TableCell className="text-sm py-2">
+                                                  {t.description}
                                                 </TableCell>
                                                 <TableCell className="text-right text-sm font-medium py-2">
                                                   {formatCurrency(Number(t.amount))}
