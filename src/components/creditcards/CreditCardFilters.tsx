@@ -86,7 +86,7 @@ export function CreditCardFilters({ accounts, filters, onFilterChange, accountId
               onClick={onShowForecast}
             >
               <TrendingUp className="h-4 w-4 mr-2" />
-              Projeção 6 Meses
+              Projeção Completa
             </Button>
           )}
           <Button
