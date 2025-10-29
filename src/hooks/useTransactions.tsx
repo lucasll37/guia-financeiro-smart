@@ -105,7 +105,7 @@ export function useTransactions(accountId?: string) {
         .from("transactions")
         .select("account_id, date")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       const { error } = await supabase
         .from("transactions")
@@ -187,7 +187,7 @@ export function useTransactions(accountId?: string) {
         .eq("account_id", accountId)
         .eq("type", isIncome ? "receita" : "despesa")
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!category) return;
 
