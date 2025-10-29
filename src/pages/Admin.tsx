@@ -37,6 +37,7 @@ import { StatsOverview } from "@/components/admin/StatsOverview";
 import { PlanLimitsManager } from "@/components/admin/PlanLimitsManager";
 import { SubscriptionManager } from "@/components/admin/SubscriptionManager";
 import { UserActionLogs } from "@/components/admin/UserActionLogs";
+import { NotificationCreator } from "@/components/admin/NotificationCreator";
 
 const couponSchema = z.object({
   code: z.string().trim().min(3, "Código deve ter no mínimo 3 caracteres").max(50, "Código muito longo"),
@@ -926,13 +927,16 @@ export default function Admin() {
             </CardContent>
           </Card>
 
+          <NotificationCreator />
+
           <Card>
             <CardHeader>
               <CardTitle>Dicas de Uso</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• Selecione o grupo de usuários que receberá a notificação</li>
+                <li>• <strong>Notificações em massa:</strong> Envie para grupos (todos, free, pro) de uma vez</li>
+                <li>• <strong>Notificações individuais:</strong> Envie mensagens personalizadas para usuários específicos</li>
                 <li>• Escolha o tipo apropriado para categorizar a mensagem</li>
                 <li>• Escreva mensagens claras e objetivas</li>
                 <li>• As notificações aparecerão no painel de cada usuário</li>
