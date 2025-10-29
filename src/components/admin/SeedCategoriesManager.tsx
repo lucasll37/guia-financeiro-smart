@@ -468,7 +468,7 @@ export function SeedCategoriesManager() {
                 <div className="ml-6 border-l-2 pl-4">
                   {addingChild === parent.id ? (
                     <div className="space-y-4">
-                      <div className="grid gap-4 md:grid-cols-3">
+                      <div className="grid gap-4 md:grid-cols-2">
                         <div className="space-y-2">
                           <Label>Nome</Label>
                           <Input
@@ -478,18 +478,6 @@ export function SeedCategoriesManager() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Tipo</Label>
-                          <Select value={editForm.type} onValueChange={(v: "receita" | "despesa") => setEditForm({ ...editForm, type: v })}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="receita">Receita</SelectItem>
-                              <SelectItem value="despesa">Despesa</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
                           <Label>Cor</Label>
                           <Input
                             type="color"
@@ -497,6 +485,12 @@ export function SeedCategoriesManager() {
                             onChange={(e) => setEditForm({ ...editForm, color: e.target.value })}
                           />
                         </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Badge variant={parent.type === "receita" ? "default" : "secondary"}>
+                          Tipo: {parent.type === "receita" ? "Receita" : "Despesa"}
+                        </Badge>
+                        <span>(herdado da categoria pai)</span>
                       </div>
                       <div className="flex gap-2">
                         <Button onClick={() => handleAddChild(parent.id)} size="sm">

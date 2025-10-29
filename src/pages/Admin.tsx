@@ -386,47 +386,45 @@ export default function Admin() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <div className="relative">
-          <div className="overflow-x-auto pb-2 -mx-2 px-2">
-            <TabsList className="inline-flex w-auto min-w-full justify-start">
-              <TabsTrigger value="overview" className="flex items-center gap-2">
-                <BarChart className="h-4 w-4" />
-                <span className="hidden sm:inline">Visão Geral</span>
-              </TabsTrigger>
-              <TabsTrigger value="users" className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                <span className="hidden sm:inline">Usuários</span>
-              </TabsTrigger>
-              <TabsTrigger value="subscriptions" className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4" />
-                <span className="hidden sm:inline">Assinaturas</span>
-              </TabsTrigger>
-              <TabsTrigger value="coupons" className="flex items-center gap-2">
-                <Gift className="h-4 w-4" />
-                <span className="hidden sm:inline">Cupons</span>
-              </TabsTrigger>
-              <TabsTrigger value="notifications" className="flex items-center gap-2">
-                <Bell className="h-4 w-4" />
-                <span className="hidden sm:inline">Notificações</span>
-              </TabsTrigger>
-              <TabsTrigger value="feedback" className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" />
-                <span className="hidden sm:inline">Feedbacks</span>
-              </TabsTrigger>
-              <TabsTrigger value="limits" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                <span className="hidden sm:inline">Limites</span>
-              </TabsTrigger>
-              <TabsTrigger value="categories" className="flex items-center gap-2">
-                <FolderTree className="h-4 w-4" />
-                <span className="hidden sm:inline">Categorias Seed</span>
-              </TabsTrigger>
-              <TabsTrigger value="logs" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                <span className="hidden sm:inline">Logs</span>
-              </TabsTrigger>
-            </TabsList>
-          </div>
+        <div className="border-b">
+          <TabsList className="w-full h-auto flex-wrap justify-start gap-1 bg-transparent p-0">
+            <TabsTrigger value="overview" className="flex items-center gap-2 data-[state=active]:bg-muted">
+              <BarChart className="h-4 w-4" />
+              <span>Visão Geral</span>
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-2 data-[state=active]:bg-muted">
+              <Users className="h-4 w-4" />
+              <span>Usuários</span>
+            </TabsTrigger>
+            <TabsTrigger value="subscriptions" className="flex items-center gap-2 data-[state=active]:bg-muted">
+              <CreditCard className="h-4 w-4" />
+              <span>Assinaturas</span>
+            </TabsTrigger>
+            <TabsTrigger value="limits" className="flex items-center gap-2 data-[state=active]:bg-muted">
+              <Settings className="h-4 w-4" />
+              <span>Limites</span>
+            </TabsTrigger>
+            <TabsTrigger value="categories" className="flex items-center gap-2 data-[state=active]:bg-muted">
+              <FolderTree className="h-4 w-4" />
+              <span>Categorias Seed</span>
+            </TabsTrigger>
+            <TabsTrigger value="coupons" className="flex items-center gap-2 data-[state=active]:bg-muted">
+              <Gift className="h-4 w-4" />
+              <span>Cupons</span>
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center gap-2 data-[state=active]:bg-muted">
+              <Bell className="h-4 w-4" />
+              <span>Notificações</span>
+            </TabsTrigger>
+            <TabsTrigger value="feedback" className="flex items-center gap-2 data-[state=active]:bg-muted">
+              <MessageSquare className="h-4 w-4" />
+              <span>Feedbacks</span>
+            </TabsTrigger>
+            <TabsTrigger value="logs" className="flex items-center gap-2 data-[state=active]:bg-muted">
+              <FileText className="h-4 w-4" />
+              <span>Logs</span>
+            </TabsTrigger>
+          </TabsList>
         </div>
 
         {/* Overview Tab */}
