@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,6 +35,7 @@ type Investment = Database["public"]["Tables"]["investment_assets"]["Row"];
 export default function InvestmentsList() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useIsMobile();
   const { investments, isLoading, createInvestment, updateInvestment, deleteInvestment } = useInvestments();
   const { toast } = useToast();
@@ -44,6 +45,15 @@ export default function InvestmentsList() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedInvestment, setSelectedInvestment] = useState<Investment | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState("");
+
+  // Detectar parâmetro ?create=true e abrir diálogo
+  useEffect(() => {
+    if (searchParams.get("create") === "true" && !isLoading) {
+      setDialogOpen(true);
+      searchParams.delete("create");
+      setSearchParams(searchParams);
+    }
+  }, [searchParams, setSearchParams, isLoading]);
 
   const handleInvestmentClick = (investmentId: string) => {
     navigate(`/app/investimentos/${investmentId}`);

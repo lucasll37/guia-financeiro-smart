@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Plus, Copy, Target, TrendingUp, CheckCircle2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -28,6 +29,7 @@ type GoalInsert = Omit<Database["public"]["Tables"]["goals"]["Insert"], "user_id
 
 export default function Goals() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useIsMobile();
   const { maskValue } = useMaskValues();
   const { toast } = useToast();
@@ -37,6 +39,15 @@ export default function Goals() {
   const [deleteConfirmName, setDeleteConfirmName] = useState("");
 
   const { goals, isLoading, createGoal, updateGoal, deleteGoal } = useGoals();
+
+  // Detectar parâmetro ?create=true e abrir diálogo
+  useEffect(() => {
+    if (searchParams.get("create") === "true") {
+      setDialogOpen(true);
+      searchParams.delete("create");
+      setSearchParams(searchParams);
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleCreateGoal = () => {
     setSelectedGoal(null);

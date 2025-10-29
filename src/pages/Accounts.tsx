@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Plus, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +17,7 @@ type AccountInsert = Database["public"]["Tables"]["accounts"]["Insert"];
 
 export default function Accounts() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const {
     accounts,
     isLoading,
@@ -30,6 +32,16 @@ export default function Accounts() {
   const [accountDialogOpen, setAccountDialogOpen] = useState(false);
   const [membersDialogOpen, setMembersDialogOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
+
+  // Detectar parâmetro ?create=true e abrir diálogo
+  useEffect(() => {
+    if (searchParams.get("create") === "true") {
+      setAccountDialogOpen(true);
+      // Remover o parâmetro da URL
+      searchParams.delete("create");
+      setSearchParams(searchParams);
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleCreateAccount = () => {
     setSelectedAccount(null);

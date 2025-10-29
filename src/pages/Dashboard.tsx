@@ -44,7 +44,7 @@ export default function Dashboard() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto pt-8">
-          <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl border-2 hover:border-primary/50" onClick={() => navigate("/app/contas")}>
+          <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl border-2 hover:border-primary/50" onClick={() => navigate("/app/contas?create=true")}>
             <CardContent className="pt-6 text-center space-y-4">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-950/30 group-hover:bg-blue-200 dark:group-hover:bg-blue-950/50 transition-colors">
                 <Wallet className="h-8 w-8 text-blue-600 dark:text-blue-400" />
@@ -58,7 +58,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl border-2 hover:border-primary/50" onClick={() => navigate("/app/investimentos")}>
+          <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl border-2 hover:border-primary/50" onClick={() => navigate("/app/investimentos?create=true")}>
             <CardContent className="pt-6 text-center space-y-4">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-950/30 group-hover:bg-green-200 dark:group-hover:bg-green-950/50 transition-colors">
                 <TrendingUp className="h-8 w-8 text-green-600 dark:text-green-400" />
@@ -72,7 +72,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl border-2 hover:border-primary/50" onClick={() => navigate("/app/metas")}>
+          <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl border-2 hover:border-primary/50" onClick={() => navigate("/app/metas?create=true")}>
             <CardContent className="pt-6 text-center space-y-4">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-950/30 group-hover:bg-purple-200 dark:group-hover:bg-purple-950/50 transition-colors">
                 <Target className="h-8 w-8 text-purple-600 dark:text-purple-400" />
@@ -121,7 +121,7 @@ export default function Dashboard() {
               title="Nenhuma conta cadastrada"
               description="Crie sua primeira conta para começar a gerenciar suas finanças"
               actionLabel="Criar Conta"
-              onAction={() => navigate("/app/contas")}
+              onAction={() => navigate("/app/contas?create=true")}
             />
           </div>
         )}
@@ -149,7 +149,7 @@ export default function Dashboard() {
               title="Nenhum investimento cadastrado"
               description="Registre seus investimentos e acompanhe a evolução do seu patrimônio"
               actionLabel="Criar Investimento"
-              onAction={() => navigate("/app/investimentos")}
+              onAction={() => navigate("/app/investimentos?create=true")}
             />
           </div>
         )}
@@ -177,7 +177,7 @@ export default function Dashboard() {
               title="Nenhuma meta em andamento"
               description="Defina metas financeiras e acompanhe seu progresso para alcançá-las"
               actionLabel="Criar Meta"
-              onAction={() => navigate("/app/metas")}
+              onAction={() => navigate("/app/metas?create=true")}
             />
           </div>
         )}
