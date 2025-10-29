@@ -346,30 +346,26 @@ export function ProfileSection() {
     
     <SecuritySection />
 
-    <Card className="animate-fade-in border-destructive/50">
+    <Card className="animate-fade-in">
       <CardHeader>
-        <CardTitle className="text-destructive flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5" />
-          Zona de Perigo
-        </CardTitle>
+        <CardTitle>Gerenciamento de Conta</CardTitle>
         <CardDescription>
-          Ações irreversíveis relacionadas à sua conta
+          Opções avançadas de configuração da conta
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-start justify-between p-4 border rounded-lg border-destructive/50 bg-destructive/5">
+        <div className="flex items-start justify-between p-4 border rounded-lg">
           <div className="space-y-1 flex-1">
-            <h3 className="font-semibold text-destructive">Excluir Conta</h3>
+            <h3 className="font-semibold">Excluir Conta Permanentemente</h3>
             <p className="text-sm text-muted-foreground">
-              Esta ação é irreversível. Todos os seus dados serão permanentemente excluídos
-              sem possibilidade de recuperação.
+              A exclusão da conta é permanente. Todos os dados associados serão removidos de forma irreversível.
             </p>
           </div>
           <Button
             onClick={() => setShowDeleteDialog(true)}
-            variant="destructive"
+            variant="outline"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
           >
-            <Trash2 className="h-4 w-4 mr-2" />
             Excluir Conta
           </Button>
         </div>
@@ -379,32 +375,29 @@ export function ProfileSection() {
     <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-destructive" />
-            Confirmar Exclusão de Conta
-          </AlertDialogTitle>
-          <AlertDialogDescription className="space-y-2">
+          <AlertDialogTitle>Confirmar Exclusão de Conta</AlertDialogTitle>
+          <AlertDialogDescription className="space-y-3 pt-2">
             <p>
-              <strong>ATENÇÃO:</strong> Esta ação é permanente e irreversível.
+              Esta ação é permanente e não poderá ser desfeita.
             </p>
             <p>
-              Enviaremos um email de confirmação para <strong>{user?.email}</strong> com
-              instruções para concluir a exclusão da sua conta.
+              Um email de confirmação será enviado para <strong>{user?.email}</strong> com
+              as instruções necessárias para completar o processo.
             </p>
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="space-y-4 py-4">
-          <div className="bg-destructive/10 p-3 rounded-md border border-destructive/30">
-            <p className="text-destructive font-semibold text-sm mb-2">
-              Todos os seus dados serão permanentemente excluídos:
+          <div className="bg-muted p-4 rounded-md border">
+            <p className="font-medium text-sm mb-3">
+              Os seguintes dados serão permanentemente removidos:
             </p>
-            <ul className="list-disc list-inside space-y-1 text-xs">
-              <li>Todas as contas e lançamentos</li>
-              <li>Categorias e subcategorias personalizadas</li>
-              <li>Previsões e orçamentos</li>
-              <li>Investimentos e metas</li>
-              <li>Configurações e preferências</li>
+            <ul className="space-y-1.5 text-sm text-muted-foreground">
+              <li>• Todas as contas e lançamentos financeiros</li>
+              <li>• Categorias e subcategorias personalizadas</li>
+              <li>• Previsões e orçamentos configurados</li>
+              <li>• Investimentos e metas cadastradas</li>
+              <li>• Configurações e preferências do usuário</li>
             </ul>
           </div>
         </div>
