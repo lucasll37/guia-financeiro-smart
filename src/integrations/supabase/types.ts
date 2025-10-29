@@ -975,6 +975,10 @@ export type Database = {
         Returns: undefined
       }
       restore_account: { Args: { account_id: string }; Returns: undefined }
+      user_can_edit_investment_returns: {
+        Args: { investment_uuid: string; user_uuid: string }
+        Returns: boolean
+      }
       user_has_account_access: {
         Args: { account_uuid: string; user_uuid: string }
         Returns: boolean
