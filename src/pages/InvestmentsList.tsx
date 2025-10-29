@@ -12,6 +12,9 @@ import { InvestmentDialog } from "@/components/investments/InvestmentDialog";
 import { InvestmentMembersDialog } from "@/components/investments/InvestmentMembersDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Copy } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +41,7 @@ export default function InvestmentsList() {
   const [membersDialogOpen, setMembersDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedInvestment, setSelectedInvestment] = useState<Investment | null>(null);
+  const [deleteConfirmName, setDeleteConfirmName] = useState("");
 
   const handleInvestmentClick = (investmentId: string) => {
     navigate(`/app/investimentos/${investmentId}`);
@@ -75,6 +79,7 @@ export default function InvestmentsList() {
   const handleDeleteClick = (e: React.MouseEvent, investment: Investment) => {
     e.stopPropagation();
     setSelectedInvestment(investment);
+    setDeleteConfirmName("");
     setDeleteDialogOpen(true);
   };
 
@@ -88,6 +93,17 @@ export default function InvestmentsList() {
     });
     setDeleteDialogOpen(false);
     setSelectedInvestment(null);
+    setDeleteConfirmName("");
+  };
+
+  const handleCopyInvestmentName = () => {
+    if (selectedInvestment) {
+      navigator.clipboard.writeText(selectedInvestment.name);
+      toast({
+        title: "Nome copiado",
+        description: "O nome do investimento foi copiado para a área de transferência",
+      });
+    }
   };
 
   const handleManageMembers = (e: React.MouseEvent, investment: Investment) => {
@@ -191,13 +207,43 @@ export default function InvestmentsList() {
           <AlertDialogHeader>
             <AlertDialogTitle>Tem certeza que deseja excluir este investimento?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. Todos os dados de rendimentos mensais também serão removidos.
+              Esta ação não pode ser desfeita. Para confirmar, digite o nome do investimento abaixo:
             </AlertDialogDescription>
           </AlertDialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 p-3 bg-muted rounded-md font-mono text-sm">
+                {selectedInvestment?.name}
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleCopyInvestmentName}
+                title="Copiar nome"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="confirm-investment-name">Digite o nome do investimento</Label>
+              <Input
+                id="confirm-investment-name"
+                value={deleteConfirmName}
+                onChange={(e) => setDeleteConfirmName(e.target.value)}
+                placeholder="Nome do investimento"
+              />
+            </div>
+          </div>
+
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setDeleteConfirmName("")}>
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
+              disabled={deleteConfirmName !== selectedInvestment?.name}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Excluir Investimento

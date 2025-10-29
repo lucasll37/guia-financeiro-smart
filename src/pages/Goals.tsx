@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Copy } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +18,7 @@ import {
 import { useGoals } from "@/hooks/useGoals";
 import { useAuth } from "@/hooks/useAuth";
 import { useMaskValues } from "@/hooks/useMaskValues";
+import { useToast } from "@/hooks/use-toast";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { GoalDialog } from "@/components/goals/GoalDialog";
 import type { Database } from "@/integrations/supabase/types";
@@ -27,9 +30,11 @@ export default function Goals() {
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const { maskValue } = useMaskValues();
+  const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+  const [deleteConfirmName, setDeleteConfirmName] = useState("");
 
   const { goals, isLoading, createGoal, updateGoal, deleteGoal } = useGoals();
 
@@ -55,6 +60,7 @@ export default function Goals() {
 
   const handleDeleteGoal = (goal: Goal) => {
     setSelectedGoal(goal);
+    setDeleteConfirmName("");
     setDeleteDialogOpen(true);
   };
 
@@ -63,6 +69,17 @@ export default function Goals() {
     await deleteGoal.mutateAsync(selectedGoal.id);
     setDeleteDialogOpen(false);
     setSelectedGoal(null);
+    setDeleteConfirmName("");
+  };
+
+  const handleCopyGoalName = () => {
+    if (selectedGoal) {
+      navigator.clipboard.writeText(selectedGoal.name);
+      toast({
+        title: "Nome copiado",
+        description: "O nome da meta foi copiado para a área de transferência",
+      });
+    }
   };
 
   const handleUpdateProgress = async (id: string, amount: number) => {
@@ -178,13 +195,43 @@ export default function Goals() {
           <AlertDialogHeader>
             <AlertDialogTitle>Tem certeza que deseja excluir esta meta?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. O progresso da meta será permanentemente removido.
+              Esta ação não pode ser desfeita. Para confirmar, digite o nome da meta abaixo:
             </AlertDialogDescription>
           </AlertDialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 p-3 bg-muted rounded-md font-mono text-sm">
+                {selectedGoal?.name}
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleCopyGoalName}
+                title="Copiar nome"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="confirm-goal-name">Digite o nome da meta</Label>
+              <Input
+                id="confirm-goal-name"
+                value={deleteConfirmName}
+                onChange={(e) => setDeleteConfirmName(e.target.value)}
+                placeholder="Nome da meta"
+              />
+            </div>
+          </div>
+
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setDeleteConfirmName("")}>
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
+              disabled={deleteConfirmName !== selectedGoal?.name}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Excluir Meta
