@@ -172,7 +172,7 @@ export function AccumulatedBalanceChart({
       {/* Main Chart */}
       <Card className="overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-chart-2/10 to-primary/10 border-b">
-          <CardTitle className="text-2xl">Evolução do Saldo Remanescente</CardTitle>
+          <CardTitle className="text-2xl">Evolução do Saldo em Conta</CardTitle>
           <CardDescription>
             Saldo acumulado dia a dia no período selecionado
           </CardDescription>
