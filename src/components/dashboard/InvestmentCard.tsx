@@ -40,8 +40,14 @@ export function InvestmentCard({ investment }: InvestmentCardProps) {
       }));
   }, [returns, investment.balance, currentValue]);
 
-  const gain = currentValue - investment.balance;
-  const gainPercentage = investment.balance > 0 ? (gain / investment.balance) * 100 : 0;
+  // Calcular total investido (inicial + todas as contribuições)
+  const totalInvested = useMemo(() => {
+    const contributions = returns.reduce((sum, r) => sum + Number(r.contribution || 0), 0);
+    return Number(investment.balance) + contributions;
+  }, [returns, investment.balance]);
+
+  // Retorno nominal é a diferença entre valor atual e total investido
+  const nominalReturn = currentValue - totalInvested;
 
   return (
     <Card 
@@ -95,21 +101,21 @@ export function InvestmentCard({ investment }: InvestmentCardProps) {
         </div>
         <div className="mt-3 space-y-1 text-sm">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Investido</span>
+            <span className="text-muted-foreground">Total Investido</span>
             <span className="font-medium">
               {maskValue(new Intl.NumberFormat("pt-BR", {
                 style: "currency",
                 currency: "BRL",
-              }).format(investment.balance))}
+              }).format(totalInvested))}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Ganho</span>
-            <span className={`font-medium ${gain >= 0 ? "text-green-600" : "text-red-600"}`}>
+            <span className="text-muted-foreground">Retorno Nominal</span>
+            <span className={`font-medium ${nominalReturn >= 0 ? "text-green-600" : "text-red-600"}`}>
               {maskValue(new Intl.NumberFormat("pt-BR", {
                 style: "currency",
                 currency: "BRL",
-              }).format(gain))} ({maskValue(`${gainPercentage.toFixed(2)}%`)})
+              }).format(nominalReturn))}
             </span>
           </div>
         </div>
