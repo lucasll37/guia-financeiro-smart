@@ -48,12 +48,13 @@ export function AccountCard({
     const expenses = accountTransactions.filter(t => Number(t.amount) < 0).reduce((sum, t) => sum + Math.abs(Number(t.amount)), 0);
     const balance = revenue - expenses;
 
-    // Calculate forecast total for current period
+    // Calculate forecast total for current period (only expenses)
     const accountForecasts = forecasts?.filter(f => 
       f.account_id === account.id && 
-      f.period_start === periodStart
+      f.period_start === periodStart &&
+      Number(f.forecasted_amount) < 0
     ) || [];
-    const budgetTotal = accountForecasts.reduce((sum, f) => sum + Number(f.forecasted_amount), 0);
+    const budgetTotal = accountForecasts.reduce((sum, f) => sum + Math.abs(Number(f.forecasted_amount)), 0);
     const completion = budgetTotal > 0 ? expenses / budgetTotal * 100 : 0;
     return {
       balance,
