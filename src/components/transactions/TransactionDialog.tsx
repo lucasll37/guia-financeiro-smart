@@ -28,6 +28,7 @@ interface TransactionDialogProps {
   accounts: Account[];
   categories: Category[];
   currentUserId: string;
+  defaultAccountId?: string; // Conta pré-selecionada do contexto
 }
 
 interface SplitMember {
@@ -43,9 +44,10 @@ export function TransactionDialog({
   accounts,
   categories,
   currentUserId,
+  defaultAccountId,
 }: TransactionDialogProps) {
   const [formData, setFormData] = useState<TransactionInsert>({
-    account_id: "",
+    account_id: defaultAccountId || "",
     category_id: "",
     date: new Date().toISOString().split("T")[0],
     amount: 0,
@@ -87,7 +89,7 @@ export function TransactionDialog({
       }
     } else {
       setFormData({
-        account_id: "",
+        account_id: defaultAccountId || "",
         category_id: "",
         date: new Date().toISOString().split("T")[0],
         amount: 0,
@@ -104,7 +106,7 @@ export function TransactionDialog({
       setInstallmentCount(2);
     }
     setErrors({});
-  }, [transaction, currentUserId, open]);
+  }, [transaction, currentUserId, open, defaultAccountId]);
 
   // Calcular mês de pagamento automaticamente quando selecionar cartão ou mudar data
   useEffect(() => {
@@ -277,6 +279,7 @@ export function TransactionDialog({
               <Select
                 value={formData.account_id}
                 onValueChange={(value) => setFormData({ ...formData, account_id: value, category_id: "" })}
+                disabled={!!defaultAccountId}
               >
                 <SelectTrigger id="account">
                   <SelectValue placeholder="Selecione a conta" />

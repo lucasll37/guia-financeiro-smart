@@ -184,6 +184,7 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
         accounts={accounts || []}
         categories={categories || []}
         currentUserId={user.id}
+        defaultAccountId={propAccountId}
       />
 
     </div>
