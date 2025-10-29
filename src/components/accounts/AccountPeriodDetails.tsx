@@ -151,15 +151,23 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
         });
     }
 
-    const incomeTotal = Object.values(incomeCategories).reduce((sum, cat) => sum + cat.actual, 0);
-    const expenseTotal = Object.values(expenseCategories).reduce((sum, cat) => sum + cat.actual, 0);
+    // Filtrar apenas categorias com transações ou previsões
+    const filteredIncomeCategories = Object.fromEntries(
+      Object.entries(incomeCategories).filter(([_, cat]) => cat.actual > 0 || cat.forecasted > 0)
+    );
+    const filteredExpenseCategories = Object.fromEntries(
+      Object.entries(expenseCategories).filter(([_, cat]) => cat.actual > 0 || cat.forecasted > 0)
+    );
+
+    const incomeTotal = Object.values(filteredIncomeCategories).reduce((sum, cat) => sum + cat.actual, 0);
+    const expenseTotal = Object.values(filteredExpenseCategories).reduce((sum, cat) => sum + cat.actual, 0);
 
     return {
-      incomeTotals: incomeCategories,
-      expenseTotals: expenseCategories,
+      incomeTotals: filteredIncomeCategories,
+      expenseTotals: filteredExpenseCategories,
       totalIncome: incomeTotal,
       totalExpense: expenseTotal,
-      categoryTransactionsMap: new Map(Object.entries({ ...incomeCategories, ...expenseCategories }).map(([k, v]) => [k, v.transactions])),
+      categoryTransactionsMap: new Map(Object.entries({ ...filteredIncomeCategories, ...filteredExpenseCategories }).map(([k, v]) => [k, v.transactions])),
     };
   }, [periodTransactions, forecasts, periodStart, categories]);
 
