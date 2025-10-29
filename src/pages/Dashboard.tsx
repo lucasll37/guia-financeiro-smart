@@ -115,7 +115,7 @@ export default function Dashboard() {
             ))}
           </div>
         ) : (
-          <div className="max-w-2xl mx-auto">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <EmptyState
               icon={Wallet}
               title="Nenhuma conta cadastrada"
@@ -143,7 +143,7 @@ export default function Dashboard() {
             ))}
           </div>
         ) : (
-          <div className="max-w-2xl mx-auto">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <EmptyState
               icon={TrendingUp}
               title="Nenhum investimento cadastrado"
@@ -171,7 +171,7 @@ export default function Dashboard() {
             ))}
           </div>
         ) : (
-          <div className="max-w-2xl mx-auto">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <EmptyState
               icon={Target}
               title="Nenhuma meta em andamento"
