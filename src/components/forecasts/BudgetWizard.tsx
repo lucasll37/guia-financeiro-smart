@@ -429,17 +429,18 @@ export function BudgetWizard({
             {/* Step: Expenses */}
             {step === "expenses" && (
               <div className="space-y-4">
-                <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-4 rounded-lg border border-primary/20">
+                {/* Summary Card with Visual Progress */}
+                <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 rounded-lg border border-primary/20 space-y-4">
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Receitas</p>
-                      <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                      <p className="text-xl font-bold text-green-600 dark:text-green-400">
                         R$ {totalIncome.toFixed(2)}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Despesas</p>
-                      <p className="text-lg font-bold text-red-600 dark:text-red-400">
+                      <p className="text-xl font-bold text-red-600 dark:text-red-400">
                         R$ {totalExpenses.toFixed(2)}
                       </p>
                     </div>
@@ -447,7 +448,7 @@ export function BudgetWizard({
                       <p className="text-xs text-muted-foreground mb-1">Saldo</p>
                       <p
                         className={cn(
-                          "text-lg font-bold",
+                          "text-xl font-bold",
                           balance >= 0
                             ? "text-green-600 dark:text-green-400"
                             : "text-red-600 dark:text-red-400"
@@ -455,6 +456,102 @@ export function BudgetWizard({
                       >
                         R$ {balance.toFixed(2)}
                       </p>
+                    </div>
+                  </div>
+
+                  {/* Visual Progress Bar */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        Orçamento Utilizado
+                      </span>
+                      <span
+                        className={cn(
+                          "font-semibold",
+                          totalExpenses > totalIncome
+                            ? "text-red-600 dark:text-red-400"
+                            : totalExpenses === totalIncome
+                            ? "text-green-600 dark:text-green-400"
+                            : "text-amber-600 dark:text-amber-400"
+                        )}
+                      >
+                        {totalIncome > 0
+                          ? ((totalExpenses / totalIncome) * 100).toFixed(1)
+                          : 0}%
+                      </span>
+                    </div>
+                    
+                    <div className="relative h-8 bg-muted rounded-full overflow-hidden border">
+                      {/* Base background */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-muted to-muted" />
+                      
+                      {/* Filled portion */}
+                      <div
+                        className={cn(
+                          "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full",
+                          totalExpenses > totalIncome
+                            ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500"
+                            : totalExpenses === totalIncome
+                            ? "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500"
+                            : "bg-gradient-to-r from-primary to-primary/80"
+                        )}
+                        style={{
+                          width: `${Math.min((totalExpenses / Math.max(totalIncome, totalExpenses)) * 100, 100)}%`,
+                        }}
+                      >
+                        {/* Animated shine effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+                      </div>
+                      
+                      {/* 100% marker line */}
+                      {totalExpenses > totalIncome && (
+                        <div
+                          className="absolute inset-y-0 w-0.5 bg-white/50"
+                          style={{
+                            left: `${(totalIncome / totalExpenses) * 100}%`,
+                          }}
+                        />
+                      )}
+                      
+                      {/* Center text */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-xs font-semibold text-foreground drop-shadow-lg">
+                          {totalExpenses > totalIncome && (
+                            <>Excedeu em R$ {(totalExpenses - totalIncome).toFixed(2)}</>
+                          )}
+                          {totalExpenses < totalIncome && (
+                            <>Restam R$ {(totalIncome - totalExpenses).toFixed(2)}</>
+                          )}
+                          {totalExpenses === totalIncome && totalIncome > 0 && (
+                            <>Orçamento Completo!</>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Status message */}
+                    <div className="flex items-center justify-center gap-2 text-sm">
+                      {totalExpenses > totalIncome ? (
+                        <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                          <TrendingDown className="h-4 w-4" />
+                          <span className="font-medium">
+                            Suas despesas excedem a receita prevista
+                          </span>
+                        </div>
+                      ) : totalExpenses < totalIncome ? (
+                        <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                          <span className="font-medium">
+                            Você ainda tem R$ {(totalIncome - totalExpenses).toFixed(2)} para alocar
+                          </span>
+                        </div>
+                      ) : totalIncome > 0 ? (
+                        <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                          <Check className="h-4 w-4" />
+                          <span className="font-medium">
+                            Orçamento equilibrado perfeitamente!
+                          </span>
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 </div>
