@@ -9,6 +9,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,11 +32,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useInvestmentMembers } from "@/hooks/useInvestmentMembers";
-import { UserPlus, Trash2, Check, X, LogOut, Crown, Shield, Eye, Edit, Calendar } from "lucide-react";
+import { UserPlus, Trash2, Check, X, LogOut, Crown, Shield, Eye, Edit, Calendar, Copy } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useToast } from "@/hooks/use-toast";
 
 type Investment = Database["public"]["Tables"]["investment_assets"]["Row"];
 
@@ -45,8 +56,11 @@ export function InvestmentMembersDialog({
 }: InvestmentMembersDialogProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"viewer" | "editor">("viewer");
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+  const [leaveConfirmName, setLeaveConfirmName] = useState("");
   const { members, inviteMember, updateMemberStatus, removeMember } = useInvestmentMembers(
     investment?.id
   );
@@ -122,22 +136,40 @@ export function InvestmentMembersDialog({
     setRole("viewer");
   };
 
-  const handleLeaveInvestment = async () => {
-    if (!currentUserMembership) return;
+  const handleLeaveInvestment = () => {
+    setLeaveConfirmName("");
+    setLeaveDialogOpen(true);
+  };
+
+  const handleConfirmLeave = async () => {
+    if (!currentUserMembership || !investment) return;
     
-    const confirmed = confirm(
-      "Tem certeza que deseja abandonar este investimento? Você perderá o acesso a todas as informações."
-    );
-    
-    if (confirmed) {
-      try {
-        await removeMember.mutateAsync(currentUserMembership.id);
-        onOpenChange(false);
-        // Redirect to investments list after leaving
-        navigate("/app/investimentos");
-      } catch (error) {
-        console.error("Error leaving investment:", error);
-      }
+    if (leaveConfirmName !== investment.name) {
+      toast({
+        title: "Nome incorreto",
+        description: "Por favor, digite o nome exato do investimento para confirmar",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await removeMember.mutateAsync(currentUserMembership.id);
+      setLeaveDialogOpen(false);
+      onOpenChange(false);
+      navigate("/app/investimentos");
+    } catch (error) {
+      console.error("Error leaving investment:", error);
+    }
+  };
+
+  const handleCopyInvestmentName = () => {
+    if (investment) {
+      navigator.clipboard.writeText(investment.name);
+      toast({
+        title: "Nome copiado",
+        description: "O nome do investimento foi copiado para a área de transferência",
+      });
     }
   };
 
@@ -360,6 +392,53 @@ export function InvestmentMembersDialog({
           )}
         </div>
       </DialogContent>
+
+      <AlertDialog open={leaveDialogOpen} onOpenChange={setLeaveDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Abandonar Investimento</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Você perderá permanentemente o acesso
+              a todas as informações deste investimento.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="confirm-name">
+                Para confirmar, digite o nome do investimento:{" "}
+                <span className="font-semibold">{investment?.name}</span>
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id="confirm-name"
+                  value={leaveConfirmName}
+                  onChange={(e) => setLeaveConfirmName(e.target.value)}
+                  placeholder="Digite o nome do investimento"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={handleCopyInvestmentName}
+                  title="Copiar nome"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmLeave}
+              disabled={leaveConfirmName !== investment?.name}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Abandonar Investimento
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }
