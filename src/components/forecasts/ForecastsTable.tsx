@@ -95,11 +95,11 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
             <span>{(forecast.categories as any)?.name || "Sem categoria"}</span>
           </div>
         </TableCell>
-        <TableCell className="text-right font-medium">
-          {formatCurrency(Number(forecast.forecasted_amount))}
-        </TableCell>
         <TableCell className="text-muted-foreground">
           {forecast.notes || "-"}
+        </TableCell>
+        <TableCell className="text-right font-medium">
+          {formatCurrency(Number(forecast.forecasted_amount))}
         </TableCell>
         <TableCell className="text-right">
           <div className="flex justify-end gap-2">
@@ -156,13 +156,13 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
                     {renderSortIcon('category')}
                   </Button>
                 </TableHead>
+                <TableHead>Observações</TableHead>
                 <TableHead className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Valor Previsto
                     {renderSortIcon('amount')}
                   </Button>
                 </TableHead>
-                <TableHead>Observações</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -172,10 +172,11 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
                 <TableCell colSpan={showAccountName ? 2 : 1} className="text-right">
                   Total de Receitas:
                 </TableCell>
+                <TableCell />
                 <TableCell className="text-right text-green-600">
                   + {formatCurrency(totalIncome)}
                 </TableCell>
-                <TableCell colSpan={2} />
+                <TableCell />
               </TableRow>
             </TableBody>
           </ResponsiveTable>
@@ -205,13 +206,13 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
                     {renderSortIcon('category')}
                   </Button>
                 </TableHead>
+                <TableHead>Observações</TableHead>
                 <TableHead className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Valor Previsto
                     {renderSortIcon('amount')}
                   </Button>
                 </TableHead>
-                <TableHead>Observações</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -221,10 +222,11 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
                 <TableCell colSpan={showAccountName ? 2 : 1} className="text-right">
                   Total de Despesas:
                 </TableCell>
+                <TableCell />
                 <TableCell className="text-right text-destructive">
                   - {formatCurrency(totalExpense)}
                 </TableCell>
-                <TableCell colSpan={2} />
+                <TableCell />
               </TableRow>
             </TableBody>
           </ResponsiveTable>
