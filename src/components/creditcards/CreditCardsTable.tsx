@@ -4,6 +4,7 @@ import { Edit, Trash2, ChevronDown, ChevronRight, ArrowUpDown, ArrowUp, ArrowDow
 import { useState, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import type { Database } from "@/integrations/supabase/types";
 
 type CreditCard = Database["public"]["Tables"]["credit_cards"]["Row"];
@@ -188,55 +189,75 @@ export function CreditCardsTable({
                           {monthlyTransactions.length === 0 ? (
                             <p className="text-sm text-muted-foreground">Nenhuma transação encontrada</p>
                           ) : (
-                            <div className="space-y-4">
+                            <Accordion type="multiple" className="space-y-2">
                               {monthlyTransactions.map(([month, txs]) => {
                                 const monthTotal = txs.reduce((sum, t) => sum + Number(t.amount), 0);
                                 return (
-                                  <div key={month} className="border rounded-lg p-3 md:p-4 bg-background shadow-sm">
-                                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3 pb-3 border-b">
-                                      <h5 className="font-semibold text-base">
-                                        {new Date(month).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
-                                      </h5>
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-sm text-muted-foreground">Total:</span>
-                                        <span className="font-bold text-destructive text-lg">
-                                          {formatCurrency(monthTotal)}
-                                        </span>
-                                      </div>
-                                    </div>
-                                    <div className="space-y-3">
-                                      {txs.map(t => (
-                                        <div key={t.id} className="flex flex-col sm:flex-row sm:justify-between gap-2 p-2 rounded hover:bg-muted/50 transition-colors">
-                                          <div className="flex flex-col gap-1 flex-1">
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                              <span className="text-xs text-muted-foreground font-medium">
-                                                {new Date(t.date).toLocaleDateString('pt-BR')}
-                                              </span>
-                                              {t.categories && (
-                                                <Badge 
-                                                  variant="outline" 
-                                                  className="text-xs"
-                                                  style={{ 
-                                                    borderColor: t.categories.color,
-                                                    color: t.categories.color 
-                                                  }}
-                                                >
-                                                  {t.categories.name}
-                                                </Badge>
-                                              )}
-                                            </div>
-                                            <span className="font-medium">{t.description}</span>
-                                          </div>
-                                          <div className="flex items-center justify-between sm:justify-end gap-2">
-                                            <span className="font-semibold text-lg">{formatCurrency(Number(t.amount))}</span>
-                                          </div>
+                                  <AccordionItem 
+                                    key={month} 
+                                    value={month}
+                                    className="border rounded-lg bg-background shadow-sm overflow-hidden"
+                                  >
+                                    <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/50 transition-colors">
+                                      <div className="flex flex-1 justify-between items-center pr-4">
+                                        <h5 className="font-semibold text-base capitalize">
+                                          {new Date(month).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                                        </h5>
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-sm text-muted-foreground">Total:</span>
+                                          <span className="font-bold text-destructive text-base">
+                                            {formatCurrency(monthTotal)}
+                                          </span>
                                         </div>
-                                      ))}
-                                    </div>
-                                  </div>
+                                      </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="p-0">
+                                      <div className="border-t">
+                                        <Table>
+                                          <TableHeader>
+                                            <TableRow className="bg-muted/50">
+                                              <TableHead className="w-[120px]">Data</TableHead>
+                                              <TableHead>Descrição</TableHead>
+                                              <TableHead className="w-[180px]">Categoria</TableHead>
+                                              <TableHead className="text-right w-[140px]">Valor</TableHead>
+                                            </TableRow>
+                                          </TableHeader>
+                                          <TableBody>
+                                            {txs.map(t => (
+                                              <TableRow key={t.id} className="hover:bg-muted/30">
+                                                <TableCell className="font-medium text-sm">
+                                                  {new Date(t.date).toLocaleDateString('pt-BR')}
+                                                </TableCell>
+                                                <TableCell className="font-medium">
+                                                  {t.description}
+                                                </TableCell>
+                                                <TableCell>
+                                                  {t.categories && (
+                                                    <Badge 
+                                                      variant="outline" 
+                                                      className="text-xs"
+                                                      style={{ 
+                                                        borderColor: t.categories.color,
+                                                        color: t.categories.color 
+                                                      }}
+                                                    >
+                                                      {t.categories.name}
+                                                    </Badge>
+                                                  )}
+                                                </TableCell>
+                                                <TableCell className="text-right font-semibold">
+                                                  {formatCurrency(Number(t.amount))}
+                                                </TableCell>
+                                              </TableRow>
+                                            ))}
+                                          </TableBody>
+                                        </Table>
+                                      </div>
+                                    </AccordionContent>
+                                  </AccordionItem>
                                 );
                               })}
-                            </div>
+                            </Accordion>
                           )}
                         </div>
                       </TableCell>
