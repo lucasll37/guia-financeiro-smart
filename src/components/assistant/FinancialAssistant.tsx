@@ -72,21 +72,52 @@ export function FinancialAssistant() {
       {/* Messages */}
       <ScrollArea className="flex-1 p-4" ref={scrollRef}>
         {messages.length === 0 && (
-          <div className="text-center text-muted-foreground space-y-4 py-8">
+          <div className="text-center text-muted-foreground space-y-4 py-8 animate-fade-in">
             <div className="flex justify-center">
-              <Sparkles className="h-12 w-12 text-primary/50" />
+              <div className="relative">
+                <Sparkles className="h-16 w-16 text-primary/50 animate-pulse" />
+                <div className="absolute inset-0 h-16 w-16 bg-primary/20 rounded-full blur-xl animate-pulse" />
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Olá! Sou seu assistente financeiro 👋</h3>
-              <p className="text-sm">
-                Posso ajudar você com:
+            <div className="space-y-2">
+              <h3 className="font-semibold text-xl bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                Olá! Sou seu assistente financeiro 👋
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Estou aqui para ajudar você a ter controle total das suas finanças
               </p>
-              <ul className="text-sm mt-2 space-y-1">
-                <li>📚 Tutoriais sobre como usar o app</li>
-                <li>💡 Insights sobre suas finanças</li>
-                <li>📊 Análise de gastos e receitas</li>
-                <li>🎯 Acompanhamento de metas</li>
-              </ul>
+            </div>
+            <div className="max-w-sm mx-auto">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                  <span className="text-lg">📚</span>
+                  <div className="text-left">
+                    <div className="font-medium">Tutoriais</div>
+                    <div className="text-xs text-muted-foreground">Como usar o app</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                  <span className="text-lg">💡</span>
+                  <div className="text-left">
+                    <div className="font-medium">Insights</div>
+                    <div className="text-xs text-muted-foreground">Análises personalizadas</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                  <span className="text-lg">📊</span>
+                  <div className="text-left">
+                    <div className="font-medium">Análises</div>
+                    <div className="text-xs text-muted-foreground">Gastos e receitas</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                  <span className="text-lg">🎯</span>
+                  <div className="text-left">
+                    <div className="font-medium">Metas</div>
+                    <div className="text-xs text-muted-foreground">Acompanhamento</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -106,9 +137,9 @@ export function FinancialAssistant() {
 
       {/* Quick Replies */}
       {messages.length === 0 && (
-        <div className="px-4 pb-2">
-          <p className="text-xs text-muted-foreground mb-2">Sugestões:</p>
-          <div className="flex flex-wrap gap-2">
+        <div className="px-4 pb-2 animate-fade-in">
+          <p className="text-xs text-muted-foreground mb-2 font-medium">Experimente perguntar:</p>
+          <div className="grid grid-cols-2 gap-2">
             {quickReplies.map((reply) => (
               <Button
                 key={reply}
@@ -116,7 +147,7 @@ export function FinancialAssistant() {
                 size="sm"
                 onClick={() => handleQuickReply(reply)}
                 disabled={isLoading}
-                className="text-xs"
+                className="text-xs justify-start h-auto py-2 hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all"
               >
                 {reply}
               </Button>
@@ -152,19 +183,19 @@ function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === "user";
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"} animate-fade-in`}>
       <div
-        className={`max-w-[80%] rounded-lg p-3 ${
+        className={`max-w-[85%] rounded-2xl p-3 shadow-sm ${
           isUser
-            ? "bg-primary text-primary-foreground"
-            : "bg-muted"
+            ? "bg-gradient-to-br from-primary to-primary/90 text-primary-foreground"
+            : "bg-muted border border-border"
         }`}
       >
-        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+        <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
         {message.isStreaming && (
-          <span className="inline-block w-2 h-4 bg-current animate-pulse ml-1" />
+          <span className="inline-block w-2 h-4 bg-current animate-pulse ml-1 rounded-sm" />
         )}
-        <p className="text-xs opacity-70 mt-1">
+        <p className="text-xs opacity-70 mt-1.5">
           {message.timestamp.toLocaleTimeString("pt-BR", {
             hour: "2-digit",
             minute: "2-digit",
