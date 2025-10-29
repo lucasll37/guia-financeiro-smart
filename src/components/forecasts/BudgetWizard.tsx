@@ -257,12 +257,12 @@ export function BudgetWizard({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[900px] max-h-[90vh]">
-        <DialogHeader>
-          <DialogTitle className="text-2xl flex items-center gap-2">
-            <Wand2 className="h-6 w-6 text-primary" />
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-lg flex items-center gap-2">
+            <Wand2 className="h-5 w-5 text-primary" />
             Assistente de Lançamento
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs">
             {step === "month" && "Selecione o mês de referência"}
             {step === "income" && "Defina suas receitas previstas"}
             {step === "expenses" && "Distribua suas despesas por categoria"}
@@ -279,15 +279,15 @@ export function BudgetWizard({
           <>
             {/* Step: Month Selection */}
             {step === "month" && (
-              <div className="space-y-6 py-4">
-                <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 rounded-lg border border-primary/20">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
-                      <Calendar className="h-6 w-6 text-primary" />
+              <div className="space-y-4 py-2">
+                <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-4 rounded-lg border border-primary/20">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
+                      <Calendar className="h-4 w-4 text-primary" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">Mês de Referência</h3>
-                      <p className="text-sm text-muted-foreground">
+                      <h3 className="text-sm font-semibold">Mês de Referência</h3>
+                      <p className="text-xs text-muted-foreground">
                         Escolha o mês para criar ou editar previsões
                       </p>
                     </div>
@@ -298,11 +298,11 @@ export function BudgetWizard({
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full justify-start text-left font-normal h-14 text-lg"
+                          "w-full justify-start text-left font-normal h-10 text-sm"
                         )}
                       >
                         {format(workingMonth, "MMMM 'de' yyyy", { locale: ptBR })}
-                        <Calendar className="ml-auto h-5 w-5 opacity-50" />
+                        <Calendar className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -321,58 +321,58 @@ export function BudgetWizard({
 
             {/* Step: Income */}
             {step === "income" && (
-              <div className="space-y-4">
-                <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 p-4 rounded-lg border border-green-500/20">
+              <div className="space-y-2">
+                <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 p-3 rounded-lg border border-green-500/20">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />
-                      <span className="font-semibold">
+                      <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      <span className="font-semibold text-sm">
                         {format(workingMonth, "MMMM 'de' yyyy", { locale: ptBR })}
                       </span>
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground">Total Receitas</p>
-                      <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                      <p className="text-lg font-bold text-green-600 dark:text-green-400">
                         R$ {totalIncome.toFixed(2)}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <ScrollArea className="h-[400px] pr-4">
-                  <div className="space-y-4">
+                <ScrollArea className="h-[420px] pr-4">
+                  <div className="space-y-2">
                     {incomeGroups.map((group) => (
                       <div
                         key={group.id}
                         className="border rounded-lg overflow-hidden"
                       >
                         <div
-                          className="bg-muted/50 p-3 flex items-center gap-2"
+                          className="bg-muted/50 p-2 flex items-center gap-2"
                           style={{
                             borderLeft: `4px solid ${group.color}`,
                           }}
                         >
                           <div
-                            className="w-3 h-3 rounded-full"
+                            className="w-2.5 h-2.5 rounded-full"
                             style={{ backgroundColor: group.color }}
                           />
-                          <span className="font-semibold">{group.name}</span>
+                          <span className="font-semibold text-sm">{group.name}</span>
                         </div>
-                        <div className="p-4 space-y-3">
+                        <div className="p-3 space-y-2">
                           {group.subcategories.map((sub) => {
                             const entry = getEntryValue(sub.id, incomeEntries);
                             return (
                               <div
                                 key={sub.id}
-                                className="grid gap-3 p-3 rounded-lg border bg-card"
+                                className="grid gap-2 p-2 rounded-lg border bg-card"
                                 style={{ gridTemplateColumns: "25% 50% 25%" }}
                               >
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1.5">
                                   <div
-                                    className="w-2 h-2 rounded-full"
+                                    className="w-1.5 h-1.5 rounded-full"
                                     style={{ backgroundColor: sub.color }}
                                   />
-                                  <span className="text-sm font-medium">
+                                  <span className="text-xs font-medium">
                                     {sub.name}
                                   </span>
                                 </div>
@@ -409,20 +409,20 @@ export function BudgetWizard({
                   </div>
                 </ScrollArea>
 
-                <div className="flex gap-3 pt-4 border-t">
+                <div className="flex gap-2 pt-2 border-t">
                   <Button
                     variant="outline"
                     onClick={() => setStep("month")}
-                    className="flex-1"
+                    className="flex-1 h-9 text-sm"
                   >
                     Voltar
                   </Button>
                   <Button
                     onClick={() => setStep("expenses")}
-                    className="flex-1"
+                    className="flex-1 h-9 text-sm"
                   >
                     Próximo: Despesas
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    <ArrowRight className="ml-2 h-3 w-3" />
                   </Button>
                 </div>
               </div>
@@ -430,27 +430,27 @@ export function BudgetWizard({
 
             {/* Step: Expenses */}
             {step === "expenses" && (
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {/* Summary Card with Visual Progress */}
-                <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 rounded-lg border border-primary/20 space-y-4">
-                  <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-3 rounded-lg border border-primary/20 space-y-2">
+                  <div className="grid grid-cols-3 gap-2 text-center">
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">Receitas</p>
-                      <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                      <p className="text-xs text-muted-foreground mb-0.5">Receitas</p>
+                      <p className="text-base font-bold text-green-600 dark:text-green-400">
                         R$ {totalIncome.toFixed(2)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">Despesas</p>
-                      <p className="text-xl font-bold text-red-600 dark:text-red-400">
+                      <p className="text-xs text-muted-foreground mb-0.5">Despesas</p>
+                      <p className="text-base font-bold text-red-600 dark:text-red-400">
                         R$ {totalExpenses.toFixed(2)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">Saldo</p>
+                      <p className="text-xs text-muted-foreground mb-0.5">Saldo</p>
                       <p
                         className={cn(
-                          "text-xl font-bold",
+                          "text-base font-bold",
                           balance >= 0
                             ? "text-green-600 dark:text-green-400"
                             : "text-red-600 dark:text-red-400"
@@ -462,8 +462,8 @@ export function BudgetWizard({
                   </div>
 
                   {/* Visual Progress Bar */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">
                         Orçamento Utilizado
                       </span>
@@ -483,7 +483,7 @@ export function BudgetWizard({
                       </span>
                     </div>
                     
-                    <div className="relative h-8 bg-muted rounded-full overflow-hidden border">
+                    <div className="relative h-6 bg-muted rounded-full overflow-hidden border">
                       {/* Base background */}
                       <div className="absolute inset-0 bg-gradient-to-r from-muted to-muted" />
                       
@@ -532,23 +532,23 @@ export function BudgetWizard({
                     </div>
 
                     {/* Status message */}
-                    <div className="flex items-center justify-center gap-2 text-sm">
+                    <div className="flex items-center justify-center gap-1.5 text-xs">
                       {totalExpenses > totalIncome ? (
-                        <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
-                          <TrendingDown className="h-4 w-4" />
+                        <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
+                          <TrendingDown className="h-3 w-3" />
                           <span className="font-medium">
                             Suas despesas excedem a receita prevista
                           </span>
                         </div>
                       ) : totalExpenses < totalIncome ? (
-                        <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                        <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
                           <span className="font-medium">
                             Você ainda tem R$ {(totalIncome - totalExpenses).toFixed(2)} para alocar
                           </span>
                         </div>
                       ) : totalIncome > 0 ? (
-                        <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                          <Check className="h-4 w-4" />
+                        <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+                          <Check className="h-3 w-3" />
                           <span className="font-medium">
                             Orçamento equilibrado perfeitamente!
                           </span>
@@ -558,8 +558,8 @@ export function BudgetWizard({
                   </div>
                 </div>
 
-                <ScrollArea className="h-[400px] pr-4">
-                  <div className="space-y-2">
+                <ScrollArea className="h-[350px] pr-4">
+                  <div className="space-y-1.5">
                     {expenseGroups.map((group) => {
                       const isOpen = openCategories.includes(group.id);
                       return (
@@ -571,42 +571,42 @@ export function BudgetWizard({
                           <div className="border rounded-lg overflow-hidden">
                             <CollapsibleTrigger className="w-full">
                               <div
-                                className="bg-muted/50 p-3 flex items-center gap-2 hover:bg-muted transition-colors"
+                                className="bg-muted/50 p-2 flex items-center gap-2 hover:bg-muted transition-colors"
                                 style={{
                                   borderLeft: `4px solid ${group.color}`,
                                 }}
                               >
                                 {isOpen ? (
-                                  <ChevronDown className="h-4 w-4" />
+                                  <ChevronDown className="h-3 w-3" />
                                 ) : (
-                                  <ChevronRight className="h-4 w-4" />
+                                  <ChevronRight className="h-3 w-3" />
                                 )}
                                 <div
-                                  className="w-3 h-3 rounded-full"
+                                  className="w-2.5 h-2.5 rounded-full"
                                   style={{ backgroundColor: group.color }}
                                 />
-                                <span className="font-semibold">{group.name}</span>
-                                <span className="ml-auto text-sm text-muted-foreground">
+                                <span className="font-semibold text-sm">{group.name}</span>
+                                <span className="ml-auto text-xs text-muted-foreground">
                                   {group.subcategories.length} subcategorias
                                 </span>
                               </div>
                             </CollapsibleTrigger>
                             <CollapsibleContent>
-                              <div className="p-4 space-y-3">
+                              <div className="p-3 space-y-2">
                                 {group.subcategories.map((sub) => {
                                   const entry = getEntryValue(sub.id, expenseEntries);
                                   return (
                                     <div
                                       key={sub.id}
-                                      className="grid gap-3 p-3 rounded-lg border bg-card"
+                                      className="grid gap-2 p-2 rounded-lg border bg-card"
                                       style={{ gridTemplateColumns: "25% 50% 25%" }}
                                     >
-                                      <div className="flex items-center gap-2">
+                                      <div className="flex items-center gap-1.5">
                                         <div
-                                          className="w-2 h-2 rounded-full"
+                                          className="w-1.5 h-1.5 rounded-full"
                                           style={{ backgroundColor: sub.color }}
                                         />
-                                        <span className="text-sm font-medium">
+                                        <span className="text-xs font-medium">
                                           {sub.name}
                                         </span>
                                       </div>
@@ -646,16 +646,16 @@ export function BudgetWizard({
                   </div>
                 </ScrollArea>
 
-                <div className="flex gap-3 pt-4 border-t">
+                <div className="flex gap-2 pt-2 border-t">
                   <Button
                     variant="outline"
                     onClick={() => setStep("income")}
-                    className="flex-1"
+                    className="flex-1 h-9 text-sm"
                   >
                     Voltar
                   </Button>
-                  <Button onClick={handleFinish} className="flex-1">
-                    <Check className="mr-2 h-5 w-5" />
+                  <Button onClick={handleFinish} className="flex-1 h-9 text-sm">
+                    <Check className="mr-2 h-3 w-3" />
                     Salvar Previsões
                   </Button>
                 </div>
