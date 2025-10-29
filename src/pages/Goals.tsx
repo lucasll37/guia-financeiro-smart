@@ -1,15 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, RefreshCw } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGoals } from "@/hooks/useGoals";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
 import { useMaskValues } from "@/hooks/useMaskValues";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { GoalDialog } from "@/components/goals/GoalDialog";
-import { evaluateNotifications } from "@/lib/notificationEvaluator";
 import type { Database } from "@/integrations/supabase/types";
 
 type Goal = Database["public"]["Tables"]["goals"]["Row"];
@@ -17,12 +15,10 @@ type GoalInsert = Omit<Database["public"]["Tables"]["goals"]["Insert"], "user_id
 
 export default function Goals() {
   const { user } = useAuth();
-  const { toast } = useToast();
   const isMobile = useIsMobile();
   const { maskValue } = useMaskValues();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
-  const [evaluating, setEvaluating] = useState(false);
 
   const { goals, isLoading, createGoal, updateGoal, deleteGoal } = useGoals();
 
@@ -55,32 +51,6 @@ export default function Goals() {
     await updateGoal.mutateAsync({ id, current_amount: amount });
   };
 
-  const handleEvaluateNotifications = async () => {
-    if (!user) return;
-
-    setEvaluating(true);
-    try {
-      const count = await evaluateNotifications({
-        userId: user.id,
-      });
-
-      toast({
-        title: "Avaliação concluída",
-        description: count > 0
-          ? `${count} nova(s) notificação(ões) gerada(s)`
-          : "Nenhuma nova notificação",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Erro ao avaliar",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setEvaluating(false);
-    }
-  };
-
   const totalGoals = goals?.length || 0;
   const completedGoals = goals?.filter(
     (g) => Number(g.current_amount) >= Number(g.target_amount)
@@ -101,20 +71,10 @@ export default function Goals() {
             Acompanhe suas metas financeiras
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleEvaluateNotifications}
-            disabled={evaluating}
-          >
-            <RefreshCw className={`h-4 w-4 ${evaluating ? "animate-spin" : ""}`} />
-            {!isMobile && <span className="ml-2">Avaliar Alertas</span>}
-          </Button>
-          <Button onClick={handleCreateGoal}>
-            <Plus className="h-4 w-4" />
-            {!isMobile && <span className="ml-2">Nova Meta</span>}
-          </Button>
-        </div>
+        <Button onClick={handleCreateGoal}>
+          <Plus className="h-4 w-4" />
+          {!isMobile && <span className="ml-2">Nova Meta</span>}
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
