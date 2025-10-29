@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useInvestmentMembers } from "@/hooks/useInvestmentMembers";
-import { UserPlus, Trash2, Check, X, LogOut } from "lucide-react";
+import { UserPlus, Trash2, Check, X, LogOut, Crown } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -48,6 +48,22 @@ export function InvestmentMembersDialog({
   
   const isOwner = user?.id === ownerId;
   const currentUserMembership = members?.find(m => m.user_id === user?.id);
+
+  // Fetch owner profile
+  const { data: ownerProfile } = useQuery({
+    queryKey: ["owner-profile", ownerId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, name, email, avatar_url")
+        .eq("id", ownerId)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!ownerId,
+  });
 
   // Query to find user by email
   const { data: searchedUser, refetch: searchUser } = useQuery({
@@ -139,36 +155,57 @@ export function InvestmentMembersDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Gerenciar Membros</DialogTitle>
+          <DialogTitle>
+            {isOwner ? "Gerenciar Membros" : "Informações do Investimento"}
+          </DialogTitle>
           <DialogDescription>
             {isOwner 
               ? `Convide usuários para compartilhar o investimento "${investment?.name}"`
-              : `Membros do investimento "${investment?.name}"`
+              : `Investimento compartilhado: "${investment?.name}"`
             }
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Leave Investment Button (for non-owners) */}
-          {!isOwner && currentUserMembership && (
-            <div className="p-4 border border-destructive/20 bg-destructive/5 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-sm">Abandonar Investimento</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Você perderá o acesso a este investimento
-                  </p>
+          {/* For non-owners: Show owner info and leave button */}
+          {!isOwner && (
+            <div className="space-y-4">
+              {/* Owner Information */}
+              <div className="p-4 border rounded-lg bg-muted/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <Crown className="h-4 w-4 text-yellow-600" />
+                  <h3 className="font-semibold">Proprietário</h3>
                 </div>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleLeaveInvestment}
-                  disabled={removeMember.isPending}
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sair
-                </Button>
+                {ownerProfile && (
+                  <div className="space-y-1">
+                    <p className="font-medium">{ownerProfile.name || "Sem nome"}</p>
+                    <p className="text-sm text-muted-foreground">{ownerProfile.email}</p>
+                  </div>
+                )}
               </div>
+
+              {/* Leave Investment Button */}
+              {currentUserMembership && (
+                <div className="p-4 border border-destructive/20 bg-destructive/5 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-sm">Abandonar Investimento</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Você perderá o acesso a este investimento
+                      </p>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleLeaveInvestment}
+                      disabled={removeMember.isPending}
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sair
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -208,26 +245,26 @@ export function InvestmentMembersDialog({
           </div>
           )}
 
-          {/* Members List */}
-          <div className="space-y-4">
-            <h3 className="font-semibold">Membros</h3>
-            {members && members.length > 0 ? (
-              <div className="space-y-2">
-                {members.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between p-3 border rounded-lg"
-                  >
-                    <div className="flex-1">
-                      <p className="font-medium">{member.profiles?.name || "Sem nome"}</p>
-                      <p className="text-sm text-muted-foreground">{member.profiles?.email}</p>
-                      <div className="flex gap-2 mt-2">
-                        {getStatusBadge(member.status)}
-                       {getRoleBadge(member.role)}
+          {/* Members List - Only for owners */}
+          {isOwner && (
+            <div className="space-y-4">
+              <h3 className="font-semibold">Membros</h3>
+              {members && members.length > 0 ? (
+                <div className="space-y-2">
+                  {members.map((member) => (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium">{member.profiles?.name || "Sem nome"}</p>
+                        <p className="text-sm text-muted-foreground">{member.profiles?.email}</p>
+                        <div className="flex gap-2 mt-2">
+                          {getStatusBadge(member.status)}
+                          {getRoleBadge(member.role)}
+                        </div>
                       </div>
-                    </div>
 
-                    {isOwner && (
                       <Button
                         variant="ghost"
                         size="icon"
@@ -236,16 +273,16 @@ export function InvestmentMembersDialog({
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Nenhum membro convidado ainda
-              </p>
-            )}
-          </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Nenhum membro convidado ainda
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
