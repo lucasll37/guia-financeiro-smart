@@ -28,7 +28,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown, Bell, Send, CreditCard, Settings, FileText, AlertTriangle, Loader2, Copy } from "lucide-react";
+import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown, Bell, Send, CreditCard, Settings, FileText, AlertTriangle, Loader2, Copy, MessageSquare } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { z } from "zod";
 import { UserGrowthChart } from "@/components/admin/UserGrowthChart";
@@ -39,6 +39,7 @@ import { SubscriptionManager } from "@/components/admin/SubscriptionManager";
 import { UserActionLogs } from "@/components/admin/UserActionLogs";
 import { NotificationCreator } from "@/components/admin/NotificationCreator";
 import { LogRetentionSettings } from "@/components/admin/LogRetentionSettings";
+import { FeedbackManager } from "@/components/admin/FeedbackManager";
 
 const couponSchema = z.object({
   code: z.string().trim().min(3, "Código deve ter no mínimo 3 caracteres").max(50, "Código muito longo"),
@@ -412,6 +413,10 @@ export default function Admin() {
           <TabsTrigger value="logs" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             {!isMobile && <span>Logs de Ações</span>}
+          </TabsTrigger>
+          <TabsTrigger value="feedback" className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4" />
+            {!isMobile && <span>Feedbacks</span>}
           </TabsTrigger>
         </TabsList>
 
@@ -976,6 +981,11 @@ export default function Admin() {
         <TabsContent value="logs" className="space-y-4">
           <LogRetentionSettings />
           <UserActionLogs />
+        </TabsContent>
+
+        {/* Feedback Tab */}
+        <TabsContent value="feedback" className="space-y-4">
+          <FeedbackManager />
         </TabsContent>
       </Tabs>
 
