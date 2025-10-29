@@ -1,11 +1,12 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, CreditCard, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Edit, Trash2, CreditCard, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight } from "lucide-react";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMemo, useState } from "react";
 import { useMaskValues } from "@/hooks/useMaskValues";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 import type { Database } from "@/integrations/supabase/types";
 
@@ -30,6 +31,8 @@ export function TransactionsTable({
 }: TransactionsTableProps) {
   const [sortField, setSortField] = useState<'date' | 'description' | 'amount' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [incomeExpanded, setIncomeExpanded] = useState(true);
+  const [expenseExpanded, setExpenseExpanded] = useState(true);
   const { maskValue } = useMaskValues();
 
   const handleSort = (field: 'date' | 'description' | 'amount') => {
@@ -170,11 +173,20 @@ export function TransactionsTable({
     <div className="space-y-4">
       {/* Receitas */}
       {incomeTransactions.length > 0 && (
-        <div className="border rounded-lg">
-          <div className="bg-green-50 dark:bg-green-950/20 px-4 py-2 border-b">
-            <h3 className="font-semibold text-green-700 dark:text-green-400">Receitas</h3>
-          </div>
-          <Table>
+        <Collapsible open={incomeExpanded} onOpenChange={setIncomeExpanded}>
+          <div className="border rounded-lg">
+            <CollapsibleTrigger asChild>
+              <div className="bg-green-50 dark:bg-green-950/20 px-4 py-2 border-b cursor-pointer hover:bg-green-100 dark:hover:bg-green-950/30 transition-colors flex items-center justify-between">
+                <h3 className="font-semibold text-green-700 dark:text-green-400">Receitas</h3>
+                {incomeExpanded ? (
+                  <ChevronDown className="h-4 w-4 text-green-700 dark:text-green-400" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 text-green-700 dark:text-green-400" />
+                )}
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[120px]">
@@ -212,16 +224,27 @@ export function TransactionsTable({
               </TableRow>
             </TableBody>
           </Table>
+            </CollapsibleContent>
         </div>
+        </Collapsible>
       )}
 
       {/* Despesas */}
       {expenseTransactions.length > 0 && (
-        <div className="border rounded-lg">
-          <div className="bg-red-50 dark:bg-red-950/20 px-4 py-2 border-b">
-            <h3 className="font-semibold text-red-700 dark:text-red-400">Despesas</h3>
-          </div>
-          <Table>
+        <Collapsible open={expenseExpanded} onOpenChange={setExpenseExpanded}>
+          <div className="border rounded-lg">
+            <CollapsibleTrigger asChild>
+              <div className="bg-red-50 dark:bg-red-950/20 px-4 py-2 border-b cursor-pointer hover:bg-red-100 dark:hover:bg-red-950/30 transition-colors flex items-center justify-between">
+                <h3 className="font-semibold text-red-700 dark:text-red-400">Despesas</h3>
+                {expenseExpanded ? (
+                  <ChevronDown className="h-4 w-4 text-red-700 dark:text-red-400" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 text-red-700 dark:text-red-400" />
+                )}
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[120px]">
@@ -259,7 +282,9 @@ export function TransactionsTable({
               </TableRow>
             </TableBody>
           </Table>
+            </CollapsibleContent>
         </div>
+        </Collapsible>
       )}
 
       {/* Saldo */}

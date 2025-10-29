@@ -1,7 +1,8 @@
-import { Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useMemo } from "react";
 import { ResponsiveTable } from "@/components/ui/responsive-table";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Table,
   TableBody,
@@ -23,6 +24,8 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
   const { formatCurrency } = useUserPreferences();
   const [sortField, setSortField] = useState<'account' | 'category' | 'amount' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [incomeExpanded, setIncomeExpanded] = useState(true);
+  const [expenseExpanded, setExpenseExpanded] = useState(true);
 
   const handleSort = (field: 'account' | 'category' | 'amount') => {
     if (sortField === field) {
@@ -135,11 +138,20 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
     <div className="space-y-4">
       {/* Receitas */}
       {incomeForecasts.length > 0 && (
-        <div className="border rounded-lg">
-          <div className="bg-green-50 dark:bg-green-950/20 px-4 py-2 border-b">
-            <h3 className="font-semibold text-green-700 dark:text-green-400">Receitas Previstas</h3>
-          </div>
-          <ResponsiveTable>
+        <Collapsible open={incomeExpanded} onOpenChange={setIncomeExpanded}>
+          <div className="border rounded-lg">
+            <CollapsibleTrigger asChild>
+              <div className="bg-green-50 dark:bg-green-950/20 px-4 py-2 border-b cursor-pointer hover:bg-green-100 dark:hover:bg-green-950/30 transition-colors flex items-center justify-between">
+                <h3 className="font-semibold text-green-700 dark:text-green-400">Receitas Previstas</h3>
+                {incomeExpanded ? (
+                  <ChevronDown className="h-4 w-4 text-green-700 dark:text-green-400" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 text-green-700 dark:text-green-400" />
+                )}
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <ResponsiveTable>
             <TableHeader>
               <TableRow>
                 {showAccountName && (
@@ -180,16 +192,27 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
               </TableRow>
             </TableBody>
           </ResponsiveTable>
+            </CollapsibleContent>
         </div>
+        </Collapsible>
       )}
 
       {/* Despesas */}
       {expenseForecasts.length > 0 && (
-        <div className="border rounded-lg">
-          <div className="bg-red-50 dark:bg-red-950/20 px-4 py-2 border-b">
-            <h3 className="font-semibold text-red-700 dark:text-red-400">Despesas Previstas</h3>
-          </div>
-          <ResponsiveTable>
+        <Collapsible open={expenseExpanded} onOpenChange={setExpenseExpanded}>
+          <div className="border rounded-lg">
+            <CollapsibleTrigger asChild>
+              <div className="bg-red-50 dark:bg-red-950/20 px-4 py-2 border-b cursor-pointer hover:bg-red-100 dark:hover:bg-red-950/30 transition-colors flex items-center justify-between">
+                <h3 className="font-semibold text-red-700 dark:text-red-400">Despesas Previstas</h3>
+                {expenseExpanded ? (
+                  <ChevronDown className="h-4 w-4 text-red-700 dark:text-red-400" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 text-red-700 dark:text-red-400" />
+                )}
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <ResponsiveTable>
             <TableHeader>
               <TableRow>
                 {showAccountName && (
@@ -230,7 +253,9 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
               </TableRow>
             </TableBody>
           </ResponsiveTable>
+            </CollapsibleContent>
         </div>
+        </Collapsible>
       )}
 
       {/* Saldo */}
