@@ -1,10 +1,9 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, ChevronDown, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Calendar } from "lucide-react";
+import { Edit, Trash2, ChevronDown, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
-import { CreditCardForecastDialog } from "./CreditCardForecastDialog";
 import type { Database } from "@/integrations/supabase/types";
 
 type CreditCard = Database["public"]["Tables"]["credit_cards"]["Row"];
@@ -32,8 +31,6 @@ export function CreditCardsTable({
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [sortField, setSortField] = useState<'name' | 'total' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [forecastDialogOpen, setForecastDialogOpen] = useState(false);
-  const [selectedCardForForecast, setSelectedCardForForecast] = useState<CreditCard | null>(null);
   const { formatCurrency } = useUserPreferences();
 
   const toggleCard = (id: string) => {
@@ -169,17 +166,6 @@ export function CreditCardsTable({
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => {
-                            setSelectedCardForForecast(card);
-                            setForecastDialogOpen(true);
-                          }}
-                          title="Ver projeção de faturas"
-                        >
-                          <Calendar className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
                           onClick={() => onEdit(card)}
                         >
                           <Edit className="h-4 w-4" />
@@ -262,15 +248,6 @@ export function CreditCardsTable({
           )}
         </TableBody>
       </Table>
-
-      {selectedCardForForecast && (
-        <CreditCardForecastDialog
-          open={forecastDialogOpen}
-          onOpenChange={setForecastDialogOpen}
-          creditCard={selectedCardForForecast}
-          transactions={transactions}
-        />
-      )}
     </div>
   );
 }

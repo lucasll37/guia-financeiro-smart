@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { format, startOfMonth, endOfMonth } from "date-fns";
+import { format, startOfMonth, endOfMonth, addMonths } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useCreditCards } from "@/hooks/useCreditCards";
@@ -109,6 +109,24 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
     await deleteCreditCard.mutateAsync(id);
   };
 
+  const handleShowForecast = () => {
+    const today = new Date();
+    const startDate = format(startOfMonth(today), "yyyy-MM-dd");
+    const endDate = format(endOfMonth(addMonths(today, 6)), "yyyy-MM-dd");
+    
+    setFilters({
+      ...filters,
+      viewMode: "custom",
+      startDate,
+      endDate,
+    });
+
+    toast({
+      title: "Projeção expandida",
+      description: "Visualizando lançamentos dos próximos 6 meses",
+    });
+  };
+
   if (!user) return null;
 
   return (
@@ -131,6 +149,7 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
         filters={filters}
         onFilterChange={setFilters}
         accountId={propAccountId}
+        onShowForecast={handleShowForecast}
       />
 
       {isLoading ? (
