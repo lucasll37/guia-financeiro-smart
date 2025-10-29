@@ -143,27 +143,27 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
             <TableHeader>
               <TableRow>
                 {showAccountName && (
-                  <TableHead>
+                  <TableHead className="w-[150px]">
                     <Button variant="ghost" size="sm" onClick={() => handleSort('account')} className="flex items-center gap-1 p-0 h-auto font-medium">
                       Conta
                       {renderSortIcon('account')}
                     </Button>
                   </TableHead>
                 )}
-                <TableHead>
+                <TableHead className="w-[200px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('category')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Categoria
                     {renderSortIcon('category')}
                   </Button>
                 </TableHead>
                 <TableHead>Descrição</TableHead>
-                <TableHead className="text-right">
+                <TableHead className="text-right w-[150px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Valor Previsto
                     {renderSortIcon('amount')}
                   </Button>
                 </TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <TableHead className="text-right w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -193,27 +193,27 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName }:
             <TableHeader>
               <TableRow>
                 {showAccountName && (
-                  <TableHead>
+                  <TableHead className="w-[150px]">
                     <Button variant="ghost" size="sm" onClick={() => handleSort('account')} className="flex items-center gap-1 p-0 h-auto font-medium">
                       Conta
                       {renderSortIcon('account')}
                     </Button>
                   </TableHead>
                 )}
-                <TableHead>
+                <TableHead className="w-[200px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('category')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Categoria
                     {renderSortIcon('category')}
                   </Button>
                 </TableHead>
                 <TableHead>Descrição</TableHead>
-                <TableHead className="text-right">
+                <TableHead className="text-right w-[150px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Valor Previsto
                     {renderSortIcon('amount')}
                   </Button>
                 </TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <TableHead className="text-right w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
