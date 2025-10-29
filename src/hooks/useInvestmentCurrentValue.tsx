@@ -23,7 +23,7 @@ export function useInvestmentCurrentValue(investmentId: string) {
         .from("investment_assets")
         .select("balance")
         .eq("id", investmentId)
-        .single();
+        .maybeSingle();
 
       return investment ? Number(investment.balance) : 0;
     },
