@@ -257,15 +257,15 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   const percentage = data.forecasted !== 0 
                     ? ((difference / data.forecasted) * 100).toFixed(1)
                     : "-";
-                  const hasMultipleTransactions = data.transactions.length > 1;
+                  const hasTransactions = data.transactions.length > 0;
                   const isExpanded = expandedCategories.has(categoryId);
 
                   return (
                     <>
-                      <TableRow key={categoryId} className={hasMultipleTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
-                        <TableCell className="w-[40px]" onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
+                      <TableRow key={categoryId} className={hasTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
+                        <TableCell className="w-[40px]" onClick={hasTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
                           <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
-                            {hasMultipleTransactions && (
+                            {hasTransactions && (
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
@@ -280,14 +280,14 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="w-[250px]" onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
+                        <TableCell className="w-[250px]" onClick={hasTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
                           <div className="flex items-center gap-2">
                             <div 
                               className="w-3 h-3 rounded-full flex-shrink-0" 
                               style={{ backgroundColor: data.categoryColor }}
                             />
                             <span className="break-words">{data.categoryName}</span>
-                            {hasMultipleTransactions && (
+                            {hasTransactions && (
                               <span className="text-xs text-muted-foreground flex-shrink-0">({data.transactions.length})</span>
                             )}
                           </div>
@@ -312,30 +312,40 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                       </TableRow>
                       
                       {/* Subtabela de transações */}
-                      {hasMultipleTransactions && isExpanded && (
+                      {hasTransactions && isExpanded && (
                         <TableRow>
-                          <TableCell colSpan={6} className="bg-muted/30 p-0">
+                          <TableCell colSpan={6} className="bg-gradient-to-br from-muted/50 to-muted/30 p-0 border-t border-border/50">
                             <div className="px-6 py-4 animate-accordion-down">
                               <div className="space-y-2">
                                 {data.transactions.map((t, idx) => (
                                   <div 
                                     key={t.id} 
-                                    className="flex items-center justify-between py-2 px-3 rounded-md bg-background border border-border/50 hover:border-primary/30 hover:bg-accent/50 transition-all duration-200"
+                                    className="group flex items-center justify-between py-3 px-4 rounded-lg bg-background/80 backdrop-blur-sm border border-border/50 hover:border-primary/40 hover:bg-accent/50 hover:shadow-sm transition-all duration-200"
                                   >
                                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                                      <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded flex-shrink-0">
-                                        {format(new Date(t.date), "dd/MM")}
-                                      </span>
-                                      <span className="font-medium truncate">{t.description}</span>
-                                      {t.credit_card_id && t.credit_cards && (
-                                        <span className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-950/30 px-2 py-1 rounded flex-shrink-0">
-                                          {t.credit_cards.name}
+                                      <div className="flex items-center gap-2 min-w-[60px]">
+                                        <span className="text-xs font-semibold text-foreground/70 bg-muted/80 px-2.5 py-1.5 rounded-md flex-shrink-0 border border-border/30">
+                                          {format(new Date(t.date), "dd/MM")}
                                         </span>
-                                      )}
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
+                                          {t.description}
+                                        </div>
+                                        {t.credit_card_id && t.credit_cards && (
+                                          <div className="flex items-center gap-1 mt-1">
+                                            <span className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-950/30 px-2 py-0.5 rounded-md border border-blue-200/20 dark:border-blue-800/30">
+                                              💳 {t.credit_cards.name}
+                                            </span>
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
-                                    <span className="font-semibold text-sm flex-shrink-0 ml-4">
-                                      {maskValue(formatCurrency(Number(t.amount)))}
-                                    </span>
+                                    <div className="flex-shrink-0 ml-4">
+                                      <span className="font-bold text-base text-foreground group-hover:text-primary transition-colors">
+                                        {maskValue(formatCurrency(Number(t.amount)))}
+                                      </span>
+                                    </div>
                                   </div>
                                 ))}
                               </div>
@@ -394,15 +404,15 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                     const percentage = data.forecasted !== 0 
                       ? ((difference / data.forecasted) * 100).toFixed(1)
                       : "-";
-                  const hasMultipleTransactions = data.transactions.length > 1;
+                  const hasTransactions = data.transactions.length > 0;
                   const isExpanded = expandedCategories.has(categoryId);
 
                   return (
                     <>
-                      <TableRow key={categoryId} className={hasMultipleTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
-                        <TableCell className="w-[40px]" onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
+                      <TableRow key={categoryId} className={hasTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
+                        <TableCell className="w-[40px]" onClick={hasTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
                           <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
-                            {hasMultipleTransactions && (
+                            {hasTransactions && (
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
@@ -417,14 +427,14 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="w-[250px]" onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
+                        <TableCell className="w-[250px]" onClick={hasTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
                           <div className="flex items-center gap-2">
                             <div 
                               className="w-3 h-3 rounded-full flex-shrink-0" 
                               style={{ backgroundColor: data.categoryColor }}
                             />
                             <span className="break-words">{data.categoryName}</span>
-                            {hasMultipleTransactions && (
+                            {hasTransactions && (
                               <span className="text-xs text-muted-foreground flex-shrink-0">({data.transactions.length})</span>
                             )}
                           </div>
@@ -449,30 +459,40 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                       </TableRow>
                       
                       {/* Subtabela de transações */}
-                      {hasMultipleTransactions && isExpanded && (
+                      {hasTransactions && isExpanded && (
                         <TableRow>
-                          <TableCell colSpan={6} className="bg-muted/30 p-0">
+                          <TableCell colSpan={6} className="bg-gradient-to-br from-muted/50 to-muted/30 p-0 border-t border-border/50">
                             <div className="px-6 py-4 animate-accordion-down">
                               <div className="space-y-2">
                                 {data.transactions.map((t, idx) => (
                                   <div 
                                     key={t.id} 
-                                    className="flex items-center justify-between py-2 px-3 rounded-md bg-background border border-border/50 hover:border-primary/30 hover:bg-accent/50 transition-all duration-200"
+                                    className="group flex items-center justify-between py-3 px-4 rounded-lg bg-background/80 backdrop-blur-sm border border-border/50 hover:border-primary/40 hover:bg-accent/50 hover:shadow-sm transition-all duration-200"
                                   >
                                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                                      <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded flex-shrink-0">
-                                        {format(new Date(t.date), "dd/MM")}
-                                      </span>
-                                      <span className="font-medium truncate">{t.description}</span>
-                                      {t.credit_card_id && t.credit_cards && (
-                                        <span className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-950/30 px-2 py-1 rounded flex-shrink-0">
-                                          {t.credit_cards.name}
+                                      <div className="flex items-center gap-2 min-w-[60px]">
+                                        <span className="text-xs font-semibold text-foreground/70 bg-muted/80 px-2.5 py-1.5 rounded-md flex-shrink-0 border border-border/30">
+                                          {format(new Date(t.date), "dd/MM")}
                                         </span>
-                                      )}
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
+                                          {t.description}
+                                        </div>
+                                        {t.credit_card_id && t.credit_cards && (
+                                          <div className="flex items-center gap-1 mt-1">
+                                            <span className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-950/30 px-2 py-0.5 rounded-md border border-blue-200/20 dark:border-blue-800/30">
+                                              💳 {t.credit_cards.name}
+                                            </span>
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
-                                    <span className="font-semibold text-sm flex-shrink-0 ml-4">
-                                      {maskValue(formatCurrency(Number(t.amount)))}
-                                    </span>
+                                    <div className="flex-shrink-0 ml-4">
+                                      <span className="font-bold text-base text-foreground group-hover:text-primary transition-colors">
+                                        {maskValue(formatCurrency(Number(t.amount)))}
+                                      </span>
+                                    </div>
                                   </div>
                                 ))}
                               </div>
