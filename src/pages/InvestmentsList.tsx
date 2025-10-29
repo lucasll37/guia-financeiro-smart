@@ -223,7 +223,7 @@ export default function InvestmentsList() {
         open={membersDialogOpen}
         onOpenChange={setMembersDialogOpen}
         investment={selectedInvestment}
-        ownerId={user.id}
+        ownerId={selectedInvestment?.owner_id || user.id}
       />
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
