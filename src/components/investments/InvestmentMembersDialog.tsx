@@ -35,7 +35,7 @@ import { useInvestmentMembers } from "@/hooks/useInvestmentMembers";
 import { UserPlus, Trash2, Check, X, LogOut, Crown, Shield, Eye, Edit, Calendar, Copy } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 
@@ -394,7 +394,7 @@ export function InvestmentMembersDialog({
       </DialogContent>
 
       <AlertDialog open={leaveDialogOpen} onOpenChange={setLeaveDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Abandonar Investimento</AlertDialogTitle>
             <AlertDialogDescription>
@@ -402,31 +402,60 @@ export function InvestmentMembersDialog({
               a todas as informações deste investimento.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="space-y-4 py-4">
+          
+          <div className="space-y-4">
+            {currentUserMembership && (
+              <div className="rounded-lg border bg-muted/50 p-3 space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Compartilhado em</span>
+                  <span className="font-medium">
+                    {format(new Date(currentUserMembership.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Dias de acesso</span>
+                  <span className="font-medium">
+                    {differenceInDays(new Date(), new Date(currentUserMembership.created_at))} dias
+                  </span>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
-              <Label htmlFor="confirm-name">
-                Para confirmar, digite o nome do investimento:{" "}
-                <span className="font-semibold">{investment?.name}</span>
-              </Label>
-              <div className="flex gap-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="investment-name" className="text-sm font-normal text-muted-foreground">
+                  Digite o nome do investimento
+                </Label>
+                <div className="flex items-center gap-2 rounded-md border bg-muted px-3 py-2">
+                  <span className="flex-1 text-sm font-medium">{investment?.name}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={handleCopyInvestmentName}
+                    title="Copiar nome"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="space-y-1.5">
+                <Label htmlFor="confirm-name" className="text-sm font-normal text-muted-foreground">
+                  Nome do investimento
+                </Label>
                 <Input
                   id="confirm-name"
                   value={leaveConfirmName}
                   onChange={(e) => setLeaveConfirmName(e.target.value)}
-                  placeholder="Digite o nome do investimento"
+                  placeholder="Nome do investimento"
+                  className="h-9"
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={handleCopyInvestmentName}
-                  title="Copiar nome"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
               </div>
             </div>
           </div>
+
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
