@@ -315,19 +315,30 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                       {hasMultipleTransactions && isExpanded && (
                         <TableRow>
                           <TableCell colSpan={6} className="bg-muted/30 p-0">
-                            <div className="p-4 space-y-1">
-                              {data.transactions.map(t => (
-                                <div key={t.id} className="flex justify-between text-sm py-1 px-2 hover:bg-background rounded">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-muted-foreground text-xs">{format(new Date(t.date), "dd/MM")}</span>
-                                    <span>{t.description}</span>
-                                    {t.credit_card_id && t.credit_cards && (
-                                      <span className="text-xs text-muted-foreground">({t.credit_cards.name})</span>
-                                    )}
+                            <div className="px-6 py-4 animate-accordion-down">
+                              <div className="space-y-2">
+                                {data.transactions.map((t, idx) => (
+                                  <div 
+                                    key={t.id} 
+                                    className="flex items-center justify-between py-2 px-3 rounded-md bg-background border border-border/50 hover:border-primary/30 hover:bg-accent/50 transition-all duration-200"
+                                  >
+                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                      <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded flex-shrink-0">
+                                        {format(new Date(t.date), "dd/MM")}
+                                      </span>
+                                      <span className="font-medium truncate">{t.description}</span>
+                                      {t.credit_card_id && t.credit_cards && (
+                                        <span className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-950/30 px-2 py-1 rounded flex-shrink-0">
+                                          {t.credit_cards.name}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="font-semibold text-sm flex-shrink-0 ml-4">
+                                      {maskValue(formatCurrency(Number(t.amount)))}
+                                    </span>
                                   </div>
-                                   <span className="font-medium">{maskValue(formatCurrency(Number(t.amount)))}</span>
-                                </div>
-                              ))}
+                                ))}
+                              </div>
                             </div>
                           </TableCell>
                         </TableRow>
@@ -445,19 +456,30 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                       {hasMultipleTransactions && isExpanded && (
                         <TableRow>
                           <TableCell colSpan={6} className="bg-muted/30 p-0">
-                            <div className="p-4 space-y-1">
-                              {data.transactions.map(t => (
-                                <div key={t.id} className="flex justify-between text-sm py-1 px-2 hover:bg-background rounded">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-muted-foreground text-xs">{format(new Date(t.date), "dd/MM")}</span>
-                                    <span>{t.description}</span>
-                                    {t.credit_card_id && t.credit_cards && (
-                                      <span className="text-xs text-muted-foreground">({t.credit_cards.name})</span>
-                                    )}
+                            <div className="px-6 py-4 animate-accordion-down">
+                              <div className="space-y-2">
+                                {data.transactions.map((t, idx) => (
+                                  <div 
+                                    key={t.id} 
+                                    className="flex items-center justify-between py-2 px-3 rounded-md bg-background border border-border/50 hover:border-primary/30 hover:bg-accent/50 transition-all duration-200"
+                                  >
+                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                      <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded flex-shrink-0">
+                                        {format(new Date(t.date), "dd/MM")}
+                                      </span>
+                                      <span className="font-medium truncate">{t.description}</span>
+                                      {t.credit_card_id && t.credit_cards && (
+                                        <span className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-950/30 px-2 py-1 rounded flex-shrink-0">
+                                          {t.credit_cards.name}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="font-semibold text-sm flex-shrink-0 ml-4">
+                                      {maskValue(formatCurrency(Number(t.amount)))}
+                                    </span>
                                   </div>
-                                  <span className="font-medium">{maskValue(formatCurrency(Number(t.amount)))}</span>
-                                </div>
-                              ))}
+                                ))}
+                              </div>
                             </div>
                           </TableCell>
                         </TableRow>
