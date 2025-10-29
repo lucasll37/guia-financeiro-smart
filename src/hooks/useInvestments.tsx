@@ -14,20 +14,59 @@ export function useInvestments(accountId?: string) {
   const { data: investments, isLoading } = useQuery({
     queryKey: ["investments", accountId],
     queryFn: async () => {
-      let query = supabase.from("investment_assets").select("*");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
 
-      // If accountId is provided, filter by it (optional association)
-      // Otherwise, fetch all investments the user has access to (owned or shared)
+      // Get user's own investments
+      let ownQuery = supabase
+        .from("investment_assets")
+        .select("*")
+        .eq("owner_id", user.id);
+
       if (accountId) {
-        query = query.eq("account_id", accountId);
+        ownQuery = ownQuery.eq("account_id", accountId);
       }
 
-      const { data, error } = await query.order("created_at", {
-        ascending: false,
-      });
+      const { data: ownInvestments, error: ownError } = await ownQuery;
+      if (ownError) throw ownError;
 
-      if (error) throw error;
-      return data as Investment[];
+      // Get investments shared with user (accepted memberships)
+      const { data: memberships, error: membershipsError } = await supabase
+        .from("investment_members")
+        .select("investment_id")
+        .eq("user_id", user.id)
+        .eq("status", "accepted");
+
+      if (membershipsError) throw membershipsError;
+
+      const sharedInvestmentIds = memberships?.map(m => m.investment_id) || [];
+
+      // Get shared investments
+      let sharedInvestments: Investment[] = [];
+      if (sharedInvestmentIds.length > 0) {
+        let sharedQuery = supabase
+          .from("investment_assets")
+          .select("*")
+          .in("id", sharedInvestmentIds);
+
+        if (accountId) {
+          sharedQuery = sharedQuery.eq("account_id", accountId);
+        }
+
+        const { data, error } = await sharedQuery;
+        if (error) throw error;
+        sharedInvestments = data || [];
+      }
+
+      // Combine and deduplicate
+      const allInvestments = [...(ownInvestments || []), ...sharedInvestments];
+      const uniqueInvestments = Array.from(
+        new Map(allInvestments.map(inv => [inv.id, inv])).values()
+      );
+
+      return uniqueInvestments.sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
     },
   });
 
