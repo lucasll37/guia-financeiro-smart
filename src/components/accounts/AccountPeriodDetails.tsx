@@ -239,7 +239,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[200px]">Categoria</TableHead>
+                      <TableHead className="w-[200px] hidden lg:table-cell">Categoria</TableHead>
                       <TableHead className="text-right w-[140px]">Previsto</TableHead>
                       <TableHead className="text-right w-[140px]">Realizado</TableHead>
                       <TableHead className="text-right w-[140px]">Diferença</TableHead>
@@ -261,7 +261,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   return (
                     <>
                       <TableRow key={categoryId} className={hasMultipleTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
-                        <TableCell onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined} className="w-[200px]">
+                        <TableCell onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined} className="w-[200px] hidden lg:table-cell">
                           <div className="flex items-center gap-2">
                             <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                               {hasMultipleTransactions && (
@@ -368,7 +368,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[200px]">Categoria</TableHead>
+                      <TableHead className="w-[200px] hidden lg:table-cell">Categoria</TableHead>
                       <TableHead className="text-right w-[140px]">Previsto</TableHead>
                       <TableHead className="text-right w-[140px]">Realizado</TableHead>
                       <TableHead className="text-right w-[140px]">Diferença</TableHead>
@@ -390,7 +390,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   return (
                     <>
                       <TableRow key={categoryId} className={hasMultipleTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
-                        <TableCell onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined} className="w-[200px]">
+                        <TableCell onClick={hasMultipleTransactions ? () => toggleCategoryExpansion(categoryId) : undefined} className="w-[200px] hidden lg:table-cell">
                           <div className="flex items-center gap-2">
                             <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                               {hasMultipleTransactions && (
@@ -487,7 +487,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px]">Descrição</TableHead>
+                <TableHead className="w-[200px] hidden lg:table-cell">Descrição</TableHead>
                 <TableHead className="text-right w-[140px]">Previsto</TableHead>
                 <TableHead className="text-right w-[140px]">Realizado</TableHead>
                 <TableHead className="text-right w-[140px]">Diferença</TableHead>
@@ -496,7 +496,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
             </TableHeader>
             <TableBody>
               <TableRow>
-                <TableCell className="w-[200px]">
+                <TableCell className="w-[200px] hidden lg:table-cell">
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 flex-shrink-0" />
                     <div className="w-3 h-3 rounded-full flex-shrink-0 bg-blue-500" />
