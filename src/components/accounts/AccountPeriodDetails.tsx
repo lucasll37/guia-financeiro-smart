@@ -312,19 +312,18 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                         </TableCell>
                           <TableCell className="text-right w-[180px]">
                             <div className="space-y-1">
-                              <div className="flex justify-between text-xs mb-1">
-                                <span className="text-muted-foreground">
-                                  {maskValue(formatCurrency(data.actual))} / {maskValue(formatCurrency(data.forecasted))}
-                                </span>
-                              </div>
-                              
-                              <div className="relative h-6 bg-muted rounded-full overflow-visible">
+                              <div className="relative h-6 bg-muted rounded-full overflow-visible border-2"
+                                style={{
+                                  borderColor: completion > 100 
+                                    ? 'rgb(220 38 38)' 
+                                    : 'rgb(34 197 94)'
+                                }}>
                                 <div
                                   className={cn(
-                                    "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full",
+                                    "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full border-2",
                                     completion > 100
-                                      ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500 border-2 border-red-600 dark:border-red-500"
-                                      : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500 border-2 border-green-600 dark:border-green-500"
+                                      ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500 border-red-600 dark:border-red-500"
+                                      : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500 border-green-600 dark:border-green-500"
                                   )}
                                   style={{
                                     width: `${Math.min(completion, 150)}%`,
@@ -343,12 +342,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                                 )}
                                 
                                 <div className="absolute inset-0 flex items-center justify-center z-10">
-                                  <span className={cn(
-                                    "text-xs font-semibold drop-shadow-lg",
-                                    completion > 100
-                                      ? "text-white"
-                                      : "text-white"
-                                  )}>
+                                  <span className="text-xs font-semibold text-white drop-shadow-lg">
                                     {Math.round(completion)}%
                                   </span>
                                 </div>
@@ -493,19 +487,18 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                         </TableCell>
                         <TableCell className="text-right w-[180px]">
                           <div className="space-y-1">
-                            <div className="flex justify-between text-xs mb-1">
-                              <span className="text-muted-foreground">
-                                {maskValue(formatCurrency(data.actual))} / {maskValue(formatCurrency(data.forecasted))}
-                              </span>
-                            </div>
-                            
-                            <div className="relative h-6 bg-muted rounded-full overflow-visible">
+                            <div className="relative h-6 bg-muted rounded-full overflow-visible border-2"
+                              style={{
+                                borderColor: completion > 100 
+                                  ? 'rgb(220 38 38)' 
+                                  : 'rgb(34 197 94)'
+                              }}>
                               <div
                                 className={cn(
-                                  "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full",
+                                  "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full border-2",
                                   completion > 100
-                                    ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500 border-2 border-red-600 dark:border-red-500"
-                                    : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500 border-2 border-green-600 dark:border-green-500"
+                                    ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500 border-red-600 dark:border-red-500"
+                                    : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500 border-green-600 dark:border-green-500"
                                 )}
                                 style={{
                                   width: `${Math.min(completion, 150)}%`,
@@ -524,12 +517,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                               )}
                               
                               <div className="absolute inset-0 flex items-center justify-center z-10">
-                                <span className={cn(
-                                  "text-xs font-semibold drop-shadow-lg",
-                                  completion > 100
-                                    ? "text-white"
-                                    : "text-white"
-                                )}>
+                                <span className="text-xs font-semibold text-white drop-shadow-lg">
                                   {Math.round(completion)}%
                                 </span>
                               </div>
