@@ -675,6 +675,7 @@ export type Database = {
           id: string
           max_accounts: number
           max_credit_cards: number
+          max_investments: number
           plan: Database["public"]["Enums"]["subscription_plan"]
           updated_at: string | null
         }
@@ -685,6 +686,7 @@ export type Database = {
           id?: string
           max_accounts?: number
           max_credit_cards?: number
+          max_investments?: number
           plan: Database["public"]["Enums"]["subscription_plan"]
           updated_at?: string | null
         }
@@ -695,6 +697,7 @@ export type Database = {
           id?: string
           max_accounts?: number
           max_credit_cards?: number
+          max_investments?: number
           plan?: Database["public"]["Enums"]["subscription_plan"]
           updated_at?: string | null
         }

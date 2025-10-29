@@ -20,6 +20,7 @@ export function PlanLimitsManager() {
   const [editForm, setEditForm] = useState({
     max_accounts: 0,
     max_credit_cards: 0,
+    max_investments: 0,
     can_edit_categories: false,
     can_generate_reports: false,
   });
@@ -40,10 +41,11 @@ export function PlanLimitsManager() {
 
   // Update plan limits mutation
   const updatePlanLimit = useMutation({
-    mutationFn: async ({ plan, max_accounts, max_credit_cards, can_edit_categories, can_generate_reports }: {
+    mutationFn: async ({ plan, max_accounts, max_credit_cards, max_investments, can_edit_categories, can_generate_reports }: {
       plan: SubscriptionPlan;
       max_accounts: number;
       max_credit_cards: number;
+      max_investments: number;
       can_edit_categories: boolean;
       can_generate_reports: boolean;
     }) => {
@@ -52,6 +54,7 @@ export function PlanLimitsManager() {
         .update({
           max_accounts,
           max_credit_cards,
+          max_investments,
           can_edit_categories,
           can_generate_reports,
         })
@@ -81,6 +84,7 @@ export function PlanLimitsManager() {
     setEditForm({
       max_accounts: limit.max_accounts,
       max_credit_cards: limit.max_credit_cards,
+      max_investments: limit.max_investments,
       can_edit_categories: limit.can_edit_categories,
       can_generate_reports: limit.can_generate_reports,
     });
@@ -89,7 +93,7 @@ export function PlanLimitsManager() {
   const handleSave = () => {
     if (!editingPlan) return;
 
-    if (editForm.max_accounts < 1 || editForm.max_credit_cards < 1) {
+    if (editForm.max_accounts < 1 || editForm.max_credit_cards < 1 || editForm.max_investments < 1) {
       toast({
         title: "Valores inválidos",
         description: "Os limites devem ser maiores que zero.",
@@ -102,6 +106,7 @@ export function PlanLimitsManager() {
       plan: editingPlan,
       max_accounts: editForm.max_accounts,
       max_credit_cards: editForm.max_credit_cards,
+      max_investments: editForm.max_investments,
       can_edit_categories: editForm.can_edit_categories,
       can_generate_reports: editForm.can_generate_reports,
     });
@@ -203,6 +208,24 @@ export function PlanLimitsManager() {
                         }
                       />
                     </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor={`investments-${limit.plan}`}>
+                        Máximo de Investimentos
+                      </Label>
+                      <Input
+                        id={`investments-${limit.plan}`}
+                        type="number"
+                        min="1"
+                        value={editForm.max_investments}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            max_investments: parseInt(e.target.value) || 1,
+                          })
+                        }
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-3 pt-2 border-t">
@@ -260,7 +283,7 @@ export function PlanLimitsManager() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="grid gap-4 md:grid-cols-2 text-sm">
+                  <div className="grid gap-4 md:grid-cols-3 text-sm">
                     <div>
                       <span className="text-muted-foreground">Contas:</span>
                       <span className="ml-2 font-medium">
@@ -271,6 +294,12 @@ export function PlanLimitsManager() {
                       <span className="text-muted-foreground">Cartões:</span>
                       <span className="ml-2 font-medium">
                         {limit.max_credit_cards === 999 ? "Ilimitado" : limit.max_credit_cards}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Investimentos:</span>
+                      <span className="ml-2 font-medium">
+                        {limit.max_investments === 999 ? "Ilimitado" : limit.max_investments}
                       </span>
                     </div>
                   </div>

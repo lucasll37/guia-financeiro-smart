@@ -61,14 +61,34 @@ export function usePlanLimits() {
     return (count || 0) < currentPlanLimits.max_credit_cards;
   };
 
+  // Check if user can create more investments
+  const canCreateInvestment = async () => {
+    if (!currentPlanLimits) return false;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    // Count user's investments
+    const { count, error } = await supabase
+      .from("investment_assets")
+      .select("*", { count: "exact", head: true })
+      .eq("owner_id", user.id);
+
+    if (error) throw error;
+
+    return (count || 0) < currentPlanLimits.max_investments;
+  };
+
   return {
     planLimits,
     currentPlanLimits,
     userPlan,
     canCreateAccount,
     canCreateCreditCard,
+    canCreateInvestment,
     maxAccounts: currentPlanLimits?.max_accounts || 1,
     maxCreditCards: currentPlanLimits?.max_credit_cards || 1,
+    maxInvestments: currentPlanLimits?.max_investments || 1,
     canEditCategories: currentPlanLimits?.can_edit_categories || false,
     canGenerateReports: currentPlanLimits?.can_generate_reports || false,
   };
