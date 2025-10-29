@@ -147,11 +147,11 @@ export function TransactionsTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Data</TableHead>
-              <TableHead>Categoria</TableHead>
+              <TableHead className="w-[120px]">Data</TableHead>
+              <TableHead className="w-[200px]">Categoria</TableHead>
               <TableHead>Descrição</TableHead>
-              <TableHead className="text-right">Valor</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <TableHead className="text-right w-[150px]">Valor</TableHead>
+              <TableHead className="text-right w-[100px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -177,26 +177,26 @@ export function TransactionsTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>
+                <TableHead className="w-[120px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('date')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Data
                     {renderSortIcon('date')}
                   </Button>
                 </TableHead>
-                <TableHead>Categoria</TableHead>
+                <TableHead className="w-[200px]">Categoria</TableHead>
                 <TableHead>
                   <Button variant="ghost" size="sm" onClick={() => handleSort('description')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Descrição
                     {renderSortIcon('description')}
                   </Button>
                 </TableHead>
-                <TableHead className="text-right">
+                <TableHead className="text-right w-[150px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Valor
                     {renderSortIcon('amount')}
                   </Button>
                 </TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <TableHead className="text-right w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -224,26 +224,26 @@ export function TransactionsTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>
+                <TableHead className="w-[120px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('date')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Data
                     {renderSortIcon('date')}
                   </Button>
                 </TableHead>
-                <TableHead>Categoria</TableHead>
+                <TableHead className="w-[200px]">Categoria</TableHead>
                 <TableHead>
                   <Button variant="ghost" size="sm" onClick={() => handleSort('description')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Descrição
                     {renderSortIcon('description')}
                   </Button>
                 </TableHead>
-                <TableHead className="text-right">
+                <TableHead className="text-right w-[150px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Valor
                     {renderSortIcon('amount')}
                   </Button>
                 </TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <TableHead className="text-right w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
