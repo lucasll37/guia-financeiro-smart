@@ -9,6 +9,7 @@ import { NavLink } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/sidebar";
 import { t } from "@/lib/i18n";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useAppSettings } from "@/hooks/useAppSettings";
 
 const menuItems = [
   { title: t("nav.dashboard"), url: "/app/dashboard", icon: LayoutDashboard },
@@ -33,6 +35,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const { data: isAdmin } = useIsAdmin();
+  const { version } = useAppSettings();
   
   const visibleMenuItems = isAdmin ? [...menuItems, adminMenuItem] : menuItems;
 
@@ -64,6 +67,12 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      
+      <SidebarFooter>
+        <div className="px-4 py-2 text-xs text-muted-foreground">
+          {!isCollapsed && <span>v{version}</span>}
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }
