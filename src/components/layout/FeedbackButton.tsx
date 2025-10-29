@@ -93,26 +93,26 @@ export function FeedbackButton() {
           <DropdownMenuTrigger asChild>
             <Button
               size="lg"
-              className="h-16 w-16 rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 bg-gradient-to-br from-primary via-primary to-primary/80 border-2 border-primary/20"
+              className="h-16 w-16 rounded-full shadow-2xl hover:shadow-primary/50 hover:scale-110 transition-all duration-300 bg-gradient-to-br from-primary via-primary to-primary/80 border-2 border-background group animate-fade-in"
             >
-              <MessageSquare className="h-7 w-7" />
+              <MessageSquare className="h-7 w-7 transition-transform group-hover:rotate-12" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
             side="top"
             sideOffset={12}
-            className="w-64 bg-background/95 backdrop-blur-sm border-border shadow-xl z-[100] p-2 animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2"
+            className="w-64 p-2 animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2 border-border/50 backdrop-blur-sm"
           >
             <DropdownMenuItem
               onClick={() => handleOpenDialog("bug")}
-              className="cursor-pointer gap-3 py-4 px-3 rounded-md hover:bg-accent/80 transition-colors group"
+              className="cursor-pointer gap-3 py-4 px-3 rounded-lg transition-all group hover:scale-[1.02]"
             >
-              <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center group-hover:bg-destructive/20 transition-colors">
-                <Bug className="h-5 w-5 text-destructive" />
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-red-500/20 to-red-600/20 dark:from-red-400/20 dark:to-red-500/20 flex items-center justify-center group-hover:from-red-500/30 group-hover:to-red-600/30 dark:group-hover:from-red-400/30 dark:group-hover:to-red-500/30 transition-all shadow-sm">
+                <Bug className="h-5 w-5 text-red-600 dark:text-red-400" />
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-sm">Reportar Bug</p>
+                <p className="font-semibold text-sm text-foreground">Reportar Bug</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Encontrou um problema?
                 </p>
@@ -120,13 +120,13 @@ export function FeedbackButton() {
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => handleOpenDialog("suggestion")}
-              className="cursor-pointer gap-3 py-4 px-3 rounded-md hover:bg-accent/80 transition-colors group"
+              className="cursor-pointer gap-3 py-4 px-3 rounded-lg transition-all group hover:scale-[1.02]"
             >
-              <div className="h-10 w-10 rounded-full bg-chart-3/10 flex items-center justify-center group-hover:bg-chart-3/20 transition-colors">
-                <Lightbulb className="h-5 w-5 text-chart-3" />
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-500/20 to-yellow-500/20 dark:from-amber-400/20 dark:to-yellow-400/20 flex items-center justify-center group-hover:from-amber-500/30 group-hover:to-yellow-500/30 dark:group-hover:from-amber-400/30 dark:group-hover:to-yellow-400/30 transition-all shadow-sm">
+                <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-sm">Sugestão</p>
+                <p className="font-semibold text-sm text-foreground">Sugestão</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Compartilhe suas ideias
                 </p>
@@ -143,12 +143,16 @@ export function FeedbackButton() {
             <DialogTitle className="flex items-center gap-2">
               {feedbackType === "bug" ? (
                 <>
-                  <Bug className="h-5 w-5 text-destructive" />
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-red-500/20 to-red-600/20 dark:from-red-400/20 dark:to-red-500/20 flex items-center justify-center">
+                    <Bug className="h-4 w-4 text-red-600 dark:text-red-400" />
+                  </div>
                   Reportar Bug
                 </>
               ) : (
                 <>
-                  <Lightbulb className="h-5 w-5 text-chart-3" />
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-amber-500/20 to-yellow-500/20 dark:from-amber-400/20 dark:to-yellow-400/20 flex items-center justify-center">
+                    <Lightbulb className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  </div>
                   Enviar Sugestão
                 </>
               )}
