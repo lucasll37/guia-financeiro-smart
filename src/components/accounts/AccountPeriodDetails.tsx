@@ -92,51 +92,24 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
     });
   }, [transactions, periodStart, periodEnd]);
 
-  // Calcular saldo do período anterior
+  // Calcular saldo do período anterior: soma de todas as transações até o fim do período anterior
   const previousBalance = useMemo(() => {
     if (!transactions) return 0;
-    
-    // Calcular o período anterior
-    const prevPeriod = calculatePeriod(addMonths(currentDate, -1), closingDay);
-    
-    // Saldo antes do período anterior
-    const balanceBeforePrevPeriod = transactions
-      .filter(t => {
-        if (t.description === "Saldo Anterior") return false;
+
+    const prev = calculatePeriod(addMonths(currentDate, -1), closingDay);
+
+    return transactions
+      .filter((t) => {
+        if (t.description === "Saldo Anterior") return false; // evita duplicidade
         if (t.credit_card_id && t.payment_month) {
           const txDate = parseISO(t.payment_month as string);
-          return txDate < prevPeriod.periodStart;
+          return txDate <= prev.periodEnd;
         } else {
           const txDate = parseISO(t.date);
-          return txDate < prevPeriod.periodStart;
+          return txDate <= prev.periodEnd;
         }
       })
       .reduce((sum, t) => sum + Number(t.amount), 0);
-    
-    // Transações do período anterior
-    const prevPeriodMonth = format(prevPeriod.periodEnd, "yyyy-MM");
-    const prevPeriodTransactions = transactions.filter(t => {
-      if (t.description === "Saldo Anterior") return false;
-      if (t.credit_card_id && t.payment_month) {
-        const pm = format(parseISO(t.payment_month as string), "yyyy-MM");
-        return pm === prevPeriodMonth;
-      } else {
-        const txMonth = format(parseISO(t.date), "yyyy-MM");
-        return txMonth === prevPeriodMonth;
-      }
-    });
-    
-    // Receitas e despesas do período anterior
-    const prevIncome = prevPeriodTransactions
-      .filter(t => Number(t.amount) > 0)
-      .reduce((sum, t) => sum + Number(t.amount), 0);
-    
-    const prevExpenses = prevPeriodTransactions
-      .filter(t => Number(t.amount) < 0)
-      .reduce((sum, t) => sum + Math.abs(Number(t.amount)), 0);
-    
-    // Saldo do período anterior = Saldo antes + Receitas - Despesas
-    return balanceBeforePrevPeriod + prevIncome - prevExpenses;
   }, [transactions, currentDate, closingDay]);
 
   // Agrupar por categoria e tipo
