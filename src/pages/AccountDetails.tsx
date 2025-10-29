@@ -93,98 +93,53 @@ export default function AccountDetails() {
 
       {showSuggestion && (
         <Collapsible open={instructionsOpen} onOpenChange={setInstructionsOpen}>
-          <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 animate-fade-in">
+          <Card className="border border-muted bg-muted/30">
             <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-primary/5 transition-colors">
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Lightbulb className="h-5 w-5 text-primary" />
-                    <CardTitle className="text-lg">Como usar esta conta</CardTitle>
+                    <Lightbulb className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Como usar esta conta
+                    </CardTitle>
                   </div>
                   <ChevronDown 
-                    className={`h-5 w-5 text-primary transition-transform duration-200 ${
+                    className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
                       instructionsOpen ? 'transform rotate-180' : ''
                     }`}
                   />
                 </div>
-                <CardDescription>
-                  Siga estes passos para ter controle total das suas finanças
-                </CardDescription>
               </CardHeader>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <CardContent className="space-y-4 animate-accordion-down">
-                <div className="grid gap-3">
-                  <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold flex-shrink-0">
-                      1
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-primary" />
-                        <h4 className="font-medium">Crie suas previsões</h4>
+              <CardContent className="pt-0 pb-4 animate-accordion-down">
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  <div className="flex items-start gap-2">
+                    <span className="font-semibold text-foreground">1.</span>
+                    <p><span className="font-medium text-foreground">Crie previsões</span> - Defina quanto espera receber e gastar em cada categoria</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="font-semibold text-foreground">2.</span>
+                    <p><span className="font-medium text-foreground">Registre lançamentos</span> - Adicione suas receitas e despesas do dia a dia</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="font-semibold text-foreground">3.</span>
+                    <p><span className="font-medium text-foreground">Acompanhe a evolução</span> - Veja a comparação entre previsto x realizado e seu saldo</p>
+                  </div>
+                  
+                  <div className="pt-2 mt-2 border-t border-muted">
+                    <p className="text-xs text-muted-foreground mb-2">Opcional:</p>
+                    <div className="space-y-1.5">
+                      <div className="flex items-start gap-2">
+                        <span>•</span>
+                        <p><span className="font-medium text-foreground">Cartões de crédito</span> - Configure seus cartões para rastrear faturas</p>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        Defina quanto espera receber e gastar em cada categoria para planejar seu período
-                      </p>
+                      <div className="flex items-start gap-2">
+                        <span>•</span>
+                        <p><span className="font-medium text-foreground">Categorias personalizadas</span> - Adapte as categorias às suas necessidades</p>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold flex-shrink-0">
-                      2
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Receipt className="h-4 w-4 text-primary" />
-                        <h4 className="font-medium">Registre seus lançamentos</h4>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Adicione suas receitas e despesas conforme acontecem no dia a dia
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold flex-shrink-0">
-                      3
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <BarChart3 className="h-4 w-4 text-primary" />
-                        <h4 className="font-medium">Acompanhe a evolução</h4>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Veja aqui a comparação entre previsto x realizado e seu saldo do período
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <Button 
-                    className="flex-1"
-                    onClick={() => {
-                      const currentUrl = window.location.pathname;
-                      const baseUrl = currentUrl.split('?')[0];
-                      navigate(`${baseUrl}?tab=previsoes`);
-                    }}
-                  >
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    Criar Previsões
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => {
-                      const currentUrl = window.location.pathname;
-                      const baseUrl = currentUrl.split('?')[0];
-                      navigate(`${baseUrl}?tab=lancamentos`);
-                    }}
-                  >
-                    <Receipt className="h-4 w-4 mr-2" />
-                    Adicionar Lançamento
-                  </Button>
                 </div>
               </CardContent>
             </CollapsibleContent>
