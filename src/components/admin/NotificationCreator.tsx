@@ -149,46 +149,61 @@ export function NotificationCreator() {
                   role="combobox"
                   aria-expanded={open}
                   className={cn(
-                    "w-full justify-between",
+                    "w-full justify-between h-10 px-3",
                     !selectedEmail && "text-muted-foreground"
                   )}
                 >
-                  {selectedEmail || "Digite o email do usuário..."}
+                  <span className="truncate">{selectedEmail || "Digite o email do usuário..."}</span>
+                  <svg className="ml-2 h-4 w-4 shrink-0 opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[400px] p-0">
-                <Command>
+              <PopoverContent 
+                className="w-[400px] p-0 bg-popover border shadow-md animate-in fade-in-0 zoom-in-95"
+                align="start"
+              >
+                <Command className="rounded-lg border-0">
                   <CommandInput
                     placeholder="Digite o email..."
                     value={emailInput}
                     onValueChange={setEmailInput}
+                    className="h-11 border-b"
                   />
-                  <CommandList>
-                    <CommandEmpty>
+                  <CommandList className="max-h-[300px]">
+                    <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
                       {emailInput.length < 2
-                        ? "Digite pelo menos 2 caracteres"
+                        ? "Digite pelo menos 2 caracteres para buscar"
                         : "Nenhum usuário encontrado"}
                     </CommandEmpty>
                     {users && users.length > 0 && (
-                      <CommandGroup>
+                      <CommandGroup className="p-2">
                         {users.map((user) => (
                           <CommandItem
                             key={user.id}
                             value={user.email}
                             onSelect={() => handleSelectUser(user)}
+                            className={cn(
+                              "flex items-center gap-3 px-3 py-3 rounded-md cursor-pointer transition-colors",
+                              "hover:bg-accent hover:text-accent-foreground",
+                              "data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground",
+                              selectedEmail === user.email && "bg-accent/50"
+                            )}
                           >
                             <Check
                               className={cn(
-                                "mr-2 h-4 w-4",
+                                "h-4 w-4 shrink-0 transition-opacity",
                                 selectedEmail === user.email
-                                  ? "opacity-100"
+                                  ? "opacity-100 text-primary"
                                   : "opacity-0"
                               )}
                             />
-                            <div className="flex flex-col">
-                              <span className="font-medium">{user.email}</span>
+                            <div className="flex flex-col gap-1 flex-1 min-w-0">
+                              <span className="font-medium text-sm truncate">
+                                {user.email}
+                              </span>
                               {user.name && (
-                                <span className="text-xs text-muted-foreground">
+                                <span className="text-xs text-muted-foreground truncate">
                                   {user.name}
                                 </span>
                               )}
