@@ -90,20 +90,39 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
     });
   }, [transactions, periodStart, periodEnd]);
 
-  // Calcular saldo remanescente do período anterior
+  // Calcular saldo do período anterior
   const previousBalance = useMemo(() => {
     if (!transactions) return 0;
     
     return transactions
       .filter(t => {
-        const txDate = parseISO(t.date);
-        return txDate < periodStart;
+        if (t.credit_card_id && t.payment_month) {
+          const txDate = parseISO(t.payment_month as string);
+          return txDate < periodStart;
+        } else {
+          const txDate = parseISO(t.date);
+          return txDate < periodStart;
+        }
       })
-      .reduce((sum, t) => {
-        const amount = Number(t.amount);
-        return t.categories?.type === "receita" ? sum + amount : sum - amount;
-      }, 0);
+      .reduce((sum, t) => sum + Number(t.amount), 0);
   }, [transactions, periodStart]);
+
+  // Calcular saldo até o final do período
+  const balance = useMemo(() => {
+    if (!transactions) return 0;
+    
+    return transactions
+      .filter(t => {
+        if (t.credit_card_id && t.payment_month) {
+          const txDate = parseISO(t.payment_month as string);
+          return txDate <= periodEnd;
+        } else {
+          const txDate = parseISO(t.date);
+          return txDate <= periodEnd;
+        }
+      })
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+  }, [transactions, periodEnd]);
 
   // Agrupar por categoria e tipo
   const { incomeTotals, expenseTotals, totalIncome, totalExpense, categoryTransactionsMap } = useMemo(() => {
@@ -172,7 +191,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
     };
   }, [periodTransactions, forecasts, periodStart, categories]);
 
-  const balance = previousBalance + totalIncome - totalExpense;
+  
 
   const handlePreviousPeriod = () => {
     setCurrentDate(prev => addMonths(prev, -1));
