@@ -96,18 +96,48 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
   const previousBalance = useMemo(() => {
     if (!transactions) return 0;
     
-    return transactions
+    // Calcular o período anterior
+    const prevPeriod = calculatePeriod(addMonths(currentDate, -1), closingDay);
+    
+    // Saldo antes do período anterior
+    const balanceBeforePrevPeriod = transactions
       .filter(t => {
+        if (t.description === "Saldo Anterior") return false;
         if (t.credit_card_id && t.payment_month) {
           const txDate = parseISO(t.payment_month as string);
-          return txDate < periodStart;
+          return txDate < prevPeriod.periodStart;
         } else {
           const txDate = parseISO(t.date);
-          return txDate < periodStart;
+          return txDate < prevPeriod.periodStart;
         }
       })
       .reduce((sum, t) => sum + Number(t.amount), 0);
-  }, [transactions, periodStart]);
+    
+    // Transações do período anterior
+    const prevPeriodMonth = format(prevPeriod.periodEnd, "yyyy-MM");
+    const prevPeriodTransactions = transactions.filter(t => {
+      if (t.description === "Saldo Anterior") return false;
+      if (t.credit_card_id && t.payment_month) {
+        const pm = format(parseISO(t.payment_month as string), "yyyy-MM");
+        return pm === prevPeriodMonth;
+      } else {
+        const txMonth = format(parseISO(t.date), "yyyy-MM");
+        return txMonth === prevPeriodMonth;
+      }
+    });
+    
+    // Receitas e despesas do período anterior
+    const prevIncome = prevPeriodTransactions
+      .filter(t => Number(t.amount) > 0)
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+    
+    const prevExpenses = prevPeriodTransactions
+      .filter(t => Number(t.amount) < 0)
+      .reduce((sum, t) => sum + Math.abs(Number(t.amount)), 0);
+    
+    // Saldo do período anterior = Saldo antes + Receitas - Despesas
+    return balanceBeforePrevPeriod + prevIncome - prevExpenses;
+  }, [transactions, currentDate, closingDay]);
 
   // Agrupar por categoria e tipo
   const { incomeTotals, expenseTotals, totalIncome, totalExpense, categoryTransactionsMap } = useMemo(() => {
