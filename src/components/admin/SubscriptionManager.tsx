@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Users, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { Database } from "@/integrations/supabase/types";
 
 type SubscriptionPlan = Database["public"]["Enums"]["subscription_plan"];
@@ -21,6 +22,7 @@ interface UserWithSubscription {
 export function SubscriptionManager() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [searchEmail, setSearchEmail] = useState("");
 
   // Fetch users with subscriptions
@@ -163,8 +165,8 @@ export function SubscriptionManager() {
                       onClick={() => handlePromote(user.profile.id)}
                       disabled={updateSubscription.isPending}
                     >
-                      <ArrowUpCircle className="h-4 w-4 mr-2" />
-                      Promover para Pro
+                      <ArrowUpCircle className="h-4 w-4" />
+                      {!isMobile && <span className="ml-2">Promover para Pro</span>}
                     </Button>
                   )}
                   
@@ -176,8 +178,8 @@ export function SubscriptionManager() {
                       onClick={() => handleDemote(user.profile.id)}
                       disabled={updateSubscription.isPending}
                     >
-                      <ArrowDownCircle className="h-4 w-4 mr-2" />
-                      Rebaixar para Free
+                      <ArrowDownCircle className="h-4 w-4" />
+                      {!isMobile && <span className="ml-2">Rebaixar para Free</span>}
                     </Button>
                   )}
                 </div>
