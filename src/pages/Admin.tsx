@@ -28,7 +28,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown, Bell, Send, CreditCard, Settings, FileText, AlertTriangle, Loader2 } from "lucide-react";
+import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown, Bell, Send, CreditCard, Settings, FileText, AlertTriangle, Loader2, Copy } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { z } from "zod";
 import { UserGrowthChart } from "@/components/admin/UserGrowthChart";
@@ -989,78 +989,55 @@ export default function Admin() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-              Confirmar Exclusão de Usuário
-            </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3">
-              <p>
-                <strong className="text-destructive">ATENÇÃO:</strong> Esta ação é permanente e irreversível.
-              </p>
-              <div className="bg-destructive/10 p-3 rounded-md border border-destructive/30">
-                <p className="text-destructive font-semibold text-sm mb-2">
-                  Todos os dados serão permanentemente excluídos:
-                </p>
-                <ul className="list-disc list-inside space-y-1 text-xs">
-                  <li>Todas as contas e lançamentos</li>
-                  <li>Categorias e subcategorias personalizadas</li>
-                  <li>Previsões e orçamentos</li>
-                  <li>Investimentos e retornos mensais</li>
-                  <li>Metas e configurações</li>
-                  <li>Dados de autenticação</li>
-                </ul>
-              </div>
-              <div className="space-y-3 pt-2">
-                <div className="space-y-2">
-                  <Label className="text-sm">Email do usuário:</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      readOnly
-                      value={userToDelete?.email || ""}
-                      className="font-mono text-sm bg-muted flex-1"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        if (userToDelete?.email) {
-                          navigator.clipboard.writeText(userToDelete.email);
-                          toast({
-                            title: "Email copiado",
-                            description: "Cole no campo abaixo para confirmar",
-                          });
-                        }
-                      }}
-                    >
-                      Copiar
-                    </Button>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirmEmail" className="text-sm font-semibold">
-                    Cole o email acima para confirmar a exclusão:
-                  </Label>
-                  <Input
-                    id="confirmEmail"
-                    type="email"
-                    placeholder="Cole o email aqui"
-                    value={deleteConfirmEmail}
-                    onChange={(e) => setDeleteConfirmEmail(e.target.value)}
-                    className="font-mono text-sm"
-                  />
-                </div>
-              </div>
+            <AlertDialogTitle>Tem certeza que deseja excluir este usuário?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Todos os dados do usuário serão permanentemente excluídos. Para confirmar, digite o email do usuário abaixo:
             </AlertDialogDescription>
           </AlertDialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 p-3 bg-muted rounded-md font-mono text-sm">
+                {userToDelete?.email}
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  if (userToDelete?.email) {
+                    navigator.clipboard.writeText(userToDelete.email);
+                    toast({
+                      title: "Email copiado",
+                      description: "Cole no campo abaixo para confirmar",
+                    });
+                  }
+                }}
+                title="Copiar email"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="confirmEmail">Digite o email do usuário</Label>
+              <Input
+                id="confirmEmail"
+                type="email"
+                value={deleteConfirmEmail}
+                onChange={(e) => setDeleteConfirmEmail(e.target.value)}
+                placeholder="Email do usuário"
+              />
+            </div>
+          </div>
+
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setDeleteConfirmEmail("")}>
               Cancelar
             </AlertDialogCancel>
-            <Button
+            <AlertDialogAction
               onClick={handleDeleteUser}
               disabled={deleteUser.isPending || deleteConfirmEmail !== userToDelete?.email}
-              variant="destructive"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deleteUser.isPending ? (
                 <>
@@ -1068,9 +1045,9 @@ export default function Admin() {
                   Excluindo...
                 </>
               ) : (
-                "Excluir Permanentemente"
+                "Excluir Usuário"
               )}
-            </Button>
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
