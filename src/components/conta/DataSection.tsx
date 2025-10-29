@@ -540,18 +540,24 @@ export function DataSection() {
                 Enviaremos um email de confirmação para <strong>{user?.email}</strong> com
                 instruções para concluir a exclusão da sua conta.
               </p>
-              <p className="text-destructive font-semibold">
-                Todos os seus dados serão permanentemente excluídos sem backup.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="bg-destructive/10 p-3 rounded-md border border-destructive/30">
+              <p className="text-destructive font-semibold text-sm mb-2">
+                Todos os seus dados serão permanentemente excluídos:
               </p>
-              <ul className="list-disc list-inside space-y-1 text-sm">
+              <ul className="list-disc list-inside space-y-1 text-xs">
                 <li>Todas as contas e lançamentos</li>
                 <li>Categorias e subcategorias personalizadas</li>
                 <li>Previsões e orçamentos</li>
                 <li>Investimentos e metas</li>
                 <li>Configurações e preferências</li>
               </ul>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+            </div>
+          </div>
+
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
