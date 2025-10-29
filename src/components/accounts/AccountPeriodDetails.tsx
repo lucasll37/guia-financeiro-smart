@@ -12,6 +12,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { useForecasts } from "@/hooks/useForecasts";
 import { useCreditCards } from "@/hooks/useCreditCards";
 import { useMaskValues } from "@/hooks/useMaskValues";
+import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
 
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
@@ -253,7 +254,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                       <TableHead className="text-right w-[140px]">Previsto</TableHead>
                       <TableHead className="text-right w-[140px]">Realizado</TableHead>
                       <TableHead className="text-right w-[140px]">Diferença</TableHead>
-                      <TableHead className="text-right w-[120px]">% Variação</TableHead>
+                      <TableHead className="text-right w-[180px]">Progresso</TableHead>
                     </TableRow>
                   </TableHeader>
               <TableBody>
@@ -306,15 +307,63 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                         <TableCell className="text-right font-medium w-[140px]">
                           {maskValue(formatCurrency(data.actual))}
                         </TableCell>
-                        <TableCell className={`text-right w-[140px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          <TableCell className={`text-right w-[140px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {maskValue(formatCurrency(Math.abs(difference)))}
                         </TableCell>
-                          <TableCell className="text-right w-[120px]">
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1">
-                                <Progress value={completion} className="h-2" />
+                          <TableCell className="text-right w-[180px]">
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-xs mb-1">
+                                <span
+                                  className={cn(
+                                    "font-semibold",
+                                    completion > 100
+                                      ? "text-red-600 dark:text-red-400"
+                                      : completion === 100
+                                      ? "text-green-600 dark:text-green-400"
+                                      : "text-primary"
+                                  )}
+                                >
+                                  {Math.round(completion)}%
+                                </span>
+                                <span className="text-muted-foreground">
+                                  {maskValue(formatCurrency(data.forecasted))}
+                                </span>
                               </div>
-                              <span className="w-12 text-right text-xs text-muted-foreground">{Math.round(completion)}%</span>
+                              
+                              <div className="relative h-6 bg-muted rounded-full overflow-hidden border">
+                                <div className="absolute inset-0 bg-gradient-to-r from-muted to-muted" />
+                                
+                                <div
+                                  className={cn(
+                                    "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full",
+                                    completion > 100
+                                      ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500"
+                                      : completion === 100
+                                      ? "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500"
+                                      : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500"
+                                  )}
+                                  style={{
+                                    width: `${Math.min(completion, 100)}%`,
+                                  }}
+                                >
+                                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                                </div>
+                                
+                                {completion > 100 && (
+                                  <div
+                                    className="absolute inset-y-0 w-0.5 bg-white/50"
+                                    style={{
+                                      left: `${(data.forecasted / data.actual) * 100}%`,
+                                    }}
+                                  />
+                                )}
+                                
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <span className="text-xs font-semibold text-foreground drop-shadow-lg">
+                                    {maskValue(formatCurrency(data.actual))}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                           </TableCell>
                       </TableRow>
@@ -397,7 +446,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                       <TableHead className="text-right w-[140px]">Previsto</TableHead>
                       <TableHead className="text-right w-[140px]">Realizado</TableHead>
                       <TableHead className="text-right w-[140px]">Diferença</TableHead>
-                      <TableHead className="text-right w-[120px]">% Variação</TableHead>
+                      <TableHead className="text-right w-[180px]">Progresso</TableHead>
                     </TableRow>
                   </TableHeader>
               <TableBody>
@@ -453,12 +502,60 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                         <TableCell className={`text-right w-[140px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {maskValue(formatCurrency(Math.abs(difference)))}
                         </TableCell>
-                        <TableCell className="text-right w-[120px]">
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1">
-                              <Progress value={completion} className="h-2" />
+                        <TableCell className="text-right w-[180px]">
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-xs mb-1">
+                              <span
+                                className={cn(
+                                  "font-semibold",
+                                  completion > 100
+                                    ? "text-red-600 dark:text-red-400"
+                                    : completion === 100
+                                    ? "text-green-600 dark:text-green-400"
+                                    : "text-primary"
+                                )}
+                              >
+                                {Math.round(completion)}%
+                              </span>
+                              <span className="text-muted-foreground">
+                                {maskValue(formatCurrency(data.forecasted))}
+                              </span>
                             </div>
-                            <span className="w-12 text-right text-xs text-muted-foreground">{Math.round(completion)}%</span>
+                            
+                            <div className="relative h-6 bg-muted rounded-full overflow-hidden border">
+                              <div className="absolute inset-0 bg-gradient-to-r from-muted to-muted" />
+                              
+                              <div
+                                className={cn(
+                                  "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full",
+                                  completion > 100
+                                    ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500"
+                                    : completion === 100
+                                    ? "bg-gradient-to-r from-amber-500 to-amber-600 dark:from-amber-400 dark:to-amber-500"
+                                    : "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500"
+                                )}
+                                style={{
+                                  width: `${Math.min(completion, 100)}%`,
+                                }}
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                              </div>
+                              
+                              {completion > 100 && (
+                                <div
+                                  className="absolute inset-y-0 w-0.5 bg-white/50"
+                                  style={{
+                                    left: `${(data.forecasted / data.actual) * 100}%`,
+                                  }}
+                                />
+                              )}
+                              
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-xs font-semibold text-foreground drop-shadow-lg">
+                                  {maskValue(formatCurrency(data.actual))}
+                                </span>
+                              </div>
+                            </div>
                           </div>
                         </TableCell>
                       </TableRow>
