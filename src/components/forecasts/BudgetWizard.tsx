@@ -1,7 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,18 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import {
@@ -29,23 +16,25 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
   ArrowRight,
-  ArrowLeft,
   Check,
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
   Wand2,
   Calendar,
+  ChevronDown,
+  ChevronRight,
+  TrendingUp,
+  TrendingDown,
 } from "lucide-react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-
-const step1Schema = z.object({
-  total_income: z.string().min(1, "Receita total é obrigatória"),
-  selected_month: z.date({ required_error: "Mês é obrigatório" }),
-});
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface BudgetWizardProps {
   open: boolean;
@@ -56,12 +45,23 @@ interface BudgetWizardProps {
   selectedMonth: string;
 }
 
-interface CategoryAllocation {
-  category_id: string;
+interface ForecastEntry {
+  subcategory_id: string;
+  amount: string;
+  notes: string;
+  existing_id?: string;
+}
+
+interface CategoryGroup {
+  id: string;
   name: string;
   color: string;
-  amount: number;
-  percentage: number;
+  type: "receita" | "despesa";
+  subcategories: {
+    id: string;
+    name: string;
+    color: string;
+  }[];
 }
 
 export function BudgetWizard({
@@ -72,546 +72,495 @@ export function BudgetWizard({
   categories,
   selectedMonth,
 }: BudgetWizardProps) {
-  const [step, setStep] = useState(1);
-  const [totalIncome, setTotalIncome] = useState(0);
-  const [allocations, setAllocations] = useState<CategoryAllocation[]>([]);
+  const [step, setStep] = useState<"month" | "income" | "expenses">("month");
   const [workingMonth, setWorkingMonth] = useState(new Date(selectedMonth + "-01"));
+  const [incomeEntries, setIncomeEntries] = useState<ForecastEntry[]>([]);
+  const [expenseEntries, setExpenseEntries] = useState<ForecastEntry[]>([]);
+  const [openCategories, setOpenCategories] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof step1Schema>>({
-    resolver: zodResolver(step1Schema),
-    defaultValues: {
-      total_income: "",
-      selected_month: new Date(selectedMonth + "-01"),
-    },
-  });
+  // Agrupar categorias por tipo
+  const categoryGroups = useMemo(() => {
+    const parentCategories = categories.filter((c) => c.parent_id === null);
+    const groups: CategoryGroup[] = [];
 
-  // Filtrar apenas subcategorias de despesa
-  const expenseSubcategories = useMemo(() => {
-    return categories.filter((c) => c.parent_id !== null && c.type === "despesa");
+    parentCategories.forEach((parent) => {
+      const subcategories = categories.filter(
+        (c) => c.parent_id === parent.id
+      );
+      if (subcategories.length > 0) {
+        groups.push({
+          id: parent.id,
+          name: parent.name,
+          color: parent.color,
+          type: parent.type,
+          subcategories: subcategories.map((sub) => ({
+            id: sub.id,
+            name: sub.name,
+            color: sub.color,
+          })),
+        });
+      }
+    });
+
+    return groups;
   }, [categories]);
 
-  // Inicializar alocações quando as categorias mudarem
-  useEffect(() => {
-    if (expenseSubcategories.length > 0 && allocations.length === 0) {
-      setAllocations(
-        expenseSubcategories.map((cat) => ({
-          category_id: cat.id,
-          name: cat.name,
-          color: cat.color,
-          amount: 0,
-          percentage: 0,
-        }))
-      );
+  const incomeGroups = useMemo(
+    () => categoryGroups.filter((g) => g.type === "receita"),
+    [categoryGroups]
+  );
+
+  const expenseGroups = useMemo(
+    () => categoryGroups.filter((g) => g.type === "despesa"),
+    [categoryGroups]
+  );
+
+  // Carregar previsões existentes ao selecionar mês
+  const loadExistingForecasts = async (month: Date) => {
+    setIsLoading(true);
+    try {
+      const periodStart = format(startOfMonth(month), "yyyy-MM-dd");
+      const periodEnd = format(endOfMonth(month), "yyyy-MM-dd");
+
+      const { data, error } = await supabase
+        .from("account_period_forecasts")
+        .select("*")
+        .eq("account_id", accountId)
+        .gte("period_start", periodStart)
+        .lte("period_start", periodEnd);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        // Separar receitas e despesas
+        const incomeData: ForecastEntry[] = [];
+        const expenseData: ForecastEntry[] = [];
+
+        data.forEach((forecast) => {
+          const category = categories.find((c) => c.id === forecast.category_id);
+          if (!category) return;
+
+          const entry: ForecastEntry = {
+            subcategory_id: forecast.category_id,
+            amount: String(forecast.forecasted_amount),
+            notes: forecast.notes || "",
+            existing_id: forecast.id,
+          };
+
+          if (category.type === "receita") {
+            incomeData.push(entry);
+          } else {
+            expenseData.push(entry);
+          }
+        });
+
+        setIncomeEntries(incomeData);
+        setExpenseEntries(expenseData);
+      } else {
+        // Inicializar vazios
+        setIncomeEntries([]);
+        setExpenseEntries([]);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar previsões:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar as previsões existentes",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-  }, [expenseSubcategories, allocations.length]);
-
-  const totalAllocated = useMemo(() => {
-    return allocations.reduce((sum, a) => sum + a.amount, 0);
-  }, [allocations]);
-
-  const remaining = useMemo(() => {
-    return totalIncome - totalAllocated;
-  }, [totalIncome, totalAllocated]);
-
-  const allocationPercentage = useMemo(() => {
-    return totalIncome > 0 ? (totalAllocated / totalIncome) * 100 : 0;
-  }, [totalAllocated, totalIncome]);
-
-  const handleStep1Submit = (data: z.infer<typeof step1Schema>) => {
-    const income = parseFloat(data.total_income);
-    setTotalIncome(income);
-    setWorkingMonth(data.selected_month);
-    setStep(2);
   };
 
-  const handleAmountChange = (categoryId: string, value: string) => {
-    const amount = parseFloat(value) || 0;
-    setAllocations((prev) =>
-      prev.map((a) =>
-        a.category_id === categoryId
-          ? {
-              ...a,
-              amount,
-              percentage: totalIncome > 0 ? (amount / totalIncome) * 100 : 0,
-            }
-          : a
-      )
+  const handleMonthSelect = async (month: Date) => {
+    setWorkingMonth(month);
+    await loadExistingForecasts(month);
+    setStep("income");
+  };
+
+  const getEntryValue = (subcategoryId: string, entries: ForecastEntry[]) => {
+    const entry = entries.find((e) => e.subcategory_id === subcategoryId);
+    return entry || { subcategory_id: subcategoryId, amount: "", notes: "", existing_id: undefined };
+  };
+
+  const updateEntry = (
+    subcategoryId: string,
+    field: "amount" | "notes",
+    value: string,
+    isIncome: boolean
+  ) => {
+    const setter = isIncome ? setIncomeEntries : setExpenseEntries;
+    setter((prev) => {
+      const existing = prev.find((e) => e.subcategory_id === subcategoryId);
+      if (existing) {
+        return prev.map((e) =>
+          e.subcategory_id === subcategoryId ? { ...e, [field]: value } : e
+        );
+      } else {
+        return [...prev, { subcategory_id: subcategoryId, amount: field === "amount" ? value : "", notes: field === "notes" ? value : "", existing_id: undefined }];
+      }
+    });
+  };
+
+  const toggleCategory = (categoryId: string) => {
+    setOpenCategories((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId]
     );
   };
 
-  const handlePercentageChange = (categoryId: string, percentage: number) => {
-    const amount = (percentage / 100) * totalIncome;
-    setAllocations((prev) =>
-      prev.map((a) =>
-        a.category_id === categoryId
-          ? {
-              ...a,
-              amount,
-              percentage,
-            }
-          : a
-      )
-    );
-  };
-
-  const handleDistributeEvenly = () => {
-    const perCategory = totalIncome / allocations.length;
-    setAllocations((prev) =>
-      prev.map((a) => ({
-        ...a,
-        amount: perCategory,
-        percentage: (perCategory / totalIncome) * 100,
-      }))
-    );
-  };
-
-  const handleFinish = () => {
+  const handleFinish = async () => {
     const periodStart = format(startOfMonth(workingMonth), "yyyy-MM-dd");
     const periodEnd = format(endOfMonth(workingMonth), "yyyy-MM-dd");
 
-    // Criar previsão de receita
-    const incomeCategories = categories.filter(
-      (c) => c.parent_id !== null && c.type === "receita"
+    const allEntries = [...incomeEntries, ...expenseEntries].filter(
+      (e) => e.amount && parseFloat(e.amount) > 0
     );
-    const incomeCategory = incomeCategories[0]; // Pegar a primeira subcategoria de receita
 
-    const forecasts = [
-      // Adicionar receita se houver categoria de receita
-      ...(incomeCategory
-        ? [
-            {
-              account_id: accountId,
-              category_id: incomeCategory.id,
-              period_start: periodStart,
-              period_end: periodEnd,
-              forecasted_amount: totalIncome,
-              notes: "Criado via Assistente de Orçamento",
-            },
-          ]
-        : []),
-      // Adicionar todas as despesas com valor > 0
-      ...allocations
-        .filter((a) => a.amount > 0)
-        .map((a) => ({
-          account_id: accountId,
-          category_id: a.category_id,
-          period_start: periodStart,
-          period_end: periodEnd,
-          forecasted_amount: a.amount,
-          notes: "Criado via Assistente de Orçamento",
-        })),
-    ];
+    const forecasts = allEntries.map((entry) => ({
+      id: entry.existing_id,
+      account_id: accountId,
+      category_id: entry.subcategory_id,
+      period_start: periodStart,
+      period_end: periodEnd,
+      forecasted_amount: parseFloat(entry.amount),
+      notes: entry.notes || null,
+    }));
 
     onSave(forecasts);
     handleClose();
   };
 
   const handleClose = () => {
-    setStep(1);
-    setTotalIncome(0);
-    setAllocations([]);
+    setStep("month");
     setWorkingMonth(new Date(selectedMonth + "-01"));
-    form.reset({
-      total_income: "",
-      selected_month: new Date(selectedMonth + "-01"),
-    });
+    setIncomeEntries([]);
+    setExpenseEntries([]);
+    setOpenCategories([]);
     onOpenChange(false);
   };
 
-  const canProceedToStep3 = Math.abs(remaining) < 0.01;
+  const totalIncome = useMemo(() => {
+    return incomeEntries.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+  }, [incomeEntries]);
+
+  const totalExpenses = useMemo(() => {
+    return expenseEntries.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+  }, [expenseEntries]);
+
+  const balance = totalIncome - totalExpenses;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[800px] max-h-[90vh]">
+      <DialogContent className="sm:max-w-[900px] max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-2">
             <Wand2 className="h-6 w-6 text-primary" />
             Assistente de Lançamento
           </DialogTitle>
           <DialogDescription>
-            Crie as previsões do mês de forma simples e visual
+            {step === "month" && "Selecione o mês de referência"}
+            {step === "income" && "Defina suas receitas previstas"}
+            {step === "expenses" && "Distribua suas despesas por categoria"}
           </DialogDescription>
         </DialogHeader>
 
-        {/* Progress Steps */}
-        <div className="flex items-center justify-between mb-6">
-          {[1, 2, 3].map((s) => (
-            <div key={s} className="flex items-center">
-              <div
-                className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all",
-                  step >= s
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
-                )}
-              >
-                {step > s ? <Check className="h-5 w-5" /> : s}
-              </div>
-              {s < 3 && (
-                <div
-                  className={cn(
-                    "h-1 w-16 mx-2 transition-all",
-                    step > s ? "bg-primary" : "bg-muted"
-                  )}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Step 1: Total Income */}
-        {step === 1 && (
-          <div className="space-y-6">
-            <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 rounded-lg border border-primary/20">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold">Passo 1: Mês e Receita</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Selecione o mês e informe a receita esperada
-                  </p>
-                </div>
-              </div>
-
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(handleStep1Submit)}
-                  className="space-y-4"
-                >
-                  <FormField
-                    control={form.control}
-                    name="selected_month"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel className="flex items-center gap-2 text-base">
-                          <Calendar className="h-4 w-4" />
-                          Mês de Referência
-                        </FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-full justify-start text-left font-normal h-14 text-lg",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value ? (
-                                  format(field.value, "MMMM 'de' yyyy", { locale: ptBR })
-                                ) : (
-                                  <span>Selecione o mês</span>
-                                )}
-                                <Calendar className="ml-auto h-5 w-5 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <CalendarComponent
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              initialFocus
-                              className={cn("p-3 pointer-events-auto")}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="total_income"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 text-base">
-                          <DollarSign className="h-4 w-4" />
-                          Receita Total Esperada
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="text"
-                            inputMode="decimal"
-                            placeholder="0.00"
-                            {...field}
-                            onChange={(e) => {
-                              const value = e.target.value.replace(/[^\d.-]/g, "");
-                              field.onChange(value);
-                            }}
-                            className="text-2xl h-14 text-center font-semibold"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <Button type="submit" className="w-full h-12" size="lg">
-                    Próximo
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </form>
-              </Form>
-            </div>
+        {isLoading && (
+          <div className="flex items-center justify-center py-8">
+            <p className="text-muted-foreground">Carregando previsões...</p>
           </div>
         )}
 
-        {/* Step 2: Allocate Expenses */}
-        {step === 2 && (
-          <div className="space-y-6">
-            {/* Summary Card */}
-            <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-4 rounded-lg border border-primary/20">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-primary" />
-                  <span className="font-semibold">
-                    {format(workingMonth, "MMMM 'de' yyyy", {
-                      locale: ptBR,
-                    })}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground">Receita Total</p>
-                  <p className="text-xl font-bold text-primary">
-                    R$ {totalIncome.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Alocado</span>
-                  <span
-                    className={cn(
-                      "font-semibold",
-                      remaining < 0 ? "text-destructive" : "text-foreground"
-                    )}
-                  >
-                    R$ {totalAllocated.toFixed(2)}
-                  </span>
-                </div>
-                <Progress value={allocationPercentage} className="h-2" />
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    {allocationPercentage.toFixed(1)}% alocado
-                  </span>
-                  <span
-                    className={cn(
-                      "font-semibold",
-                      remaining < 0
-                        ? "text-destructive"
-                        : remaining === 0
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-amber-600 dark:text-amber-400"
-                    )}
-                  >
-                    {remaining < 0 ? "Excedeu" : "Restante"}: R${" "}
-                    {Math.abs(remaining).toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Distribution Controls */}
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <TrendingDown className="h-5 w-5 text-destructive" />
-                Distribuir Despesas
-              </h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDistributeEvenly}
-              >
-                Distribuir Igualmente
-              </Button>
-            </div>
-
-            {/* Categories Allocation */}
-            <ScrollArea className="h-[400px] pr-4">
-              <div className="space-y-4">
-                {allocations.map((allocation) => (
-                  <div
-                    key={allocation.category_id}
-                    className="p-4 rounded-lg border bg-card space-y-3 hover:border-primary/50 transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-4 h-4 rounded-full"
-                          style={{ backgroundColor: allocation.color }}
-                        />
-                        <span className="font-medium">{allocation.name}</span>
-                      </div>
-                      <div className="text-right">
-                        <Input
-                          type="text"
-                          inputMode="decimal"
-                          value={allocation.amount.toFixed(2)}
-                          onChange={(e) =>
-                            handleAmountChange(
-                              allocation.category_id,
-                              e.target.value
-                            )
-                          }
-                          className="w-32 text-right font-semibold"
-                        />
-                      </div>
+        {!isLoading && (
+          <>
+            {/* Step: Month Selection */}
+            {step === "month" && (
+              <div className="space-y-6 py-4">
+                <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 rounded-lg border border-primary/20">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                      <Calendar className="h-6 w-6 text-primary" />
                     </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">Mês de Referência</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Escolha o mês para criar ou editar previsões
+                      </p>
+                    </div>
+                  </div>
 
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>{allocation.percentage.toFixed(1)}%</span>
-                        <span>R$ {allocation.amount.toFixed(2)}</span>
-                      </div>
-                      <Slider
-                        value={[allocation.percentage]}
-                        onValueChange={([value]) =>
-                          handlePercentageChange(allocation.category_id, value)
-                        }
-                        max={100}
-                        step={0.1}
-                        className="cursor-pointer"
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal h-14 text-lg"
+                        )}
+                      >
+                        {format(workingMonth, "MMMM 'de' yyyy", { locale: ptBR })}
+                        <Calendar className="ml-auto h-5 w-5 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={workingMonth}
+                        onSelect={(date) => date && handleMonthSelect(date)}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
                       />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            )}
+
+            {/* Step: Income */}
+            {step === "income" && (
+              <div className="space-y-4">
+                <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 p-4 rounded-lg border border-green-500/20">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />
+                      <span className="font-semibold">
+                        {format(workingMonth, "MMMM 'de' yyyy", { locale: ptBR })}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground">Total Receitas</p>
+                      <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                        R$ {totalIncome.toFixed(2)}
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </ScrollArea>
-
-            {/* Navigation */}
-            <div className="flex gap-3 pt-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setStep(1)}
-                className="flex-1"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Voltar
-              </Button>
-              <Button
-                onClick={() => setStep(3)}
-                disabled={!canProceedToStep3}
-                className="flex-1"
-              >
-                Próximo
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Review & Confirm */}
-        {step === 3 && (
-          <div className="space-y-6">
-            <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 p-6 rounded-lg border border-green-500/20">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="h-12 w-12 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <Check className="h-6 w-6 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold">Passo 3: Revisar</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Confira seu orçamento antes de salvar
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {/* Summary */}
-                <div className="grid grid-cols-2 gap-4 p-4 bg-card rounded-lg border">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Mês de Referência
-                    </p>
-                    <p className="font-semibold">
-                      {format(workingMonth, "MMMM 'de' yyyy", { locale: ptBR })}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Receita Total
-                    </p>
-                    <p className="font-semibold text-green-600 dark:text-green-400">
-                      R$ {totalIncome.toFixed(2)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Total de Despesas
-                    </p>
-                    <p className="font-semibold text-destructive">
-                      R$ {totalAllocated.toFixed(2)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Categorias Alocadas
-                    </p>
-                    <p className="font-semibold">
-                      {allocations.filter((a) => a.amount > 0).length} de{" "}
-                      {allocations.length}
-                    </p>
-                  </div>
                 </div>
 
-                {/* Categories List */}
-                <ScrollArea className="h-[300px]">
-                  <div className="space-y-2">
-                    {allocations
-                      .filter((a) => a.amount > 0)
-                      .sort((a, b) => b.amount - a.amount)
-                      .map((allocation) => (
+                <ScrollArea className="h-[400px] pr-4">
+                  <div className="space-y-4">
+                    {incomeGroups.map((group) => (
+                      <div
+                        key={group.id}
+                        className="border rounded-lg overflow-hidden"
+                      >
                         <div
-                          key={allocation.category_id}
-                          className="flex items-center justify-between p-3 rounded-lg border bg-card"
+                          className="bg-muted/50 p-3 flex items-center gap-2"
+                          style={{
+                            borderLeft: `4px solid ${group.color}`,
+                          }}
                         >
-                          <div className="flex items-center gap-3">
-                            <div
-                              className="w-3 h-3 rounded-full"
-                              style={{ backgroundColor: allocation.color }}
-                            />
-                            <span className="font-medium text-sm">
-                              {allocation.name}
-                            </span>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-semibold">
-                              R$ {allocation.amount.toFixed(2)}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {allocation.percentage.toFixed(1)}%
-                            </p>
-                          </div>
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: group.color }}
+                          />
+                          <span className="font-semibold">{group.name}</span>
                         </div>
-                      ))}
+                        <div className="p-4 space-y-3">
+                          {group.subcategories.map((sub) => {
+                            const entry = getEntryValue(sub.id, incomeEntries);
+                            return (
+                              <div
+                                key={sub.id}
+                                className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3 rounded-lg border bg-card"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className="w-2 h-2 rounded-full"
+                                    style={{ backgroundColor: sub.color }}
+                                  />
+                                  <span className="text-sm font-medium">
+                                    {sub.name}
+                                  </span>
+                                </div>
+                                <Input
+                                  type="text"
+                                  inputMode="decimal"
+                                  placeholder="R$ 0.00"
+                                  value={entry.amount}
+                                  onChange={(e) =>
+                                    updateEntry(
+                                      sub.id,
+                                      "amount",
+                                      e.target.value.replace(/[^\d.-]/g, ""),
+                                      true
+                                    )
+                                  }
+                                  className="text-right font-semibold"
+                                />
+                                <Input
+                                  type="text"
+                                  placeholder="Observações..."
+                                  value={entry.notes}
+                                  onChange={(e) =>
+                                    updateEntry(sub.id, "notes", e.target.value, true)
+                                  }
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </ScrollArea>
-              </div>
-            </div>
 
-            {/* Navigation */}
-            <div className="flex gap-3 pt-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setStep(2)}
-                className="flex-1"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Voltar
-              </Button>
-              <Button onClick={handleFinish} className="flex-1" size="lg">
-                <Check className="mr-2 h-5 w-5" />
-                Criar Previsões
-              </Button>
-            </div>
-          </div>
+                <div className="flex gap-3 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={() => setStep("month")}
+                    className="flex-1"
+                  >
+                    Voltar
+                  </Button>
+                  <Button
+                    onClick={() => setStep("expenses")}
+                    className="flex-1"
+                  >
+                    Próximo: Despesas
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Step: Expenses */}
+            {step === "expenses" && (
+              <div className="space-y-4">
+                <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-4 rounded-lg border border-primary/20">
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Receitas</p>
+                      <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                        R$ {totalIncome.toFixed(2)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Despesas</p>
+                      <p className="text-lg font-bold text-red-600 dark:text-red-400">
+                        R$ {totalExpenses.toFixed(2)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Saldo</p>
+                      <p
+                        className={cn(
+                          "text-lg font-bold",
+                          balance >= 0
+                            ? "text-green-600 dark:text-green-400"
+                            : "text-red-600 dark:text-red-400"
+                        )}
+                      >
+                        R$ {balance.toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <ScrollArea className="h-[400px] pr-4">
+                  <div className="space-y-2">
+                    {expenseGroups.map((group) => {
+                      const isOpen = openCategories.includes(group.id);
+                      return (
+                        <Collapsible
+                          key={group.id}
+                          open={isOpen}
+                          onOpenChange={() => toggleCategory(group.id)}
+                        >
+                          <div className="border rounded-lg overflow-hidden">
+                            <CollapsibleTrigger className="w-full">
+                              <div
+                                className="bg-muted/50 p-3 flex items-center gap-2 hover:bg-muted transition-colors"
+                                style={{
+                                  borderLeft: `4px solid ${group.color}`,
+                                }}
+                              >
+                                {isOpen ? (
+                                  <ChevronDown className="h-4 w-4" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4" />
+                                )}
+                                <div
+                                  className="w-3 h-3 rounded-full"
+                                  style={{ backgroundColor: group.color }}
+                                />
+                                <span className="font-semibold">{group.name}</span>
+                                <span className="ml-auto text-sm text-muted-foreground">
+                                  {group.subcategories.length} subcategorias
+                                </span>
+                              </div>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <div className="p-4 space-y-3">
+                                {group.subcategories.map((sub) => {
+                                  const entry = getEntryValue(sub.id, expenseEntries);
+                                  return (
+                                    <div
+                                      key={sub.id}
+                                      className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3 rounded-lg border bg-card"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <div
+                                          className="w-2 h-2 rounded-full"
+                                          style={{ backgroundColor: sub.color }}
+                                        />
+                                        <span className="text-sm font-medium">
+                                          {sub.name}
+                                        </span>
+                                      </div>
+                                      <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        placeholder="R$ 0.00"
+                                        value={entry.amount}
+                                        onChange={(e) =>
+                                          updateEntry(
+                                            sub.id,
+                                            "amount",
+                                            e.target.value.replace(/[^\d.-]/g, ""),
+                                            false
+                                          )
+                                        }
+                                        className="text-right font-semibold"
+                                      />
+                                      <Input
+                                        type="text"
+                                        placeholder="Observações..."
+                                        value={entry.notes}
+                                        onChange={(e) =>
+                                          updateEntry(sub.id, "notes", e.target.value, false)
+                                        }
+                                      />
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </CollapsibleContent>
+                          </div>
+                        </Collapsible>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
+
+                <div className="flex gap-3 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={() => setStep("income")}
+                    className="flex-1"
+                  >
+                    Voltar
+                  </Button>
+                  <Button onClick={handleFinish} className="flex-1">
+                    <Check className="mr-2 h-5 w-5" />
+                    Salvar Previsões
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </DialogContent>
     </Dialog>

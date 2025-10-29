@@ -131,9 +131,16 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
   };
 
   const handleWizardSave = async (forecasts: any[]) => {
-    // Criar todas as previsões em lote
+    // Salvar/atualizar todas as previsões
     for (const forecast of forecasts) {
-      await createForecast.mutateAsync(forecast);
+      if (forecast.id) {
+        // Atualizar existente
+        await updateForecast.mutateAsync(forecast);
+      } else {
+        // Criar nova
+        const { id, ...createData } = forecast;
+        await createForecast.mutateAsync(createData);
+      }
     }
   };
 
