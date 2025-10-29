@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Copy, Sparkles } from "lucide-react";
+import { Plus, Copy, Wand2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAccounts } from "@/hooks/useAccounts";
@@ -157,7 +157,7 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
               className="gap-2"
               size={isMobile ? "sm" : "default"}
             >
-              <Sparkles className="h-4 w-4" />
+              <Wand2 className="h-4 w-4" />
               <span>Assistente de Lançamento</span>
             </Button>
             <Button 

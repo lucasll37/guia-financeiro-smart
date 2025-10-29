@@ -35,7 +35,7 @@ import {
   DollarSign,
   TrendingUp,
   TrendingDown,
-  Sparkles,
+  Wand2,
   Calendar,
 } from "lucide-react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
@@ -225,7 +225,7 @@ export function BudgetWizard({
       <DialogContent className="sm:max-w-[800px] max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-primary" />
+            <Wand2 className="h-6 w-6 text-primary" />
             Assistente de Lançamento
           </DialogTitle>
           <DialogDescription>
