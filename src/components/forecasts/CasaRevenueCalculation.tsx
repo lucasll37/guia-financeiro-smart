@@ -27,9 +27,9 @@ export function CasaRevenueCalculation({ accountId, forecasts }: CasaRevenueCalc
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-lg">Contribuição Necessária por Membro</CardTitle>
+            <CardTitle className="text-lg">Receitas Previstas por Membro</CardTitle>
             <CardDescription>
-              Valores calculados automaticamente baseados nas despesas previstas (R$ {totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
+              Contribuição necessária de cada membro para cobrir as despesas previstas (R$ {totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
             </CardDescription>
           </div>
           <CasaRevenueSplitManager accountId={accountId} />

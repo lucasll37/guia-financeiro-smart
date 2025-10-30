@@ -30,17 +30,28 @@ export function useCasaRevenueSplit(accountId?: string) {
   const { data: members } = useQuery({
     queryKey: ["casa-members", accountId, account?.revenue_split],
     queryFn: async () => {
-      if (!accountId || !account) return [];
+      if (!accountId || !account) {
+        console.log("useCasaRevenueSplit: Missing accountId or account", { accountId, account });
+        return [];
+      }
+      
+      console.log("useCasaRevenueSplit: Starting fetch for account", { 
+        accountId, 
+        ownerId: account.owner_id,
+        revenueSplit: account.revenue_split 
+      });
       
       const allMembers: Member[] = [];
       
       // Buscar proprietário
       if (account.owner_id) {
-        const { data: ownerData } = await supabase
+        const { data: ownerData, error: ownerError } = await supabase
           .from("profiles")
           .select("id, name, email")
           .eq("id", account.owner_id)
           .maybeSingle();
+
+        console.log("useCasaRevenueSplit: Owner query result", { ownerData, ownerError });
 
         if (ownerData) {
           const weight = (account.revenue_split as any)?.[ownerData.id] || 1;
@@ -54,7 +65,7 @@ export function useCasaRevenueSplit(accountId?: string) {
       }
 
       // Buscar membros editores aceitos
-      const { data: memberData } = await supabase
+      const { data: memberData, error: memberError } = await supabase
         .from("account_members")
         .select(`
           user_id,
@@ -63,6 +74,8 @@ export function useCasaRevenueSplit(accountId?: string) {
         .eq("account_id", accountId)
         .eq("status", "accepted")
         .eq("role", "editor");
+
+      console.log("useCasaRevenueSplit: Members query result", { memberData, memberError });
 
       if (memberData && memberData.length > 0) {
         memberData.forEach((m: any) => {
@@ -76,6 +89,7 @@ export function useCasaRevenueSplit(accountId?: string) {
         });
       }
 
+      console.log("useCasaRevenueSplit: Final members list", { allMembers, count: allMembers.length });
       return allMembers;
     },
     enabled: !!accountId && !!account,
