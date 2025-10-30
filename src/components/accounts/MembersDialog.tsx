@@ -166,11 +166,14 @@ export function MembersDialog({
 
     try {
       await removeMember.mutateAsync(currentUserMembership.id);
+      
+      // Wait a bit more for the database to process the deletion
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       setLeaveDialogOpen(false);
       onOpenChange(false);
       
-      // Explicitly refetch accounts before navigating
-      await queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      // Force refetch before navigating
       await queryClient.refetchQueries({ queryKey: ["accounts"] });
       
       navigate("/app/contas");
