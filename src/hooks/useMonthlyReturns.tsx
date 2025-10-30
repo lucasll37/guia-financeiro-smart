@@ -20,7 +20,7 @@ export function useMonthlyReturns(investmentId?: string) {
         .from("investment_monthly_returns")
         .select("*")
         .eq("investment_id", investmentId)
-        .order("month", { ascending: false });
+        .order("month", { ascending: true });
 
       if (error) throw error;
       return data as MonthlyReturn[];
