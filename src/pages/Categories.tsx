@@ -46,6 +46,10 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
   const { data: canEdit = false } = useAccountEditPermissions(selectedAccountId);
 
   const handleCreateCategory = () => {
+    if (!canEditCategories) {
+      navigate("/app/planos");
+      return;
+    }
     if (!selectedAccountId) {
       toast({
         title: "Selecione uma conta",
@@ -60,12 +64,20 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
   };
 
   const handleEditCategory = (category: Category) => {
+    if (!canEditCategories) {
+      navigate("/app/planos");
+      return;
+    }
     setSelectedCategory(category);
     setParentId(null);
     setDialogOpen(true);
   };
 
   const handleAddChild = (parentCategoryId: string) => {
+    if (!canEditCategories) {
+      navigate("/app/planos");
+      return;
+    }
     if (!selectedAccountId) return;
     setSelectedCategory(null);
     setParentId(parentCategoryId);
@@ -147,25 +159,27 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
         </div>
       )}
 
-      {!canEditCategories ? (
-        <div className="p-4 bg-muted rounded-lg border border-primary/20">
+      {!canEditCategories && (
+        <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg border border-primary/20">
           <div className="flex items-start gap-3">
             <Crown className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
             <div className="flex-1">
-              <p className="font-medium mb-1">Recurso exclusivo do plano Pro</p>
+              <p className="font-medium mb-1">Edição de categorias - Plano Pago</p>
               <p className="text-sm text-muted-foreground mb-3">
-                A visualização e edição de categorias está disponível apenas para assinantes Pro.
+                Você pode visualizar as categorias, mas a criação e edição está disponível apenas para planos pagos.
               </p>
               <Button 
                 size="sm" 
                 onClick={() => navigate("/app/planos")}
               >
-                Fazer Upgrade
+                Ver Planos
               </Button>
             </div>
           </div>
         </div>
-      ) : !selectedAccountId ? (
+      )}
+
+      {!selectedAccountId ? (
         <div className="text-center py-12 border rounded-lg">
           <p className="text-muted-foreground">Selecione uma conta para ver as categorias</p>
         </div>
@@ -183,7 +197,7 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
               onEdit={handleEditCategory}
               onDelete={handleDeleteCategory}
               onAddChild={handleAddChild}
-              canEdit={canEdit}
+              canEdit={canEdit && canEditCategories}
             />
           </TabsContent>
           <TabsContent value="despesa" className="mt-6">
@@ -192,7 +206,7 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
               onEdit={handleEditCategory}
               onDelete={handleDeleteCategory}
               onAddChild={handleAddChild}
-              canEdit={canEdit}
+              canEdit={canEdit && canEditCategories}
             />
           </TabsContent>
         </Tabs>
