@@ -55,6 +55,7 @@ interface ForecastDialogProps {
   accountId: string;
   categories: any[];
   selectedMonth: string;
+  accountType?: string;
 }
 
 export function ForecastDialog({
@@ -65,6 +66,7 @@ export function ForecastDialog({
   accountId,
   categories,
   selectedMonth,
+  accountType,
 }: ForecastDialogProps) {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -211,8 +213,18 @@ export function ForecastDialog({
               control={form.control}
               name="category_id"
               render={({ field }) => {
-                // Filtrar apenas subcategorias
-                const subcategories = categories.filter((c) => c.parent_id !== null);
+                // Agrupar subcategorias por categoria pai
+                const parentCategories = categories.filter((c) => c.parent_id === null);
+                
+                // Filtrar receitas se for conta casa
+                const filteredParents = accountType === "casa" 
+                  ? parentCategories.filter(p => p.type === "despesa")
+                  : parentCategories;
+                
+                const groupedSubcategories = filteredParents.map((parent) => ({
+                  parent,
+                  subcategories: categories.filter((c) => c.parent_id === parent.id),
+                })).filter(group => group.subcategories.length > 0);
                 
                 return (
                   <FormItem>
@@ -227,21 +239,32 @@ export function ForecastDialog({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {subcategories.length === 0 ? (
+                        {groupedSubcategories.length === 0 ? (
                           <div className="px-2 py-1.5 text-sm text-muted-foreground">
                             Nenhuma subcategoria disponível. Crie subcategorias primeiro.
                           </div>
                         ) : (
-                          subcategories.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              <div className="flex items-center gap-2">
+                          groupedSubcategories.map((group) => (
+                            <div key={group.parent.id}>
+                              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50 flex items-center gap-2">
                                 <div
                                   className="w-3 h-3 rounded-full"
-                                  style={{ backgroundColor: category.color }}
+                                  style={{ backgroundColor: group.parent.color }}
                                 />
-                                {category.name}
+                                {group.parent.name}
                               </div>
-                            </SelectItem>
+                              {group.subcategories.map((subcategory) => (
+                                <SelectItem key={subcategory.id} value={subcategory.id} className="pl-8">
+                                  <div className="flex items-center gap-2">
+                                    <div
+                                      className="w-2 h-2 rounded-full"
+                                      style={{ backgroundColor: subcategory.color }}
+                                    />
+                                    {subcategory.name}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </div>
                           ))
                         )}
                       </SelectContent>
