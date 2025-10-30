@@ -101,7 +101,7 @@ export function CasaRevenueSplitManager({ accountId, periodStart }: CasaRevenueS
         <DialogHeader>
           <DialogTitle>Configurar Rateio de Receitas</DialogTitle>
           <DialogDescription>
-            Defina os pesos de contribuição de cada membro para o período de <strong>{new Date(currentPeriod).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</strong>. O valor previsto de cada um será calculado proporcionalmente para cobrir todas as despesas.
+            Defina os pesos de contribuição de cada membro para o período de <strong>{new Date(currentPeriod + 'T00:00:00').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</strong>. O valor previsto de cada um será calculado proporcionalmente para cobrir todas as despesas.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 mt-4">
