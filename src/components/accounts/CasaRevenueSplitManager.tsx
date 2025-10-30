@@ -85,7 +85,7 @@ export function CasaRevenueSplitManager({ accountId }: CasaRevenueSplitManagerPr
             <div key={member.user_id} className="space-y-2">
               <Label htmlFor={`weight-${member.user_id}`}>
                 {member.name}
-                {member.email && <span className="text-muted-foreground text-sm ml-2">({member.email})</span>}
+                {member.email && <span className="text-muted-foreground text-sm ml-1">({member.email})</span>}
               </Label>
               <Input
                 id={`weight-${member.user_id}`}

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCasaRevenueSplit } from "@/hooks/useCasaRevenueSplit";
 import { Badge } from "@/components/ui/badge";
+import { CasaRevenueSplitManager } from "@/components/accounts/CasaRevenueSplitManager";
 
 interface CasaRevenueCalculationProps {
   accountId: string;
@@ -24,17 +25,25 @@ export function CasaRevenueCalculation({ accountId, forecasts }: CasaRevenueCalc
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Contribuição Necessária por Membro</CardTitle>
-        <CardDescription>
-          Valores calculados automaticamente baseados nas despesas previstas (R$ {totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-lg">Contribuição Necessária por Membro</CardTitle>
+            <CardDescription>
+              Valores calculados automaticamente baseados nas despesas previstas (R$ {totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
+            </CardDescription>
+          </div>
+          <CasaRevenueSplitManager accountId={accountId} />
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
           {splits.map((split) => (
             <div key={split.user_id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
               <div>
-                <p className="font-medium">{split.name}</p>
+                <p className="font-medium">
+                  {split.name}
+                  {split.email && <span className="text-muted-foreground text-sm ml-1">({split.email})</span>}
+                </p>
                 <p className="text-sm text-muted-foreground">
                   Peso: {split.weight} ({split.percentage.toFixed(1)}%)
                 </p>

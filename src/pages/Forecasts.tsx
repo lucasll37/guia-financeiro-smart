@@ -221,9 +221,6 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             accountId={propAccountId}
           />
         </div>
-        {filters.accountId !== "all" && (
-          <CasaRevenueSplitManager accountId={filters.accountId} />
-        )}
       </div>
 
       {filters.accountId !== "all" && (
