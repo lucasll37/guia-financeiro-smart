@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { ChevronRight, ChevronDown, Edit, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import type { Database } from "@/integrations/supabase/types";
 
 type Category = Database["public"]["Tables"]["categories"]["Row"];
@@ -56,10 +55,6 @@ function CategoryNode({ category, categoryMap, level, onEdit, onDelete, onAddChi
         />
 
         <span className={`flex-1 ${level === 0 ? 'font-semibold' : ''}`}>{category.name}</span>
-
-        <Badge variant={category.type === "despesa" ? "destructive" : "default"}>
-          {category.type === "despesa" ? "Despesa" : "Receita"}
-        </Badge>
 
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button
