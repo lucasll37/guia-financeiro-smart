@@ -73,7 +73,7 @@ export function ForecastDialog({
     defaultValues: {
       category_id: "",
       forecasted_amount: "",
-      selected_date: new Date(selectedMonth + "-01"),
+      selected_date: new Date(), // Mês atual por padrão
       notes: "",
     },
   });
@@ -90,11 +90,11 @@ export function ForecastDialog({
       form.reset({
         category_id: "",
         forecasted_amount: "",
-        selected_date: new Date(selectedMonth + "-01"),
+        selected_date: new Date(), // Usar mês atual ao invés de selectedMonth
         notes: "",
       });
     }
-  }, [forecast, form, selectedMonth]);
+  }, [forecast, form]);
 
   const handleSubmit = (data: FormData) => {
     // Validar se é subcategoria
