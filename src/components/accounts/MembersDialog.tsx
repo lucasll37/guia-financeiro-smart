@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -57,6 +57,7 @@ export function MembersDialog({
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"viewer" | "editor">("viewer");
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
@@ -167,6 +168,11 @@ export function MembersDialog({
       await removeMember.mutateAsync(currentUserMembership.id);
       setLeaveDialogOpen(false);
       onOpenChange(false);
+      
+      // Explicitly refetch accounts before navigating
+      await queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      await queryClient.refetchQueries({ queryKey: ["accounts"] });
+      
       navigate("/app/contas");
     } catch (error) {
       console.error("Error leaving account:", error);
