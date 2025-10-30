@@ -140,6 +140,18 @@ export function useTransactions(accountId?: string) {
   // Função para atualizar saldo do próximo mês
   const updateNextMonthBalance = async (accountId: string, currentDate: string) => {
     try {
+      // Verificar tipo da conta - contas tipo "casa" não mantém saldo remanescente
+      const { data: account } = await supabase
+        .from("accounts")
+        .select("type")
+        .eq("id", accountId)
+        .single();
+      
+      // Contas tipo casa sempre têm saldo zero (todos pagam exatamente o esperado)
+      if (account?.type === "casa") {
+        return;
+      }
+      
       // Calcular período do mês atual
       const date = new Date(currentDate);
       const monthStart = startOfMonth(date);
