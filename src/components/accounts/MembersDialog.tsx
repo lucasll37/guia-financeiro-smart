@@ -32,12 +32,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAccountMembers } from "@/hooks/useAccountMembers";
-import { UserPlus, Trash2, LogOut, Crown, Eye, Edit, Calendar, Copy } from "lucide-react";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { UserPlus, Trash2, LogOut, Crown, Eye, Edit, Calendar, Copy, Sparkles } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
 
@@ -58,6 +60,7 @@ export function MembersDialog({
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { canShareAccounts } = usePlanLimits();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"viewer" | "editor">("viewer");
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
@@ -224,6 +227,30 @@ export function MembersDialog({
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Upgrade CTA for non-pro users */}
+          {!canShareAccounts && (
+            <Alert className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <AlertTitle className="text-base font-semibold">Faça upgrade para compartilhar contas</AlertTitle>
+              <AlertDescription className="mt-2 space-y-3">
+                <p className="text-sm">
+                  O compartilhamento de contas é uma funcionalidade exclusiva dos planos pagos.
+                  Faça upgrade agora e compartilhe suas contas com familiares ou parceiros!
+                </p>
+                <Button 
+                  onClick={() => {
+                    onOpenChange(false);
+                    navigate("/app/planos");
+                  }}
+                  className="w-full sm:w-auto"
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Ver Planos
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* For non-owners: Show enhanced info card */}
           {!isOwner && currentUserMembership && (
             <div className="space-y-4">
