@@ -439,10 +439,6 @@ export default function Admin() {
               <FileText className="h-4 w-4" />
               <span>Logs</span>
             </TabsTrigger>
-            <TabsTrigger value="ai-tutor" className="flex items-center gap-2 data-[state=active]:bg-muted">
-              <Sparkles className="h-4 w-4" />
-              <span>Tutor IA</span>
-            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -833,6 +829,7 @@ export default function Admin() {
         {/* Plan Limits Tab */}
         <TabsContent value="limits" className="space-y-4">
           <PlanLimitsManager />
+          <AiTutorSettings />
           <VersionSettings />
         </TabsContent>
 
@@ -855,11 +852,6 @@ export default function Admin() {
         {/* Feedback Tab */}
         <TabsContent value="feedback" className="space-y-4">
           <FeedbackManager />
-        </TabsContent>
-
-        {/* AI Tutor Settings Tab */}
-        <TabsContent value="ai-tutor" className="space-y-4">
-          <AiTutorSettings />
         </TabsContent>
       </Tabs>
 
