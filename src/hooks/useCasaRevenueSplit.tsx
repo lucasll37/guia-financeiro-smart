@@ -28,16 +28,30 @@ export function useCasaRevenueSplit(accountId?: string) {
   });
 
   const { data: members } = useQuery({
-    queryKey: ["casa-members", accountId],
+    queryKey: ["casa-members", accountId, account?.revenue_split],
     queryFn: async () => {
-      if (!accountId) return [];
+      if (!accountId || !account) return [];
+      
+      const allMembers: Member[] = [];
       
       // Buscar proprietário
-      const { data: ownerData } = await supabase
-        .from("profiles")
-        .select("id, name, email")
-        .eq("id", account?.owner_id)
-        .single();
+      if (account.owner_id) {
+        const { data: ownerData } = await supabase
+          .from("profiles")
+          .select("id, name, email")
+          .eq("id", account.owner_id)
+          .maybeSingle();
+
+        if (ownerData) {
+          const weight = (account.revenue_split as any)?.[ownerData.id] || 1;
+          allMembers.push({
+            user_id: ownerData.id,
+            name: ownerData.name || ownerData.email || "Sem nome",
+            email: ownerData.email || "",
+            weight,
+          });
+        }
+      }
 
       // Buscar membros editores aceitos
       const { data: memberData } = await supabase
@@ -50,21 +64,9 @@ export function useCasaRevenueSplit(accountId?: string) {
         .eq("status", "accepted")
         .eq("role", "editor");
 
-      const allMembers: Member[] = [];
-      
-      if (ownerData) {
-        const weight = (account?.revenue_split as any)?.[ownerData.id] || 1;
-        allMembers.push({
-          user_id: ownerData.id,
-          name: ownerData.name || ownerData.email || "Sem nome",
-          email: ownerData.email || "",
-          weight,
-        });
-      }
-
-      if (memberData) {
+      if (memberData && memberData.length > 0) {
         memberData.forEach((m: any) => {
-          const weight = (account?.revenue_split as any)?.[m.user_id] || 1;
+          const weight = (account.revenue_split as any)?.[m.user_id] || 1;
           allMembers.push({
             user_id: m.user_id,
             name: m.profiles.name || m.profiles.email || "Sem nome",
