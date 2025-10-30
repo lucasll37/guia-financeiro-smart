@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +28,17 @@ export function CasaRevenueSplitManager({ accountId, periodStart }: CasaRevenueS
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [weights, setWeights] = useState<Record<string, number>>({});
+
+  // Atualizar pesos quando o período ou membros mudarem
+  useEffect(() => {
+    if (members.length > 0) {
+      const currentWeights: Record<string, number> = {};
+      members.forEach((m) => {
+        currentWeights[m.user_id] = m.weight;
+      });
+      setWeights(currentWeights);
+    }
+  }, [members, currentPeriod]);
 
   const handleOpen = () => {
     // Inicializar pesos com valores atuais
