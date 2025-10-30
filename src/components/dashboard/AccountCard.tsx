@@ -153,28 +153,20 @@ export function AccountCard({
           {/* Progress Bar */}
           <div className="space-y-1">
             <div className="flex justify-end mb-1">
-              <span className={cn(
-                "text-xs font-semibold",
-                completion > 100 ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"
-              )}>
+              <span className="text-xs font-semibold text-primary">
                 {Math.round(completion)}%
               </span>
             </div>
             <div className="relative h-2.5 bg-muted rounded-full overflow-hidden">
               <div
-                className={cn(
-                  "h-full transition-all duration-500 ease-out rounded-full",
-                  completion > 100
-                    ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500"
-                    : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500"
-                )}
+                className="h-full transition-all duration-500 ease-out rounded-full bg-gradient-to-r from-primary to-primary/80"
                 style={{
                   width: `${Math.min(completion, 100)}%`,
                 }}
               />
               
               {completion > 100 && (
-                <div className="absolute inset-y-0 right-0 w-0.5 bg-foreground/60" />
+                <div className="absolute inset-y-0 right-0 w-0.5 bg-destructive" />
               )}
             </div>
           </div>
