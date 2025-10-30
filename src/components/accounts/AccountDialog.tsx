@@ -92,7 +92,14 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
               <Label htmlFor="type">Tipo</Label>
               <Select
                 value={formData.type}
-                onValueChange={(value: any) => setFormData({ ...formData, type: value })}
+                onValueChange={(value: any) => {
+                  const requiresSharing = ['conjugal', 'mesada', 'casa'].includes(value);
+                  setFormData({ 
+                    ...formData, 
+                    type: value,
+                    is_shared: requiresSharing || formData.is_shared
+                  });
+                }}
               >
                 <SelectTrigger id="type">
                   <SelectValue />
@@ -137,8 +144,14 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
               id="is_shared"
               checked={formData.is_shared}
               onCheckedChange={(checked) => setFormData({ ...formData, is_shared: checked })}
+              disabled={['conjugal', 'mesada', 'casa'].includes(formData.type)}
             />
-            <Label htmlFor="is_shared">Conta Compartilhada</Label>
+            <Label htmlFor="is_shared">
+              Conta Compartilhada
+              {['conjugal', 'mesada', 'casa'].includes(formData.type) && (
+                <span className="text-xs text-muted-foreground ml-2">(Obrigatório para este tipo)</span>
+              )}
+            </Label>
           </div>
 
           {formData.is_shared && (
