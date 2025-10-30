@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Não autenticado' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const { accountId } = await req.json();
+    const { accountId, accountType } = await req.json();
     if (!accountId) {
       return new Response(JSON.stringify({ error: 'accountId é obrigatório' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
@@ -122,6 +122,11 @@ Deno.serve(async (req) => {
       { name: 'Imposto de Renda a Pagar', type: 'despesa', color: '#6366f1', parent_id: 'Serviços Financeiros' },
     ];
 
+    // Para contas tipo casa, filtrar apenas despesas (receitas têm regras especiais)
+    const filteredCategories = accountType === 'casa'
+      ? categories.filter(c => c.type === 'despesa')
+      : categories;
+
     const buildKey = (name: string, parentId: string | null) => `${name}__${parentId ?? 'root'}`;
 
     // Busca existentes
@@ -141,8 +146,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    const parentCategories = categories.filter(c => c.parent_id === null);
-    const childCategories = categories.filter(c => c.parent_id !== null);
+    const parentCategories = filteredCategories.filter(c => c.parent_id === null);
+    const childCategories = filteredCategories.filter(c => c.parent_id !== null);
 
     let createdCount = 0;
 

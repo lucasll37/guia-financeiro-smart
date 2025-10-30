@@ -78,7 +78,7 @@ export default function Accounts() {
         try {
           console.log("Iniciando seed de categorias via edge function para conta:", newAccount.id);
           const { data, error } = await supabase.functions.invoke('seed-categories', {
-            body: { accountId: newAccount.id },
+            body: { accountId: newAccount.id, accountType: accountData.type },
           });
           if (error) throw error;
           console.log(`Seed de categorias concluído:`, data);
@@ -87,7 +87,7 @@ export default function Accounts() {
           // Fallback para função local
           try {
             console.log("Tentando fallback com função local...");
-            const categoriesCreated = await seedCategories(newAccount.id);
+            const categoriesCreated = await seedCategories(newAccount.id, accountData.type);
             console.log(`${categoriesCreated} categorias criadas com sucesso via função local`);
           } catch (localError) {
             console.error("Erro ao criar categorias padrão via função local:", localError);

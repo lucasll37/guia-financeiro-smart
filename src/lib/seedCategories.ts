@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export async function seedCategories(accountId: string) {
-  console.log("seedCategories chamado para account_id:", accountId);
+export async function seedCategories(accountId: string, accountType?: string) {
+  console.log("seedCategories chamado para account_id:", accountId, "tipo:", accountType);
   
   const categories = [
     // RECEITAS - PRIMEIRA CATEGORIA
@@ -121,8 +121,13 @@ export async function seedCategories(accountId: string) {
     }
   }
 
-  const parentCategories = categories.filter(c => c.parent_id === null);
-  const childCategories = categories.filter(c => c.parent_id !== null);
+  // Para contas tipo casa, filtrar apenas despesas (receitas têm regras especiais)
+  const filteredCategories = accountType === 'casa' 
+    ? categories.filter(c => c.type === 'despesa')
+    : categories;
+
+  const parentCategories = filteredCategories.filter(c => c.parent_id === null);
+  const childCategories = filteredCategories.filter(c => c.parent_id !== null);
 
   let createdCount = 0;
 
