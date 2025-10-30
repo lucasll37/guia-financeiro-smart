@@ -177,6 +177,19 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
         await createForecast.mutateAsync(createData);
       }
     }
+
+    // Após salvar, alinhar o mês selecionado com o mês salvo no assistente
+    const savedPeriodStart = forecasts[0]?.period_start;
+    if (savedPeriodStart) {
+      const d = new Date(savedPeriodStart);
+      const ym = format(d, "yyyy-MM");
+      setFilters(prev => ({
+        ...prev,
+        selectedMonth: ym,
+        startDate: format(startOfMonth(d), "yyyy-MM-dd"),
+        endDate: format(endOfMonth(d), "yyyy-MM-dd"),
+      }));
+    }
     
     // Trigger revenue sync for CASA accounts after saving expense forecasts
     if (selectedAccount?.type === "casa") {
