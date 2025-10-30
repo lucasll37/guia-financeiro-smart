@@ -69,18 +69,20 @@ export function MembersDialog({
 
   // Fetch owner profile
   const { data: ownerProfile } = useQuery({
-    queryKey: ["owner-profile", currentUserId],
+    queryKey: ["owner-profile", account?.owner_id],
     queryFn: async () => {
+      if (!account?.owner_id) return null;
+      
       const { data, error } = await supabase
         .from("profiles")
         .select("id, name, email, avatar_url")
-        .eq("id", currentUserId)
+        .eq("id", account.owner_id)
         .maybeSingle();
       
       if (error) throw error;
       return data;
     },
-    enabled: !!currentUserId,
+    enabled: !!account?.owner_id,
   });
 
   // Query to find user by email
