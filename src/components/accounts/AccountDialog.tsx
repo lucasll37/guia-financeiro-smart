@@ -100,6 +100,7 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
                     is_shared: requiresSharing || formData.is_shared
                   });
                 }}
+                disabled={!!account}
               >
                 <SelectTrigger id="type">
                   <SelectValue />
@@ -112,6 +113,11 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
                   <SelectItem value="evento">Evento</SelectItem>
                 </SelectContent>
               </Select>
+              {account && (
+                <p className="text-xs text-muted-foreground">
+                  O tipo da conta não pode ser alterado após a criação
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
