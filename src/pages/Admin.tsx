@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown, Bell, Send, CreditCard, Settings, FileText, AlertTriangle, Loader2, Copy, MessageSquare, FolderTree, Sparkles } from "lucide-react";
+import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown, Bell, Send, CreditCard, Settings, FileText, AlertTriangle, Loader2, Copy, MessageSquare, FolderTree } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { z } from "zod";
 import { UserGrowthChart } from "@/components/admin/UserGrowthChart";
@@ -26,7 +26,6 @@ import { LogRetentionSettings } from "@/components/admin/LogRetentionSettings";
 import { FeedbackManager } from "@/components/admin/FeedbackManager";
 import { SeedCategoriesManager } from "@/components/admin/SeedCategoriesManager";
 import { VersionSettings } from "@/components/admin/VersionSettings";
-import { AiTutorSettings } from "@/components/admin/AiTutorSettings";
 const couponSchema = z.object({
   code: z.string().trim().min(3, "Código deve ter no mínimo 3 caracteres").max(50, "Código muito longo"),
   discount_percent: z.number().min(1, "Desconto deve ser entre 1 e 100").max(100, "Desconto deve ser entre 1 e 100"),
@@ -829,7 +828,6 @@ export default function Admin() {
         {/* Plan Limits Tab */}
         <TabsContent value="limits" className="space-y-4">
           <PlanLimitsManager />
-          <AiTutorSettings />
           <VersionSettings />
         </TabsContent>
 

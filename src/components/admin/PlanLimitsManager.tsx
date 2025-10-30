@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { Save, Settings } from "lucide-react";
+import { Save, Settings, Sparkles } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
 type PlanLimit = Database["public"]["Tables"]["plan_limits"]["Row"];
@@ -24,6 +24,7 @@ export function PlanLimitsManager() {
     can_edit_categories: false,
     can_generate_reports: false,
   });
+  const [requiresPro, setRequiresPro] = useState(false);
 
   // Fetch plan limits
   const { data: planLimits, isLoading } = useQuery({
@@ -36,6 +37,24 @@ export function PlanLimitsManager() {
 
       if (error) throw error;
       return data as PlanLimit[];
+    },
+  });
+
+  // Fetch AI tutor setting
+  const { isLoading: aiTutorLoading } = useQuery({
+    queryKey: ["ai-tutor-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("admin_settings")
+        .select("setting_value")
+        .eq("setting_key", "ai_tutor_requires_pro")
+        .single();
+
+      if (error) throw error;
+      
+      const enabled = (data.setting_value as any)?.enabled || false;
+      setRequiresPro(enabled);
+      return enabled;
     },
   });
 
@@ -73,6 +92,34 @@ export function PlanLimitsManager() {
     onError: (error: any) => {
       toast({
         title: "Erro ao atualizar limites",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update AI tutor setting mutation
+  const updateAiTutorSetting = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      const { error } = await supabase
+        .from("admin_settings")
+        .update({
+          setting_value: { enabled },
+        })
+        .eq("setting_key", "ai_tutor_requires_pro");
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ai-tutor-settings"] });
+      toast({
+        title: "Configuração atualizada!",
+        description: "As configurações do Tutor IA foram atualizadas com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao atualizar configuração",
         description: error.message,
         variant: "destructive",
       });
@@ -128,7 +175,7 @@ export function PlanLimitsManager() {
     return colors[plan] || "default";
   };
 
-  if (isLoading) {
+  if (isLoading || aiTutorLoading) {
     return (
       <Card>
         <CardContent className="py-8">
@@ -319,6 +366,46 @@ export function PlanLimitsManager() {
               )}
             </div>
           ))}
+
+          {/* AI Tutor Global Settings */}
+          <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <h3 className="font-medium">Configurações Globais do Tutor IA</h3>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="ai-tutor-requires-pro"
+                  checked={requiresPro}
+                  onChange={(e) => setRequiresPro(e.target.checked)}
+                  className="h-4 w-4 rounded border-border"
+                />
+                <Label htmlFor="ai-tutor-requires-pro" className="font-normal cursor-pointer">
+                  Requer plano Pro para acessar o Tutor IA
+                </Label>
+              </div>
+              <p className="text-sm text-muted-foreground ml-6">
+                {requiresPro 
+                  ? "Apenas usuários com plano Pro poderão acessar o Tutor IA"
+                  : "Todos os usuários podem acessar o Tutor IA gratuitamente"
+                }
+              </p>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <Button 
+                onClick={() => updateAiTutorSetting.mutate(requiresPro)} 
+                disabled={updateAiTutorSetting.isPending}
+                size="sm"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Salvar
+              </Button>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
