@@ -45,6 +45,28 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
     enabled: !!accountId && !!selectedMonth,
   });
 
+  // Buscar transações de despesas do mês (fallback quando não há previsões)
+  const { data: expenseTransactions } = useQuery({
+    queryKey: ["transactions", accountId, selectedMonth, "expenses-only"],
+    queryFn: async () => {
+      const monthDate = new Date(selectedMonth + "-01");
+      const periodStart = format(startOfMonth(monthDate), "yyyy-MM-dd");
+      const periodEnd = format(endOfMonth(monthDate), "yyyy-MM-dd");
+
+      const { data, error } = await supabase
+        .from("transactions")
+        .select("amount, date, categories!inner(type)")
+        .eq("account_id", accountId)
+        .gte("date", periodStart)
+        .lte("date", periodEnd)
+        .eq("categories.type", "despesa");
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!accountId && !!selectedMonth,
+  });
+
   // Mutation para sincronizar previsões de receita
   const syncRevenueForecasts = useMutation({
     mutationFn: async () => {
@@ -54,11 +76,20 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
         return;
       }
 
-      // Calcular total de despesas (pode ser 0)
-      const totalExpenses = expenseForecasts?.reduce(
+      // Calcular total de despesas (previsões > lançamentos)
+      const totalExpenseForecasts = expenseForecasts?.reduce(
         (sum, f) => sum + Number(f.forecasted_amount),
         0
       ) || 0;
+
+      const totalExpenseTransactions = expenseTransactions?.reduce(
+        (sum, t) => sum + Number(t.amount),
+        0
+      ) || 0;
+
+      const totalExpenses = totalExpenseForecasts > 0
+        ? totalExpenseForecasts
+        : totalExpenseTransactions;
 
       if (totalExpenses === 0) return; // Não criar previsões se não há despesas
 
@@ -127,10 +158,25 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
 
   // Auto-sincronizar quando despesas ou splits mudarem
   useEffect(() => {
-    if (isCasaAccount && expenseForecasts !== undefined && members.length > 0 && revenueCategory && revenueSubcategories.length > 0) {
+    if (
+      isCasaAccount &&
+      expenseForecasts !== undefined &&
+      expenseTransactions !== undefined &&
+      members.length > 0 &&
+      revenueCategory &&
+      revenueSubcategories.length > 0
+    ) {
       syncRevenueForecasts.mutate();
     }
-  }, [isCasaAccount, expenseForecasts, members.length, selectedMonth, revenueSubcategories.length, revenueCategory?.id]);
+  }, [
+    isCasaAccount,
+    expenseForecasts,
+    expenseTransactions,
+    members.length,
+    selectedMonth,
+    revenueSubcategories.length,
+    revenueCategory?.id
+  ]);
 
   return {
     syncRevenueForecasts,
