@@ -1,20 +1,32 @@
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 export const ThemeToggle = () => {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const { preferences, updatePreferences } = useUserPreferences();
 
   useEffect(() => {
-    const isDark = document.documentElement.classList.contains("dark");
-    setTheme(isDark ? "dark" : "light");
-  }, []);
+    // Aplicar tema ao montar o componente
+    const applyTheme = (theme: "light" | "dark" | "system") => {
+      if (theme === "system") {
+        const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.classList.toggle("dark", systemPrefersDark);
+      } else {
+        document.documentElement.classList.toggle("dark", theme === "dark");
+      }
+    };
+
+    applyTheme(preferences.theme);
+  }, [preferences.theme]);
 
   const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    document.documentElement.classList.toggle("dark");
+    const isDark = document.documentElement.classList.contains("dark");
+    const newTheme = isDark ? "light" : "dark";
+    updatePreferences({ theme: newTheme });
   };
+
+  const isDark = document.documentElement.classList.contains("dark");
 
   return (
     <Button
@@ -23,10 +35,10 @@ export const ThemeToggle = () => {
       onClick={toggleTheme}
       aria-label="Alternar tema"
     >
-      {theme === "light" ? (
-        <Moon className="h-5 w-5" />
-      ) : (
+      {isDark ? (
         <Sun className="h-5 w-5" />
+      ) : (
+        <Moon className="h-5 w-5" />
       )}
     </Button>
   );
