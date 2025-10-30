@@ -65,6 +65,11 @@ interface CategoryGroup {
   }[];
 }
 
+const parseSelectedMonth = (ym: string) => {
+  const [y, m] = ym.split("-").map(Number);
+  return new Date(y, (m || 1) - 1, 1);
+};
+
 export function BudgetWizard({
   open,
   onOpenChange,
@@ -75,7 +80,7 @@ export function BudgetWizard({
   accountType,
 }: BudgetWizardProps) {
   const [step, setStep] = useState<"month" | "income" | "expenses">("month");
-  const [workingMonth, setWorkingMonth] = useState(new Date(selectedMonth + "-01"));
+  const [workingMonth, setWorkingMonth] = useState(parseSelectedMonth(selectedMonth));
   const [incomeEntries, setIncomeEntries] = useState<ForecastEntry[]>([]);
   const [expenseEntries, setExpenseEntries] = useState<ForecastEntry[]>([]);
   const [openCategories, setOpenCategories] = useState<string[]>([]);
@@ -240,7 +245,7 @@ export function BudgetWizard({
 
   const handleClose = () => {
     setStep("month");
-    setWorkingMonth(new Date(selectedMonth + "-01"));
+    setWorkingMonth(parseSelectedMonth(selectedMonth));
     setIncomeEntries([]);
     setExpenseEntries([]);
     setOpenCategories([]);
