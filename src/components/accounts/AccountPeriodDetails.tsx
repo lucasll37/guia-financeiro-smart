@@ -44,8 +44,8 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
   const closingDay = account.closing_day || 1;
   const [currentDate, setCurrentDate] = useState(new Date());
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  const [incomeExpanded, setIncomeExpanded] = useState(true);
-  const [expenseExpanded, setExpenseExpanded] = useState(true);
+  const [incomeExpanded, setIncomeExpanded] = useState(false);
+  const [expenseExpanded, setExpenseExpanded] = useState(false);
   const [balanceExpanded, setBalanceExpanded] = useState(true);
   const { maskValue } = useMaskValues();
   
