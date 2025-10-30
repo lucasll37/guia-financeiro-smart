@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Target, Edit, Trash2, Calendar, TrendingUp } from "lucide-react";
@@ -66,20 +65,35 @@ export function GoalCard({ goal, onEdit, onDelete, onUpdateProgress }: GoalCardP
               de {maskValue(formatCurrency(Number(goal.target_amount)))}
             </span>
           </div>
-          <Progress value={Math.min(percentage, 100)} className="h-2" />
+          <div className="relative overflow-hidden rounded-full bg-secondary h-2.5">
+            <div 
+              className={`h-full rounded-full transition-all duration-500 ${
+                percentage >= 100 
+                  ? 'bg-gradient-to-r from-green-500 to-green-600' 
+                  : 'bg-gradient-to-r from-primary to-primary/80'
+              }`}
+              style={{ width: `${Math.min(percentage, 100)}%` }}
+            />
+          </div>
           <div className="flex items-center justify-between mt-2 text-sm">
             <span className={getStatusColor()}>
               {isComplete ? (
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-1 font-semibold">
                   <TrendingUp className="h-4 w-4" />
                   Meta atingida!
                 </span>
               ) : (
-                maskValue(`${percentage.toFixed(1)}%`)
+                <span className="font-medium">{maskValue(`${percentage.toFixed(1)}%`)}</span>
               )}
             </span>
             <span className="text-muted-foreground">
-              Faltam {maskValue(formatCurrency(Number(goal.target_amount) - Number(goal.current_amount)))}
+              {Number(goal.target_amount) - Number(goal.current_amount) > 0 ? (
+                <>Faltam {maskValue(formatCurrency(Number(goal.target_amount) - Number(goal.current_amount)))}</>
+              ) : (
+                <span className="text-green-600 dark:text-green-400 font-medium">
+                  Excedeu em {maskValue(formatCurrency(Math.abs(Number(goal.target_amount) - Number(goal.current_amount))))}
+                </span>
+              )}
             </span>
           </div>
         </div>

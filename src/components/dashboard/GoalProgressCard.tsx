@@ -19,9 +19,12 @@ interface GoalProgressCardProps {
 export function GoalProgressCard({ goal }: GoalProgressCardProps) {
   const navigate = useNavigate();
   const { maskValue } = useMaskValues();
-  const progress = goal.target_amount > 0
+  const progressRaw = goal.target_amount > 0
     ? (goal.current_amount / goal.target_amount) * 100 
     : 0;
+  
+  // Limitar o progresso para no máximo 100% para evitar overflow da barra
+  const progress = Math.min(progressRaw, 100);
   
   const remaining = goal.target_amount - goal.current_amount;
   
@@ -49,13 +52,26 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
       </CardHeader>
       <CardContent className="relative z-10">
         <div className="space-y-4">
-          <Progress value={progress} className="h-3" />
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm mb-1">
+              <span className="text-muted-foreground">Progresso</span>
+              <span className={`font-semibold ${progressRaw > 100 ? 'text-green-600 dark:text-green-400' : 'font-medium'}`}>
+                {progressRaw.toFixed(1)}%
+              </span>
+            </div>
+            <div className="relative overflow-hidden rounded-full bg-secondary h-2.5">
+              <div 
+                className={`h-full rounded-full transition-all duration-500 ${
+                  progressRaw >= 100 
+                    ? 'bg-gradient-to-r from-green-500 to-green-600' 
+                    : 'bg-gradient-to-r from-primary to-primary/80'
+                }`}
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
           
           <div className="space-y-1 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Progresso</span>
-              <span className="font-medium">{progress.toFixed(1)}%</span>
-            </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Meta</span>
               <span className="font-medium">
@@ -65,15 +81,27 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
                 }).format(goal.target_amount))}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Falta</span>
-              <span className="font-medium">
-                {maskValue(new Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                }).format(remaining))}
-              </span>
-            </div>
+            {remaining > 0 ? (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Falta</span>
+                <span className="font-medium">
+                  {maskValue(new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  }).format(remaining))}
+                </span>
+              </div>
+            ) : (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Excedeu em</span>
+                <span className="font-medium text-green-600 dark:text-green-400">
+                  {maskValue(new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  }).format(Math.abs(remaining)))}
+                </span>
+              </div>
+            )}
             {daysLeft !== null && (
               <div className="flex justify-between pt-2 border-t">
                 <span className="text-muted-foreground">Prazo</span>
