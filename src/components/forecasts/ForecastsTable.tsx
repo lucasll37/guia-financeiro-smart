@@ -161,7 +161,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
               variant="ghost"
               size="icon"
               onClick={() => onEdit(forecast)}
-              disabled={!canEdit}
+              disabled={!canEdit || isCasaRevenue}
             >
               <Edit className="h-4 w-4" />
             </Button>
@@ -253,7 +253,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                       variant="ghost"
                       size="icon"
                       onClick={() => onEdit(forecast)}
-                      disabled={!canEdit}
+                      disabled={!canEdit || isCasaRevenue}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -292,10 +292,12 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
         <Collapsible open={incomeExpanded} onOpenChange={setIncomeExpanded}>
           <div className="border rounded-lg">
             <CollapsibleTrigger asChild>
-              <div className="bg-green-50 dark:bg-green-950/20 px-4 py-2 border-b cursor-pointer hover:bg-green-100 dark:hover:bg-green-950/30 transition-colors flex items-center justify-between">
-                <h3 className="font-semibold text-green-700 dark:text-green-400">Receitas Previstas</h3>
+              <div className="bg-green-50 dark:bg-green-950/20 px-4 py-3 border-b cursor-pointer hover:bg-green-100 dark:hover:bg-green-950/30 transition-colors flex items-center justify-between">
                 <div className="flex items-center gap-3">
+                  <h3 className="font-semibold text-green-700 dark:text-green-400">Receitas Previstas</h3>
                   {revenueHeaderActions}
+                </div>
+                <div className="flex items-center gap-2">
                   {incomeExpanded ? (
                     <ChevronDown className="h-4 w-4 text-green-700 dark:text-green-400" />
                   ) : (
