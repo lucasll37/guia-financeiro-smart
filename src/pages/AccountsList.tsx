@@ -173,10 +173,10 @@ export default function AccountsList() {
                 onClick={() => handleAccountClick(account.id)}
               >
                 <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <CardTitle className="text-xl">{account.name}</CardTitle>
-                      <div className="text-sm text-muted-foreground flex items-center gap-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <CardTitle className="text-xl truncate">{account.name}</CardTitle>
+                      <div className="text-sm text-muted-foreground flex items-center gap-2 flex-wrap">
                         <Badge variant={account.type === "pessoal" ? "default" : "secondary"}>
                           {account.type === "pessoal" ? "Pessoal" : "Empresarial"}
                         </Badge>
@@ -188,44 +188,42 @@ export default function AccountsList() {
                         )}
                       </div>
                     </div>
-                    <div className="flex gap-1 shrink-0">
-                      {/* Botão Gerenciar Membros - apenas para contas compartilhadas do dono */}
-                      {account.is_shared && isOwner && (
+                    {/* Botões de ação - apenas para o dono */}
+                    {isOwner && (
+                      <div className="flex gap-1 items-start">
+                        {/* Botão Gerenciar Membros - apenas para contas compartilhadas */}
+                        {account.is_shared && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => handleManageMembers(e, account)}
+                            title="Gerenciar Membros"
+                            aria-label="Gerenciar membros"
+                          >
+                            <Users className="h-4 w-4" />
+                          </Button>
+                        )}
+                        
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={(e) => handleManageMembers(e, account)}
-                          title="Gerenciar Membros"
-                          aria-label="Gerenciar membros"
+                          onClick={(e) => handleDeleteClick(e, account)}
+                          title="Excluir"
+                          aria-label="Excluir conta"
                         >
-                          <Users className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
-                      )}
-
-                      {/* Botões Excluir e Editar - apenas para o dono */}
-                      {isOwner && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => handleDeleteClick(e, account)}
-                            title="Excluir"
-                            aria-label="Excluir conta"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => handleEditAccount(e, account)}
-                            title="Editar"
-                            aria-label="Editar conta"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => handleEditAccount(e, account)}
+                          title="Editar"
+                          aria-label="Editar conta"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent>
