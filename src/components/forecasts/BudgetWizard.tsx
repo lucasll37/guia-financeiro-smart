@@ -182,9 +182,12 @@ export function BudgetWizard({
     }
   };
 
-  const handleMonthSelect = async (month: Date) => {
+  const handleMonthSelect = (month: Date) => {
     setWorkingMonth(month);
-    await loadExistingForecasts(month);
+  };
+
+  const handleContinueFromMonth = async () => {
+    await loadExistingForecasts(workingMonth);
     // Pular etapa de receitas em contas casa
     setStep(accountType === "casa" ? "expenses" : "income");
   };
@@ -323,6 +326,16 @@ export function BudgetWizard({
                       />
                     </PopoverContent>
                   </Popover>
+                </div>
+
+                <div className="flex justify-end pt-2 border-t">
+                  <Button
+                    onClick={handleContinueFromMonth}
+                    className="gap-2"
+                  >
+                    Continuar
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             )}
