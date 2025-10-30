@@ -44,14 +44,15 @@ export function useAccountMembers(accountId?: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["account_members"] });
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
       toast({
-        title: "Convite enviado",
-        description: "O convite foi enviado com sucesso",
+        title: "Membro adicionado",
+        description: "O membro foi adicionado com sucesso à conta",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Erro ao enviar convite",
+        title: "Erro ao adicionar membro",
         description: error.message,
         variant: "destructive",
       });
@@ -86,88 +87,20 @@ export function useAccountMembers(accountId?: string) {
     },
   });
 
-  const respondToInvite = useMutation({
-    mutationFn: async ({ id, status, accountId, invitedBy }: { 
-      id: string; 
-      status: "accepted" | "rejected";
-      accountId: string;
-      invitedBy: string;
-    }) => {
-      // Se for recusar, deletar o registro ao invés de atualizar
-      if (status === "rejected") {
-        const { error } = await supabase
-          .from("account_members")
-          .delete()
-          .eq("id", id);
-
-        if (error) throw error;
-        return { id, status: "rejected" };
-      }
-      
-      // Se for aceitar, atualizar o status
-      const { data, error } = await supabase
-        .from("account_members")
-        .update({ status: "accepted" })
-        .eq("id", id)
-        .select()
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["account_members"] });
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["accounts"] });
-      toast({
-        title: variables.status === "accepted" ? "Convite aceito" : "Convite recusado",
-        description: `Você ${variables.status === "accepted" ? "aceitou" : "recusou"} o convite`,
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Erro ao responder convite",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
 
   const removeMember = useMutation({
     mutationFn: async (id: string) => {
-      // Get member info before deleting to update notification
-      const { data: member } = await supabase
-        .from("account_members")
-        .select("user_id, status")
-        .eq("id", id)
-        .maybeSingle();
-
       const { error } = await supabase
         .from("account_members")
         .delete()
         .eq("id", id);
 
       if (error) throw error;
-
-      // If member was pending, invalidate their notification
-      if (member?.status === "pending") {
-        await supabase
-          .from("notifications")
-          .update({ 
-            metadata: { 
-              ...{} as any,
-              invite_cancelled: true,
-              cancelled_at: new Date().toISOString()
-            } 
-          })
-          .eq("type", "invite")
-          .eq("user_id", member.user_id)
-          .contains("metadata", { invite_id: id });
-      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["account_members"] });
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
       toast({
         title: "Membro removido",
         description: "O membro foi removido da conta",
@@ -187,7 +120,6 @@ export function useAccountMembers(accountId?: string) {
     isLoading,
     inviteMember,
     updateMemberRole,
-    respondToInvite,
     removeMember,
   };
 }

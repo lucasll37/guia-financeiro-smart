@@ -1,43 +1,28 @@
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
-import { useAccountMembers } from "@/hooks/useAccountMembers";
 import { useInvestmentMembers } from "@/hooks/useInvestmentMembers";
-import { supabase } from "@/integrations/supabase/client";
 
 interface InviteActionsProps {
   inviteId: string; // ID da notificação
-  membershipId: string; // ID do registro em account_members ou investment_members
-  accountId?: string;
-  investmentId?: string;
+  membershipId: string; // ID do registro em investment_members
+  investmentId: string;
   invitedBy: string;
   onComplete?: () => void;
 }
 
-export function InviteActions({ inviteId, membershipId, accountId, investmentId, invitedBy, onComplete }: InviteActionsProps) {
-  const { respondToInvite: respondToAccountInvite } = useAccountMembers();
+export function InviteActions({ inviteId, membershipId, investmentId, invitedBy, onComplete }: InviteActionsProps) {
   const { updateMemberStatus: respondToInvestmentInvite } = useInvestmentMembers();
 
   const handleResponse = async (status: "accepted" | "rejected") => {
-    console.log("Respondendo ao convite:", { inviteId, membershipId, status, investmentId, accountId });
+    console.log("Respondendo ao convite:", { inviteId, membershipId, status, investmentId });
     
     try {
-      if (investmentId) {
-        // Responder a convite de investimento
-        console.log("Atualizando investment_members...");
-        await respondToInvestmentInvite.mutateAsync({
-          id: membershipId,
-          status: status === "accepted" ? "accepted" : "declined",
-        });
-      } else if (accountId) {
-        // Responder a convite de conta
-        console.log("Atualizando account_members...");
-        await respondToAccountInvite.mutateAsync({
-          id: membershipId,
-          status,
-          accountId,
-          invitedBy,
-        });
-      }
+      // Responder a convite de investimento
+      console.log("Atualizando investment_members...");
+      await respondToInvestmentInvite.mutateAsync({
+        id: membershipId,
+        status: status === "accepted" ? "accepted" : "declined",
+      });
       
       console.log("Convite processado com sucesso");
       onComplete?.();
@@ -47,7 +32,7 @@ export function InviteActions({ inviteId, membershipId, accountId, investmentId,
     }
   };
 
-  const isLoading = respondToAccountInvite.isPending || respondToInvestmentInvite.isPending;
+  const isLoading = respondToInvestmentInvite.isPending;
 
   return (
     <div className="flex gap-2 mt-2">

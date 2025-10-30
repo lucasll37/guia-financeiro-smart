@@ -268,11 +268,10 @@ export function NotificationPanel({ userId, onOpenPreferences }: NotificationPan
                                     </Badge>
                                   )}
                                 </div>
-                                {isInvitePending && (
+                                {isInvitePending && metadata.investment_id && (
                                   <InviteActions
                                     inviteId={notification.id}
                                     membershipId={metadata.invite_id}
-                                    accountId={metadata.account_id}
                                     investmentId={metadata.investment_id}
                                     invitedBy={metadata.invited_by}
                                     onComplete={() => {

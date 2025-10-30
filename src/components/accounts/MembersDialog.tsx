@@ -1,17 +1,43 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { UserPlus, Mail, Trash2, Crown } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAccountMembers } from "@/hooks/useAccountMembers";
-import { useAuditLogs } from "@/hooks/useAuditLogs";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { UserPlus, Trash2, LogOut, Crown, Eye, Edit, Calendar, Copy } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
+import { useAuth } from "@/hooks/useAuth";
+import { format, differenceInDays } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { useToast } from "@/hooks/use-toast";
 
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
 
@@ -22,344 +48,410 @@ interface MembersDialogProps {
   currentUserId: string;
 }
 
-const roleLabels: Record<string, string> = {
-  owner: "Proprietário",
-  editor: "Editor",
-  viewer: "Visualizador",
-};
-
-const statusLabels: Record<string, string> = {
-  pending: "Pendente",
-  accepted: "Aceito",
-  rejected: "Recusado",
-};
-
-export function MembersDialog({ open, onOpenChange, account, currentUserId }: MembersDialogProps) {
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"editor" | "viewer">("viewer");
-  const [isInviting, setIsInviting] = useState(false);
-
-  const { members, isLoading, inviteMember, updateMemberRole, removeMember } = useAccountMembers(account?.id);
-  const { logAction } = useAuditLogs();
+export function MembersDialog({
+  open,
+  onOpenChange,
+  account,
+  currentUserId,
+}: MembersDialogProps) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState<"viewer" | "editor">("viewer");
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+  const [leaveConfirmName, setLeaveConfirmName] = useState("");
+  const { members, inviteMember, removeMember } = useAccountMembers(account?.id);
+  
+  const isOwner = user?.id === currentUserId;
+  const currentUserMembership = members?.find(m => m.user_id === user?.id);
+
+  // Fetch owner profile
+  const { data: ownerProfile } = useQuery({
+    queryKey: ["owner-profile", currentUserId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, name, email, avatar_url")
+        .eq("id", currentUserId)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!currentUserId,
+  });
+
+  // Query to find user by email
+  const { data: searchedUser, refetch: searchUser } = useQuery({
+    queryKey: ["search-user", email],
+    queryFn: async () => {
+      if (!email) return null;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, email, name")
+        .eq("email", email.toLowerCase().trim())
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: false,
+  });
 
   const handleInvite = async () => {
-    if (!account || !inviteEmail) return;
+    if (!account || !email) return;
 
-    setIsInviting(true);
-    try {
-      // Buscar usuário pelo email (tipagem flexível até o types ser atualizado)
-      const { data: profiles, error: profileError } = await (supabase
-        .from("profiles")
-        .select("id, name, email" as any)
-        .ilike("email" as any, inviteEmail)
-        .limit(1)) as any;
+    // Search for user
+    const { data: user } = await searchUser();
 
-      if (profileError) throw profileError;
-      
-      if (!profiles || profiles.length === 0) {
-        toast({
-          title: "Usuário não encontrado",
-          description: "Não foi possível encontrar um usuário com este email",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const profile = profiles[0];
-
-      // Criar convite (o trigger cria a notificação automaticamente)
-      const newMember = await inviteMember.mutateAsync({
-        account_id: account.id,
-        user_id: profile.id,
-        role: inviteRole,
-        invited_by: currentUserId,
-        status: "pending",
-      });
-
-      logAction.mutate({
-        entity: "account_members",
-        entity_id: account.id,
-        action: "create",
-        diff: { role: inviteRole, invited_user: profile.id } as any,
-      });
-
-      setInviteEmail("");
-      setInviteRole("viewer");
-    } catch (error: any) {
+    if (!user) {
       toast({
-        title: "Erro ao enviar convite",
-        description: error.message,
+        title: "Usuário não encontrado",
+        description: "Não foi possível encontrar um usuário com este e-mail",
         variant: "destructive",
       });
-    } finally {
-      setIsInviting(false);
+      return;
     }
-  };
 
-  const handleRemoveMember = async (memberId: string) => {
-    if (!account) return;
+    if (user.id === currentUserId) {
+      toast({
+        title: "Ação inválida",
+        description: "Você não pode convidar a si mesmo",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    await removeMember.mutateAsync(memberId);
-    
-    logAction.mutate({
-      entity: "account_members",
-      entity_id: account.id,
-      action: "delete",
-      diff: { member_id: memberId } as any,
+    // Check if already a member
+    const alreadyMember = members?.some((m) => m.user_id === user.id);
+    if (alreadyMember) {
+      toast({
+        title: "Usuário já é membro",
+        description: "Este usuário já é um membro desta conta",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await inviteMember.mutateAsync({
+      account_id: account.id,
+      user_id: user.id,
+      invited_by: currentUserId,
+      role,
+      status: "accepted", // Direct sharing
     });
+
+    setEmail("");
+    setRole("viewer");
   };
 
-  const handleUpdateRole = async (memberId: string, newRole: "owner" | "editor" | "viewer") => {
-    if (!account) return;
+  const handleLeaveAccount = () => {
+    setLeaveConfirmName("");
+    setLeaveDialogOpen(true);
+  };
 
-    await updateMemberRole.mutateAsync({ id: memberId, role: newRole });
+  const handleConfirmLeave = async () => {
+    if (!currentUserMembership || !account) return;
     
-    logAction.mutate({
-      entity: "account_members",
-      entity_id: account.id,
-      action: "update",
-      diff: { member_id: memberId, new_role: newRole } as any,
-    });
-  };
-
-  const handleTransferOwnership = async (newOwnerId: string, memberName: string) => {
-    if (!account) return;
-
-    if (!confirm(`Tem certeza que deseja transferir a propriedade da conta para ${memberName}?`)) return;
+    if (leaveConfirmName !== account.name) {
+      toast({
+        title: "Nome incorreto",
+        description: "Por favor, digite o nome exato da conta para confirmar",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
-      // Atualizar o dono da conta
-      const { error: accountError } = await supabase
-        .from("accounts")
-        .update({ owner_id: newOwnerId })
-        .eq("id", account.id);
-
-      if (accountError) throw accountError;
-
-      // Criar notificação para o novo dono
-      await supabase.from("notifications").insert({
-        user_id: newOwnerId,
-        type: "invite",
-        message: `Você agora é o proprietário da conta "${account.name}"`,
-        metadata: {
-          account_id: account.id,
-          account_name: account.name,
-          transferred_by: currentUserId,
-        },
-      });
-
-      // Criar notificação para o antigo dono confirmando transferência
-      await supabase.from("notifications").insert({
-        user_id: currentUserId,
-        type: "system",
-        message: `Você transferiu a propriedade da conta "${account.name}" para ${memberName}`,
-        metadata: {
-          account_id: account.id,
-          account_name: account.name,
-          new_owner: newOwnerId,
-        },
-      });
-
-      toast({
-        title: "Propriedade transferida",
-        description: "A propriedade da conta foi transferida com sucesso",
-      });
-
-      logAction.mutate({
-        entity: "accounts",
-        entity_id: account.id,
-        action: "update",
-        diff: { transferred_to: newOwnerId } as any,
-      });
-
+      await removeMember.mutateAsync(currentUserMembership.id);
+      setLeaveDialogOpen(false);
       onOpenChange(false);
-    } catch (error: any) {
+      navigate("/app/contas");
+    } catch (error) {
+      console.error("Error leaving account:", error);
+    }
+  };
+
+  const handleCopyAccountName = () => {
+    if (account) {
+      navigator.clipboard.writeText(account.name);
       toast({
-        title: "Erro ao transferir propriedade",
-        description: error.message,
-        variant: "destructive",
+        title: "Nome copiado",
+        description: "O nome da conta foi copiado para a área de transferência",
       });
     }
+  };
+
+  const getStatusBadge = (status: string) => {
+    return <Badge variant="default">Ativo</Badge>;
+  };
+
+  const getRoleIcon = (role: string) => {
+    return role === "editor" ? (
+      <Edit className="h-4 w-4" />
+    ) : (
+      <Eye className="h-4 w-4" />
+    );
+  };
+
+  const getRoleLabel = (role: string) => {
+    return role === "editor" ? "Editor" : "Visualizador";
+  };
+
+  const getRoleDescription = (role: string) => {
+    return role === "editor" 
+      ? "Pode criar e editar transações"
+      : "Pode apenas visualizar informações";
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Gerenciar Membros - {account?.name}</DialogTitle>
+          <DialogTitle>
+            {isOwner ? "Gerenciar Membros" : "Informações da Conta"}
+          </DialogTitle>
+          <DialogDescription>
+            {isOwner 
+              ? `Convide usuários para compartilhar a conta "${account?.name}"`
+              : `Conta compartilhada: "${account?.name}"`
+            }
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Invite Section */}
-          <div className="space-y-4">
-            <h3 className="font-medium flex items-center gap-2">
-              <UserPlus className="h-4 w-4" />
-              Convidar Novo Membro
-            </h3>
+          {/* For non-owners: Show enhanced info card */}
+          {!isOwner && currentUserMembership && (
+            <div className="space-y-4">
+              {/* Owner Information Card */}
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-full bg-yellow-500/10">
+                      <Crown className="h-6 w-6 text-yellow-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-muted-foreground mb-1">Proprietário</p>
+                      <p className="font-semibold text-lg">{ownerProfile?.name || "Sem nome"}</p>
+                      <p className="text-sm text-muted-foreground">{ownerProfile?.email}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-            <div className="space-y-3">
+              {/* Access Information Cards */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Access Type Card */}
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className={`p-2 rounded-lg ${
+                        currentUserMembership.role === "editor" 
+                          ? "bg-blue-500/10" 
+                          : "bg-gray-500/10"
+                      }`}>
+                        {getRoleIcon(currentUserMembership.role)}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs text-muted-foreground">Tipo de Acesso</p>
+                        <p className="font-semibold text-sm">
+                          {getRoleLabel(currentUserMembership.role)}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {getRoleDescription(currentUserMembership.role)}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Shared Since Card */}
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="p-2 rounded-lg bg-purple-500/10">
+                        <Calendar className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs text-muted-foreground">Compartilhado desde</p>
+                        <p className="font-semibold text-sm">
+                          {format(new Date(currentUserMembership.created_at || ""), "dd/MM/yyyy", { locale: ptBR })}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Há {differenceInDays(new Date(), new Date(currentUserMembership.created_at))} dias
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Leave Account Card */}
+              <Card className="border-destructive/20 bg-destructive/5">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-start gap-3">
+                      <LogOut className="h-5 w-5 text-destructive mt-0.5" />
+                      <div>
+                        <p className="font-medium text-sm">Abandonar Conta</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Você perderá o acesso a esta conta
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleLeaveAccount}
+                      disabled={removeMember.isPending}
+                    >
+                      Sair
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Invite Form (only for owners) */}
+          {isOwner && (
+            <div className="space-y-4 border-b pb-4">
+            <div className="grid gap-4">
               <div className="space-y-2">
-                <Label htmlFor="invite-email">E-mail do Usuário</Label>
-                <div className="flex gap-2">
-                  <Mail className="h-5 w-5 mt-2 text-muted-foreground" />
-                  <Input
-                    id="invite-email"
-                    type="email"
-                    placeholder="email@exemplo.com"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Insira o e-mail do usuário que deseja convidar
-                </p>
+                <Label htmlFor="email">E-mail do usuário</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="usuario@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="invite-role">Papel</Label>
-                <Select value={inviteRole} onValueChange={(value: any) => setInviteRole(value)}>
-                  <SelectTrigger id="invite-role">
+                <Label htmlFor="role">Permissão</Label>
+                <Select value={role} onValueChange={(v: "viewer" | "editor") => setRole(v)}>
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="editor">Editor</SelectItem>
-                    <SelectItem value="viewer">Visualizador</SelectItem>
+                    <SelectItem value="viewer">Visualizador (apenas leitura)</SelectItem>
+                    <SelectItem value="editor">Editor (pode editar)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-
-              <Button
-                onClick={handleInvite}
-                disabled={!inviteEmail || isInviting}
-                className="w-full"
-              >
-                {isInviting ? "Enviando..." : "Enviar Convite"}
-              </Button>
             </div>
+
+            <Button onClick={handleInvite} disabled={!email || inviteMember.isPending}>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Enviar Convite
+            </Button>
           </div>
+          )}
 
-          <Separator />
-
-          {/* Members List */}
-          <div className="space-y-4">
-            <h3 className="font-medium">Membros da Conta</h3>
-
-            {/* Owner Section */}
-            {account && (
-              <div className="p-3 border rounded-lg bg-primary/5">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <Crown className="h-4 w-4 text-primary" />
-                      <p className="font-medium">Proprietário</p>
-                      {(() => {
-                        const defaultSplit = (account.default_split || []) as Array<{ email: string; percent: number }>;
-                        const ownerSplit = defaultSplit.find((s) => s.email === "owner");
-                        const percentage = ownerSplit?.percent || 0;
-                        return percentage > 0 && (
-                          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
-                            {percentage}%
-                          </span>
-                        );
-                      })()}
-                    </div>
-                    <p className="text-sm text-muted-foreground">Você</p>
-                  </div>
-                  <Badge variant="default">Proprietário</Badge>
-                </div>
-              </div>
-            )}
-
-            <h4 className="font-medium text-sm text-muted-foreground">Membros Convidados</h4>
-
-            {isLoading ? (
-              <p className="text-sm text-muted-foreground">Carregando...</p>
-            ) : members && members.length > 0 ? (
-              <div className="space-y-3">
-                {members.map((member) => {
-                  // Encontrar o percentual do membro no default_split
-                  const memberEmail = (member.user as any)?.email;
-                  const defaultSplit = (account.default_split || []) as Array<{ email: string; percent: number }>;
-                  const splitMember = defaultSplit.find(
-                    (s) => s.email === memberEmail
-                  );
-                  const percentage = splitMember?.percent || 0;
-
-                  return (
+          {/* Members List - Only for owners */}
+          {isOwner && (
+            <div className="space-y-4">
+              <h3 className="font-semibold">Membros</h3>
+              {members && members.length > 0 ? (
+                <div className="space-y-2">
+                  {members.map((member) => (
                     <div
                       key={member.id}
                       className="flex items-center justify-between p-3 border rounded-lg"
                     >
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">
-                            {(member.user as any)?.name || "Usuário"}
-                          </p>
-                          {percentage > 0 && (
-                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
-                              {percentage}%
-                            </span>
-                          )}
+                        <p className="font-medium">{(member.user as any)?.name || "Sem nome"}</p>
+                        <p className="text-sm text-muted-foreground">{(member.user as any)?.email}</p>
+                        <div className="flex gap-2 mt-2">
+                          {getStatusBadge(member.status)}
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            {getRoleIcon(member.role)}
+                            {getRoleLabel(member.role)}
+                          </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {memberEmail || member.user_id}
-                        </p>
                       </div>
 
-                      <div className="flex items-center gap-3">
-                        <Badge variant={member.status === "accepted" ? "default" : "secondary"}>
-                          {statusLabels[member.status]}
-                        </Badge>
-
-                        {account?.owner_id === currentUserId && member.status === "accepted" && (
-                          <>
-                            <Select
-                              value={member.role}
-                              onValueChange={(value: any) => handleUpdateRole(member.id, value)}
-                            >
-                              <SelectTrigger className="w-32">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="editor">Editor</SelectItem>
-                                <SelectItem value="viewer">Visualizador</SelectItem>
-                              </SelectContent>
-                            </Select>
-
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              title="Transferir propriedade"
-                              onClick={() => handleTransferOwnership(member.user_id, (member.user as any)?.name || "Usuário")}
-                            >
-                              <Crown className="h-4 w-4" />
-                            </Button>
-
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleRemoveMember(member.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
-
-                        {account?.owner_id !== currentUserId && (
-                          <Badge variant="outline">{roleLabels[member.role]}</Badge>
-                        )}
-                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeMember.mutate(member.id)}
+                        disabled={removeMember.isPending}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
                     </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">Nenhum membro adicional</p>
-            )}
-          </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Nenhum membro convidado ainda
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </DialogContent>
+
+      <AlertDialog open={leaveDialogOpen} onOpenChange={setLeaveDialogOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Abandonar Conta</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Você perderá permanentemente o acesso
+              a todas as informações desta conta.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="account-name" className="text-sm font-normal text-muted-foreground">
+                  Digite o nome da conta
+                </Label>
+                <div className="flex items-center gap-2 rounded-md border bg-muted px-3 py-2">
+                  <span className="flex-1 text-sm font-medium">{account?.name}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={handleCopyAccountName}
+                    title="Copiar nome"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="space-y-1.5">
+                <Label htmlFor="confirm-name" className="text-sm font-normal text-muted-foreground">
+                  Nome da conta
+                </Label>
+                <Input
+                  id="confirm-name"
+                  value={leaveConfirmName}
+                  onChange={(e) => setLeaveConfirmName(e.target.value)}
+                  placeholder="Nome da conta"
+                  className="h-9"
+                />
+              </div>
+            </div>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmLeave}
+              disabled={leaveConfirmName !== account?.name}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Abandonar Conta
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }
