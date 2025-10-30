@@ -159,6 +159,13 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
   };
 
   const handleWizardSave = async (forecasts: any[]) => {
+    console.log("[Forecasts] Starting wizard save", {
+      forecastsCount: forecasts.length,
+      accountType: selectedAccount?.type,
+      accountId: filters.accountId,
+      selectedMonth: filters.selectedMonth
+    });
+    
     // Salvar/atualizar todas as previsões
     for (const forecast of forecasts) {
       if (forecast.id) {
@@ -173,9 +180,13 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
     
     // Trigger revenue sync for CASA accounts after saving expense forecasts
     if (selectedAccount?.type === "casa") {
+      console.log("[Forecasts] Triggering revenue sync for CASA account");
       setTimeout(() => {
+        console.log("[Forecasts] Calling syncRevenueForecasts.mutate()");
         syncRevenueForecasts.mutate();
       }, 500);
+    } else {
+      console.log("[Forecasts] Not a CASA account, skipping revenue sync");
     }
   };
 

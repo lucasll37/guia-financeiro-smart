@@ -48,7 +48,22 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
   // Mutation para sincronizar previsões de receita
   const syncRevenueForecasts = useMutation({
     mutationFn: async () => {
-      if (!isCasaAccount || members.length === 0 || !revenueCategory) return;
+      console.log("[CasaRevenue] syncRevenueForecasts called", {
+        isCasaAccount,
+        membersLength: members.length,
+        revenueCategory: revenueCategory?.id,
+        accountId,
+        selectedMonth
+      });
+      
+      if (!isCasaAccount || members.length === 0 || !revenueCategory) {
+        console.warn("[CasaRevenue] Conditions not met:", {
+          isCasaAccount,
+          membersLength: members.length,
+          hasRevenueCategory: !!revenueCategory
+        });
+        return;
+      }
       if (revenueSubcategories.length === 0) {
         console.warn("Nenhuma subcategoria de receita encontrada para esta conta");
         return;
@@ -140,6 +155,16 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
 
   // Auto-sincronizar quando despesas ou splits mudarem
   useEffect(() => {
+    console.log("[CasaRevenue] useEffect triggered", {
+      isCasaAccount,
+      expenseForecastsDefined: expenseForecasts !== undefined,
+      expenseForecastsCount: expenseForecasts?.length,
+      membersLength: members.length,
+      hasRevenueCategory: !!revenueCategory,
+      revenueSubcategoriesLength: revenueSubcategories.length,
+      selectedMonth
+    });
+    
     if (
       isCasaAccount &&
       expenseForecasts !== undefined &&
@@ -147,7 +172,10 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
       revenueCategory &&
       revenueSubcategories.length > 0
     ) {
+      console.log("[CasaRevenue] All conditions met, calling syncRevenueForecasts");
       syncRevenueForecasts.mutate();
+    } else {
+      console.log("[CasaRevenue] Conditions not met, skipping sync");
     }
   }, [
     isCasaAccount,
