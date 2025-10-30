@@ -63,7 +63,7 @@ export function MembersDialog({
   const [leaveConfirmName, setLeaveConfirmName] = useState("");
   const { members, inviteMember, removeMember } = useAccountMembers(account?.id);
   
-  const isOwner = user?.id === currentUserId;
+  const isOwner = account?.owner_id === user?.id;
   const currentUserMembership = members?.find(m => m.user_id === user?.id);
 
   // Fetch owner profile
