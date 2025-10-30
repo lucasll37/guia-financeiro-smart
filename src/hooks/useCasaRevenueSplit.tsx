@@ -9,7 +9,7 @@ interface Member {
   weight: number;
 }
 
-export function useCasaRevenueSplit(accountId?: string) {
+export function useCasaRevenueSplit(accountId?: string, periodStart?: string) {
   const { data: account } = useQuery({
     queryKey: ["account", accountId],
     queryFn: async () => {
@@ -27,47 +27,29 @@ export function useCasaRevenueSplit(accountId?: string) {
     enabled: !!accountId,
   });
 
+  // Usar mês atual se não especificado
+  const currentPeriod = periodStart || new Date().toISOString().slice(0, 7) + "-01";
+
   const { data: members } = useQuery({
-    queryKey: ["casa-members", accountId, account?.revenue_split],
+    queryKey: ["casa-members", accountId, currentPeriod],
     queryFn: async () => {
       if (!accountId || !account) return [];
 
-      // Buscar membros editores aceitos da conta
-      const { data: accountMembers, error: membersError } = await supabase
-        .from("account_members")
-        .select("user_id, role, status")
+      // Buscar splits do período da nova tabela casa_revenue_splits
+      const { data: splits, error: splitsError } = await supabase
+        .from("casa_revenue_splits")
+        .select("user_id, weight, profiles(id, name, email)")
         .eq("account_id", accountId)
-        .eq("status", "accepted")
-        .eq("role", "editor");
+        .eq("period_start", currentPeriod);
 
-      if (membersError) throw membersError;
+      if (splitsError) throw splitsError;
 
-      // Participantes pagantes = dono + membros editores aceitos
-      const editorIds = accountMembers?.map(m => m.user_id) || [];
-      const payingUserIds = Array.from(
-        new Set([
-          ...(account.owner_id ? [account.owner_id] : []),
-          ...editorIds,
-        ])
-      );
-
-      if (payingUserIds.length === 0) return [];
-
-      // Buscar perfis dos usuários pagantes
-      const { data: profiles, error } = await supabase
-        .from("profiles")
-        .select("id, name, email")
-        .in("id", payingUserIds);
-
-      if (error) throw error;
-
-      // Mapear para estrutura Member usando peso do revenue_split (default 1)
-      const split = (account.revenue_split as Record<string, number>) || {};
-      const allMembers: Member[] = (profiles || []).map((p: any) => ({
-        user_id: p.id,
-        name: p.name || p.email || "Sem nome",
-        email: p.email || "",
-        weight: split[p.id] ?? 1,
+      // Mapear para estrutura Member
+      const allMembers: Member[] = (splits || []).map((s: any) => ({
+        user_id: s.user_id,
+        name: s.profiles?.name || s.profiles?.email || "Sem nome",
+        email: s.profiles?.email || "",
+        weight: s.weight,
       }));
 
       return allMembers;

@@ -18,10 +18,12 @@ import { useQueryClient } from "@tanstack/react-query";
 
 interface CasaRevenueSplitManagerProps {
   accountId: string;
+  periodStart?: string; // Período para editar (default: mês atual)
 }
 
-export function CasaRevenueSplitManager({ accountId }: CasaRevenueSplitManagerProps) {
-  const { account, members } = useCasaRevenueSplit(accountId);
+export function CasaRevenueSplitManager({ accountId, periodStart }: CasaRevenueSplitManagerProps) {
+  const currentPeriod = periodStart || new Date().toISOString().slice(0, 7) + "-01";
+  const { account, members } = useCasaRevenueSplit(accountId, currentPeriod);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -39,10 +41,20 @@ export function CasaRevenueSplitManager({ accountId }: CasaRevenueSplitManagerPr
 
   const handleSave = async () => {
     try {
+      // Atualizar pesos na tabela casa_revenue_splits
+      const updates = Object.entries(weights).map(([userId, weight]) => ({
+        account_id: accountId,
+        user_id: userId,
+        period_start: currentPeriod,
+        weight: weight,
+      }));
+
+      // Usar upsert para inserir ou atualizar
       const { error } = await supabase
-        .from("accounts")
-        .update({ revenue_split: weights })
-        .eq("id", accountId);
+        .from("casa_revenue_splits")
+        .upsert(updates, {
+          onConflict: "account_id,user_id,period_start",
+        });
 
       if (error) throw error;
 
@@ -53,6 +65,7 @@ export function CasaRevenueSplitManager({ accountId }: CasaRevenueSplitManagerPr
 
       queryClient.invalidateQueries({ queryKey: ["account", accountId] });
       queryClient.invalidateQueries({ queryKey: ["casa-members", accountId] });
+      queryClient.invalidateQueries({ queryKey: ["forecasts"] });
       setOpen(false);
     } catch (error: any) {
       toast({
@@ -77,7 +90,7 @@ export function CasaRevenueSplitManager({ accountId }: CasaRevenueSplitManagerPr
         <DialogHeader>
           <DialogTitle>Configurar Rateio de Receitas</DialogTitle>
           <DialogDescription>
-            Defina os pesos de contribuição de cada membro. O valor previsto de cada um será calculado proporcionalmente para cobrir todas as despesas.
+            Defina os pesos de contribuição de cada membro para o período de <strong>{new Date(currentPeriod).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</strong>. O valor previsto de cada um será calculado proporcionalmente para cobrir todas as despesas.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 mt-4">

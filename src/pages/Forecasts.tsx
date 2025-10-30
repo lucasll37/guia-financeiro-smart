@@ -11,7 +11,6 @@ import { ForecastDialog } from "@/components/forecasts/ForecastDialog";
 import { ForecastFilters } from "@/components/forecasts/ForecastFilters";
 import { BudgetWizard } from "@/components/forecasts/BudgetWizard";
 import { useAccountEditPermissions } from "@/hooks/useAccountEditPermissions";
-import { useCasaRevenueForecasts } from "@/hooks/useCasaRevenueForecasts";
 import { CasaRevenueSplitManager } from "@/components/accounts/CasaRevenueSplitManager";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -76,12 +75,6 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
 
   const { data: canEdit = false } = useAccountEditPermissions(
     filters.accountId !== "all" ? filters.accountId : undefined
-  );
-
-  // Auto-sincronizar receitas para contas tipo casa
-  useCasaRevenueForecasts(
-    filters.accountId !== "all" ? filters.accountId : "",
-    filters.selectedMonth
   );
 
   // Generate month options for copy dialog (6 months before and after current month)
@@ -183,7 +176,10 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             {filters.accountId !== "all" && (
               <>
                 {/* Gerenciar divisão de receitas para contas tipo casa */}
-                <CasaRevenueSplitManager accountId={filters.accountId} />
+                <CasaRevenueSplitManager 
+                  accountId={filters.accountId} 
+                  periodStart={filters.selectedMonth + "-01"}
+                />
               </>
             )}
             <span className="text-sm text-muted-foreground hidden lg:inline">
