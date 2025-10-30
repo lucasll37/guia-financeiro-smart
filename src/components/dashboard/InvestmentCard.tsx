@@ -52,7 +52,7 @@ export function InvestmentCard({ investment }: InvestmentCardProps) {
   return (
     <Card 
       className="group relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl border-2 hover:border-primary/50" 
-      onClick={() => navigate("/app/investimentos")}
+      onClick={() => navigate(`/app/investimentos/${investment.id}`)}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       <CardHeader className="pb-3 relative z-10">
