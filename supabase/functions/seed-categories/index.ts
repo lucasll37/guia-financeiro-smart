@@ -47,85 +47,56 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Permissão negada' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const categories: Array<{ name: string; type: 'receita' | 'despesa'; color: string; parent_id: string | null }> = [
-      { name: 'Receita', type: 'receita', color: '#10b981', parent_id: null },
-      { name: 'Salário  / Adiantamento', type: 'receita', color: '#10b981', parent_id: 'Receita' },
-      { name: 'Férias', type: 'receita', color: '#10b981', parent_id: 'Receita' },
-      { name: '13º salário', type: 'receita', color: '#10b981', parent_id: 'Receita' },
-      { name: 'Aposentadoria', type: 'receita', color: '#10b981', parent_id: 'Receita' },
-      { name: 'Receita extra (aluguel, restituição IR)', type: 'receita', color: '#10b981', parent_id: 'Receita' },
-      { name: 'Outras Receitas', type: 'receita', color: '#10b981', parent_id: 'Receita' },
-      { name: 'Alimentação', type: 'despesa', color: '#22c55e', parent_id: null },
-      { name: 'Supermercado', type: 'despesa', color: '#22c55e', parent_id: 'Alimentação' },
-      { name: 'Feira  / Sacolão', type: 'despesa', color: '#22c55e', parent_id: 'Alimentação' },
-      { name: 'Padaria', type: 'despesa', color: '#22c55e', parent_id: 'Alimentação' },
-      { name: 'Refeição fora de casa', type: 'despesa', color: '#22c55e', parent_id: 'Alimentação' },
-      { name: 'Outros (café, água, sorvetes, etc)', type: 'despesa', color: '#22c55e', parent_id: 'Alimentação' },
-      { name: 'Moradia', type: 'despesa', color: '#f59e0b', parent_id: null },
-      { name: 'Prestação /Aluguel de imóvel', type: 'despesa', color: '#f59e0b', parent_id: 'Moradia' },
-      { name: 'Condomínio', type: 'despesa', color: '#f59e0b', parent_id: 'Moradia' },
-      { name: 'Consumo de água', type: 'despesa', color: '#f59e0b', parent_id: 'Moradia' },
-      { name: 'Serviço de limpeza( diarista ou mensalista)', type: 'despesa', color: '#f59e0b', parent_id: 'Moradia' },
-      { name: 'Energia Elétrica', type: 'despesa', color: '#f59e0b', parent_id: 'Moradia' },
-      { name: 'Gás', type: 'despesa', color: '#f59e0b', parent_id: 'Moradia' },
-      { name: 'IPTU', type: 'despesa', color: '#f59e0b', parent_id: 'Moradia' },
-      { name: 'Decoração da casa', type: 'despesa', color: '#f59e0b', parent_id: 'Moradia' },
-      { name: 'Manutenção / Reforma da casa', type: 'despesa', color: '#f59e0b', parent_id: 'Moradia' },
-      { name: 'Celular', type: 'despesa', color: '#f59e0b', parent_id: 'Moradia' },
-      { name: 'Telefone fixo', type: 'despesa', color: '#f59e0b', parent_id: 'Moradia' },
-      { name: 'Internet / TV a cabo', type: 'despesa', color: '#f59e0b', parent_id: 'Moradia' },
-      { name: 'Educação', type: 'despesa', color: '#8b5cf6', parent_id: null },
-      { name: 'Matricula Escolar/ Mensalidade', type: 'despesa', color: '#8b5cf6', parent_id: 'Educação' },
-      { name: 'Material Escolar', type: 'despesa', color: '#8b5cf6', parent_id: 'Educação' },
-      { name: 'Outros cursos', type: 'despesa', color: '#8b5cf6', parent_id: 'Educação' },
-      { name: 'Transporte escolar', type: 'despesa', color: '#8b5cf6', parent_id: 'Educação' },
-      { name: 'Animal de Estimação', type: 'despesa', color: '#ec4899', parent_id: null },
-      { name: 'Ração', type: 'despesa', color: '#ec4899', parent_id: 'Animal de Estimação' },
-      { name: 'Banho / Tosa', type: 'despesa', color: '#ec4899', parent_id: 'Animal de Estimação' },
-      { name: 'Veterinário / medicamento', type: 'despesa', color: '#ec4899', parent_id: 'Animal de Estimação' },
-      { name: 'Outros (acessórios, brinquedos, hotel, dog walker)', type: 'despesa', color: '#ec4899', parent_id: 'Animal de Estimação' },
-      { name: 'Saúde', type: 'despesa', color: '#14b8a6', parent_id: null },
-      { name: 'Plano de saúde', type: 'despesa', color: '#14b8a6', parent_id: 'Saúde' },
-      { name: 'Medicamentos', type: 'despesa', color: '#14b8a6', parent_id: 'Saúde' },
-      { name: 'Dentista', type: 'despesa', color: '#14b8a6', parent_id: 'Saúde' },
-      { name: 'Terapia / Psicólogo  / Acupuntura', type: 'despesa', color: '#14b8a6', parent_id: 'Saúde' },
-      { name: 'Médicos/Exames fora do plano de saúde', type: 'despesa', color: '#14b8a6', parent_id: 'Saúde' },
-      { name: 'Academia / Tratamento Estético', type: 'despesa', color: '#14b8a6', parent_id: 'Saúde' },
-      { name: 'Transporte', type: 'despesa', color: '#3b82f6', parent_id: null },
-      { name: 'Ônibus / Metrô', type: 'despesa', color: '#3b82f6', parent_id: 'Transporte' },
-      { name: 'Taxi', type: 'despesa', color: '#3b82f6', parent_id: 'Transporte' },
-      { name: 'Combustível', type: 'despesa', color: '#3b82f6', parent_id: 'Transporte' },
-      { name: 'Estacionamento', type: 'despesa', color: '#3b82f6', parent_id: 'Transporte' },
-      { name: 'Seguro Auto', type: 'despesa', color: '#3b82f6', parent_id: 'Transporte' },
-      { name: 'Manutenção / Lavagem / Troca de óleo', type: 'despesa', color: '#3b82f6', parent_id: 'Transporte' },
-      { name: 'Licenciamento', type: 'despesa', color: '#3b82f6', parent_id: 'Transporte' },
-      { name: 'Pedágio', type: 'despesa', color: '#3b82f6', parent_id: 'Transporte' },
-      { name: 'IPVA', type: 'despesa', color: '#3b82f6', parent_id: 'Transporte' },
-      { name: 'Pessoais', type: 'despesa', color: '#06b6d4', parent_id: null },
-      { name: 'Vestuário / Calçados / Acessórios', type: 'despesa', color: '#06b6d4', parent_id: 'Pessoais' },
-      { name: 'Cabeleireiro / Manicure / Higiene pessoal', type: 'despesa', color: '#06b6d4', parent_id: 'Pessoais' },
-      { name: 'Presentes', type: 'despesa', color: '#06b6d4', parent_id: 'Pessoais' },
-      { name: 'Outros', type: 'despesa', color: '#06b6d4', parent_id: 'Pessoais' },
-      { name: 'Lazer', type: 'despesa', color: '#f43f5e', parent_id: null },
-      { name: 'Cinema / Teatro / Shows', type: 'despesa', color: '#f43f5e', parent_id: 'Lazer' },
-      { name: 'Livros / Revistas / Cd´s', type: 'despesa', color: '#f43f5e', parent_id: 'Lazer' },
-      { name: 'Clube / Parques / Casa Noturna', type: 'despesa', color: '#f43f5e', parent_id: 'Lazer' },
-      { name: 'Viagens', type: 'despesa', color: '#f43f5e', parent_id: 'Lazer' },
-      { name: 'Restaurantes / Bares / Festas', type: 'despesa', color: '#f43f5e', parent_id: 'Lazer' },
-      { name: 'Serviços Financeiros', type: 'despesa', color: '#6366f1', parent_id: null },
-      { name: 'Empréstimos', type: 'despesa', color: '#6366f1', parent_id: 'Serviços Financeiros' },
-      { name: 'Seguros (vida/residencial)', type: 'despesa', color: '#6366f1', parent_id: 'Serviços Financeiros' },
-      { name: 'Previdência privada', type: 'despesa', color: '#6366f1', parent_id: 'Serviços Financeiros' },
-      { name: 'Juros Cheque Especial', type: 'despesa', color: '#6366f1', parent_id: 'Serviços Financeiros' },
-      { name: 'Tarifas bancárias', type: 'despesa', color: '#6366f1', parent_id: 'Serviços Financeiros' },
-      { name: 'Financiamento de veículo', type: 'despesa', color: '#6366f1', parent_id: 'Serviços Financeiros' },
-      { name: 'Imposto de Renda a Pagar', type: 'despesa', color: '#6366f1', parent_id: 'Serviços Financeiros' },
-    ];
+    // Buscar a primeira conta do sistema (seed/template)
+    const { data: firstAccount, error: accountError } = await supabaseClient
+      .from('accounts')
+      .select('id')
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (accountError) {
+      console.error("Erro ao buscar primeira conta:", accountError);
+      return new Response(JSON.stringify({ error: 'Erro ao buscar conta seed' }), { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      });
+    }
+
+    if (!firstAccount) {
+      console.error("Nenhuma conta seed encontrada no sistema");
+      return new Response(JSON.stringify({ error: 'Nenhuma conta seed encontrada' }), { 
+        status: 404, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      });
+    }
+
+    // Buscar categorias seed da primeira conta
+    const { data: seedCategories, error: seedError } = await supabaseClient
+      .from('categories')
+      .select('id, name, type, color, parent_id')
+      .eq('account_id', firstAccount.id);
+
+    if (seedError) {
+      console.error("Erro ao buscar categorias seed:", seedError);
+      return new Response(JSON.stringify({ error: 'Erro ao buscar categorias seed' }), { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      });
+    }
+
+    if (!seedCategories || seedCategories.length === 0) {
+      console.log("Nenhuma categoria seed encontrada");
+      return new Response(JSON.stringify({ created: 0 }), { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
+        status: 200 
+      });
+    }
 
     // Para contas tipo casa, filtrar apenas despesas (receitas têm regras especiais)
-    const filteredCategories = accountType === 'casa'
-      ? categories.filter(c => c.type === 'despesa')
-      : categories;
+    const categories = accountType === 'casa'
+      ? seedCategories.filter(c => c.type === 'despesa')
+      : seedCategories;
 
     const buildKey = (name: string, parentId: string | null) => `${name}__${parentId ?? 'root'}`;
 
@@ -146,8 +117,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    const parentCategories = filteredCategories.filter(c => c.parent_id === null);
-    const childCategories = filteredCategories.filter(c => c.parent_id !== null);
+    const parentCategories = categories.filter(c => c.parent_id === null);
+    const childCategories = categories.filter(c => c.parent_id !== null);
 
     let createdCount = 0;
 
@@ -172,13 +143,17 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Cria filhos
+    // Cria filhos - agora precisa mapear parent_id do seed para o novo parent_id
     for (const cat of childCategories) {
-      const parentKey = buildKey(cat.parent_id as string, null);
+      // Buscar o parent na lista de seed categories para pegar o nome
+      const seedParent = seedCategories.find(s => s.id === cat.parent_id);
+      if (!seedParent) continue;
+
+      const parentKey = buildKey(seedParent.name, null);
       let parentId = byKey.get(parentKey);
 
       if (!parentId) {
-        const parentSpec = parentCategories.find(p => p.name === cat.parent_id);
+        const parentSpec = parentCategories.find(p => p.name === seedParent.name);
         if (parentSpec) {
           const pk = buildKey(parentSpec.name, null);
           if (!byKey.has(pk)) {
