@@ -289,20 +289,20 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
 
                   return (
                     <>
-                      <TableRow key={categoryId} className={hasTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
+                      <TableRow key={categoryId} className={hasTransactions ? "cursor-pointer hover:bg-muted/80 transition-colors" : ""}>
                         <TableCell className="w-[40px]" onClick={hasTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
                           <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                             {hasTransactions && (
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-6 w-6 p-0"
+                                className="h-6 w-6 p-0 hover:bg-primary/20"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   toggleCategoryExpansion(categoryId);
                                 }}
                               >
-                                {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
+                                {isExpanded ? <ChevronDown className="h-4 w-4 text-primary" /> : <ChevronRightIcon className="h-4 w-4 text-primary" />}
                               </Button>
                             )}
                           </div>
@@ -315,7 +315,9 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                             />
                             <span className="break-words">{data.categoryName}</span>
                             {hasTransactions && (
-                              <span className="text-xs text-muted-foreground flex-shrink-0">({data.transactions.length})</span>
+                              <span className="text-xs text-primary font-semibold bg-primary/10 px-2 py-0.5 rounded-full flex-shrink-0">
+                                {data.transactions.length} {data.transactions.length === 1 ? 'lançamento' : 'lançamentos'}
+                              </span>
                             )}
                           </div>
                         </TableCell>
@@ -454,20 +456,20 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
 
                   return (
                     <>
-                      <TableRow key={categoryId} className={hasTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
+                      <TableRow key={categoryId} className={hasTransactions ? "cursor-pointer hover:bg-muted/80 transition-colors" : ""}>
                         <TableCell className="w-[40px]" onClick={hasTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
                           <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                             {hasTransactions && (
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-6 w-6 p-0"
+                                className="h-6 w-6 p-0 hover:bg-primary/20"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   toggleCategoryExpansion(categoryId);
                                 }}
                               >
-                                {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
+                                {isExpanded ? <ChevronDown className="h-4 w-4 text-primary" /> : <ChevronRightIcon className="h-4 w-4 text-primary" />}
                               </Button>
                             )}
                           </div>
@@ -480,7 +482,9 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                             />
                             <span className="break-words">{data.categoryName}</span>
                             {hasTransactions && (
-                              <span className="text-xs text-muted-foreground flex-shrink-0">({data.transactions.length})</span>
+                              <span className="text-xs text-primary font-semibold bg-primary/10 px-2 py-0.5 rounded-full flex-shrink-0">
+                                {data.transactions.length} {data.transactions.length === 1 ? 'lançamento' : 'lançamentos'}
+                              </span>
                             )}
                           </div>
                         </TableCell>
