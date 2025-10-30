@@ -24,7 +24,7 @@ interface CategoryNodeProps {
 }
 
 function CategoryNode({ category, categoryMap, level, onEdit, onDelete, onAddChild, canEdit = true }: CategoryNodeProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const children = categoryMap.get(category.id) || [];
   const hasChildren = children.length > 0;
 
