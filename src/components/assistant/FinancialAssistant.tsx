@@ -56,7 +56,7 @@ export function FinancialAssistant() {
       <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-primary/10 to-primary/5">
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold">Assistente Financeiro IA</h2>
+          <h2 className="text-lg font-semibold">Tutor IA Financeiro</h2>
         </div>
         <Button
           variant="ghost"
@@ -81,7 +81,7 @@ export function FinancialAssistant() {
             </div>
             <div className="space-y-2">
               <h3 className="font-semibold text-xl bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                Olá! Sou seu assistente financeiro 👋
+                Olá! Sou seu tutor financeiro 👋
               </h3>
               <p className="text-sm text-muted-foreground">
                 Estou aqui para ajudar você a ter controle total das suas finanças

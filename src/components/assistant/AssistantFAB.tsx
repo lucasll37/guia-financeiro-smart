@@ -2,10 +2,14 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { MessageSquare, Sparkles } from "lucide-react";
+import { MessageSquare, Sparkles, Lock } from "lucide-react";
 import { FinancialAssistant } from "./FinancialAssistant";
+import { useAiTutorAccess } from "@/hooks/useAiTutorAccess";
+import { useToast } from "@/hooks/use-toast";
 
 export function AssistantFAB() {
+  const { hasAccess, requiresPro } = useAiTutorAccess();
+  const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [showPulse, setShowPulse] = useState(true);
 
@@ -18,10 +22,24 @@ export function AssistantFAB() {
   }, []);
 
   const handleOpen = () => {
+    if (!hasAccess) {
+      toast({
+        title: requiresPro ? "Recurso Pro" : "Acesso negado",
+        description: requiresPro 
+          ? "O Tutor IA está disponível apenas para usuários com plano Pro."
+          : "Você não tem permissão para acessar o Tutor IA.",
+        variant: "destructive",
+      });
+      return;
+    }
     setIsOpen(true);
     setShowPulse(false);
     localStorage.setItem("assistant-interacted", "true");
   };
+
+  if (!hasAccess) {
+    return null;
+  }
 
   return (
     <>
@@ -53,7 +71,7 @@ export function AssistantFAB() {
           <TooltipContent side="left" className="bg-primary text-primary-foreground font-medium">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4" />
-              <span>Assistente Financeiro IA</span>
+              <span>Tutor IA Financeiro</span>
             </div>
           </TooltipContent>
         </Tooltip>

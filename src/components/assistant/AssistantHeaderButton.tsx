@@ -4,9 +4,31 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Bot, Sparkles } from "lucide-react";
 import { FinancialAssistant } from "./FinancialAssistant";
+import { useAiTutorAccess } from "@/hooks/useAiTutorAccess";
+import { useToast } from "@/hooks/use-toast";
 
 export function AssistantHeaderButton() {
+  const { hasAccess, requiresPro } = useAiTutorAccess();
+  const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpen = () => {
+    if (!hasAccess) {
+      toast({
+        title: requiresPro ? "Recurso Pro" : "Acesso negado",
+        description: requiresPro 
+          ? "O Tutor IA está disponível apenas para usuários com plano Pro."
+          : "Você não tem permissão para acessar o Tutor IA.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsOpen(true);
+  };
+
+  if (!hasAccess) {
+    return null;
+  }
 
   return (
     <>
@@ -14,7 +36,7 @@ export function AssistantHeaderButton() {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              onClick={() => setIsOpen(true)}
+              onClick={handleOpen}
               variant="outline"
               size="sm"
               className="gap-2 relative overflow-hidden group hover:shadow-md transition-all border-primary/20 hover:border-primary/50"
@@ -27,7 +49,7 @@ export function AssistantHeaderButton() {
               
               {/* Texto apenas em desktop */}
               <span className="hidden sm:inline relative">
-                Assistente IA
+                Tutor IA
               </span>
               
               {/* Badge de IA */}
@@ -39,7 +61,7 @@ export function AssistantHeaderButton() {
           <TooltipContent className="bg-primary text-primary-foreground">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4" />
-              <span>Pergunte ao seu assistente financeiro</span>
+              <span>Pergunte ao seu tutor financeiro</span>
             </div>
           </TooltipContent>
         </Tooltip>
