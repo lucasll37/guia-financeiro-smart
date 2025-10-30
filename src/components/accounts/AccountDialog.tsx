@@ -87,62 +87,36 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
             {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="type">Tipo</Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value: any) => {
-                  const requiresSharing = ['conjugal', 'mesada', 'casa'].includes(value);
-                  setFormData({ 
-                    ...formData, 
-                    type: value,
-                    is_shared: requiresSharing || formData.is_shared
-                  });
-                }}
-                disabled={!!account}
-              >
-                <SelectTrigger id="type">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pessoal">Pessoal</SelectItem>
-                  <SelectItem value="conjugal">Conjugal</SelectItem>
-                  <SelectItem value="mesada">Mesada</SelectItem>
-                  <SelectItem value="casa">Casa</SelectItem>
-                  <SelectItem value="evento">Evento</SelectItem>
-                </SelectContent>
-              </Select>
-              {account && (
-                <p className="text-xs text-muted-foreground">
-                  O tipo da conta não pode ser alterado após a criação
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="currency">Moeda</Label>
-              <Input
-                id="currency"
-                value={formData.currency}
-                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-              />
-            </div>
-          </div>
-
           <div className="space-y-2">
-            <Label htmlFor="closing_day">Dia de Viragem (1-10)</Label>
-            <Input
-              id="closing_day"
-              type="number"
-              min={1}
-              max={10}
-              value={formData.closing_day || 1}
-              onChange={(e) => setFormData({ ...formData, closing_day: Math.min(10, Math.max(1, Number(e.target.value))) })}
-            />
-            <p className="text-xs text-muted-foreground">
-              Dia do mês em que o período de controle se renova (1 a 10)
-            </p>
+            <Label htmlFor="type">Tipo</Label>
+            <Select
+              value={formData.type}
+              onValueChange={(value: any) => {
+                const requiresSharing = ['conjugal', 'mesada', 'casa'].includes(value);
+                setFormData({ 
+                  ...formData, 
+                  type: value,
+                  is_shared: requiresSharing || formData.is_shared
+                });
+              }}
+              disabled={!!account}
+            >
+              <SelectTrigger id="type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pessoal">Pessoal</SelectItem>
+                <SelectItem value="conjugal">Conjugal</SelectItem>
+                <SelectItem value="mesada">Mesada</SelectItem>
+                <SelectItem value="casa">Casa</SelectItem>
+                <SelectItem value="evento">Evento</SelectItem>
+              </SelectContent>
+            </Select>
+            {account && (
+              <p className="text-xs text-muted-foreground">
+                O tipo da conta não pode ser alterado após a criação
+              </p>
+            )}
           </div>
 
           <div className="flex items-center space-x-2">
