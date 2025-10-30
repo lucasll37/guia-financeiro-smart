@@ -84,7 +84,7 @@ export function useCasaRevenueSplit(accountId?: string, periodStart?: string) {
             } as Member;
           });
         } else {
-          // 3) Fallback: membros editores aceitos da conta, pesos iguais
+          // 3) Fallback final: owner + membros editores aceitos
           const { data: am } = await supabase
             .from("account_members")
             .select("user_id, role, status")
@@ -92,23 +92,24 @@ export function useCasaRevenueSplit(accountId?: string, periodStart?: string) {
             .eq("role", "editor")
             .eq("status", "accepted");
 
-          const userIds = (am || []).map((m: any) => m.user_id);
-          if (userIds.length > 0) {
-            const { data: profilesData } = await supabase
-              .from("profiles")
-              .select("id, name, email")
-              .in("id", userIds);
+          // SEMPRE incluir o owner
+          const memberUserIds = (am || []).map((m: any) => m.user_id);
+          const allUserIds = [account.owner_id, ...memberUserIds];
+          
+          const { data: profilesData } = await supabase
+            .from("profiles")
+            .select("id, name, email")
+            .in("id", allUserIds);
 
-            allMembers = userIds.map((uid: string) => {
-              const p = profilesData?.find((pr: any) => pr.id === uid);
-              return {
-                user_id: uid,
-                name: p?.name || p?.email || "Sem nome",
-                email: p?.email || "",
-                weight: 1,
-              } as Member;
-            });
-          }
+          allMembers = allUserIds.map((uid: string) => {
+            const p = profilesData?.find((pr: any) => pr.id === uid);
+            return {
+              user_id: uid,
+              name: p?.name || p?.email || "Sem nome",
+              email: p?.email || "",
+              weight: 1,
+            } as Member;
+          });
         }
       }
 
