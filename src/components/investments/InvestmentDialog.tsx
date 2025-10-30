@@ -30,7 +30,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { Database } from "@/integrations/supabase/types";
-import { CurrencyInput } from "@/components/ui/currency-input";
 
 type Investment = Database["public"]["Tables"]["investment_assets"]["Row"];
 
@@ -196,9 +195,15 @@ export function InvestmentDialog({
                 <FormItem>
                   <FormLabel>Saldo Inicial</FormLabel>
                   <FormControl>
-                    <CurrencyInput
-                      value={field.value || 0}
-                      onChange={(value) => field.onChange(value)}
+                    <Input
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="0.00"
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^\d.-]/g, "");
+                        field.onChange(value === "" ? 0 : parseFloat(value) || 0);
+                      }}
                     />
                   </FormControl>
                   <FormDescription>

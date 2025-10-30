@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Database } from "@/integrations/supabase/types";
-import { CurrencyInput } from "@/components/ui/currency-input";
 
 type CreditCard = Database["public"]["Tables"]["credit_cards"]["Row"];
 type CreditCardInsert = Database["public"]["Tables"]["credit_cards"]["Insert"];
@@ -135,15 +134,18 @@ export function CreditCardDialog({
 
           <div className="space-y-2">
             <Label htmlFor="credit_limit">Limite (Opcional)</Label>
-            <CurrencyInput
+            <Input
               id="credit_limit"
-              value={formData.credit_limit || 0}
-              onChange={(value) =>
+              type="number"
+              step="0.01"
+              value={formData.credit_limit || ""}
+              onChange={(e) =>
                 setFormData({
                   ...formData,
-                  credit_limit: value || undefined,
+                  credit_limit: e.target.value ? parseFloat(e.target.value) : undefined,
                 })
               }
+              placeholder="0.00"
             />
           </div>
 
