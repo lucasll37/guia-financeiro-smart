@@ -231,10 +231,10 @@ export function MembersDialog({
           {!canShareAccounts && (
             <Alert className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
               <Sparkles className="h-5 w-5 text-primary" />
-              <AlertTitle className="text-base font-semibold">Faça upgrade para compartilhar contas</AlertTitle>
+              <AlertTitle className="text-base font-semibold">Faça upgrade para o plano Pro</AlertTitle>
               <AlertDescription className="mt-2 space-y-3">
                 <p className="text-sm">
-                  O compartilhamento de contas é uma funcionalidade exclusiva dos planos pagos.
+                  O compartilhamento de contas é uma funcionalidade exclusiva do plano Pro.
                   Faça upgrade agora e compartilhe suas contas com familiares ou parceiros!
                 </p>
                 <Button 

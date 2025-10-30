@@ -164,9 +164,9 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
           <div className="flex items-start gap-3">
             <Crown className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
             <div className="flex-1">
-              <p className="font-medium mb-1">Edição de categorias - Plano Pago</p>
+              <p className="font-medium mb-1">Edição de categorias - Plano Pro</p>
               <p className="text-sm text-muted-foreground mb-3">
-                Você pode visualizar as categorias, mas a criação e edição está disponível apenas para planos pagos.
+                Você pode visualizar as categorias, mas a criação e edição está disponível apenas para o plano Pro.
               </p>
               <Button 
                 size="sm" 
