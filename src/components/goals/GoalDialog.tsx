@@ -9,6 +9,7 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
+import { CurrencyInput } from "@/components/ui/currency-input";
 
 type Goal = Database["public"]["Tables"]["goals"]["Row"];
 type GoalInsert = Omit<Database["public"]["Tables"]["goals"]["Insert"], "user_id">;
@@ -98,32 +99,20 @@ export function GoalDialog({ open, onOpenChange, onSave, goal }: GoalDialogProps
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="target">Valor Alvo (R$) *</Label>
-              <Input
+              <CurrencyInput
                 id="target"
-                type="text"
-                inputMode="decimal"
-                placeholder="0.00"
-                value={formData.target_amount || ""}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^\d.-]/g, "");
-                  setFormData({ ...formData, target_amount: value === "" ? 0 : Number(value) });
-                }}
+                value={formData.target_amount || 0}
+                onChange={(value) => setFormData({ ...formData, target_amount: value })}
               />
               {errors.target && <p className="text-sm text-destructive">{errors.target}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="current">Valor Atual (R$)</Label>
-              <Input
+              <CurrencyInput
                 id="current"
-                type="text"
-                inputMode="decimal"
-                placeholder="0.00"
-                value={formData.current_amount || ""}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^\d.-]/g, "");
-                  setFormData({ ...formData, current_amount: value === "" ? 0 : Number(value) });
-                }}
+                value={formData.current_amount || 0}
+                onChange={(value) => setFormData({ ...formData, current_amount: value })}
               />
               {errors.current && <p className="text-sm text-destructive">{errors.current}</p>}
             </div>

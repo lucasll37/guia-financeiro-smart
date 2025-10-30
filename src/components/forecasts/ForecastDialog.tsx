@@ -37,6 +37,7 @@ import { CalendarIcon, FolderTree, DollarSign, FileText } from "lucide-react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { CurrencyInput } from "@/components/ui/currency-input";
 
 const formSchema = z.object({
   category_id: z.string().min(1, "Subcategoria é obrigatória"),
@@ -189,15 +190,10 @@ export function ForecastDialog({
                       Valor Previsto
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        placeholder="0.00"
-                        {...field}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/[^\d.-]/g, "");
-                          field.onChange(value);
-                        }}
+                      <CurrencyInput
+                        value={parseFloat(field.value) || 0}
+                        onChange={(value) => field.onChange(value.toString())}
+                        allowNegative
                         className="text-lg"
                       />
                     </FormControl>

@@ -15,6 +15,7 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
 import { useCreditCards } from "@/hooks/useCreditCards";
+import { CurrencyInput } from "@/components/ui/currency-input";
 
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
 type Category = Database["public"]["Tables"]["categories"]["Row"];
@@ -365,44 +366,42 @@ export function TransactionDialog({
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
-                    variant="outline"
+                    id="date"
+                    variant={"outline"}
                     className={cn(
                       "w-full justify-start text-left font-normal",
                       !formData.date && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.date ? format(new Date(formData.date), "dd/MM/yyyy") : "Selecione a data"}
+                    {formData.date ? format(new Date(formData.date), "PPP", { locale: ptBR }) : <span>Selecione a data</span>}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0">
                   <Calendar
                     mode="single"
                     selected={formData.date ? new Date(formData.date) : undefined}
                     onSelect={(date) => {
                       if (date) {
-                        setFormData({ ...formData, date: format(date, "yyyy-MM-dd") });
+                        const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                        setFormData({ ...formData, date: localDate.toISOString().split('T')[0] });
                       }
                     }}
                     initialFocus
-                    className={cn("p-3 pointer-events-auto")}
+                    className="pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
+              {errors.date && <p className="text-sm text-destructive">{errors.date}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="amount">Valor (R$) *</Label>
-              <Input
+              <CurrencyInput
                 id="amount"
-                type="text"
-                inputMode="decimal"
-                placeholder="0.00"
-                value={formData.amount || ""}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^\d.-]/g, "");
-                  setFormData({ ...formData, amount: value === "" ? 0 : Number(value) });
-                }}
+                value={formData.amount || 0}
+                onChange={(value) => setFormData({ ...formData, amount: value })}
+                allowNegative
               />
               {errors.amount && <p className="text-sm text-destructive">{errors.amount}</p>}
             </div>
