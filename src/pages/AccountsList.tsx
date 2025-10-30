@@ -29,6 +29,14 @@ import type { Database } from "@/integrations/supabase/types";
 type AccountInsert = Database["public"]["Tables"]["accounts"]["Insert"];
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
 
+const accountTypeLabels: Record<string, string> = {
+  pessoal: "Pessoal",
+  conjugal: "Conjugal",
+  mesada: "Mesada",
+  casa: "Casa",
+  evento: "Evento",
+};
+
 export default function AccountsList() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -178,7 +186,7 @@ export default function AccountsList() {
                       <CardTitle className="text-xl truncate">{account.name}</CardTitle>
                       <div className="text-sm text-muted-foreground flex items-center gap-2 flex-wrap">
                         <Badge variant={account.type === "pessoal" ? "default" : "secondary"}>
-                          {account.type === "pessoal" ? "Pessoal" : "Empresarial"}
+                          {accountTypeLabels[account.type] || account.type}
                         </Badge>
                         {account.is_shared && (
                           <Badge variant="outline" className="gap-1">

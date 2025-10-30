@@ -19,6 +19,14 @@ import Forecasts from "./Forecasts";
 import Analysis from "./Analysis";
 import Reports from "./Reports";
 
+const accountTypeLabels: Record<string, string> = {
+  pessoal: "Conta Pessoal",
+  conjugal: "Conta Conjugal",
+  mesada: "Conta Mesada",
+  casa: "Conta Casa",
+  evento: "Conta Evento",
+};
+
 export default function AccountDetails() {
   const { accountId } = useParams<{ accountId: string }>();
   const navigate = useNavigate();
@@ -85,7 +93,7 @@ export default function AccountDetails() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{account.name}</h1>
           <p className="text-muted-foreground">
-            {account.type === "pessoal" ? "Conta Pessoal" : "Conta Empresarial"}
+            {accountTypeLabels[account.type] || account.type}
             {account.is_shared && " • Compartilhada"}
           </p>
         </div>
