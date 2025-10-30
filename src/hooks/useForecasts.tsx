@@ -70,46 +70,6 @@ export function useForecasts(accountId?: string | null) {
 
   const updateForecast = useMutation({
     mutationFn: async ({ id, ...updates }: ForecastUpdate & { id: string }) => {
-      // Buscar valores atuais do registro
-      const { data: current, error: fetchError } = await supabase
-        .from("account_period_forecasts")
-        .select("account_id, category_id, period_start")
-        .eq("id", id)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      // Valores finais (atuais ou atualizados)
-      const finalAccountId = updates.account_id ?? current.account_id;
-      const finalCategoryId = updates.category_id ?? current.category_id;
-      const finalPeriodStart = updates.period_start ?? current.period_start;
-
-      // Verificar se realmente mudou algum campo chave (valor diferente do atual)
-      const changingAccount =
-        updates.account_id !== undefined && updates.account_id !== current.account_id;
-      const changingCategory =
-        updates.category_id !== undefined && updates.category_id !== current.category_id;
-      const changingPeriod =
-        updates.period_start !== undefined && updates.period_start !== current.period_start;
-
-      const hasChanged = changingAccount || changingCategory || changingPeriod;
-
-      // Se mudou, verificar se já existe outro registro com esses valores
-      if (hasChanged) {
-        const { data: existing } = await supabase
-          .from("account_period_forecasts")
-          .select("id")
-          .eq("account_id", finalAccountId)
-          .eq("category_id", finalCategoryId)
-          .eq("period_start", finalPeriodStart)
-          .neq("id", id)
-          .maybeSingle();
-
-        if (existing) {
-          throw new Error("DUPLICATE_FORECAST");
-        }
-      }
-
       const { data, error } = await supabase
         .from("account_period_forecasts")
         .update(updates)
@@ -129,8 +89,7 @@ export function useForecasts(accountId?: string | null) {
       });
     },
     onError: (error: any) => {
-      // Check if it's a unique constraint violation or duplicate check
-      if (error.message === "DUPLICATE_FORECAST" || error.code === '23505') {
+      if (error.code === '23505') {
         toast({
           title: "Previsão já existe",
           description: "Já existe outra previsão para esta subcategoria neste mês. Edite a previsão existente ou escolha outra subcategoria/mês.",
