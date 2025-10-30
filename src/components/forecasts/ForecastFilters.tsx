@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar, CalendarIcon } from "lucide-react";
-import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, parse } from "date-fns";
+import { format, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -27,24 +26,11 @@ interface ForecastFiltersProps {
 }
 
 export function ForecastFilters({ accounts, filters, onFilterChange, accountId, isCasaAccount }: ForecastFiltersProps) {
-  // Generate month options: 6 months before and after current month
-  const monthOptions = useMemo(() => {
-    const options = [];
-    const current = new Date();
+  const handleMonthChange = (date: Date | undefined) => {
+    if (!date) return;
     
-    for (let i = -6; i <= 6; i++) {
-      const date = new Date(current.getFullYear(), current.getMonth() + i, 1);
-      options.push({
-        value: format(date, "yyyy-MM"),
-        label: format(date, "MMMM 'de' yyyy", { locale: ptBR }),
-      });
-    }
-    
-    return options;
-  }, []);
-
-  const handleMonthChange = (month: string) => {
-    const monthDate = new Date(month + "-01");
+    const month = format(date, "yyyy-MM");
+    const monthDate = new Date(date.getFullYear(), date.getMonth(), 1);
     const startDate = format(startOfMonth(monthDate), "yyyy-MM-dd");
     const endDate = format(endOfMonth(monthDate), "yyyy-MM-dd");
     
@@ -61,8 +47,7 @@ export function ForecastFilters({ accounts, filters, onFilterChange, accountId, 
     
     if (newMode === "monthly") {
       // Reset to current month when switching back to monthly view
-      const currentMonth = format(new Date(), "yyyy-MM");
-      handleMonthChange(currentMonth);
+      handleMonthChange(new Date());
     } else {
       // When switching to custom view, set start date to first day of current year
       // and end date to last day of current year
@@ -134,21 +119,34 @@ export function ForecastFilters({ accounts, filters, onFilterChange, accountId, 
       {filters.viewMode === "monthly" ? (
         <div className={`space-y-2 ${accountId ? 'md:col-span-3' : 'md:col-span-3'}`}>
           <Label htmlFor="month-filter">Mês</Label>
-          <Select
-            value={filters.selectedMonth}
-            onValueChange={handleMonthChange}
-          >
-            <SelectTrigger id="month-filter">
-              <SelectValue placeholder="Selecione o mês" />
-            </SelectTrigger>
-            <SelectContent>
-              {monthOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                id="month-filter"
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !filters.selectedMonth && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {filters.selectedMonth 
+                  ? format(new Date(filters.selectedMonth + "-01T00:00:00"), "MMMM 'de' yyyy", { locale: ptBR })
+                  : "Selecione o mês"
+                }
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <CalendarComponent
+                mode="single"
+                selected={filters.selectedMonth ? new Date(filters.selectedMonth + "-01T00:00:00") : undefined}
+                onSelect={handleMonthChange}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+                locale={ptBR}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       ) : (
         <>
@@ -164,16 +162,17 @@ export function ForecastFilters({ accounts, filters, onFilterChange, accountId, 
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {filters.startDate ? format(parse(filters.startDate, "yyyy-MM-dd", new Date()), "dd/MM/yyyy") : "Selecione"}
+                  {filters.startDate ? format(new Date(filters.startDate + "T00:00:00"), "dd/MM/yyyy") : "Selecione"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <CalendarComponent
                   mode="single"
-                  selected={filters.startDate ? parse(filters.startDate, "yyyy-MM-dd", new Date()) : undefined}
+                  selected={filters.startDate ? new Date(filters.startDate + "T00:00:00") : undefined}
                   onSelect={(date) => date && onFilterChange({ ...filters, startDate: format(date, "yyyy-MM-dd") })}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
+                  locale={ptBR}
                 />
               </PopoverContent>
             </Popover>
@@ -191,17 +190,18 @@ export function ForecastFilters({ accounts, filters, onFilterChange, accountId, 
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {filters.endDate ? format(parse(filters.endDate, "yyyy-MM-dd", new Date()), "dd/MM/yyyy") : "Selecione"}
+                  {filters.endDate ? format(new Date(filters.endDate + "T00:00:00"), "dd/MM/yyyy") : "Selecione"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <CalendarComponent
                   mode="single"
-                  selected={filters.endDate ? parse(filters.endDate, "yyyy-MM-dd", new Date()) : undefined}
+                  selected={filters.endDate ? new Date(filters.endDate + "T00:00:00") : undefined}
                   onSelect={(date) => date && onFilterChange({ ...filters, endDate: format(date, "yyyy-MM-dd") })}
-                  disabled={(date) => (filters.startDate ? date < parse(filters.startDate, "yyyy-MM-dd", new Date()) : false)}
+                  disabled={(date) => (filters.startDate ? date < new Date(filters.startDate + "T00:00:00") : false)}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
+                  locale={ptBR}
                 />
               </PopoverContent>
             </Popover>
