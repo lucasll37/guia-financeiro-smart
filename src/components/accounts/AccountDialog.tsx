@@ -137,7 +137,7 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
           {formData.is_shared && (
             <div className="p-4 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">
-                ℹ️ Após criar a conta, use o botão <strong>"Gerenciar Membros"</strong> para convidar pessoas e definir a divisão de despesas.
+                ℹ️ Após criar a conta, use o botão <strong>"Gerenciar Membros"</strong> para convidar pessoas.
               </p>
             </div>
           )}
