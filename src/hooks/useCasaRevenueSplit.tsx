@@ -30,66 +30,52 @@ export function useCasaRevenueSplit(accountId?: string) {
   const { data: members } = useQuery({
     queryKey: ["casa-members", accountId, account?.revenue_split],
     queryFn: async () => {
-      if (!accountId || !account) {
-        console.log("useCasaRevenueSplit: Missing accountId or account", { accountId, account });
-        return [];
-      }
-      
-      console.log("useCasaRevenueSplit: Starting fetch for account", { 
-        accountId, 
-        ownerId: account.owner_id,
-        revenueSplit: account.revenue_split 
-      });
-      
-      const allMembers: Member[] = [];
-      
-      // Buscar proprietário
-      if (account.owner_id) {
-        const { data: ownerData, error: ownerError } = await supabase
+      if (!accountId || !account) return [];
+
+      // Participantes do rateio = dono + chaves do revenue_split
+      const split = (account.revenue_split as Record<string, number>) || {};
+      const uniqueIds = Array.from(
+        new Set([
+          ...(account.owner_id ? [account.owner_id] : []),
+          ...Object.keys(split),
+        ])
+      );
+
+      if (uniqueIds.length === 0) return [];
+
+      // Buscar perfis de todos participantes de uma vez
+      const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("id, name, email")
+        .in("id", uniqueIds);
+
+      if (error) throw error;
+
+      // Mapear para estrutura Member usando peso do revenue_split (default 1)
+      const allMembers: Member[] = (profiles || []).map((p: any) => ({
+        user_id: p.id,
+        name: p.name || p.email || "Sem nome",
+        email: p.email || "",
+        weight: split[p.id] ?? 1,
+      }));
+
+      // Garantir que o dono aparece mesmo que não venha do select (por segurança)
+      if (account.owner_id && !allMembers.find(m => m.user_id === account.owner_id)) {
+        const { data: ownerData } = await supabase
           .from("profiles")
           .select("id, name, email")
           .eq("id", account.owner_id)
           .maybeSingle();
-
-        console.log("useCasaRevenueSplit: Owner query result", { ownerData, ownerError });
-
         if (ownerData) {
-          const weight = (account.revenue_split as any)?.[ownerData.id] || 1;
-          allMembers.push({
+          allMembers.unshift({
             user_id: ownerData.id,
             name: ownerData.name || ownerData.email || "Sem nome",
             email: ownerData.email || "",
-            weight,
+            weight: split[ownerData.id] ?? 1,
           });
         }
       }
 
-      // Buscar membros editores aceitos
-      const { data: memberData, error: memberError } = await supabase
-        .from("account_members")
-        .select(`
-          user_id,
-          profiles!inner(name, email)
-        `)
-        .eq("account_id", accountId)
-        .eq("status", "accepted")
-        .eq("role", "editor");
-
-      console.log("useCasaRevenueSplit: Members query result", { memberData, memberError });
-
-      if (memberData && memberData.length > 0) {
-        memberData.forEach((m: any) => {
-          const weight = (account.revenue_split as any)?.[m.user_id] || 1;
-          allMembers.push({
-            user_id: m.user_id,
-            name: m.profiles.name || m.profiles.email || "Sem nome",
-            email: m.profiles.email || "",
-            weight,
-          });
-        });
-      }
-
-      console.log("useCasaRevenueSplit: Final members list", { allMembers, count: allMembers.length });
       return allMembers;
     },
     enabled: !!accountId && !!account,
