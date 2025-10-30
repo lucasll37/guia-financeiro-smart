@@ -35,22 +35,82 @@ export function useCasaRevenueSplit(accountId?: string, periodStart?: string) {
     queryFn: async () => {
       if (!accountId || !account) return [];
 
-      // Buscar splits do período da nova tabela casa_revenue_splits
+      // 1) Buscar splits do período atual
       const { data: splits, error: splitsError } = await supabase
         .from("casa_revenue_splits")
-        .select("user_id, weight, profiles(id, name, email)")
+        .select("user_id, weight")
         .eq("account_id", accountId)
         .eq("period_start", currentPeriod);
 
       if (splitsError) throw splitsError;
 
-      // Mapear para estrutura Member
-      const allMembers: Member[] = (splits || []).map((s: any) => ({
-        user_id: s.user_id,
-        name: s.profiles?.name || s.profiles?.email || "Sem nome",
-        email: s.profiles?.email || "",
-        weight: s.weight,
-      }));
+      let allMembers: Member[] = [];
+
+      if (splits && splits.length > 0) {
+        // Enriquecer com perfis em uma única consulta
+        const userIds = splits.map((s: any) => s.user_id);
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, name, email")
+          .in("id", userIds);
+
+        allMembers = splits.map((s: any) => {
+          const p = profilesData?.find((pr: any) => pr.id === s.user_id);
+          return {
+            user_id: s.user_id,
+            name: p?.name || p?.email || "Sem nome",
+            email: p?.email || "",
+            weight: Number(s.weight) || 1,
+          } as Member;
+        });
+      } else {
+        // 2) Fallback: usar accounts.revenue_split (JSON) se existir
+        const revSplit = (account as any).revenue_split || {};
+        const entries = Object.entries(revSplit as Record<string, number>);
+        if (entries.length > 0) {
+          const userIds = entries.map(([uid]) => uid);
+          const { data: profilesData } = await supabase
+            .from("profiles")
+            .select("id, name, email")
+            .in("id", userIds);
+
+          allMembers = entries.map(([uid, w]) => {
+            const p = profilesData?.find((pr: any) => pr.id === uid);
+            return {
+              user_id: uid,
+              name: p?.name || p?.email || "Sem nome",
+              email: p?.email || "",
+              weight: Number(w) || 1,
+            } as Member;
+          });
+        } else {
+          // 3) Fallback: membros editores aceitos da conta, pesos iguais
+          const { data: am } = await supabase
+            .from("account_members")
+            .select("user_id, role, status")
+            .eq("account_id", accountId)
+            .eq("role", "editor")
+            .eq("status", "accepted");
+
+          const userIds = (am || []).map((m: any) => m.user_id);
+          if (userIds.length > 0) {
+            const { data: profilesData } = await supabase
+              .from("profiles")
+              .select("id, name, email")
+              .in("id", userIds);
+
+            allMembers = userIds.map((uid: string) => {
+              const p = profilesData?.find((pr: any) => pr.id === uid);
+              return {
+                user_id: uid,
+                name: p?.name || p?.email || "Sem nome",
+                email: p?.email || "",
+                weight: 1,
+              } as Member;
+            });
+          }
+        }
+      }
 
       return allMembers;
     },

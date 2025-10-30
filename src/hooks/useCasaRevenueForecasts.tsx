@@ -69,18 +69,32 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
         return;
       }
 
-      // Calcular total de despesas PREVISTAS
-      const totalExpenses = expenseForecasts?.reduce(
-        (sum, f) => sum + Number(f.forecasted_amount),
-        0
-      ) || 0;
-
-      if (totalExpenses === 0) return; // Não criar previsões se não há despesas previstas
-
-      const splits = calculateSplit(totalExpenses);
+      // Datas do período selecionado
       const monthDate = new Date(selectedMonth + "-01");
       const periodStart = format(startOfMonth(monthDate), "yyyy-MM-dd");
       const periodEnd = format(endOfMonth(monthDate), "yyyy-MM-dd");
+
+      // Buscar despesas previstas diretamente do backend para evitar cache desatualizado
+      const { data: freshExpenses, error: freshErr } = await supabase
+        .from("account_period_forecasts")
+        .select("forecasted_amount, categories!inner(type)")
+        .eq("account_id", accountId)
+        .eq("period_start", periodStart)
+        .eq("categories.type", "despesa");
+
+      if (freshErr) throw freshErr;
+
+      const totalExpenses = (freshExpenses || []).reduce(
+        (sum: number, f: any) => sum + Number(f.forecasted_amount),
+        0
+      );
+
+      if (totalExpenses === 0) {
+        console.warn("[CasaRevenue] Nenhuma despesa prevista encontrada para calcular receitas");
+        return;
+      }
+
+      const splits = calculateSplit(totalExpenses);
 
       console.log("[CasaRevenue] Sincronizando receitas", {
         selectedMonth,
