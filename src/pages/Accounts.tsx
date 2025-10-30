@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Plus, RotateCcw } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { seedCategories } from "@/lib/seedCategories";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuditLogs } from "@/hooks/useAuditLogs";
@@ -74,25 +72,6 @@ export default function Accounts() {
           diff: accountData as any,
         });
         
-        // Criar categorias padrão via backend usando edge function
-        try {
-          console.log("Iniciando seed de categorias via edge function para conta:", newAccount.id);
-          const { data, error } = await supabase.functions.invoke('seed-categories', {
-            body: { accountId: newAccount.id, accountType: accountData.type },
-          });
-          if (error) throw error;
-          console.log(`Seed de categorias concluído:`, data);
-        } catch (error) {
-          console.error("Erro ao criar categorias padrão via edge function:", error);
-          // Fallback para função local
-          try {
-            console.log("Tentando fallback com função local...");
-            const categoriesCreated = await seedCategories(newAccount.id, accountData.type);
-            console.log(`${categoriesCreated} categorias criadas com sucesso via função local`);
-          } catch (localError) {
-            console.error("Erro ao criar categorias padrão via função local:", localError);
-          }
-        }
       }
     }
     
