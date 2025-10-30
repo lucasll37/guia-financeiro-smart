@@ -69,6 +69,8 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
   }, [searchParams, setSearchParams]);
 
   const { categories } = useCategories(filters.accountId !== "all" ? filters.accountId : undefined);
+  const selectedAccount = accounts?.find(a => a.id === filters.accountId);
+  
   const { forecasts, isLoading, createForecast, updateForecast, deleteForecast, copyForecast } = useForecasts(
     filters.accountId !== "all" ? filters.accountId : null
   );
@@ -173,15 +175,6 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 sm:justify-end">
-            {filters.accountId !== "all" && (
-              <>
-                {/* Gerenciar divisão de receitas para contas tipo casa */}
-                <CasaRevenueSplitManager 
-                  accountId={filters.accountId} 
-                  periodStart={filters.selectedMonth + "-01"}
-                />
-              </>
-            )}
             <span className="text-sm text-muted-foreground hidden lg:inline">
               Nova previsão:
             </span>
@@ -243,6 +236,15 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             viewMode={filters.viewMode}
             categories={categories || []}
             canEdit={canEdit}
+            accountType={selectedAccount?.type}
+            revenueHeaderActions={
+              selectedAccount?.type === "casa" && filters.accountId !== "all" ? (
+                <CasaRevenueSplitManager 
+                  accountId={filters.accountId} 
+                  periodStart={filters.selectedMonth + "-01"}
+                />
+              ) : undefined
+            }
           />
         )}
       </div>

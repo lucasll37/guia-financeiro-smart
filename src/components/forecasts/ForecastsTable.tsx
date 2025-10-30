@@ -23,9 +23,11 @@ interface ForecastsTableProps {
   viewMode?: "monthly" | "custom";
   categories?: any[];
   canEdit?: boolean;
+  accountType?: string;
+  revenueHeaderActions?: React.ReactNode;
 }
 
-export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, viewMode = "monthly", categories = [], canEdit = true }: ForecastsTableProps) {
+export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, viewMode = "monthly", categories = [], canEdit = true, accountType, revenueHeaderActions }: ForecastsTableProps) {
   const { formatCurrency } = useUserPreferences();
   const [sortField, setSortField] = useState<'account' | 'category' | 'amount' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -129,6 +131,8 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
   const balance = totalIncome - totalExpense;
 
   const renderForecastRow = (forecast: any) => {
+    const isCasaRevenue = accountType === "casa" && forecast.categories?.type === "receita";
+    
     return (
       <TableRow key={forecast.id}>
         {showAccountName && (
@@ -157,16 +161,20 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
               variant="ghost"
               size="icon"
               onClick={() => onEdit(forecast)}
+              disabled={!canEdit}
             >
               <Edit className="h-4 w-4" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onDelete(forecast.id)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            {!isCasaRevenue && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onDelete(forecast.id)}
+                disabled={!canEdit}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </TableCell>
       </TableRow>
@@ -219,45 +227,51 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
           </TableRow>
           
           {/* Subcategorias */}
-          {isExpanded && data.children.map((forecast) => (
-            <TableRow key={forecast.id} className="bg-muted/20">
-              {showAccountName && <TableCell />}
-              <TableCell className="pl-12">
-                <div className="flex items-center gap-2">
-                  <div className="w-0.5 h-8 bg-primary/30 ml-2" />
-                  <span className="text-sm">
-                    {format(new Date(forecast.period_start), "MMMM 'de' yyyy", { locale: ptBR })}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell className="text-muted-foreground text-sm">
-                {forecast.notes || "-"}
-              </TableCell>
-              <TableCell className="text-right text-sm">
-                {formatCurrency(Number(forecast.forecasted_amount))}
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onEdit(forecast)}
-                    disabled={!canEdit}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onDelete(forecast.id)}
-                    disabled={!canEdit}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
+          {isExpanded && data.children.map((forecast) => {
+            const isCasaRevenue = accountType === "casa" && forecast.categories?.type === "receita";
+            
+            return (
+              <TableRow key={forecast.id} className="bg-muted/20">
+                {showAccountName && <TableCell />}
+                <TableCell className="pl-12">
+                  <div className="flex items-center gap-2">
+                    <div className="w-0.5 h-8 bg-primary/30 ml-2" />
+                    <span className="text-sm">
+                      {format(new Date(forecast.period_start), "MMMM 'de' yyyy", { locale: ptBR })}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-muted-foreground text-sm">
+                  {forecast.notes || "-"}
+                </TableCell>
+                <TableCell className="text-right text-sm">
+                  {formatCurrency(Number(forecast.forecasted_amount))}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onEdit(forecast)}
+                      disabled={!canEdit}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    {!isCasaRevenue && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onDelete(forecast.id)}
+                        disabled={!canEdit}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </>
       );
     });
@@ -280,11 +294,14 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
             <CollapsibleTrigger asChild>
               <div className="bg-green-50 dark:bg-green-950/20 px-4 py-2 border-b cursor-pointer hover:bg-green-100 dark:hover:bg-green-950/30 transition-colors flex items-center justify-between">
                 <h3 className="font-semibold text-green-700 dark:text-green-400">Receitas Previstas</h3>
-                {incomeExpanded ? (
-                  <ChevronDown className="h-4 w-4 text-green-700 dark:text-green-400" />
-                ) : (
-                  <ChevronRight className="h-4 w-4 text-green-700 dark:text-green-400" />
-                )}
+                <div className="flex items-center gap-3">
+                  {revenueHeaderActions}
+                  {incomeExpanded ? (
+                    <ChevronDown className="h-4 w-4 text-green-700 dark:text-green-400" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-green-700 dark:text-green-400" />
+                  )}
+                </div>
               </div>
             </CollapsibleTrigger>
             <CollapsibleContent>
