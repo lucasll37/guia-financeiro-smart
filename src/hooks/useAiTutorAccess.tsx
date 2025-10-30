@@ -5,44 +5,37 @@ import { useSubscription } from "./useSubscription";
 export function useAiTutorAccess() {
   const { subscription } = useSubscription();
 
-  // Fetch AI tutor settings
-  const { data: settings } = useQuery({
-    queryKey: ["ai-tutor-settings"],
+  // Fetch plan limits to check AI tutor access
+  const { data: planLimits } = useQuery({
+    queryKey: ["plan-limits"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("admin_settings")
-        .select("setting_value")
-        .eq("setting_key", "ai_tutor_requires_pro")
-        .single();
+        .from("plan_limits")
+        .select("*");
 
-      if (error) {
-        console.error("Error fetching AI tutor settings:", error);
-        // Default to free access if setting not found
-        return { requiresPro: false };
-      }
-      
-      const enabled = (data.setting_value as any)?.enabled || false;
-      return { requiresPro: enabled };
+      if (error) throw error;
+      return data;
     },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
+  // Get the current user's plan limit
+  const userPlan = subscription?.plan || "free";
+  const currentPlanLimit = planLimits?.find(limit => limit.plan === userPlan);
+
   // Determine if user has access
   const hasAccess = (() => {
-    // If settings haven't loaded yet, deny access
-    if (!settings) return false;
+    // If plan limits haven't loaded yet, deny access
+    if (!currentPlanLimit) return false;
 
-    // If AI tutor doesn't require pro, everyone has access
-    if (!settings.requiresPro) return true;
-
-    // If it requires pro, check if user has pro plan
-    return subscription?.plan === "pro" && 
+    // Check if the user's plan has AI tutor access
+    // and if subscription is active or trialing
+    return currentPlanLimit.can_access_ai_tutor && 
            (subscription?.status === "active" || subscription?.status === "trialing");
   })();
 
   return {
     hasAccess,
-    requiresPro: settings?.requiresPro || false,
-    isLoading: !settings,
+    isLoading: !planLimits,
   };
 }

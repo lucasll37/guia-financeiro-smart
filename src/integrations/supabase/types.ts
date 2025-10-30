@@ -741,6 +741,7 @@ export type Database = {
       }
       plan_limits: {
         Row: {
+          can_access_ai_tutor: boolean
           can_edit_categories: boolean
           can_generate_reports: boolean
           created_at: string | null
@@ -752,6 +753,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          can_access_ai_tutor?: boolean
           can_edit_categories?: boolean
           can_generate_reports?: boolean
           created_at?: string | null
@@ -763,6 +765,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          can_access_ai_tutor?: boolean
           can_edit_categories?: boolean
           can_generate_reports?: boolean
           created_at?: string | null

@@ -91,5 +91,6 @@ export function usePlanLimits() {
     maxInvestments: currentPlanLimits?.max_investments || 1,
     canEditCategories: currentPlanLimits?.can_edit_categories || false,
     canGenerateReports: currentPlanLimits?.can_generate_reports || false,
+    canAccessAiTutor: currentPlanLimits?.can_access_ai_tutor || false,
   };
 }

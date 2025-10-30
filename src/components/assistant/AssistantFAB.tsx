@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { MessageSquare, Sparkles, Lock } from "lucide-react";
+import { MessageSquare, Sparkles } from "lucide-react";
 import { FinancialAssistant } from "./FinancialAssistant";
 import { useAiTutorAccess } from "@/hooks/useAiTutorAccess";
 import { useToast } from "@/hooks/use-toast";
 
 export function AssistantFAB() {
-  const { hasAccess, requiresPro } = useAiTutorAccess();
+  const { hasAccess } = useAiTutorAccess();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [showPulse, setShowPulse] = useState(true);
@@ -24,10 +24,8 @@ export function AssistantFAB() {
   const handleOpen = () => {
     if (!hasAccess) {
       toast({
-        title: requiresPro ? "Recurso Pro" : "Acesso negado",
-        description: requiresPro 
-          ? "O Tutor IA está disponível apenas para usuários com plano Pro."
-          : "Você não tem permissão para acessar o Tutor IA.",
+        title: "Recurso não disponível",
+        description: "O Tutor IA não está disponível no seu plano atual.",
         variant: "destructive",
       });
       return;
