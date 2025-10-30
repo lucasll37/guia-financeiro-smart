@@ -14,10 +14,15 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
   const { calculateSplit, isCasaAccount, members } = useCasaRevenueSplit(accountId);
   const { categories } = useCategories(accountId);
 
-  // Buscar categoria de receita principal (ou criar se não existir)
+  // Buscar categoria de receita principal
   const revenueCategory = categories?.find(
-    (c) => c.type === "receita" && c.name.toLowerCase().includes("contribuição")
+    (c) => c.type === "receita" && c.parent_id === null
   );
+
+  // Buscar subcategorias de receita (uma para cada membro)
+  const revenueSubcategories = categories?.filter(
+    (c) => c.type === "receita" && c.parent_id === revenueCategory?.id
+  ) || [];
 
   // Buscar previsões de despesas do mês
   const { data: expenseForecasts } = useQuery({
@@ -43,7 +48,11 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
   // Mutation para sincronizar previsões de receita
   const syncRevenueForecasts = useMutation({
     mutationFn: async () => {
-      if (!isCasaAccount || !expenseForecasts || members.length === 0) return;
+      if (!isCasaAccount || !expenseForecasts || members.length === 0 || !revenueCategory) return;
+      if (revenueSubcategories.length === 0) {
+        console.warn("Nenhuma subcategoria de receita encontrada para esta conta casa");
+        return;
+      }
 
       const totalExpenses = expenseForecasts.reduce(
         (sum, f) => sum + Number(f.forecasted_amount),
@@ -55,41 +64,41 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
       const periodStart = format(startOfMonth(monthDate), "yyyy-MM-dd");
       const periodEnd = format(endOfMonth(monthDate), "yyyy-MM-dd");
 
-      // Buscar ou criar categoria de receita para contribuições
-      let categoryId = revenueCategory?.id;
-      
-      if (!categoryId) {
-        const { data: newCategory, error: catError } = await supabase
-          .from("categories")
-          .insert({
-            name: "Contribuição Casa",
-            type: "receita",
-            color: "#10b981",
-            account_id: accountId,
-          })
-          .select()
-          .single();
+      // Mapear cada membro para sua subcategoria correspondente
+      const forecastsToUpsert = splits
+        .map((split) => {
+          // Buscar subcategoria que contém o email do membro
+          const subcategory = revenueSubcategories.find((cat) => 
+            cat.name.toLowerCase().includes(split.email.toLowerCase())
+          );
 
-        if (catError) throw catError;
-        categoryId = newCategory.id;
+          if (!subcategory) {
+            console.warn(`Subcategoria não encontrada para ${split.email}`);
+            return null;
+          }
+
+          return {
+            account_id: accountId,
+            category_id: subcategory.id,
+            period_start: periodStart,
+            period_end: periodEnd,
+            forecasted_amount: split.amount,
+            notes: `Contribuição: ${split.percentage.toFixed(1)}% (peso ${split.weight})`,
+          };
+        })
+        .filter((f) => f !== null);
+
+      if (forecastsToUpsert.length === 0) {
+        console.warn("Nenhuma previsão pôde ser mapeada para as subcategorias existentes");
+        return;
       }
 
-      // Criar/atualizar previsões de receita para cada membro
-      const forecastsToUpsert = splits.map((split) => ({
-        account_id: accountId,
-        category_id: categoryId,
-        period_start: periodStart,
-        period_end: periodEnd,
-        forecasted_amount: split.amount,
-        notes: `Contribuição de ${split.name} (${split.percentage.toFixed(1)}% - peso ${split.weight})`,
-      }));
-
-      // Deletar previsões antigas de receita para este mês (apenas da categoria de contribuição)
+      // Deletar previsões antigas de receita para este mês (apenas das subcategorias de receita)
       await supabase
         .from("account_period_forecasts")
         .delete()
         .eq("account_id", accountId)
-        .eq("category_id", categoryId)
+        .in("category_id", revenueSubcategories.map(c => c.id))
         .eq("period_start", periodStart);
 
       // Inserir novas previsões
@@ -109,10 +118,10 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
 
   // Auto-sincronizar quando despesas ou splits mudarem
   useEffect(() => {
-    if (isCasaAccount && expenseForecasts && members.length > 0) {
+    if (isCasaAccount && expenseForecasts && members.length > 0 && revenueCategory && revenueSubcategories.length > 0) {
       syncRevenueForecasts.mutate();
     }
-  }, [isCasaAccount, expenseForecasts, members.length, selectedMonth]);
+  }, [isCasaAccount, expenseForecasts, members.length, selectedMonth, revenueSubcategories.length]);
 
   return {
     syncRevenueForecasts,
