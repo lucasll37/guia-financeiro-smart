@@ -330,37 +330,28 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                         </TableCell>
                           <TableCell className="text-right w-[180px]">
                             <div className="space-y-1">
-                              <div className="relative h-6 bg-muted rounded-full overflow-visible border-2"
+                              <div className="relative h-2.5 bg-muted rounded-full overflow-hidden border"
                                 style={{
                                   borderColor: completion > 100 
-                                    ? 'rgb(220 38 38)' 
-                                    : 'rgb(34 197 94)'
+                                    ? 'hsl(var(--destructive))' 
+                                    : 'hsl(var(--primary))'
                                 }}>
                                 <div
                                   className={cn(
-                                    "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full border-2",
+                                    "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full",
                                     completion > 100
-                                      ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500 border-red-600 dark:border-red-500"
-                                      : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500 border-green-600 dark:border-green-500"
+                                      ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500"
+                                      : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500"
                                   )}
                                   style={{
-                                    width: `${Math.min(completion, 150)}%`,
+                                    width: `${Math.min(completion, 100)}%`,
                                   }}
                                 >
                                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full" />
                                 </div>
                                 
-                                {completion > 100 && (
-                                  <div
-                                    className="absolute inset-y-0 w-0.5 bg-foreground z-10"
-                                    style={{
-                                      left: `${(100 / Math.min(completion, 150)) * 100}%`,
-                                    }}
-                                  />
-                                )}
-                                
                                 <div className="absolute inset-0 flex items-center justify-center z-10">
-                                  <span className="text-xs font-semibold text-white drop-shadow-lg">
+                                  <span className="text-xs font-semibold text-foreground">
                                     {Math.round(completion)}%
                                   </span>
                                 </div>
@@ -504,43 +495,34 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                           {maskValue(formatCurrency(difference))}
                         </TableCell>
                         <TableCell className="text-right w-[180px]">
-                          <div className="space-y-1">
-                            <div className="relative h-6 bg-muted rounded-full overflow-visible border-2"
-                              style={{
-                                borderColor: completion > 100 
-                                  ? 'rgb(220 38 38)' 
-                                  : 'rgb(34 197 94)'
-                              }}>
-                              <div
-                                className={cn(
-                                  "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full border-2",
-                                  completion > 100
-                                    ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500 border-red-600 dark:border-red-500"
-                                    : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500 border-green-600 dark:border-green-500"
-                                )}
+                            <div className="space-y-1">
+                              <div className="relative h-2.5 bg-muted rounded-full overflow-hidden border"
                                 style={{
-                                  width: `${Math.min(completion, 150)}%`,
-                                }}
-                              >
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full" />
-                              </div>
-                              
-                              {completion > 100 && (
+                                  borderColor: completion > 100 
+                                    ? 'hsl(var(--destructive))' 
+                                    : 'hsl(var(--primary))'
+                                }}>
                                 <div
-                                  className="absolute inset-y-0 w-0.5 bg-foreground z-10"
+                                  className={cn(
+                                    "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full",
+                                    completion > 100
+                                      ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500"
+                                      : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500"
+                                  )}
                                   style={{
-                                    left: `${(100 / Math.min(completion, 150)) * 100}%`,
+                                    width: `${Math.min(completion, 100)}%`,
                                   }}
-                                />
-                              )}
-                              
-                              <div className="absolute inset-0 flex items-center justify-center z-10">
-                                <span className="text-xs font-semibold text-white drop-shadow-lg">
-                                  {Math.round(completion)}%
-                                </span>
+                                >
+                                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full" />
+                                </div>
+                                
+                                <div className="absolute inset-0 flex items-center justify-center z-10">
+                                  <span className="text-xs font-semibold text-foreground">
+                                    {Math.round(completion)}%
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                          </div>
                         </TableCell>
                       </TableRow>
                       
