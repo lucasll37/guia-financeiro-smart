@@ -157,23 +157,25 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
         </TableCell>
         <TableCell className="text-right">
           <div className="flex justify-end gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onEdit(forecast)}
-              disabled={!canEdit || isCasaRevenue}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
             {!isCasaRevenue && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onDelete(forecast.id)}
-                disabled={!canEdit}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEdit(forecast)}
+                  disabled={!canEdit}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onDelete(forecast.id)}
+                  disabled={!canEdit}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </>
             )}
           </div>
         </TableCell>
@@ -249,23 +251,25 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEdit(forecast)}
-                      disabled={!canEdit || isCasaRevenue}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
                     {!isCasaRevenue && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onDelete(forecast.id)}
-                        disabled={!canEdit}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onEdit(forecast)}
+                          disabled={!canEdit}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onDelete(forecast.id)}
+                          disabled={!canEdit}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
                     )}
                   </div>
                 </TableCell>
