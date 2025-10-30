@@ -98,9 +98,11 @@ export function useAccountMembers(accountId?: string) {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["account_members"] });
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      // Remove all account-related queries from cache
+      queryClient.removeQueries({ queryKey: ["account_members"] });
+      queryClient.removeQueries({ queryKey: ["accounts"] });
+      queryClient.removeQueries({ queryKey: ["notifications"] });
+      
       toast({
         title: "Membro removido",
         description: "O membro foi removido da conta",

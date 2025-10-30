@@ -166,16 +166,8 @@ export function MembersDialog({
 
     try {
       await removeMember.mutateAsync(currentUserMembership.id);
-      
-      // Wait a bit more for the database to process the deletion
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
       setLeaveDialogOpen(false);
       onOpenChange(false);
-      
-      // Force refetch before navigating
-      await queryClient.refetchQueries({ queryKey: ["accounts"] });
-      
       navigate("/app/contas");
     } catch (error) {
       console.error("Error leaving account:", error);
