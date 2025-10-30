@@ -11,8 +11,8 @@ import { ForecastDialog } from "@/components/forecasts/ForecastDialog";
 import { ForecastFilters } from "@/components/forecasts/ForecastFilters";
 import { BudgetWizard } from "@/components/forecasts/BudgetWizard";
 import { useAccountEditPermissions } from "@/hooks/useAccountEditPermissions";
+import { useCasaRevenueForecasts } from "@/hooks/useCasaRevenueForecasts";
 import { CasaRevenueSplitManager } from "@/components/accounts/CasaRevenueSplitManager";
-import { CasaRevenueCalculation } from "@/components/forecasts/CasaRevenueCalculation";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useSearchParams } from "react-router-dom";
@@ -76,6 +76,12 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
 
   const { data: canEdit = false } = useAccountEditPermissions(
     filters.accountId !== "all" ? filters.accountId : undefined
+  );
+
+  // Auto-sincronizar receitas para contas tipo casa
+  useCasaRevenueForecasts(
+    filters.accountId !== "all" ? filters.accountId : "",
+    filters.selectedMonth
   );
 
   // Generate month options for copy dialog (6 months before and after current month)
@@ -174,6 +180,12 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 sm:justify-end">
+            {filters.accountId !== "all" && (
+              <>
+                {/* Gerenciar divisão de receitas para contas tipo casa */}
+                <CasaRevenueSplitManager accountId={filters.accountId} />
+              </>
+            )}
             <span className="text-sm text-muted-foreground hidden lg:inline">
               Nova previsão:
             </span>
@@ -222,13 +234,6 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
           />
         </div>
       </div>
-
-      {filters.accountId !== "all" && (
-        <CasaRevenueCalculation 
-          accountId={filters.accountId} 
-          forecasts={filteredForecasts}
-        />
-      )}
 
       <div className="space-y-4">
         {isLoading ? (
