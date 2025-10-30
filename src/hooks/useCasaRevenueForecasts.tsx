@@ -67,6 +67,14 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
       const periodStart = format(startOfMonth(monthDate), "yyyy-MM-dd");
       const periodEnd = format(endOfMonth(monthDate), "yyyy-MM-dd");
 
+      console.log("[CasaRevenue] Sincronizando receitas", {
+        selectedMonth,
+        periodStart,
+        totalExpenses,
+        members: members.length,
+        subcats: revenueSubcategories.length
+      });
+
       // Mapear cada membro para sua subcategoria correspondente
       const forecastsToUpsert = [];
 
@@ -120,8 +128,13 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
       return forecastsToUpsert;
     },
     onSuccess: () => {
+      // Recarregar listas de previsões para esta conta
       queryClient.invalidateQueries({ queryKey: ["forecasts"] });
-      queryClient.invalidateQueries({ queryKey: ["expense-forecasts"] });
+      queryClient.invalidateQueries({ queryKey: ["forecasts", accountId] });
+      queryClient.invalidateQueries({ queryKey: ["expense-forecasts", accountId, selectedMonth] });
+    },
+    onError: (error) => {
+      console.error("[CasaRevenue] Falha ao sincronizar receitas:", error);
     },
   });
 
