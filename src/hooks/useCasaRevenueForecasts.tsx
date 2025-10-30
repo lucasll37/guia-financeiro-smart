@@ -48,9 +48,9 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
   // Mutation para sincronizar previsões de receita
   const syncRevenueForecasts = useMutation({
     mutationFn: async () => {
-      if (!isCasaAccount || !expenseForecasts || members.length === 0 || !revenueCategory) return;
+      if (!expenseForecasts || members.length === 0 || !revenueCategory) return;
       if (revenueSubcategories.length === 0) {
-        console.warn("Nenhuma subcategoria de receita encontrada para esta conta casa");
+        console.warn("Nenhuma subcategoria de receita encontrada para esta conta");
         return;
       }
 
@@ -59,34 +59,42 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
         0
       );
 
+      if (totalExpenses === 0) return; // Não criar previsões se não há despesas
+
       const splits = calculateSplit(totalExpenses);
       const monthDate = new Date(selectedMonth + "-01");
       const periodStart = format(startOfMonth(monthDate), "yyyy-MM-dd");
       const periodEnd = format(endOfMonth(monthDate), "yyyy-MM-dd");
 
       // Mapear cada membro para sua subcategoria correspondente
-      const forecastsToUpsert = splits
-        .map((split) => {
-          // Buscar subcategoria que contém o email do membro
-          const subcategory = revenueSubcategories.find((cat) => 
-            cat.name.toLowerCase().includes(split.email.toLowerCase())
+      const forecastsToUpsert = [];
+
+      for (const split of splits) {
+        // Buscar subcategoria que corresponde ao membro (busca por email ou nome)
+        let subcategory = revenueSubcategories.find((cat) => 
+          split.email && cat.name.toLowerCase().includes(split.email.toLowerCase())
+        );
+
+        // Se não encontrou por email, buscar por nome
+        if (!subcategory && split.name) {
+          subcategory = revenueSubcategories.find((cat) => 
+            cat.name.toLowerCase().includes(split.name.toLowerCase())
           );
+        }
 
-          if (!subcategory) {
-            console.warn(`Subcategoria não encontrada para ${split.email}`);
-            return null;
-          }
-
-          return {
+        if (subcategory) {
+          forecastsToUpsert.push({
             account_id: accountId,
             category_id: subcategory.id,
             period_start: periodStart,
             period_end: periodEnd,
             forecasted_amount: split.amount,
-            notes: `Contribuição: ${split.percentage.toFixed(1)}% (peso ${split.weight})`,
-          };
-        })
-        .filter((f) => f !== null);
+            notes: `Contribuição automática: ${split.percentage.toFixed(1)}% (peso ${split.weight})`,
+          });
+        } else {
+          console.warn(`Subcategoria não encontrada para ${split.name} (${split.email})`);
+        }
+      }
 
       if (forecastsToUpsert.length === 0) {
         console.warn("Nenhuma previsão pôde ser mapeada para as subcategorias existentes");
@@ -118,10 +126,10 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
 
   // Auto-sincronizar quando despesas ou splits mudarem
   useEffect(() => {
-    if (isCasaAccount && expenseForecasts && members.length > 0 && revenueCategory && revenueSubcategories.length > 0) {
+    if (expenseForecasts && members.length > 0 && revenueCategory && revenueSubcategories.length > 0) {
       syncRevenueForecasts.mutate();
     }
-  }, [isCasaAccount, expenseForecasts, members.length, selectedMonth, revenueSubcategories.length]);
+  }, [expenseForecasts, members.length, selectedMonth, revenueSubcategories.length, revenueCategory?.id]);
 
   return {
     syncRevenueForecasts,
