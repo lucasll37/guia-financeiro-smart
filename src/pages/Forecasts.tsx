@@ -12,7 +12,6 @@ import { ForecastFilters } from "@/components/forecasts/ForecastFilters";
 import { BudgetWizard } from "@/components/forecasts/BudgetWizard";
 import { useAccountEditPermissions } from "@/hooks/useAccountEditPermissions";
 import { CasaRevenueSplitManager } from "@/components/accounts/CasaRevenueSplitManager";
-import { useCasaRevenueForecasts } from "@/hooks/useCasaRevenueForecasts";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useSearchParams } from "react-router-dom";
@@ -78,12 +77,6 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
 
   const { data: canEdit = false } = useAccountEditPermissions(
     filters.accountId !== "all" ? filters.accountId : undefined
-  );
-
-  // Auto-sync revenue forecasts for CASA accounts
-  const { syncRevenueForecasts } = useCasaRevenueForecasts(
-    filters.accountId !== "all" ? filters.accountId : "",
-    filters.selectedMonth
   );
 
   // Generate month options for copy dialog (6 months before and after current month)
@@ -159,13 +152,6 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
   };
 
   const handleWizardSave = async (forecasts: any[]) => {
-    console.log("[Forecasts] Starting wizard save", {
-      forecastsCount: forecasts.length,
-      accountType: selectedAccount?.type,
-      accountId: filters.accountId,
-      selectedMonth: filters.selectedMonth
-    });
-    
     // Salvar/atualizar todas as previsões
     for (const forecast of forecasts) {
       if (forecast.id) {
@@ -190,17 +176,7 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
         endDate: format(endOfMonth(d), "yyyy-MM-dd"),
       }));
     }
-    
-    // Trigger revenue sync for CASA accounts after saving expense forecasts
-    if (selectedAccount?.type === "casa") {
-      console.log("[Forecasts] Triggering revenue sync for CASA account");
-      setTimeout(() => {
-        console.log("[Forecasts] Calling syncRevenueForecasts.mutate()");
-        syncRevenueForecasts.mutate();
-      }, 500);
-    } else {
-      console.log("[Forecasts] Not a CASA account, skipping revenue sync");
-    }
+    // Nota: triggers no backend já recalculam receitas automaticamente
   };
 
   return (
