@@ -136,17 +136,19 @@ export function useForecasts(accountId?: string | null) {
       sourcePeriodStart, 
       targetPeriodStart,
       targetPeriodEnd,
-      accountId 
+      accountId,
+      isCasaAccount
     }: { 
       sourcePeriodStart: string;
       targetPeriodStart: string;
       targetPeriodEnd: string;
       accountId: string;
+      isCasaAccount?: boolean;
     }) => {
       // Buscar previsões do período de origem
       const { data: sourceForecasts, error: fetchError } = await supabase
         .from("account_period_forecasts")
-        .select("*")
+        .select("*, categories(type)")
         .eq("account_id", accountId)
         .eq("period_start", sourcePeriodStart);
 
@@ -155,8 +157,19 @@ export function useForecasts(accountId?: string | null) {
         throw new Error("Nenhuma previsão encontrada no período de origem");
       }
 
+      // Filtrar apenas despesas se for conta tipo casa
+      const forecastsToCopy = isCasaAccount 
+        ? sourceForecasts.filter(f => (f.categories as any)?.type === "despesa")
+        : sourceForecasts;
+
+      if (forecastsToCopy.length === 0) {
+        throw new Error(isCasaAccount 
+          ? "Nenhuma despesa encontrada no período de origem" 
+          : "Nenhuma previsão encontrada no período de origem");
+      }
+
       // Criar novas previsões para o período de destino
-      const newForecasts = sourceForecasts.map(f => ({
+      const newForecasts = forecastsToCopy.map(f => ({
         account_id: f.account_id,
         category_id: f.category_id,
         period_start: targetPeriodStart,

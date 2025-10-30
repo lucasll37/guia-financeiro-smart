@@ -144,6 +144,7 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
       targetPeriodStart,
       targetPeriodEnd,
       accountId: filters.accountId,
+      isCasaAccount: selectedAccount?.type === "casa",
     });
 
     setCopyDialogOpen(false);
@@ -274,7 +275,10 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
           <AlertDialogHeader>
             <AlertDialogTitle>Copiar Previsões</AlertDialogTitle>
             <AlertDialogDescription>
-              Copiar todas as previsões de {format(new Date(filters.selectedMonth + "-01"), "MMMM 'de' yyyy", { locale: ptBR })} para qual mês?
+              {selectedAccount?.type === "casa" 
+                ? `Copiar apenas as despesas previstas de ${format(new Date(filters.selectedMonth + "-01T00:00:00"), "MMMM 'de' yyyy", { locale: ptBR })} para qual mês? (As receitas serão calculadas automaticamente)`
+                : `Copiar todas as previsões de ${format(new Date(filters.selectedMonth + "-01T00:00:00"), "MMMM 'de' yyyy", { locale: ptBR })} para qual mês?`
+              }
             </AlertDialogDescription>
           </AlertDialogHeader>
           <Select value={copyTargetMonth} onValueChange={setCopyTargetMonth}>
