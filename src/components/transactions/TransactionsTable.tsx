@@ -24,6 +24,7 @@ interface TransactionsTableProps {
   onDelete: (id: string) => void;
   categories?: any[]; // Lista completa de categorias para resolver hierarquia
   canEdit?: boolean;
+  accountType?: string; // Tipo da conta (e.g., "casa")
 }
 
 export function TransactionsTable({
@@ -32,6 +33,7 @@ export function TransactionsTable({
   onDelete,
   categories = [],
   canEdit = true,
+  accountType,
 }: TransactionsTableProps) {
   const [sortField, setSortField] = useState<'date' | 'description' | 'amount' | 'category' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -119,6 +121,11 @@ export function TransactionsTable({
   const renderTransactionRow = (transaction: Transaction) => {
     const isExpense = transaction.categories?.type === "despesa";
     const isCreditCard = !!transaction.credit_card_id;
+    const isIncome = transaction.categories?.type === "receita";
+    const isCasaAccount = accountType === "casa";
+    
+    // Em contas casa, não mostrar botões de edição/exclusão para receitas
+    const shouldShowActions = !(isCasaAccount && isIncome);
     
     return (
       <TableRow key={transaction.id}>
@@ -147,24 +154,26 @@ export function TransactionsTable({
           </span>
         </TableCell>
         <TableCell className="text-right">
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onEdit(transaction)}
-              disabled={!canEdit}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onDelete(transaction.id)}
-              disabled={!canEdit}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+          {shouldShowActions && (
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onEdit(transaction)}
+                disabled={!canEdit}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onDelete(transaction.id)}
+                disabled={!canEdit}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </TableCell>
       </TableRow>
     );

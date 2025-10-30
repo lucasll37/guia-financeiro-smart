@@ -193,6 +193,7 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
           onDelete={handleDeleteTransaction}
           categories={categories || []}
           canEdit={canEdit}
+          accountType={filters.accountId !== "all" ? accounts?.find(a => a.id === filters.accountId)?.type : undefined}
         />
       )}
 
