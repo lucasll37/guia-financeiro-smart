@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Users, ChevronDown, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { AccountPeriodDetails } from "./AccountPeriodDetails";
+import { useAuth } from "@/hooks/useAuth";
 import type { Database } from "@/integrations/supabase/types";
 
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
@@ -24,6 +25,7 @@ const accountTypeLabels: Record<string, string> = {
 };
 
 export function AccountsTable({ accounts, onEdit, onDelete, onManageMembers }: AccountsTableProps) {
+  const { user } = useAuth();
   const [expandedAccount, setExpandedAccount] = useState<string | null>(null);
   const [sortField, setSortField] = useState<'name' | 'type' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -124,30 +126,45 @@ export function AccountsTable({ accounts, onEdit, onDelete, onManageMembers }: A
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onManageMembers(account)}
-                        title="Gerenciar Membros"
-                      >
-                        <Users className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onEdit(account)}
-                        title="Editar"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onDelete(account.id)}
-                        title="Excluir"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {account.owner_id === user?.id ? (
+                        <>
+                          {account.is_shared && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onManageMembers(account)}
+                              title="Gerenciar Membros"
+                            >
+                              <Users className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onEdit(account)}
+                            title="Editar"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onDelete(account.id)}
+                            title="Excluir"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onManageMembers(account)}
+                          title="Informações da Conta"
+                        >
+                          <Users className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

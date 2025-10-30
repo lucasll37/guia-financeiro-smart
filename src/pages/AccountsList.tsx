@@ -188,42 +188,55 @@ export default function AccountsList() {
                         )}
                       </div>
                     </div>
-                    {/* Botões de ação - apenas para o dono */}
-                    {isOwner && (
-                      <div className="flex gap-1 items-start">
-                        {/* Botão Gerenciar Membros - apenas para contas compartilhadas */}
-                        {account.is_shared && (
+                    {/* Botões de ação */}
+                    <div className="flex gap-1 items-start">
+                      {isOwner ? (
+                        <>
+                          {/* Botão Gerenciar Membros - apenas para contas compartilhadas do dono */}
+                          {account.is_shared && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => handleManageMembers(e, account)}
+                              title="Gerenciar Membros"
+                              aria-label="Gerenciar membros"
+                            >
+                              <Users className="h-4 w-4" />
+                            </Button>
+                          )}
+                          
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={(e) => handleManageMembers(e, account)}
-                            title="Gerenciar Membros"
-                            aria-label="Gerenciar membros"
+                            onClick={(e) => handleDeleteClick(e, account)}
+                            title="Excluir"
+                            aria-label="Excluir conta"
                           >
-                            <Users className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
-                        )}
-                        
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => handleEditAccount(e, account)}
+                            title="Editar"
+                            aria-label="Editar conta"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </>
+                      ) : (
+                        /* Botão Informações da Conta - para membros não proprietários */
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={(e) => handleDeleteClick(e, account)}
-                          title="Excluir"
-                          aria-label="Excluir conta"
+                          onClick={(e) => handleManageMembers(e, account)}
+                          title="Informações da Conta"
+                          aria-label="Ver informações da conta"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Users className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => handleEditAccount(e, account)}
-                          title="Editar"
-                          aria-label="Editar conta"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
