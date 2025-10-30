@@ -338,7 +338,12 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                                   {Math.round(completion)}%
                                 </span>
                               </div>
-                              <div className="relative h-2.5 bg-muted rounded-full overflow-hidden">
+                              <div className={cn(
+                                "relative h-2.5 bg-muted rounded-full overflow-hidden border-2",
+                                completion > 100 
+                                  ? "border-red-500 dark:border-red-400" 
+                                  : "border-green-500 dark:border-green-400"
+                              )}>
                                 <div
                                   className={cn(
                                     "h-full transition-all duration-500 ease-out rounded-full",
@@ -503,7 +508,12 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                                 {Math.round(completion)}%
                               </span>
                             </div>
-                            <div className="relative h-2.5 bg-muted rounded-full overflow-hidden">
+                            <div className={cn(
+                              "relative h-2.5 bg-muted rounded-full overflow-hidden border-2",
+                              completion > 100 
+                                ? "border-red-500 dark:border-red-400" 
+                                : "border-green-500 dark:border-green-400"
+                            )}>
                               <div
                                 className={cn(
                                   "h-full transition-all duration-500 ease-out rounded-full",
