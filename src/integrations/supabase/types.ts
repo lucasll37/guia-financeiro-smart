@@ -328,6 +328,48 @@ export type Database = {
           },
         ]
       }
+      casa_revenue_splits: {
+        Row: {
+          account_id: string
+          created_at: string
+          id: string
+          period_start: string
+          user_id: string
+          weight: number
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          id?: string
+          period_start: string
+          user_id: string
+          weight?: number
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          id?: string
+          period_start?: string
+          user_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "casa_revenue_splits_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "casa_revenue_splits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           account_id: string
