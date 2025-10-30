@@ -744,6 +744,7 @@ export type Database = {
           can_access_ai_tutor: boolean
           can_edit_categories: boolean
           can_generate_reports: boolean
+          can_share_accounts: boolean
           created_at: string | null
           id: string
           max_accounts: number
@@ -756,6 +757,7 @@ export type Database = {
           can_access_ai_tutor?: boolean
           can_edit_categories?: boolean
           can_generate_reports?: boolean
+          can_share_accounts?: boolean
           created_at?: string | null
           id?: string
           max_accounts?: number
@@ -768,6 +770,7 @@ export type Database = {
           can_access_ai_tutor?: boolean
           can_edit_categories?: boolean
           can_generate_reports?: boolean
+          can_share_accounts?: boolean
           created_at?: string | null
           id?: string
           max_accounts?: number

@@ -92,5 +92,6 @@ export function usePlanLimits() {
     canEditCategories: currentPlanLimits?.can_edit_categories || false,
     canGenerateReports: currentPlanLimits?.can_generate_reports || false,
     canAccessAiTutor: currentPlanLimits?.can_access_ai_tutor || false,
+    canShareAccounts: currentPlanLimits?.can_share_accounts || false,
   };
 }

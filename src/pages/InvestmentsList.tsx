@@ -302,6 +302,7 @@ function InvestmentCard({
   const { data: currentValue = 0 } = useInvestmentCurrentValue(investment.id);
   const { returns = [] } = useMonthlyReturns(investment.id);
   const { maskValue } = useMaskValues();
+  const { canShareAccounts } = usePlanLimits();
 
   // Calcular aportes nominais totais
   const totalContributions = returns.reduce((sum, r) => sum + Number(r.contribution || 0), 0);
@@ -361,14 +362,16 @@ function InvestmentCard({
             </Badge>
           </div>
           <div className="flex gap-1 shrink-0">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={(e) => onManageMembers(e, investment)}
-              title={isOwner ? "Gerenciar Membros" : "Ver Membros"}
-            >
-              <Users className="h-4 w-4" />
-            </Button>
+            {canShareAccounts && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => onManageMembers(e, investment)}
+                title={isOwner ? "Gerenciar Membros" : "Ver Membros"}
+              >
+                <Users className="h-4 w-4" />
+              </Button>
+            )}
             {isOwner && (
               <>
                 <Button

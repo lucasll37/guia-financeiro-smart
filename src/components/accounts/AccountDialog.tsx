@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import type { Database } from "@/integrations/supabase/types";
 
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
@@ -19,6 +20,7 @@ interface AccountDialogProps {
 }
 
 export function AccountDialog({ open, onOpenChange, onSave, account, currentUserId }: AccountDialogProps) {
+  const { canShareAccounts } = usePlanLimits();
   const [formData, setFormData] = useState<AccountInsert>({
     owner_id: currentUserId,
     name: "",
@@ -106,9 +108,13 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="pessoal">Pessoal</SelectItem>
-                <SelectItem value="conjugal">Conjugal</SelectItem>
-                <SelectItem value="mesada">Mesada</SelectItem>
-                <SelectItem value="casa">Casa</SelectItem>
+                {canShareAccounts && (
+                  <>
+                    <SelectItem value="conjugal">Conjugal</SelectItem>
+                    <SelectItem value="mesada">Mesada</SelectItem>
+                    <SelectItem value="casa">Casa</SelectItem>
+                  </>
+                )}
               </SelectContent>
             </Select>
             {account && (
@@ -116,29 +122,38 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
                 O tipo da conta não pode ser alterado após a criação
               </p>
             )}
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="is_shared"
-              checked={formData.is_shared}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_shared: checked })}
-              disabled={['conjugal', 'mesada', 'casa'].includes(formData.type)}
-            />
-            <Label htmlFor="is_shared">
-              Conta Compartilhada
-              {['conjugal', 'mesada', 'casa'].includes(formData.type) && (
-                <span className="text-xs text-muted-foreground ml-2">(Obrigatório para este tipo)</span>
-              )}
-            </Label>
-          </div>
-
-          {formData.is_shared && (
-            <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">
-                ℹ️ Após criar a conta, use o botão <strong>"Gerenciar Membros"</strong> para convidar pessoas.
+            {!canShareAccounts && (
+              <p className="text-xs text-muted-foreground">
+                💡 Tipos de contas compartilhadas (Conjugal, Mesada, Casa) disponíveis apenas no plano Pro
               </p>
-            </div>
+            )}
+          </div>
+
+          {canShareAccounts && (
+            <>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="is_shared"
+                  checked={formData.is_shared}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_shared: checked })}
+                  disabled={['conjugal', 'mesada', 'casa'].includes(formData.type)}
+                />
+                <Label htmlFor="is_shared">
+                  Conta Compartilhada
+                  {['conjugal', 'mesada', 'casa'].includes(formData.type) && (
+                    <span className="text-xs text-muted-foreground ml-2">(Obrigatório para este tipo)</span>
+                  )}
+                </Label>
+              </div>
+
+              {formData.is_shared && (
+                <div className="p-4 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    ℹ️ Após criar a conta, use o botão <strong>"Gerenciar Membros"</strong> para convidar pessoas.
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
 

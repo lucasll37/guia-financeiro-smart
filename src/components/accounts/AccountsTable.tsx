@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Users, ChevronDown, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { AccountPeriodDetails } from "./AccountPeriodDetails";
 import { useAuth } from "@/hooks/useAuth";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import type { Database } from "@/integrations/supabase/types";
 
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
@@ -25,6 +26,7 @@ const accountTypeLabels: Record<string, string> = {
 
 export function AccountsTable({ accounts, onEdit, onDelete, onManageMembers }: AccountsTableProps) {
   const { user } = useAuth();
+  const { canShareAccounts } = usePlanLimits();
   const [expandedAccount, setExpandedAccount] = useState<string | null>(null);
   const [sortField, setSortField] = useState<'name' | 'type' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -127,7 +129,7 @@ export function AccountsTable({ accounts, onEdit, onDelete, onManageMembers }: A
                     <div className="flex justify-end gap-2">
                       {account.owner_id === user?.id ? (
                         <>
-                          {account.is_shared && (
+                          {canShareAccounts && account.is_shared && (
                             <Button
                               variant="ghost"
                               size="icon"

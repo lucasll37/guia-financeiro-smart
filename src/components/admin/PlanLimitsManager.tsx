@@ -24,6 +24,7 @@ export function PlanLimitsManager() {
     can_edit_categories: false,
     can_generate_reports: false,
     can_access_ai_tutor: false,
+    can_share_accounts: false,
   });
 
   // Fetch plan limits
@@ -42,7 +43,7 @@ export function PlanLimitsManager() {
 
   // Update plan limits mutation
   const updatePlanLimit = useMutation({
-    mutationFn: async ({ plan, max_accounts, max_credit_cards, max_investments, can_edit_categories, can_generate_reports, can_access_ai_tutor }: {
+    mutationFn: async ({ plan, max_accounts, max_credit_cards, max_investments, can_edit_categories, can_generate_reports, can_access_ai_tutor, can_share_accounts }: {
       plan: SubscriptionPlan;
       max_accounts: number;
       max_credit_cards: number;
@@ -50,6 +51,7 @@ export function PlanLimitsManager() {
       can_edit_categories: boolean;
       can_generate_reports: boolean;
       can_access_ai_tutor: boolean;
+      can_share_accounts: boolean;
     }) => {
       const { error } = await supabase
         .from("plan_limits")
@@ -60,6 +62,7 @@ export function PlanLimitsManager() {
           can_edit_categories,
           can_generate_reports,
           can_access_ai_tutor,
+          can_share_accounts,
         })
         .eq("plan", plan);
 
@@ -91,6 +94,7 @@ export function PlanLimitsManager() {
       can_edit_categories: limit.can_edit_categories,
       can_generate_reports: limit.can_generate_reports,
       can_access_ai_tutor: limit.can_access_ai_tutor,
+      can_share_accounts: limit.can_share_accounts,
     });
   };
 
@@ -114,6 +118,7 @@ export function PlanLimitsManager() {
       can_edit_categories: editForm.can_edit_categories,
       can_generate_reports: editForm.can_generate_reports,
       can_access_ai_tutor: editForm.can_access_ai_tutor,
+      can_share_accounts: editForm.can_share_accounts,
     });
   };
 
@@ -289,6 +294,24 @@ export function PlanLimitsManager() {
                         Pode acessar Tutor IA
                       </Label>
                     </div>
+
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`share-accounts-${limit.plan}`}
+                        checked={editForm.can_share_accounts}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            can_share_accounts: e.target.checked,
+                          })
+                        }
+                        className="h-4 w-4 rounded border-border"
+                      />
+                      <Label htmlFor={`share-accounts-${limit.plan}`} className="font-normal cursor-pointer">
+                        Pode compartilhar contas
+                      </Label>
+                    </div>
                   </div>
 
                   <div className="flex gap-2 justify-end pt-2">
@@ -338,6 +361,9 @@ export function PlanLimitsManager() {
                       </Badge>
                       <Badge variant={limit.can_access_ai_tutor ? "default" : "secondary"}>
                         {limit.can_access_ai_tutor ? "✓" : "✗"} Acessar Tutor IA
+                      </Badge>
+                      <Badge variant={limit.can_share_accounts ? "default" : "secondary"}>
+                        {limit.can_share_accounts ? "✓" : "✗"} Compartilhar contas
                       </Badge>
                     </div>
                   </div>
