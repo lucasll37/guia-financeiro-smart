@@ -43,6 +43,8 @@ export function useForecasts(accountId?: string | null) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["forecasts"] });
+      // Garante que hooks dependentes de despesas previstas (ex.: casa) recarreguem
+      queryClient.invalidateQueries({ queryKey: ["expense-forecasts"] });
       toast({
         title: "Previsão criada",
         description: "Sua previsão foi criada com sucesso",
@@ -80,6 +82,7 @@ export function useForecasts(accountId?: string | null) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["forecasts"] });
+      queryClient.invalidateQueries({ queryKey: ["expense-forecasts"] });
       toast({
         title: "Previsão atualizada",
         description: "Sua previsão foi atualizada com sucesso",
@@ -114,6 +117,7 @@ export function useForecasts(accountId?: string | null) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["forecasts"] });
+      queryClient.invalidateQueries({ queryKey: ["expense-forecasts"] });
       toast({
         title: "Previsão excluída",
         description: "Sua previsão foi excluída com sucesso",
@@ -172,6 +176,7 @@ export function useForecasts(accountId?: string | null) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["forecasts"] });
+      queryClient.invalidateQueries({ queryKey: ["expense-forecasts"] });
       toast({
         title: "Previsão copiada",
         description: "As previsões foram copiadas com sucesso",
