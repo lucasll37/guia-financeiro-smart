@@ -599,52 +599,53 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
           </Collapsible>
         )}
 
-        {/* Saldo Remanescente */}
-        <Collapsible open={balanceExpanded} onOpenChange={setBalanceExpanded}>
-          <div className="border rounded-lg overflow-hidden">
-            <CollapsibleTrigger asChild>
-              <div className="bg-blue-50 dark:bg-blue-950/20 px-4 py-2 border-b cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-950/30 transition-colors flex items-center justify-between">
-                <h3 className="font-semibold text-blue-700 dark:text-blue-400">Saldo Remanescente</h3>
-                {balanceExpanded ? (
-                  <ChevronDown className="h-4 w-4 text-blue-700 dark:text-blue-400" />
-                ) : (
-                  <ChevronRight className="h-4 w-4 text-blue-700 dark:text-blue-400" />
-                )}
-              </div>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[40px]"></TableHead>
-                    <TableHead className="w-[250px]">Descrição</TableHead>
-                    <TableHead className="text-right w-[140px]">Previsto</TableHead>
-                    <TableHead className="text-right w-[140px]">Realizado</TableHead>
-                    <TableHead className="text-right w-[140px]">Diferença</TableHead>
-                    <TableHead className="text-right w-[180px]">Progresso</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="w-[40px]"></TableCell>
-                    <TableCell className="w-[250px]">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full flex-shrink-0 bg-blue-500" />
-                        <span className="break-words">Saldo do período anterior</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right w-[140px]">-</TableCell>
-                    <TableCell className="text-right font-medium w-[140px]">
-                      {maskValue(formatCurrency(previousBalance))}
-                    </TableCell>
-                    <TableCell className="text-right w-[140px]">-</TableCell>
-                    <TableCell className="text-right w-[180px]">-</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </CollapsibleContent>
-          </div>
-        </Collapsible>
+        {account.type !== "casa" && (
+          <Collapsible open={balanceExpanded} onOpenChange={setBalanceExpanded}>
+            <div className="border rounded-lg overflow-hidden">
+              <CollapsibleTrigger asChild>
+                <div className="bg-blue-50 dark:bg-blue-950/20 px-4 py-2 border-b cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-950/30 transition-colors flex items-center justify-between">
+                  <h3 className="font-semibold text-blue-700 dark:text-blue-400">Saldo Remanescente</h3>
+                  {balanceExpanded ? (
+                    <ChevronDown className="h-4 w-4 text-blue-700 dark:text-blue-400" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-blue-700 dark:text-blue-400" />
+                  )}
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[40px]"></TableHead>
+                      <TableHead className="w-[250px]">Descrição</TableHead>
+                      <TableHead className="text-right w-[140px]">Previsto</TableHead>
+                      <TableHead className="text-right w-[140px]">Realizado</TableHead>
+                      <TableHead className="text-right w-[140px]">Diferença</TableHead>
+                      <TableHead className="text-right w-[180px]">Progresso</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="w-[40px]"></TableCell>
+                      <TableCell className="w-[250px]">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full flex-shrink-0 bg-blue-500" />
+                          <span className="break-words">Saldo do período anterior</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right w-[140px]">-</TableCell>
+                      <TableCell className="text-right font-medium w-[140px]">
+                        {maskValue(formatCurrency(previousBalance))}
+                      </TableCell>
+                      <TableCell className="text-right w-[140px]">-</TableCell>
+                      <TableCell className="text-right w-[180px]">-</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CollapsibleContent>
+            </div>
+          </Collapsible>
+        )}
 
         {/* Saldo */}
         <div className="border rounded-lg bg-muted/50">
