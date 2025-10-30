@@ -84,11 +84,15 @@ export function useForecasts(accountId?: string | null) {
       const finalCategoryId = updates.category_id ?? current.category_id;
       const finalPeriodStart = updates.period_start ?? current.period_start;
 
-      // Verificar se mudou algum campo chave
-      const hasChanged = 
-        updates.account_id !== undefined ||
-        updates.category_id !== undefined ||
-        updates.period_start !== undefined;
+      // Verificar se realmente mudou algum campo chave (valor diferente do atual)
+      const changingAccount =
+        updates.account_id !== undefined && updates.account_id !== current.account_id;
+      const changingCategory =
+        updates.category_id !== undefined && updates.category_id !== current.category_id;
+      const changingPeriod =
+        updates.period_start !== undefined && updates.period_start !== current.period_start;
+
+      const hasChanged = changingAccount || changingCategory || changingPeriod;
 
       // Se mudou, verificar se já existe outro registro com esses valores
       if (hasChanged) {
