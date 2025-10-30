@@ -23,9 +23,10 @@ interface ForecastFiltersProps {
   };
   onFilterChange: (filters: any) => void;
   accountId?: string;
+  isCasaAccount?: boolean;
 }
 
-export function ForecastFilters({ accounts, filters, onFilterChange, accountId }: ForecastFiltersProps) {
+export function ForecastFilters({ accounts, filters, onFilterChange, accountId, isCasaAccount }: ForecastFiltersProps) {
   // Generate month options: 6 months before and after current month
   const monthOptions = useMemo(() => {
     const options = [];
@@ -96,13 +97,15 @@ export function ForecastFilters({ accounts, filters, onFilterChange, accountId }
             {filters.viewMode === "monthly" ? "Visualização Mensal" : "Período Personalizado"}
           </span>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={toggleViewMode}
-        >
-          {filters.viewMode === "monthly" ? "Personalizar Período" : "Voltar para Mensal"}
-        </Button>
+        {!isCasaAccount && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleViewMode}
+          >
+            {filters.viewMode === "monthly" ? "Personalizar Período" : "Voltar para Mensal"}
+          </Button>
+        )}
       </div>
 
       <div className={`grid gap-4 p-4 border rounded-lg bg-card ${accountId ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>

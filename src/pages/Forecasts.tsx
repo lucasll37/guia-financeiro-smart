@@ -220,6 +220,7 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             filters={filters}
             onFilterChange={setFilters}
             accountId={propAccountId}
+            isCasaAccount={selectedAccount?.type === "casa"}
           />
         </div>
       </div>
