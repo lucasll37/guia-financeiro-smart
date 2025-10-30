@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCasaRevenueSplit } from "./useCasaRevenueSplit";
@@ -20,29 +20,40 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
   );
 
   // Buscar subcategorias de receita (uma para cada membro)
-  const revenueSubcategories = categories?.filter(
-    (c) => c.type === "receita" && c.parent_id === revenueCategory?.id
-  ) || [];
+  const revenueSubcategories =
+    categories?.filter((c) => c.type === "receita" && c.parent_id === revenueCategory?.id) || [];
+
+  // IDs de categorias de DESPESA (evita join com categories)
+  const expenseCategoryIds = useMemo(
+    () => categories?.filter((c) => c.type === "despesa").map((c) => c.id) ?? [],
+    [categories]
+  );
 
   // Buscar previsões de despesas do mês
   const { data: expenseForecasts } = useQuery({
-    queryKey: ["expense-forecasts", accountId, selectedMonth],
+    queryKey: [
+      "expense-forecasts",
+      accountId,
+      selectedMonth,
+      expenseCategoryIds.join(","),
+    ],
     queryFn: async () => {
       const monthDate = new Date(selectedMonth + "-01");
       const periodStart = format(startOfMonth(monthDate), "yyyy-MM-dd");
-      const periodEnd = format(endOfMonth(monthDate), "yyyy-MM-dd");
+
+      if (expenseCategoryIds.length === 0) return [];
 
       const { data, error } = await supabase
         .from("account_period_forecasts")
-        .select("*, categories!inner(type)")
+        .select("forecasted_amount, category_id")
         .eq("account_id", accountId)
         .eq("period_start", periodStart)
-        .eq("categories.type", "despesa");
+        .in("category_id", expenseCategoryIds);
 
       if (error) throw error;
       return data;
     },
-    enabled: !!accountId && !!selectedMonth,
+    enabled: !!accountId && !!selectedMonth && expenseCategoryIds.length > 0,
   });
 
   // Mutation para sincronizar previsões de receita
@@ -77,10 +88,10 @@ export function useCasaRevenueForecasts(accountId: string, selectedMonth: string
       // Buscar despesas previstas diretamente do backend para evitar cache desatualizado
       const { data: freshExpenses, error: freshErr } = await supabase
         .from("account_period_forecasts")
-        .select("forecasted_amount, categories!inner(type)")
+        .select("forecasted_amount, category_id")
         .eq("account_id", accountId)
         .eq("period_start", periodStart)
-        .eq("categories.type", "despesa");
+        .in("category_id", expenseCategoryIds);
 
       if (freshErr) throw freshErr;
 
