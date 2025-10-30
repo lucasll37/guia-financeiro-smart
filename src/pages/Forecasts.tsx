@@ -268,6 +268,7 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
         accountId={filters.accountId !== "all" ? filters.accountId : ""}
         categories={categories || []}
         selectedMonth={filters.selectedMonth}
+        accountType={filters.accountId !== "all" ? accounts?.find(a => a.id === filters.accountId)?.type : undefined}
       />
 
       <AlertDialog open={copyDialogOpen} onOpenChange={setCopyDialogOpen}>

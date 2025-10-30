@@ -43,6 +43,7 @@ interface BudgetWizardProps {
   accountId: string;
   categories: any[];
   selectedMonth: string;
+  accountType?: string;
 }
 
 interface ForecastEntry {
@@ -71,6 +72,7 @@ export function BudgetWizard({
   accountId,
   categories,
   selectedMonth,
+  accountType,
 }: BudgetWizardProps) {
   const [step, setStep] = useState<"month" | "income" | "expenses">("month");
   const [workingMonth, setWorkingMonth] = useState(new Date(selectedMonth + "-01"));
@@ -178,7 +180,8 @@ export function BudgetWizard({
   const handleMonthSelect = async (month: Date) => {
     setWorkingMonth(month);
     await loadExistingForecasts(month);
-    setStep("income");
+    // Pular etapa de receitas em contas casa
+    setStep(accountType === "casa" ? "expenses" : "income");
   };
 
   const getEntryValue = (subcategoryId: string, entries: ForecastEntry[]) => {
@@ -265,7 +268,7 @@ export function BudgetWizard({
           <DialogDescription className="text-xs">
             {step === "month" && "Selecione o mês de referência"}
             {step === "income" && "Defina suas receitas previstas"}
-            {step === "expenses" && "Distribua suas despesas por categoria"}
+            {step === "expenses" && (accountType === "casa" ? "Distribua suas despesas por categoria" : "Distribua suas despesas por categoria")}
           </DialogDescription>
         </DialogHeader>
 
@@ -431,134 +434,156 @@ export function BudgetWizard({
             {/* Step: Expenses */}
             {step === "expenses" && (
               <div className="space-y-2">
-                {/* Summary Card with Visual Progress */}
-                <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-3 rounded-lg border border-primary/20 space-y-2">
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-0.5">Receitas</p>
-                      <p className="text-base font-bold text-green-600 dark:text-green-400">
-                        R$ {totalIncome.toFixed(2)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-0.5">Despesas</p>
-                      <p className="text-base font-bold text-red-600 dark:text-red-400">
-                        R$ {totalExpenses.toFixed(2)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-0.5">Saldo</p>
-                      <p
-                        className={cn(
-                          "text-base font-bold",
-                          balance >= 0
-                            ? "text-green-600 dark:text-green-400"
-                            : "text-red-600 dark:text-red-400"
-                        )}
-                      >
-                        R$ {balance.toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Visual Progress Bar */}
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">
-                        Orçamento Utilizado
-                      </span>
-                      <span
-                        className={cn(
-                          "font-semibold",
-                          totalExpenses > totalIncome
-                            ? "text-red-600 dark:text-red-400"
-                            : totalExpenses === totalIncome
-                            ? "text-green-600 dark:text-green-400"
-                            : "text-amber-600 dark:text-amber-400"
-                        )}
-                      >
-                        {totalIncome > 0
-                          ? ((totalExpenses / totalIncome) * 100).toFixed(1)
-                          : 0}%
-                      </span>
-                    </div>
-                    
-                    <div className="relative h-6 bg-muted rounded-full overflow-hidden border">
-                      {/* Base background */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-muted to-muted" />
-                      
-                      {/* Filled portion */}
-                      <div
-                        className={cn(
-                          "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full",
-                          totalExpenses > totalIncome
-                            ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500"
-                            : totalExpenses === totalIncome
-                            ? "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500"
-                            : "bg-gradient-to-r from-primary to-primary/80"
-                        )}
-                        style={{
-                          width: `${Math.min((totalExpenses / Math.max(totalIncome, totalExpenses)) * 100, 100)}%`,
-                        }}
-                      >
-                        {/* Animated shine effect */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+                {/* Summary Card with Visual Progress - Only for non-casa accounts */}
+                {accountType !== "casa" && (
+                  <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-3 rounded-lg border border-primary/20 space-y-2">
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-0.5">Receitas</p>
+                        <p className="text-base font-bold text-green-600 dark:text-green-400">
+                          R$ {totalIncome.toFixed(2)}
+                        </p>
                       </div>
-                      
-                      {/* 100% marker line */}
-                      {totalExpenses > totalIncome && (
-                        <div
-                          className="absolute inset-y-0 w-0.5 bg-white/50"
-                          style={{
-                            left: `${(totalIncome / totalExpenses) * 100}%`,
-                          }}
-                        />
-                      )}
-                      
-                      {/* Center text */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-xs font-semibold text-foreground drop-shadow-lg">
-                          {totalExpenses > totalIncome && (
-                            <>Excedeu em R$ {(totalExpenses - totalIncome).toFixed(2)}</>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-0.5">Despesas</p>
+                        <p className="text-base font-bold text-red-600 dark:text-red-400">
+                          R$ {totalExpenses.toFixed(2)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-0.5">Saldo</p>
+                        <p
+                          className={cn(
+                            "text-base font-bold",
+                            balance >= 0
+                              ? "text-green-600 dark:text-green-400"
+                              : "text-red-600 dark:text-red-400"
                           )}
-                          {totalExpenses < totalIncome && (
-                            <>Restam R$ {(totalIncome - totalExpenses).toFixed(2)}</>
+                        >
+                          R$ {balance.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Visual Progress Bar */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">
+                          Orçamento Utilizado
+                        </span>
+                        <span
+                          className={cn(
+                            "font-semibold",
+                            totalExpenses > totalIncome
+                              ? "text-red-600 dark:text-red-400"
+                              : totalExpenses === totalIncome
+                              ? "text-green-600 dark:text-green-400"
+                              : "text-amber-600 dark:text-amber-400"
                           )}
-                          {totalExpenses === totalIncome && totalIncome > 0 && (
-                            <>Orçamento Completo!</>
-                          )}
+                        >
+                          {totalIncome > 0
+                            ? ((totalExpenses / totalIncome) * 100).toFixed(1)
+                            : 0}%
                         </span>
                       </div>
-                    </div>
+                      
+                      <div className="relative h-6 bg-muted rounded-full overflow-hidden border">
+                        {/* Base background */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-muted to-muted" />
+                        
+                        {/* Filled portion */}
+                        <div
+                          className={cn(
+                            "absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full",
+                            totalExpenses > totalIncome
+                              ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500"
+                              : totalExpenses === totalIncome
+                              ? "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500"
+                              : "bg-gradient-to-r from-primary to-primary/80"
+                          )}
+                          style={{
+                            width: `${Math.min((totalExpenses / Math.max(totalIncome, totalExpenses)) * 100, 100)}%`,
+                          }}
+                        >
+                          {/* Animated shine effect */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+                        </div>
+                        
+                        {/* 100% marker line */}
+                        {totalExpenses > totalIncome && (
+                          <div
+                            className="absolute inset-y-0 w-0.5 bg-white/50"
+                            style={{
+                              left: `${(totalIncome / totalExpenses) * 100}%`,
+                            }}
+                          />
+                        )}
+                        
+                        {/* Center text */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-xs font-semibold text-foreground drop-shadow-lg">
+                            {totalExpenses > totalIncome && (
+                              <>Excedeu em R$ {(totalExpenses - totalIncome).toFixed(2)}</>
+                            )}
+                            {totalExpenses < totalIncome && (
+                              <>Restam R$ {(totalIncome - totalExpenses).toFixed(2)}</>
+                            )}
+                            {totalExpenses === totalIncome && totalIncome > 0 && (
+                              <>Orçamento Completo!</>
+                            )}
+                          </span>
+                        </div>
+                      </div>
 
-                    {/* Status message */}
-                    <div className="flex items-center justify-center gap-1.5 text-xs">
-                      {totalExpenses > totalIncome ? (
-                        <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
-                          <TrendingDown className="h-3 w-3" />
-                          <span className="font-medium">
-                            Suas despesas excedem a receita prevista
-                          </span>
-                        </div>
-                      ) : totalExpenses < totalIncome ? (
-                        <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
-                          <span className="font-medium">
-                            Você ainda tem R$ {(totalIncome - totalExpenses).toFixed(2)} para alocar
-                          </span>
-                        </div>
-                      ) : totalIncome > 0 ? (
-                        <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
-                          <Check className="h-3 w-3" />
-                          <span className="font-medium">
-                            Orçamento equilibrado perfeitamente!
-                          </span>
-                        </div>
-                      ) : null}
+                      {/* Status message */}
+                      <div className="flex items-center justify-center gap-1.5 text-xs">
+                        {totalExpenses > totalIncome ? (
+                          <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
+                            <TrendingDown className="h-3 w-3" />
+                            <span className="font-medium">
+                              Suas despesas excedem a receita prevista
+                            </span>
+                          </div>
+                        ) : totalExpenses < totalIncome ? (
+                          <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                            <span className="font-medium">
+                              Você ainda tem R$ {(totalIncome - totalExpenses).toFixed(2)} para alocar
+                            </span>
+                          </div>
+                        ) : totalIncome > 0 ? (
+                          <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+                            <Check className="h-3 w-3" />
+                            <span className="font-medium">
+                              Orçamento equilibrado perfeitamente!
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
-                <ScrollArea className="h-[350px] pr-4">
+                {/* Header for casa accounts */}
+                {accountType === "casa" && (
+                  <div className="bg-gradient-to-br from-red-500/10 to-red-500/5 p-3 rounded-lg border border-red-500/20">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
+                        <span className="font-semibold text-sm">
+                          {format(workingMonth, "MMMM 'de' yyyy", { locale: ptBR })}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground">Total Despesas</p>
+                        <p className="text-lg font-bold text-red-600 dark:text-red-400">
+                          R$ {totalExpenses.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <ScrollArea className={cn(accountType === "casa" ? "h-[440px]" : "h-[350px]", "pr-4")}>
                   <div className="space-y-1.5">
                     {expenseGroups.map((group) => {
                       const isOpen = openCategories.includes(group.id);
@@ -649,7 +674,7 @@ export function BudgetWizard({
                 <div className="flex gap-2 pt-2 border-t">
                   <Button
                     variant="outline"
-                    onClick={() => setStep("income")}
+                    onClick={() => setStep(accountType === "casa" ? "month" : "income")}
                     className="flex-1 h-9 text-sm"
                   >
                     Voltar
