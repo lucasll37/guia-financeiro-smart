@@ -18,10 +18,10 @@ interface AccountsTableProps {
 
 const accountTypeLabels: Record<string, string> = {
   pessoal: "Pessoal",
-  casa: "Casa",
-  empresa: "Empresa",
   conjugal: "Conjugal",
-  outro: "Outro",
+  mesada: "Mesada",
+  casa: "Casa",
+  evento: "Evento",
 };
 
 export function AccountsTable({ accounts, onEdit, onDelete, onManageMembers }: AccountsTableProps) {

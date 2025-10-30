@@ -997,7 +997,7 @@ export type Database = {
     }
     Enums: {
       account_member_role: "owner" | "editor" | "viewer"
-      account_type: "pessoal" | "casa" | "empresa" | "conjugal" | "outro"
+      account_type: "pessoal" | "conjugal" | "mesada" | "casa" | "evento"
       app_role: "admin" | "user"
       audit_action: "create" | "update" | "delete"
       billing_cycle: "monthly" | "annual"
@@ -1145,7 +1145,7 @@ export const Constants = {
   public: {
     Enums: {
       account_member_role: ["owner", "editor", "viewer"],
-      account_type: ["pessoal", "casa", "empresa", "conjugal", "outro"],
+      account_type: ["pessoal", "conjugal", "mesada", "casa", "evento"],
       app_role: ["admin", "user"],
       audit_action: ["create", "update", "delete"],
       billing_cycle: ["monthly", "annual"],

@@ -99,10 +99,10 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="pessoal">Pessoal</SelectItem>
-                  <SelectItem value="casa">Casa</SelectItem>
-                  <SelectItem value="empresa">Empresa</SelectItem>
                   <SelectItem value="conjugal">Conjugal</SelectItem>
-                  <SelectItem value="outro">Outro</SelectItem>
+                  <SelectItem value="mesada">Mesada</SelectItem>
+                  <SelectItem value="casa">Casa</SelectItem>
+                  <SelectItem value="evento">Evento</SelectItem>
                 </SelectContent>
               </Select>
             </div>
