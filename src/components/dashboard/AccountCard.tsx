@@ -151,25 +151,31 @@ export function AccountCard({
           </div>
 
           {/* Progress Bar */}
-          <div className="space-y-2">
-            <div className="relative h-8 bg-muted rounded-full overflow-visible border-2" style={{
-            borderColor: completion > 100 ? 'rgb(220 38 38)' : 'rgb(34 197 94)'
-          }}>
-              <div className={cn("absolute inset-y-0 left-0 transition-all duration-500 ease-out rounded-full border-2", completion > 100 ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500 border-red-600 dark:border-red-500" : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500 border-green-600 dark:border-green-500")} style={{
-              width: `${Math.min(completion, 150)}%`
-            }}>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full" />
-              </div>
+          <div className="space-y-1">
+            <div className="flex justify-end mb-1">
+              <span className={cn(
+                "text-xs font-semibold",
+                completion > 100 ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"
+              )}>
+                {Math.round(completion)}%
+              </span>
+            </div>
+            <div className="relative h-2.5 bg-muted rounded-full overflow-hidden">
+              <div
+                className={cn(
+                  "h-full transition-all duration-500 ease-out rounded-full",
+                  completion > 100
+                    ? "bg-gradient-to-r from-red-500 to-red-600 dark:from-red-400 dark:to-red-500"
+                    : "bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500"
+                )}
+                style={{
+                  width: `${Math.min(completion, 100)}%`,
+                }}
+              />
               
-              {completion > 100 && <div className="absolute inset-y-0 w-0.5 bg-foreground z-10" style={{
-              left: `${100 / Math.min(completion, 150) * 100}%`
-            }} />}
-              
-              <div className="absolute inset-0 flex items-center justify-center z-10">
-                <span className="text-xs font-semibold text-white drop-shadow-lg">
-                  {Math.round(completion)}%
-                </span>
-              </div>
+              {completion > 100 && (
+                <div className="absolute inset-y-0 right-0 w-0.5 bg-foreground/60" />
+              )}
             </div>
           </div>
 
