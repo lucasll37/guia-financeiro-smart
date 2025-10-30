@@ -17,6 +17,7 @@ interface CategoryDialogProps {
   accountId: string;
   parentId?: string | null;
   categories: Category[];
+  accountType?: string;
 }
 
 const PRESET_COLORS = [
@@ -34,6 +35,7 @@ export function CategoryDialog({
   accountId,
   parentId,
   categories,
+  accountType,
 }: CategoryDialogProps) {
   const [formData, setFormData] = useState<CategoryInsert>({
     account_id: accountId,
@@ -44,6 +46,9 @@ export function CategoryDialog({
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Verifica se é conta tipo casa tentando criar/editar receita
+  const isCasaRevenueRestricted = accountType === "casa" && formData.type === "receita";
 
   useEffect(() => {
     if (category) {
@@ -128,6 +133,14 @@ export function CategoryDialog({
         </DialogHeader>
 
         <div className="space-y-4">
+          {isCasaRevenueRestricted && (
+            <div className="p-3 border border-amber-500/50 bg-amber-500/10 rounded-md">
+              <p className="text-sm text-amber-600 dark:text-amber-400">
+                <strong>Atenção:</strong> Em contas tipo Casa, as subcategorias de receita são criadas automaticamente baseadas nos membros da conta e não podem ser editadas manualmente.
+              </p>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="name">Nome *</Label>
             <Input
@@ -135,6 +148,7 @@ export function CategoryDialog({
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Ex: Alimentação"
+              disabled={isCasaRevenueRestricted}
             />
             {errors.name && (
               <p className="text-sm text-destructive">{errors.name}</p>
@@ -148,7 +162,7 @@ export function CategoryDialog({
               onValueChange={(value: any) =>
                 setFormData({ ...formData, type: value })
               }
-              disabled={!!category}
+              disabled={!!category || (accountType === "casa" && formData.type === "receita")}
             >
               <SelectTrigger id="type">
                 <SelectValue />
@@ -175,6 +189,7 @@ export function CategoryDialog({
                   parent_id: value === "none" ? null : value,
                 })
               }
+              disabled={isCasaRevenueRestricted}
             >
               <SelectTrigger id="parent">
                 <SelectValue placeholder="Sem categoria pai" />
@@ -207,6 +222,7 @@ export function CategoryDialog({
                   }`}
                   style={{ backgroundColor: color }}
                   onClick={() => setFormData({ ...formData, color })}
+                  disabled={isCasaRevenueRestricted}
                 />
               ))}
             </div>
@@ -215,6 +231,7 @@ export function CategoryDialog({
               value={formData.color}
               onChange={(e) => setFormData({ ...formData, color: e.target.value })}
               className="w-full h-10"
+              disabled={isCasaRevenueRestricted}
             />
           </div>
         </div>
@@ -223,7 +240,7 @@ export function CategoryDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit}>
+          <Button onClick={handleSubmit} disabled={isCasaRevenueRestricted}>
             {category ? "Salvar" : "Criar Categoria"}
           </Button>
         </DialogFooter>

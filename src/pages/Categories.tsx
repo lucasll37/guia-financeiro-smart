@@ -266,6 +266,7 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
           accountId={selectedAccountId}
           parentId={parentId}
           categories={categories || []}
+          accountType={accounts?.find(a => a.id === selectedAccountId)?.type}
         />
       )}
     </div>

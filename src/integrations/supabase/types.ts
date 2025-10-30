@@ -155,6 +155,7 @@ export type Database = {
           is_shared: boolean
           name: string
           owner_id: string
+          revenue_split: Json | null
           type: Database["public"]["Enums"]["account_type"]
           updated_at: string
         }
@@ -168,6 +169,7 @@ export type Database = {
           is_shared?: boolean
           name: string
           owner_id: string
+          revenue_split?: Json | null
           type?: Database["public"]["Enums"]["account_type"]
           updated_at?: string
         }
@@ -181,6 +183,7 @@ export type Database = {
           is_shared?: boolean
           name?: string
           owner_id?: string
+          revenue_split?: Json | null
           type?: Database["public"]["Enums"]["account_type"]
           updated_at?: string
         }

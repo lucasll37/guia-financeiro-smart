@@ -11,6 +11,8 @@ import { ForecastDialog } from "@/components/forecasts/ForecastDialog";
 import { ForecastFilters } from "@/components/forecasts/ForecastFilters";
 import { BudgetWizard } from "@/components/forecasts/BudgetWizard";
 import { useAccountEditPermissions } from "@/hooks/useAccountEditPermissions";
+import { CasaRevenueSplitManager } from "@/components/accounts/CasaRevenueSplitManager";
+import { CasaRevenueCalculation } from "@/components/forecasts/CasaRevenueCalculation";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useSearchParams } from "react-router-dom";
@@ -210,12 +212,26 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
         </div>
       </div>
 
-      <ForecastFilters
-        accounts={accounts || []}
-        filters={filters}
-        onFilterChange={setFilters}
-        accountId={propAccountId}
-      />
+      <div className="flex items-center gap-2">
+        <div className="flex-1">
+          <ForecastFilters
+            accounts={accounts || []}
+            filters={filters}
+            onFilterChange={setFilters}
+            accountId={propAccountId}
+          />
+        </div>
+        {filters.accountId !== "all" && (
+          <CasaRevenueSplitManager accountId={filters.accountId} />
+        )}
+      </div>
+
+      {filters.accountId !== "all" && (
+        <CasaRevenueCalculation 
+          accountId={filters.accountId} 
+          forecasts={filteredForecasts}
+        />
+      )}
 
       <div className="space-y-4">
         {isLoading ? (
