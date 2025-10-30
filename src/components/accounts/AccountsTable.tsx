@@ -21,7 +21,6 @@ const accountTypeLabels: Record<string, string> = {
   conjugal: "Conjugal",
   mesada: "Mesada",
   casa: "Casa",
-  evento: "Evento",
 };
 
 export function AccountsTable({ accounts, onEdit, onDelete, onManageMembers }: AccountsTableProps) {

@@ -34,7 +34,6 @@ const accountTypeLabels: Record<string, string> = {
   conjugal: "Conjugal",
   mesada: "Mesada",
   casa: "Casa",
-  evento: "Evento",
 };
 
 export default function AccountsList() {

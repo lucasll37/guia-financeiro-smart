@@ -24,7 +24,6 @@ const accountTypeLabels: Record<string, string> = {
   conjugal: "Conta Conjugal",
   mesada: "Conta Mesada",
   casa: "Conta Casa",
-  evento: "Conta Evento",
 };
 
 export default function AccountDetails() {

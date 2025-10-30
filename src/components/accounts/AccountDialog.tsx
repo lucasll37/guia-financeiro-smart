@@ -109,7 +109,6 @@ export function AccountDialog({ open, onOpenChange, onSave, account, currentUser
                 <SelectItem value="conjugal">Conjugal</SelectItem>
                 <SelectItem value="mesada">Mesada</SelectItem>
                 <SelectItem value="casa">Casa</SelectItem>
-                <SelectItem value="evento">Evento</SelectItem>
               </SelectContent>
             </Select>
             {account && (
