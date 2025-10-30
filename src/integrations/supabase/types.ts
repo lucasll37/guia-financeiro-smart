@@ -977,6 +977,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      recompute_casa_revenue_forecasts: {
+        Args: { p_account_id: string; p_period_start: string }
+        Returns: undefined
+      }
       restore_account: { Args: { account_id: string }; Returns: undefined }
       user_can_edit_account_resources: {
         Args: { account_uuid: string; user_uuid: string }
