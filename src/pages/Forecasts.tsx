@@ -12,6 +12,7 @@ import { ForecastFilters } from "@/components/forecasts/ForecastFilters";
 import { BudgetWizard } from "@/components/forecasts/BudgetWizard";
 import { useAccountEditPermissions } from "@/hooks/useAccountEditPermissions";
 import { CasaRevenueSplitManager } from "@/components/accounts/CasaRevenueSplitManager";
+import { useCasaRevenueForecasts } from "@/hooks/useCasaRevenueForecasts";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useSearchParams } from "react-router-dom";
@@ -77,6 +78,12 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
 
   const { data: canEdit = false } = useAccountEditPermissions(
     filters.accountId !== "all" ? filters.accountId : undefined
+  );
+
+  // Auto-sync revenue forecasts for CASA accounts
+  const { syncRevenueForecasts } = useCasaRevenueForecasts(
+    filters.accountId !== "all" ? filters.accountId : "",
+    filters.selectedMonth
   );
 
   // Generate month options for copy dialog (6 months before and after current month)
@@ -162,6 +169,13 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
         const { id, ...createData } = forecast;
         await createForecast.mutateAsync(createData);
       }
+    }
+    
+    // Trigger revenue sync for CASA accounts after saving expense forecasts
+    if (selectedAccount?.type === "casa") {
+      setTimeout(() => {
+        syncRevenueForecasts.mutate();
+      }, 500);
     }
   };
 
