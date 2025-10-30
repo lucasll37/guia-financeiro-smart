@@ -13,6 +13,7 @@ import { useSearchParams } from "react-router-dom";
 import { TransactionFilters } from "@/components/transactions/TransactionFilters";
 import { TransactionsTable } from "@/components/transactions/TransactionsTable";
 import { TransactionDialog } from "@/components/transactions/TransactionDialog";
+import { useAccountEditPermissions } from "@/hooks/useAccountEditPermissions";
 import type { Database } from "@/integrations/supabase/types";
 
 type TransactionInsert = Database["public"]["Tables"]["transactions"]["Insert"];
@@ -69,6 +70,10 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
     useTransactions(filters.accountId !== "all" ? filters.accountId : undefined);
   
   const { categories } = useCategories(
+    filters.accountId !== "all" ? filters.accountId : undefined
+  );
+
+  const { data: canEdit = false } = useAccountEditPermissions(
     filters.accountId !== "all" ? filters.accountId : undefined
   );
 
@@ -165,7 +170,7 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
             Registre suas receitas e despesas
           </p>
         </div>
-        <Button onClick={handleCreateTransaction}>
+        <Button onClick={handleCreateTransaction} disabled={!canEdit}>
           <Plus className="h-4 w-4" />
           {!isMobile && <span className="ml-2">Novo Lançamento</span>}
         </Button>
@@ -187,6 +192,7 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
           onEdit={handleEditTransaction}
           onDelete={handleDeleteTransaction}
           categories={categories || []}
+          canEdit={canEdit}
         />
       )}
 

@@ -21,6 +21,7 @@ interface CreditCardsTableProps {
   transactions: Transaction[];
   onEdit: (creditCard: CreditCard) => void;
   onDelete: (id: string) => void;
+  canEdit?: boolean;
 }
 
 export function CreditCardsTable({
@@ -28,6 +29,7 @@ export function CreditCardsTable({
   transactions,
   onEdit,
   onDelete,
+  canEdit = true,
 }: CreditCardsTableProps) {
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [sortField, setSortField] = useState<'name' | 'total' | null>(null);
@@ -168,6 +170,7 @@ export function CreditCardsTable({
                           variant="ghost"
                           size="icon"
                           onClick={() => onEdit(card)}
+                          disabled={!canEdit}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -175,6 +178,7 @@ export function CreditCardsTable({
                           variant="ghost"
                           size="icon"
                           onClick={() => onDelete(card.id)}
+                          disabled={!canEdit}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

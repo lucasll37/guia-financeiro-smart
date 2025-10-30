@@ -8,6 +8,7 @@ import { useAccounts } from "@/hooks/useAccounts";
 import { useCreditCards } from "@/hooks/useCreditCards";
 import { useTransactions } from "@/hooks/useTransactions";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { useAccountEditPermissions } from "@/hooks/useAccountEditPermissions";
 import { useToast } from "@/hooks/use-toast";
 import { CreditCardsTable } from "@/components/creditcards/CreditCardsTable";
 import { CreditCardDialog } from "@/components/creditcards/CreditCardDialog";
@@ -51,6 +52,10 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
     useCreditCards(filters.accountId !== "all" ? filters.accountId : undefined);
 
   const { transactions } = useTransactions(filters.accountId !== "all" ? filters.accountId : undefined);
+
+  const { data: canEdit = false } = useAccountEditPermissions(
+    filters.accountId !== "all" ? filters.accountId : undefined
+  );
 
   // Filtrar transações por período
   const filteredTransactions = transactions?.filter((t) => {
@@ -120,7 +125,7 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
             Gerencie seus cartões de crédito e controle de faturas
           </p>
         </div>
-        <Button onClick={handleCreateCard}>
+        <Button onClick={handleCreateCard} disabled={!canEdit}>
           <Plus className="h-4 w-4" />
           {!isMobile && <span className="ml-2">Novo Cartão</span>}
         </Button>
@@ -141,6 +146,7 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
           transactions={filteredTransactions}
           onEdit={handleEditCard}
           onDelete={handleDeleteCard}
+          canEdit={canEdit}
         />
       )}
 

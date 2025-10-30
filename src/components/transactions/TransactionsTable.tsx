@@ -23,6 +23,7 @@ interface TransactionsTableProps {
   onEdit: (transaction: Transaction) => void;
   onDelete: (id: string) => void;
   categories?: any[]; // Lista completa de categorias para resolver hierarquia
+  canEdit?: boolean;
 }
 
 export function TransactionsTable({
@@ -30,6 +31,7 @@ export function TransactionsTable({
   onEdit,
   onDelete,
   categories = [],
+  canEdit = true,
 }: TransactionsTableProps) {
   const [sortField, setSortField] = useState<'date' | 'description' | 'amount' | 'category' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -150,6 +152,7 @@ export function TransactionsTable({
               variant="ghost"
               size="icon"
               onClick={() => onEdit(transaction)}
+              disabled={!canEdit}
             >
               <Edit className="h-4 w-4" />
             </Button>
@@ -157,6 +160,7 @@ export function TransactionsTable({
               variant="ghost"
               size="icon"
               onClick={() => onDelete(transaction.id)}
+              disabled={!canEdit}
             >
               <Trash2 className="h-4 w-4" />
             </Button>

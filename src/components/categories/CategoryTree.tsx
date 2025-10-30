@@ -11,6 +11,7 @@ interface CategoryTreeProps {
   onEdit: (category: Category) => void;
   onDelete: (id: string) => void;
   onAddChild: (parentId: string) => void;
+  canEdit?: boolean;
 }
 
 interface CategoryNodeProps {
@@ -20,9 +21,10 @@ interface CategoryNodeProps {
   onEdit: (category: Category) => void;
   onDelete: (id: string) => void;
   onAddChild: (parentId: string) => void;
+  canEdit?: boolean;
 }
 
-function CategoryNode({ category, categoryMap, level, onEdit, onDelete, onAddChild }: CategoryNodeProps) {
+function CategoryNode({ category, categoryMap, level, onEdit, onDelete, onAddChild, canEdit = true }: CategoryNodeProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const children = categoryMap.get(category.id) || [];
   const hasChildren = children.length > 0;
@@ -65,6 +67,7 @@ function CategoryNode({ category, categoryMap, level, onEdit, onDelete, onAddChi
             size="icon"
             className="h-8 w-8"
             onClick={() => onAddChild(category.id)}
+            disabled={!canEdit}
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -73,6 +76,7 @@ function CategoryNode({ category, categoryMap, level, onEdit, onDelete, onAddChi
             size="icon"
             className="h-8 w-8"
             onClick={() => onEdit(category)}
+            disabled={!canEdit}
           >
             <Edit className="h-4 w-4" />
           </Button>
@@ -81,6 +85,7 @@ function CategoryNode({ category, categoryMap, level, onEdit, onDelete, onAddChi
             size="icon"
             className="h-8 w-8"
             onClick={() => onDelete(category.id)}
+            disabled={!canEdit}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -98,6 +103,7 @@ function CategoryNode({ category, categoryMap, level, onEdit, onDelete, onAddChi
               onEdit={onEdit}
               onDelete={onDelete}
               onAddChild={onAddChild}
+              canEdit={canEdit}
             />
           ))}
         </div>
@@ -106,7 +112,7 @@ function CategoryNode({ category, categoryMap, level, onEdit, onDelete, onAddChi
   );
 }
 
-export function CategoryTree({ categories, onEdit, onDelete, onAddChild }: CategoryTreeProps) {
+export function CategoryTree({ categories, onEdit, onDelete, onAddChild, canEdit = true }: CategoryTreeProps) {
   // Build tree structure
   const categoryMap = new Map<string, Category[]>();
   const rootCategories: Category[] = [];
@@ -141,6 +147,7 @@ export function CategoryTree({ categories, onEdit, onDelete, onAddChild }: Categ
           onEdit={onEdit}
           onDelete={onDelete}
           onAddChild={onAddChild}
+          canEdit={canEdit}
         />
       ))}
     </div>

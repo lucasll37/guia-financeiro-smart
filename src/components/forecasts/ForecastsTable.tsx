@@ -22,9 +22,10 @@ interface ForecastsTableProps {
   showAccountName?: boolean;
   viewMode?: "monthly" | "custom";
   categories?: any[];
+  canEdit?: boolean;
 }
 
-export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, viewMode = "monthly", categories = [] }: ForecastsTableProps) {
+export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, viewMode = "monthly", categories = [], canEdit = true }: ForecastsTableProps) {
   const { formatCurrency } = useUserPreferences();
   const [sortField, setSortField] = useState<'account' | 'category' | 'amount' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -241,6 +242,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                     variant="ghost"
                     size="icon"
                     onClick={() => onEdit(forecast)}
+                    disabled={!canEdit}
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
@@ -248,6 +250,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                     variant="ghost"
                     size="icon"
                     onClick={() => onDelete(forecast.id)}
+                    disabled={!canEdit}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

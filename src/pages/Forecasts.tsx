@@ -10,6 +10,7 @@ import { ForecastsTable } from "@/components/forecasts/ForecastsTable";
 import { ForecastDialog } from "@/components/forecasts/ForecastDialog";
 import { ForecastFilters } from "@/components/forecasts/ForecastFilters";
 import { BudgetWizard } from "@/components/forecasts/BudgetWizard";
+import { useAccountEditPermissions } from "@/hooks/useAccountEditPermissions";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useSearchParams } from "react-router-dom";
@@ -69,6 +70,10 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
   const { categories } = useCategories(filters.accountId !== "all" ? filters.accountId : undefined);
   const { forecasts, isLoading, createForecast, updateForecast, deleteForecast, copyForecast } = useForecasts(
     filters.accountId !== "all" ? filters.accountId : null
+  );
+
+  const { data: canEdit = false } = useAccountEditPermissions(
+    filters.accountId !== "all" ? filters.accountId : undefined
   );
 
   // Generate month options for copy dialog (6 months before and after current month)
@@ -172,7 +177,7 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             </span>
             <Button
               onClick={() => setWizardOpen(true)}
-              disabled={filters.accountId === "all"}
+              disabled={filters.accountId === "all" || !canEdit}
               className="gap-2"
               size={isMobile ? "sm" : "default"}
             >
@@ -182,7 +187,7 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             <Button 
               variant="outline" 
               onClick={handleCreateForecast} 
-              disabled={filters.accountId === "all"}
+              disabled={filters.accountId === "all" || !canEdit}
               className="gap-2"
               size={isMobile ? "sm" : "default"}
             >
@@ -193,7 +198,7 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
               <Button
                 variant="outline"
                 onClick={() => setCopyDialogOpen(true)}
-                disabled={filters.accountId === "all" || filteredForecasts.length === 0}
+                disabled={filters.accountId === "all" || filteredForecasts.length === 0 || !canEdit}
                 className="gap-2"
                 size={isMobile ? "sm" : "default"}
               >
@@ -223,6 +228,7 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             showAccountName={filters.accountId === "all"}
             viewMode={filters.viewMode}
             categories={categories || []}
+            canEdit={canEdit}
           />
         )}
       </div>

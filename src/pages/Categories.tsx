@@ -9,6 +9,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useTransactions } from "@/hooks/useTransactions";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { useAccountEditPermissions } from "@/hooks/useAccountEditPermissions";
 import { CategoryTree } from "@/components/categories/CategoryTree";
 import { CategoryDialog } from "@/components/categories/CategoryDialog";
 import { useToast } from "@/hooks/use-toast";
@@ -44,6 +45,8 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
   const { categories, isLoading, createCategory, updateCategory, deleteCategory } =
     useCategories(selectedAccountId);
   const { transactions } = useTransactions(selectedAccountId);
+
+  const { data: canEdit = false } = useAccountEditPermissions(selectedAccountId);
 
   const handleSeedCategories = async () => {
     if (!selectedAccountId) return;
@@ -172,14 +175,14 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
           {selectedAccountId && (!categories || categories.length === 0) && (
             <Button 
               onClick={handleSeedCategories} 
-              disabled={seedingCategories}
+              disabled={seedingCategories || !canEdit}
               variant="outline"
             >
               <TreePine className="h-4 w-4" />
               {!isMobile && <span className="ml-2">{seedingCategories ? "Criando..." : "Semear Categorias"}</span>}
             </Button>
           )}
-          <Button onClick={handleCreateCategory}>
+          <Button onClick={handleCreateCategory} disabled={!canEdit}>
             <Plus className="h-4 w-4" />
             {!isMobile && <span className="ml-2">Nova Categoria</span>}
           </Button>
@@ -239,6 +242,7 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
               onEdit={handleEditCategory}
               onDelete={handleDeleteCategory}
               onAddChild={handleAddChild}
+              canEdit={canEdit}
             />
           </TabsContent>
           <TabsContent value="despesa" className="mt-6">
@@ -247,6 +251,7 @@ export default function Categories({ accountId: propAccountId }: CategoriesProps
               onEdit={handleEditCategory}
               onDelete={handleDeleteCategory}
               onAddChild={handleAddChild}
+              canEdit={canEdit}
             />
           </TabsContent>
         </Tabs>
