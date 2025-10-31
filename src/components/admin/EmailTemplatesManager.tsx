@@ -54,30 +54,8 @@ export function EmailTemplatesManager() {
     return html;
   };
 
-  // Update preview when content changes or tab changes
-  useEffect(() => {
-    if (iframeRef.current && editForm.html_content && activeTab === "preview") {
-      const iframe = iframeRef.current;
-      
-      // Wait for iframe to be ready
-      const updateIframe = () => {
-        const doc = iframe.contentDocument || iframe.contentWindow?.document;
-        if (doc) {
-          try {
-            doc.open();
-            doc.write(getPreviewHTML());
-            doc.close();
-          } catch (error) {
-            console.error("Error updating iframe:", error);
-          }
-        }
-      };
+  // Preview is driven by iframe srcDoc; no imperative updates needed.
 
-      // Try to update immediately and also on load
-      updateIframe();
-      iframe.onload = updateIframe;
-    }
-  }, [editForm.html_content, activeTab]);
 
   // Fetch templates
   const { data: templates, isLoading } = useQuery({
@@ -405,6 +383,7 @@ export function EmailTemplatesManager() {
                           ref={iframeRef}
                           title="Email Preview"
                           className="w-full min-h-[600px] border-0"
+                          srcDoc={activeTab === "preview" ? getPreviewHTML() : ""}
                         />
                       </div>
                     </div>
