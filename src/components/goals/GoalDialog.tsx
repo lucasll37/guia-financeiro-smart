@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -98,42 +99,22 @@ export function GoalDialog({ open, onOpenChange, onSave, goal }: GoalDialogProps
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="target">Valor Alvo (R$) *</Label>
-              <Input
+              <DecimalInput
                 id="target"
-                type="text"
-                inputMode="decimal"
                 placeholder="0.00"
-                value={formData.target_amount || ""}
-                onChange={(e) => {
-                  let value = e.target.value.replace(/[^\d.,-]/g, "");
-                  value = value.replace(",", ".");
-                  const parts = value.split(".");
-                  if (parts.length > 2) {
-                    value = parts[0] + "." + parts.slice(1).join("");
-                  }
-                  setFormData({ ...formData, target_amount: value === "" ? 0 : parseFloat(value) || 0 });
-                }}
+                value={formData.target_amount ?? null}
+                onValueChange={(num) => setFormData({ ...formData, target_amount: num ?? 0 })}
               />
               {errors.target && <p className="text-sm text-destructive">{errors.target}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="current">Valor Atual (R$)</Label>
-              <Input
+              <DecimalInput
                 id="current"
-                type="text"
-                inputMode="decimal"
                 placeholder="0.00"
-                value={formData.current_amount || ""}
-                onChange={(e) => {
-                  let value = e.target.value.replace(/[^\d.,-]/g, "");
-                  value = value.replace(",", ".");
-                  const parts = value.split(".");
-                  if (parts.length > 2) {
-                    value = parts[0] + "." + parts.slice(1).join("");
-                  }
-                  setFormData({ ...formData, current_amount: value === "" ? 0 : parseFloat(value) || 0 });
-                }}
+                value={formData.current_amount ?? null}
+                onValueChange={(num) => setFormData({ ...formData, current_amount: num ?? 0 })}
               />
               {errors.current && <p className="text-sm text-destructive">{errors.current}</p>}
             </div>

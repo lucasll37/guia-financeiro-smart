@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { Button } from "@/components/ui/button";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -195,20 +196,10 @@ export function InvestmentDialog({
                 <FormItem>
                   <FormLabel>Saldo Inicial</FormLabel>
                   <FormControl>
-                    <Input
-                      type="text"
-                      inputMode="decimal"
+                    <DecimalInput
                       placeholder="0.00"
-                      value={field.value || ""}
-                      onChange={(e) => {
-                        let value = e.target.value.replace(/[^\d.,-]/g, "");
-                        value = value.replace(",", ".");
-                        const parts = value.split(".");
-                        if (parts.length > 2) {
-                          value = parts[0] + "." + parts.slice(1).join("");
-                        }
-                        field.onChange(value === "" ? 0 : parseFloat(value) || 0);
-                      }}
+                      value={field.value ?? null}
+                      onValueChange={(num) => field.onChange(num ?? 0)}
                     />
                   </FormControl>
                   <FormDescription>

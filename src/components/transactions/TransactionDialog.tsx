@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -393,24 +394,13 @@ export function TransactionDialog({
 
             <div className="space-y-2">
               <Label htmlFor="amount">Valor (R$) *</Label>
-              <Input
+              <DecimalInput
                 id="amount"
-                type="text"
-                inputMode="decimal"
-                placeholder="0.00"
-                value={formData.amount || ""}
-                onChange={(e) => {
-                  // Permitir vírgula e ponto como separador decimal
-                  let value = e.target.value.replace(/[^\d.,-]/g, "");
-                  // Substituir vírgula por ponto para armazenamento
-                  value = value.replace(",", ".");
-                  // Permitir apenas um ponto decimal
-                  const parts = value.split(".");
-                  if (parts.length > 2) {
-                    value = parts[0] + "." + parts.slice(1).join("");
-                  }
-                  setFormData({ ...formData, amount: value === "" ? 0 : parseFloat(value) || 0 });
+                value={typeof formData.amount === 'number' ? formData.amount : (parseFloat(String(formData.amount)) || null)}
+                onValueChange={(num) => {
+                  setFormData({ ...formData, amount: num ?? 0 });
                 }}
+                placeholder="0.00"
               />
               {errors.amount && <p className="text-sm text-destructive">{errors.amount}</p>}
             </div>
@@ -568,19 +558,11 @@ export function TransactionDialog({
                           onChange={(e) => updateSplitMember(index, "user_id", e.target.value)}
                           className="flex-1"
                         />
-                        <Input
-                          type="text"
-                          inputMode="decimal"
+                        <DecimalInput
                           placeholder="%"
-                          value={member.percent || ""}
-                          onChange={(e) => {
-                            let value = e.target.value.replace(/[^\d.,-]/g, "");
-                            value = value.replace(",", ".");
-                            const parts = value.split(".");
-                            if (parts.length > 2) {
-                              value = parts[0] + "." + parts.slice(1).join("");
-                            }
-                            updateSplitMember(index, "percent", parseFloat(value) || 0);
+                          value={member.percent ?? null}
+                          onValueChange={(num) => {
+                            updateSplitMember(index, "percent", (num ?? 0));
                           }}
                           className="w-24"
                         />
