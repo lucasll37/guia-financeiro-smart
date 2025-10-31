@@ -57,38 +57,40 @@ function CategoryNode({ category, categoryMap, level, onEdit, onDelete, onAddChi
 
         <span className={`flex-1 ${level === 0 ? 'font-semibold' : ''}`}>{category.name}</span>
 
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => onAddChild(category.id)}
-            disabled={!canEdit || isSystemGenerated}
-            title={isSystemGenerated ? "Categoria automática - não pode adicionar subcategorias" : "Adicionar subcategoria"}
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => onEdit(category)}
-            disabled={!canEdit || isSystemGenerated}
-            title={isSystemGenerated ? "Categoria automática - não pode ser editada" : "Editar categoria"}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => onDelete(category.id)}
-            disabled={!canEdit || isSystemGenerated}
-            title={isSystemGenerated ? "Categoria automática - não pode ser excluída" : "Excluir categoria"}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
+        {!isSystemGenerated && (
+          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => onAddChild(category.id)}
+              disabled={!canEdit}
+              title="Adicionar subcategoria"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => onEdit(category)}
+              disabled={!canEdit}
+              title="Editar categoria"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => onDelete(category.id)}
+              disabled={!canEdit}
+              title="Excluir categoria"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </div>
 
       {isExpanded && hasChildren && (
