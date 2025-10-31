@@ -176,7 +176,7 @@ export default function AccountsList() {
             return (
               <Card
                 key={account.id}
-                className="cursor-pointer hover:shadow-lg transition-shadow"
+                className="cursor-pointer hover:shadow-lg transition-shadow flex flex-col h-full"
                 onClick={() => handleAccountClick(account.id)}
               >
                 <CardHeader>
@@ -246,7 +246,7 @@ export default function AccountsList() {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="mt-auto">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">
                       Clique para acessar
