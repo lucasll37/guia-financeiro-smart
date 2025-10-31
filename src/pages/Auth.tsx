@@ -261,60 +261,113 @@ export default function Auth() {
   if (resetMode) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>{t("auth.resetPassword")}</CardTitle>
-            <CardDescription>
-              Digite seu e-mail para receber instruções de recuperação
-            </CardDescription>
-          </CardHeader>
-          <form onSubmit={handleResetPassword}>
-            <CardContent className="space-y-4">
-              {error && (
-                <Alert>
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              <div className="space-y-2">
-                <Label htmlFor="reset-email">{t("auth.email")}</Label>
-                <Input
-                  id="reset-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-2">
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? t("common.loading") : t("auth.resetPassword")}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full"
-                onClick={() => setResetMode(false)}
+        <div className="w-full max-w-md space-y-6">
+          {/* Logo e Slogan */}
+          <div className="flex flex-col items-center leading-none">
+            <div className="flex items-center gap-2">
+              <svg
+                className="h-8 w-8 text-primary"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                {t("auth.backToLogin")}
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
+                <rect width="20" height="14" x="2" y="5" rx="2" />
+                <line x1="2" x2="22" y1="10" y2="10" />
+              </svg>
+              <span className="font-display text-4xl font-bold text-foreground">
+                Prospera!
+              </span>
+            </div>
+            <span className="text-base text-muted-foreground font-medium tracking-wide mt-1">
+              Gestor Financeiro
+            </span>
+          </div>
+
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle>{t("auth.resetPassword")}</CardTitle>
+              <CardDescription>
+                Digite seu e-mail para receber instruções de recuperação
+              </CardDescription>
+            </CardHeader>
+            <form onSubmit={handleResetPassword}>
+              <CardContent className="space-y-4">
+                {error && (
+                  <Alert>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="reset-email">{t("auth.email")}</Label>
+                  <Input
+                    id="reset-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="flex flex-col gap-2">
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? t("common.loading") : t("auth.resetPassword")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => setResetMode(false)}
+                >
+                  {t("auth.backToLogin")}
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
-      <Card className="w-full max-w-md">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <CardHeader>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">{t("auth.login")}</TabsTrigger>
-              <TabsTrigger value="signup">{t("auth.signup")}</TabsTrigger>
-            </TabsList>
-          </CardHeader>
+      <div className="w-full max-w-md space-y-6">
+        {/* Logo e Slogan */}
+        <div className="flex flex-col items-center leading-none">
+          <div className="flex items-center gap-2">
+            <svg
+              className="h-8 w-8 text-primary"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect width="20" height="14" x="2" y="5" rx="2" />
+              <line x1="2" x2="22" y1="10" y2="10" />
+            </svg>
+            <span className="font-display text-4xl font-bold text-foreground">
+              Prospera!
+            </span>
+          </div>
+          <span className="text-base text-muted-foreground font-medium tracking-wide mt-1">
+            Gestor Financeiro
+          </span>
+        </div>
+
+        <Card className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <CardHeader>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">{t("auth.login")}</TabsTrigger>
+                <TabsTrigger value="signup">{t("auth.signup")}</TabsTrigger>
+              </TabsList>
+            </CardHeader>
 
           <TabsContent value="login">
             <form onSubmit={handleSignIn}>
@@ -446,6 +499,7 @@ export default function Auth() {
           </TabsContent>
         </Tabs>
       </Card>
+      </div>
 
       {/* Modal de Confirmação de Email */}
       <Dialog open={showEmailConfirmModal} onOpenChange={setShowEmailConfirmModal}>
