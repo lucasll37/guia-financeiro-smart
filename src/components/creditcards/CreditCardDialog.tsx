@@ -17,6 +17,7 @@ interface CreditCardDialogProps {
   onSave: (creditCard: CreditCardInsert) => void;
   creditCard?: CreditCard | null;
   accounts: Account[];
+  accountId?: string;
 }
 
 export function CreditCardDialog({
@@ -25,6 +26,7 @@ export function CreditCardDialog({
   onSave,
   creditCard,
   accounts,
+  accountId: contextAccountId,
 }: CreditCardDialogProps) {
   const [formData, setFormData] = useState<CreditCardInsert>({
     account_id: "",
@@ -45,14 +47,14 @@ export function CreditCardDialog({
       });
     } else {
       setFormData({
-        account_id: accounts[0]?.id || "",
+        account_id: contextAccountId || accounts[0]?.id || "",
         name: "",
         closing_day: 5,
         due_day: 15,
         credit_limit: undefined,
       });
     }
-  }, [creditCard, accounts, open]);
+  }, [creditCard, accounts, contextAccountId, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,26 +71,28 @@ export function CreditCardDialog({
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="account">Conta</Label>
-            <Select
-              value={formData.account_id}
-              onValueChange={(value) =>
-                setFormData({ ...formData, account_id: value })
-              }
-            >
-              <SelectTrigger id="account">
-                <SelectValue placeholder="Selecione a conta" />
-              </SelectTrigger>
-              <SelectContent>
-                {accounts.map((account) => (
-                  <SelectItem key={account.id} value={account.id}>
-                    {account.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {!contextAccountId && (
+            <div className="space-y-2">
+              <Label htmlFor="account">Conta</Label>
+              <Select
+                value={formData.account_id}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, account_id: value })
+                }
+              >
+                <SelectTrigger id="account">
+                  <SelectValue placeholder="Selecione a conta" />
+                </SelectTrigger>
+                <SelectContent>
+                  {accounts.map((account) => (
+                    <SelectItem key={account.id} value={account.id}>
+                      {account.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="name">Nome do Cartão</Label>

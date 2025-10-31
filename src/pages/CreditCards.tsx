@@ -156,6 +156,7 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
         onSave={handleSaveCard}
         creditCard={selectedCard}
         accounts={accounts || []}
+        accountId={propAccountId}
       />
     </div>
   );
