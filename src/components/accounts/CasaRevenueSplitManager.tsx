@@ -260,15 +260,19 @@ export function CasaRevenueSplitManager({ accountId, periodStart }: CasaRevenueS
                     </Label>
                     <Input
                       id={`weight-${member.user_id}`}
-                      type="number"
-                      min="0.1"
-                      max="1000"
-                      step="0.1"
+                      type="text"
+                      inputMode="decimal"
                       value={isFinite(weight) ? weight.toFixed(1) : "1.0"}
                       onChange={(e) => {
-                        const value = parseFloat(e.target.value);
-                        if (!isNaN(value) && isFinite(value)) {
-                          handleWeightChange(member.user_id, value);
+                        let value = e.target.value.replace(/[^\d.,-]/g, "");
+                        value = value.replace(",", ".");
+                        const parts = value.split(".");
+                        if (parts.length > 2) {
+                          value = parts[0] + "." + parts.slice(1).join("");
+                        }
+                        const numValue = parseFloat(value);
+                        if (!isNaN(numValue) && isFinite(numValue)) {
+                          handleWeightChange(member.user_id, numValue);
                         }
                       }}
                       className="w-20 h-7 text-xs"
