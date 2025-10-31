@@ -254,7 +254,14 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
               <>
                 <Button
                   variant="outline"
-                  onClick={() => setCopyDialogOpen(true)}
+                  onClick={() => {
+                    // Define o mês default como o próximo mês baseado no mês de origem
+                    const [y, m] = filters.selectedMonth.split("-").map(Number);
+                    const sourceDate = new Date(y, (m || 1) - 1, 1);
+                    const nextMonth = addMonths(sourceDate, 1);
+                    setCopyTargetMonth(nextMonth);
+                    setCopyDialogOpen(true);
+                  }}
                   disabled={filters.accountId === "all" || filteredForecasts.length === 0 || !canEdit}
                   className="gap-2"
                   size={isMobile ? "sm" : "default"}
