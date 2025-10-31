@@ -224,13 +224,7 @@ Deno.serve(async (req) => {
       .delete()
       .eq('user_id', userId);
 
-    // 18. Delete profile
-    await supabaseClient
-      .from('profiles')
-      .delete()
-      .eq('id', userId);
-
-    // 19. Delete from storage (avatar)
+    // 18. Delete from storage (avatar)
     const { data: storageFiles } = await supabaseClient
       .storage
       .from('avatars')
@@ -244,7 +238,7 @@ Deno.serve(async (req) => {
         .remove(filePaths);
     }
 
-    // 20. Finally, delete user from auth
+    // 19. Finally, delete user from auth (this will cascade delete the profile)
     const { error: deleteAuthError } = await supabaseClient.auth.admin.deleteUser(userId);
 
     if (deleteAuthError) {
