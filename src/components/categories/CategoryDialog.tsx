@@ -47,8 +47,11 @@ export function CategoryDialog({
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
+  // Verifica se é categoria gerada pelo sistema (não pode ser editada)
+  const isSystemGenerated = category?.is_system_generated || false;
+  
   // Verifica se é conta tipo casa tentando criar/editar receita
-  const isCasaRevenueRestricted = accountType === "casa" && formData.type === "receita";
+  const isCasaRevenueRestricted = (accountType === "casa" && formData.type === "receita") || isSystemGenerated;
 
   useEffect(() => {
     if (category) {
@@ -136,7 +139,9 @@ export function CategoryDialog({
           {isCasaRevenueRestricted && (
             <div className="p-3 border border-amber-500/50 bg-amber-500/10 rounded-md">
               <p className="text-sm text-amber-600 dark:text-amber-400">
-                <strong>Atenção:</strong> Em contas tipo Casa, as subcategorias de receita são criadas automaticamente baseadas nos membros da conta e não podem ser editadas manualmente.
+                <strong>Atenção:</strong> {isSystemGenerated 
+                  ? "Esta categoria foi criada automaticamente pelo sistema e não pode ser editada."
+                  : "Em contas tipo Casa, as subcategorias de receita são criadas automaticamente baseadas nos membros da conta e não podem ser editadas manualmente."}
               </p>
             </div>
           )}

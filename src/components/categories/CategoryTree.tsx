@@ -27,6 +27,7 @@ function CategoryNode({ category, categoryMap, level, onEdit, onDelete, onAddChi
   const [isExpanded, setIsExpanded] = useState(false);
   const children = categoryMap.get(category.id) || [];
   const hasChildren = children.length > 0;
+  const isSystemGenerated = category.is_system_generated || false;
 
   return (
     <div className="space-y-1">
@@ -62,7 +63,8 @@ function CategoryNode({ category, categoryMap, level, onEdit, onDelete, onAddChi
             size="icon"
             className="h-8 w-8"
             onClick={() => onAddChild(category.id)}
-            disabled={!canEdit}
+            disabled={!canEdit || isSystemGenerated}
+            title={isSystemGenerated ? "Categoria automática - não pode adicionar subcategorias" : "Adicionar subcategoria"}
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -71,7 +73,8 @@ function CategoryNode({ category, categoryMap, level, onEdit, onDelete, onAddChi
             size="icon"
             className="h-8 w-8"
             onClick={() => onEdit(category)}
-            disabled={!canEdit}
+            disabled={!canEdit || isSystemGenerated}
+            title={isSystemGenerated ? "Categoria automática - não pode ser editada" : "Editar categoria"}
           >
             <Edit className="h-4 w-4" />
           </Button>
@@ -80,7 +83,8 @@ function CategoryNode({ category, categoryMap, level, onEdit, onDelete, onAddChi
             size="icon"
             className="h-8 w-8"
             onClick={() => onDelete(category.id)}
-            disabled={!canEdit}
+            disabled={!canEdit || isSystemGenerated}
+            title={isSystemGenerated ? "Categoria automática - não pode ser excluída" : "Excluir categoria"}
           >
             <Trash2 className="h-4 w-4" />
           </Button>

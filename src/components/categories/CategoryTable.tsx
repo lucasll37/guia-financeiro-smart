@@ -128,56 +128,103 @@ export function CategoryTable({ categories, onEdit, onDelete }: CategoryTablePro
               <TableCell className="text-right">
                 <TooltipProvider>
                   <div className="flex justify-end gap-1">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => canEditCategories ? onEdit(category) : navigate("/app/planos")}
-                            disabled={!canEditCategories}
-                            className="h-8 w-8 relative"
-                          >
-                            <Pencil className="h-4 w-4" />
-                            {!canEditCategories && (
-                              <Crown className="h-3 w-3 absolute -top-1 -right-1 text-primary" />
-                            )}
-                          </Button>
-                        </div>
-                      </TooltipTrigger>
-                      {!canEditCategories && (
+                    {/* Desabilitar edição para categorias do sistema */}
+                    {!category.is_system_generated ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => canEditCategories ? onEdit(category) : navigate("/app/planos")}
+                              disabled={!canEditCategories}
+                              className="h-8 w-8 relative"
+                            >
+                              <Pencil className="h-4 w-4" />
+                              {!canEditCategories && (
+                                <Crown className="h-3 w-3 absolute -top-1 -right-1 text-primary" />
+                              )}
+                            </Button>
+                          </div>
+                        </TooltipTrigger>
+                        {!canEditCategories && (
+                          <TooltipContent>
+                            <p className="text-xs max-w-[200px]">
+                              Editar categorias é exclusivo do plano Pro. Clique para fazer upgrade.
+                            </p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    ) : (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              disabled={true}
+                              className="h-8 w-8 opacity-50 cursor-not-allowed"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TooltipTrigger>
                         <TooltipContent>
                           <p className="text-xs max-w-[200px]">
-                            Editar categorias é exclusivo do plano Pro. Clique para fazer upgrade.
+                            Esta categoria foi criada automaticamente e não pode ser editada
                           </p>
                         </TooltipContent>
-                      )}
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => canEditCategories ? onDelete(category.id) : navigate("/app/planos")}
-                            disabled={!canEditCategories}
-                            className="h-8 w-8 text-destructive hover:text-destructive relative"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            {!canEditCategories && (
-                              <Crown className="h-3 w-3 absolute -top-1 -right-1 text-primary" />
-                            )}
-                          </Button>
-                        </div>
-                      </TooltipTrigger>
-                      {!canEditCategories && (
+                      </Tooltip>
+                    )}
+                    
+                    {/* Desabilitar exclusão para categorias do sistema */}
+                    {!category.is_system_generated ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => canEditCategories ? onDelete(category.id) : navigate("/app/planos")}
+                              disabled={!canEditCategories}
+                              className="h-8 w-8 text-destructive hover:text-destructive relative"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              {!canEditCategories && (
+                                <Crown className="h-3 w-3 absolute -top-1 -right-1 text-primary" />
+                              )}
+                            </Button>
+                          </div>
+                        </TooltipTrigger>
+                        {!canEditCategories && (
+                          <TooltipContent>
+                            <p className="text-xs max-w-[200px]">
+                              Deletar categorias é exclusivo do plano Pro. Clique para fazer upgrade.
+                            </p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    ) : (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              disabled={true}
+                              className="h-8 w-8 text-destructive opacity-50 cursor-not-allowed"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TooltipTrigger>
                         <TooltipContent>
                           <p className="text-xs max-w-[200px]">
-                            Deletar categorias é exclusivo do plano Pro. Clique para fazer upgrade.
+                            Esta categoria foi criada automaticamente e não pode ser excluída
                           </p>
                         </TooltipContent>
-                      )}
-                    </Tooltip>
+                      </Tooltip>
+                    )}
                   </div>
                 </TooltipProvider>
               </TableCell>

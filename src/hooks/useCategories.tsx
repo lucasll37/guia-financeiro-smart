@@ -75,9 +75,12 @@ export function useCategories(accountId?: string) {
       });
     },
     onError: (error: Error) => {
+      const isSystemCategory = error.message.includes("row-level security");
       toast({
         title: "Erro ao atualizar categoria",
-        description: error.message,
+        description: isSystemCategory 
+          ? "Esta categoria foi criada automaticamente e não pode ser editada"
+          : error.message,
         variant: "destructive",
       });
     },
@@ -97,9 +100,12 @@ export function useCategories(accountId?: string) {
       });
     },
     onError: (error: Error) => {
+      const isSystemCategory = error.message.includes("row-level security");
       toast({
         title: "Erro ao excluir categoria",
-        description: error.message,
+        description: isSystemCategory
+          ? "Esta categoria foi criada automaticamente e não pode ser excluída"
+          : error.message,
         variant: "destructive",
       });
     },
