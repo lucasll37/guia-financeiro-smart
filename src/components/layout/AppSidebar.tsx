@@ -80,12 +80,13 @@ export function AppSidebar() {
                           ]
                         )}
                       >
-                        <item.icon 
-                          className="h-5 w-5 flex-shrink-0"
-                          style={{ color: 'hsl(var(--foreground))' }}
-                          absoluteStrokeWidth
-                          strokeWidth={2}
-                        />
+                        <span className="inline-flex w-5 h-5 items-center justify-center shrink-0 text-foreground">
+                          <item.icon 
+                            className="h-5 w-5"
+                            absoluteStrokeWidth
+                            strokeWidth={2}
+                          />
+                        </span>
                         {!isCollapsed && (
                           <span className="flex-1 truncate text-sm">
                             {item.title}
