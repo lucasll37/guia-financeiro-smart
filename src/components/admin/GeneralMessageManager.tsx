@@ -144,12 +144,6 @@ export const GeneralMessageManager = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Alert>
-          <AlertDescription>
-            Versão atual: {settingsData?.version || "Não definida"}
-          </AlertDescription>
-        </Alert>
-
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label htmlFor="message-enabled" className="text-base">
@@ -210,6 +204,17 @@ export const GeneralMessageManager = () => {
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Forçar Exibição para Todos
+          </Button>
+
+          <Button
+            variant="secondary"
+            onClick={() => {
+              localStorage.removeItem("prospera-general-message");
+              window.location.reload();
+            }}
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            Testar Localmente
           </Button>
         </div>
 

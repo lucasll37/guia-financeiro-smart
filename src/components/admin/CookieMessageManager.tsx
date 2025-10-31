@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { AlertCircle, Save, RefreshCw } from "lucide-react";
+import { AlertCircle, Save, RefreshCw, Eye } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const DEFAULT_MESSAGE = `Este site utiliza cookies e armazena dados localmente para melhorar sua experiência de uso. 
@@ -140,12 +140,6 @@ export const CookieMessageManager = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Alert>
-          <AlertDescription>
-            Versão atual: {settingsData?.version || "Não definida"}
-          </AlertDescription>
-        </Alert>
-
         <div className="space-y-2">
           <Label htmlFor="cookie-message">Mensagem</Label>
           <Textarea
@@ -173,6 +167,17 @@ export const CookieMessageManager = () => {
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Forçar Exibição para Todos
+          </Button>
+
+          <Button
+            variant="secondary"
+            onClick={() => {
+              localStorage.removeItem("prospera-cookie-consent");
+              window.location.reload();
+            }}
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            Testar Localmente
           </Button>
         </div>
 
