@@ -5,12 +5,10 @@ import { DataSection } from "@/components/conta/DataSection";
 import { UserPreferences } from "@/components/settings/UserPreferences";
 import { AccessibilityChecklist } from "@/components/settings/AccessibilityChecklist";
 import { User, CreditCard, Settings, Shield, Database } from "lucide-react";
-
 export default function Conta() {
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Minha Conta Prospere</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Minha Conta Prospera</h1>
         <p className="text-muted-foreground">
           Gerencie suas informações pessoais e preferências
         </p>
@@ -60,6 +58,5 @@ export default function Conta() {
           <AccessibilityChecklist />
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 }
