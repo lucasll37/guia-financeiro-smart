@@ -238,7 +238,20 @@ Deno.serve(async (req) => {
         .remove(filePaths);
     }
 
-    // 19. Finally, delete user from auth (this will cascade delete the profile)
+    // 19. Clear references from settings tables that FK to auth.users
+    const { error: adminSettingsErr } = await supabaseClient
+      .from('admin_settings')
+      .update({ updated_by: null })
+      .eq('updated_by', userId);
+    if (adminSettingsErr) console.error('Error nullifying admin_settings.updated_by:', adminSettingsErr);
+
+    const { error: appSettingsErr } = await supabaseClient
+      .from('app_settings')
+      .update({ updated_by: null })
+      .eq('updated_by', userId);
+    if (appSettingsErr) console.error('Error nullifying app_settings.updated_by:', appSettingsErr);
+
+    // 20. Finally, delete user from auth (this will cascade delete the profile)
     const { error: deleteAuthError } = await supabaseClient.auth.admin.deleteUser(userId);
 
     if (deleteAuthError) {
