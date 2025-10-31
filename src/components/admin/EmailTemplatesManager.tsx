@@ -32,19 +32,6 @@ export function EmailTemplatesManager() {
   const [testEmail, setTestEmail] = useState("");
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // Update preview when content changes
-  useEffect(() => {
-    if (iframeRef.current && editForm.html_content) {
-      const iframe = iframeRef.current;
-      const doc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (doc) {
-        doc.open();
-        doc.write(getPreviewHTML());
-        doc.close();
-      }
-    }
-  }, [editForm.html_content]);
-
   const getPreviewHTML = () => {
     // Replace template variables with example values
     let html = editForm.html_content;
@@ -65,6 +52,31 @@ export function EmailTemplatesManager() {
 
     return html;
   };
+
+  // Update preview when content changes
+  useEffect(() => {
+    if (iframeRef.current && editForm.html_content) {
+      const iframe = iframeRef.current;
+      
+      // Wait for iframe to be ready
+      const updateIframe = () => {
+        const doc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (doc) {
+          try {
+            doc.open();
+            doc.write(getPreviewHTML());
+            doc.close();
+          } catch (error) {
+            console.error("Error updating iframe:", error);
+          }
+        }
+      };
+
+      // Try to update immediately and also on load
+      updateIframe();
+      iframe.onload = updateIframe;
+    }
+  }, [editForm.html_content]);
 
   // Fetch templates
   const { data: templates, isLoading } = useQuery({
@@ -392,7 +404,6 @@ export function EmailTemplatesManager() {
                           ref={iframeRef}
                           title="Email Preview"
                           className="w-full min-h-[600px] border-0"
-                          sandbox="allow-same-origin"
                         />
                       </div>
                     </div>
