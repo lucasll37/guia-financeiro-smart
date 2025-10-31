@@ -21,9 +21,10 @@ interface CookieSettings {
 interface CookieConsentProps {
   forceShow?: boolean;
   onClose?: () => void;
+  onVisibleChange?: (visible: boolean) => void;
 }
 
-export const CookieConsent = ({ forceShow = false, onClose }: CookieConsentProps = {}) => {
+export const CookieConsent = ({ forceShow = false, onClose, onVisibleChange }: CookieConsentProps = {}) => {
   const [isVisible, setIsVisible] = useState(forceShow);
   const [dontShowAgain, setDontShowAgain] = useState(false);
 
@@ -49,6 +50,10 @@ export const CookieConsent = ({ forceShow = false, onClose }: CookieConsentProps
       };
     },
   });
+
+  useEffect(() => {
+    onVisibleChange?.(isVisible);
+  }, [isVisible, onVisibleChange]);
 
   useEffect(() => {
     // Se forceShow estiver ativo, não processar lógica de localStorage

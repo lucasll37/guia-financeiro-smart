@@ -166,18 +166,12 @@ export const DashboardLayout = () => {
         </div>
         <FeedbackButton />
         
-        {showCookieModal && (
-          <CookieConsent 
-            forceShow={true}
-            onClose={handleCookieClose}
-          />
-        )}
+        <CookieConsent 
+          onVisibleChange={setShowCookieModal}
+        />
         
-        {showGeneralModal && !showCookieModal && (
-          <GeneralMessageModal 
-            forceShow={true}
-            onClose={handleGeneralClose}
-          />
+        {!showCookieModal && (
+          <GeneralMessageModal />
         )}
       </div>
     </SidebarProvider>
