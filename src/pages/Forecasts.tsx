@@ -15,6 +15,9 @@ import { CasaRevenueSplitManager } from "@/components/accounts/CasaRevenueSplitM
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useSearchParams } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +36,8 @@ interface ForecastsProps {
 export default function Forecasts({ accountId: propAccountId }: ForecastsProps) {
   const { accounts } = useAccounts();
   const isMobile = useIsMobile();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const today = new Date();
   const currentMonth = format(today, "yyyy-MM");
@@ -152,31 +157,59 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
   };
 
   const handleWizardSave = async (forecasts: any[]) => {
-    // Salvar/atualizar todas as previsões
-    for (const forecast of forecasts) {
-      if (forecast.id) {
-        // Atualizar existente
-        await updateForecast.mutateAsync(forecast);
-      } else {
-        // Criar nova
-        const { id, ...createData } = forecast;
-        await createForecast.mutateAsync(createData);
+    try {
+      // Salvar/atualizar todas as previsões diretamente sem notificações individuais
+      for (const forecast of forecasts) {
+        if (forecast.id) {
+          // Atualizar existente
+          const { id, ...updates } = forecast;
+          const { error } = await supabase
+            .from("account_period_forecasts")
+            .update(updates)
+            .eq("id", id);
+          
+          if (error) throw error;
+        } else {
+          // Criar nova
+          const { id, ...createData } = forecast;
+          const { error } = await supabase
+            .from("account_period_forecasts")
+            .insert(createData);
+          
+          if (error) throw error;
+        }
       }
-    }
 
-    // Após salvar, alinhar o mês selecionado com o mês salvo no assistente
-    const savedPeriodStart = forecasts[0]?.period_start;
-    if (savedPeriodStart) {
-      const d = new Date(savedPeriodStart);
-      const ym = format(d, "yyyy-MM");
-      setFilters(prev => ({
-        ...prev,
-        selectedMonth: ym,
-        startDate: format(startOfMonth(d), "yyyy-MM-dd"),
-        endDate: format(endOfMonth(d), "yyyy-MM-dd"),
-      }));
+      // Invalidar queries para atualizar a UI
+      queryClient.invalidateQueries({ queryKey: ["forecasts"] });
+      queryClient.invalidateQueries({ queryKey: ["expense-forecasts"] });
+
+      // Mostrar uma única notificação de sucesso ao final
+      toast({
+        title: "Previsões salvas",
+        description: `${forecasts.length} previsão(ões) salva(s) com sucesso`,
+      });
+
+      // Após salvar, alinhar o mês selecionado com o mês salvo no assistente
+      const savedPeriodStart = forecasts[0]?.period_start;
+      if (savedPeriodStart) {
+        const d = new Date(savedPeriodStart);
+        const ym = format(d, "yyyy-MM");
+        setFilters(prev => ({
+          ...prev,
+          selectedMonth: ym,
+          startDate: format(startOfMonth(d), "yyyy-MM-dd"),
+          endDate: format(endOfMonth(d), "yyyy-MM-dd"),
+        }));
+      }
+      // Nota: triggers no backend já recalculam receitas automaticamente
+    } catch (error: any) {
+      toast({
+        title: "Erro ao salvar previsões",
+        description: error.message,
+        variant: "destructive",
+      });
     }
-    // Nota: triggers no backend já recalculam receitas automaticamente
   };
 
   return (
