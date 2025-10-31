@@ -83,7 +83,7 @@ export function ForecastDialog({
       form.reset({
         category_id: forecast.category_id,
         forecasted_amount: String(forecast.forecasted_amount),
-        selected_date: new Date(forecast.period_start),
+        selected_date: new Date(forecast.period_start + "T00:00:00"),
         notes: forecast.notes || "",
       });
     } else {
