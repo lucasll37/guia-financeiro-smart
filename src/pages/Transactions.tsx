@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { format, startOfMonth, endOfMonth, parse } from "date-fns";
+import { format, startOfMonth, endOfMonth, parseISO } from "date-fns";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useCategories } from "@/hooks/useCategories";
@@ -89,9 +89,9 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
       if (filters.type !== "all" && t.categories?.type !== filters.type) return false;
       
       // Date range filter
-      const transactionDate = parse(String(t.date), "yyyy-MM-dd", new Date());
-      const startDate = parse(filters.startDate, "yyyy-MM-dd", new Date());
-      const endDate = parse(filters.endDate, "yyyy-MM-dd", new Date());
+      const transactionDate = parseISO(String(t.date));
+      const startDate = parseISO(filters.startDate);
+      const endDate = parseISO(filters.endDate);
       if (transactionDate < startDate || transactionDate > endDate) return false;
       
       // Search filter

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, Calendar, CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
-import { format, startOfMonth, endOfMonth, parse, addMonths, subMonths } from "date-fns";
+import { format, startOfMonth, endOfMonth, parse, addMonths, subMonths, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -232,13 +232,13 @@ export function TransactionFilters({ accounts, categories, filters, onFilterChan
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {filters.startDate ? format(new Date(filters.startDate), "dd/MM/yyyy") : "Selecione"}
+                  {filters.startDate ? format(parseISO(filters.startDate), "dd/MM/yyyy") : "Selecione"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <CalendarComponent
                   mode="single"
-                  selected={filters.startDate ? new Date(filters.startDate) : undefined}
+                  selected={filters.startDate ? parseISO(filters.startDate) : undefined}
                   onSelect={(date) => date && onFilterChange({ ...filters, startDate: format(date, "yyyy-MM-dd") })}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
@@ -259,15 +259,15 @@ export function TransactionFilters({ accounts, categories, filters, onFilterChan
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {filters.endDate ? format(new Date(filters.endDate), "dd/MM/yyyy") : "Selecione"}
+                  {filters.endDate ? format(parseISO(filters.endDate), "dd/MM/yyyy") : "Selecione"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <CalendarComponent
                   mode="single"
-                  selected={filters.endDate ? new Date(filters.endDate) : undefined}
+                  selected={filters.endDate ? parseISO(filters.endDate) : undefined}
                   onSelect={(date) => date && onFilterChange({ ...filters, endDate: format(date, "yyyy-MM-dd") })}
-                  disabled={(date) => filters.startDate ? date < new Date(filters.startDate) : false}
+                  disabled={(date) => filters.startDate ? date < parseISO(filters.startDate) : false}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
                 />
