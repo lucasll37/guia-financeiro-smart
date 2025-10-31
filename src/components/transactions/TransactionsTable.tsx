@@ -122,10 +122,6 @@ export function TransactionsTable({
     const isExpense = transaction.categories?.type === "despesa";
     const isCreditCard = !!transaction.credit_card_id;
     const isIncome = transaction.categories?.type === "receita";
-    const isCasaAccount = accountType === "casa";
-    
-    // Em contas casa, não mostrar botões de edição/exclusão para receitas
-    const shouldShowActions = !(isCasaAccount && isIncome);
     
     return (
       <TableRow key={transaction.id}>
@@ -154,26 +150,24 @@ export function TransactionsTable({
           </span>
         </TableCell>
         <TableCell className="text-right">
-          {shouldShowActions && (
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onEdit(transaction)}
-                disabled={!canEdit}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onDelete(transaction.id)}
-                disabled={!canEdit}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onEdit(transaction)}
+              disabled={!canEdit}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onDelete(transaction.id)}
+              disabled={!canEdit}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </TableCell>
       </TableRow>
     );
