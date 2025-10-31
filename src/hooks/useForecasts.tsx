@@ -145,15 +145,11 @@ export function useForecasts(accountId?: string | null) {
       accountId: string;
       isCasaAccount?: boolean;
     }) => {
-      console.log("Copiando previsões:", { sourcePeriodStart, targetPeriodStart, accountId, isCasaAccount });
-      
       // Buscar TODAS as previsões da conta
       const { data: sourceForecasts, error: fetchError } = await supabase
         .from("account_period_forecasts")
         .select("*, categories(type)")
         .eq("account_id", accountId);
-
-      console.log("Todas previsões da conta:", sourceForecasts);
 
       if (fetchError) throw fetchError;
       if (!sourceForecasts || sourceForecasts.length === 0) {
@@ -167,16 +163,13 @@ export function useForecasts(accountId?: string | null) {
         return fMonthStart === sourceMonthStart;
       });
 
-      console.log("Previsões do mês de origem:", forecastsToCopy);
-
       if (forecastsToCopy.length === 0) {
-        throw new Error("Nenhuma previsão encontrada no período de origem (mês " + sourceMonthStart + ")");
+        throw new Error("Nenhuma previsão encontrada no período de origem");
       }
 
       // Filtrar apenas despesas se for conta casa
       if (isCasaAccount) {
         forecastsToCopy = forecastsToCopy.filter(f => (f.categories as any)?.type === "despesa");
-        console.log("Após filtrar despesas:", forecastsToCopy);
       }
 
       if (forecastsToCopy.length === 0) {
@@ -194,8 +187,6 @@ export function useForecasts(accountId?: string | null) {
         forecasted_amount: f.forecasted_amount,
         notes: f.notes,
       }));
-
-      console.log("Criando previsões no período de destino:", newForecasts);
 
       const { data, error } = await supabase
         .from("account_period_forecasts")
