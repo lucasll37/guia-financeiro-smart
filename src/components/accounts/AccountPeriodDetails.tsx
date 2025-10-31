@@ -289,12 +289,12 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[40px]"></TableHead>
-                      <TableHead className="w-[250px]">Categoria</TableHead>
-                      <TableHead className="text-right w-[140px]">Previsto</TableHead>
-                      <TableHead className="text-right w-[140px]">Realizado</TableHead>
-                      <TableHead className="text-right w-[140px]">Diferença</TableHead>
-                      <TableHead className="text-right w-[180px]">Progresso</TableHead>
+                      <TableHead className="w-[40px] max-w-[40px]"></TableHead>
+                      <TableHead className="w-[280px] max-w-[280px]">Categoria</TableHead>
+                      <TableHead className="text-right w-[150px] max-w-[150px]">Previsto</TableHead>
+                      <TableHead className="text-right w-[150px] max-w-[150px]">Realizado</TableHead>
+                      <TableHead className="text-right w-[150px] max-w-[150px]">Diferença</TableHead>
+                      <TableHead className="text-right w-[200px] max-w-[200px]">Progresso</TableHead>
                     </TableRow>
                   </TableHeader>
               <TableBody>
@@ -312,7 +312,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   return (
                     <>
                       <TableRow key={categoryId} className={hasTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
-                        <TableCell className="w-[40px]" onClick={hasTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
+                        <TableCell className="w-[40px] max-w-[40px]" onClick={hasTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
                           <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                             {hasTransactions && (
                               <Button 
@@ -329,7 +329,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="w-[250px]" onClick={hasTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
+                        <TableCell className="w-[280px] max-w-[280px]" onClick={hasTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
                           <div className="flex items-center gap-2">
                             <div 
                               className="w-3 h-3 rounded-full flex-shrink-0" 
@@ -341,16 +341,16 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-right w-[140px]">
+                        <TableCell className="text-right w-[150px] max-w-[150px]">
                           <span className="font-medium">{maskValue(formatCurrency(data.forecasted))}</span>
                         </TableCell>
-                        <TableCell className="text-right font-medium w-[140px]">
+                        <TableCell className="text-right font-medium w-[150px] max-w-[150px]">
                           {maskValue(formatCurrency(data.actual))}
                         </TableCell>
-                        <TableCell className={`text-right w-[140px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <TableCell className={`text-right w-[150px] max-w-[150px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {maskValue(formatCurrency(difference))}
                         </TableCell>
-                          <TableCell className="text-right w-[180px]">
+                          <TableCell className="text-right w-[200px] max-w-[200px]">
                             <div className="space-y-1">
                               <div className="flex justify-end mb-1">
                                 <span className={cn(
@@ -454,12 +454,12 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[40px]"></TableHead>
-                      <TableHead className="w-[250px]">Categoria</TableHead>
-                      <TableHead className="text-right w-[140px]">Previsto</TableHead>
-                      <TableHead className="text-right w-[140px]">Realizado</TableHead>
-                      <TableHead className="text-right w-[140px]">Diferença</TableHead>
-                      <TableHead className="text-right w-[180px]">Progresso</TableHead>
+                      <TableHead className="w-[40px] max-w-[40px]"></TableHead>
+                      <TableHead className="w-[280px] max-w-[280px]">Categoria</TableHead>
+                      <TableHead className="text-right w-[150px] max-w-[150px]">Previsto</TableHead>
+                      <TableHead className="text-right w-[150px] max-w-[150px]">Realizado</TableHead>
+                      <TableHead className="text-right w-[150px] max-w-[150px]">Diferença</TableHead>
+                      <TableHead className="text-right w-[200px] max-w-[200px]">Progresso</TableHead>
                     </TableRow>
                   </TableHeader>
               <TableBody>
@@ -477,7 +477,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   return (
                     <>
                       <TableRow key={categoryId} className={hasTransactions ? "cursor-pointer hover:bg-muted/50" : ""}>
-                        <TableCell className="w-[40px]" onClick={hasTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
+                        <TableCell className="w-[40px] max-w-[40px]" onClick={hasTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
                           <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                             {hasTransactions && (
                               <Button 
@@ -494,7 +494,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="w-[250px]" onClick={hasTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
+                        <TableCell className="w-[280px] max-w-[280px]" onClick={hasTransactions ? () => toggleCategoryExpansion(categoryId) : undefined}>
                           <div className="flex items-center gap-2">
                             <div 
                               className="w-3 h-3 rounded-full flex-shrink-0" 
@@ -506,16 +506,16 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-right w-[140px]">
+                        <TableCell className="text-right w-[150px] max-w-[150px]">
                           <span className="font-medium">{maskValue(formatCurrency(data.forecasted))}</span>
                         </TableCell>
-                        <TableCell className="text-right font-medium w-[140px]">
+                        <TableCell className="text-right font-medium w-[150px] max-w-[150px]">
                           {maskValue(formatCurrency(data.actual))}
                         </TableCell>
-                        <TableCell className={`text-right w-[140px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <TableCell className={`text-right w-[150px] max-w-[150px] ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {maskValue(formatCurrency(difference))}
                         </TableCell>
-                        <TableCell className="text-right w-[180px]">
+                        <TableCell className="text-right w-[200px] max-w-[200px]">
                           <div className="space-y-1">
                             <div className="flex justify-end mb-1">
                               <span className={cn(
@@ -618,29 +618,29 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[40px]"></TableHead>
-                      <TableHead className="w-[250px]">Descrição</TableHead>
-                      <TableHead className="text-right w-[140px]">Previsto</TableHead>
-                      <TableHead className="text-right w-[140px]">Realizado</TableHead>
-                      <TableHead className="text-right w-[140px]">Diferença</TableHead>
-                      <TableHead className="text-right w-[180px]">Progresso</TableHead>
+                      <TableHead className="w-[40px] max-w-[40px]"></TableHead>
+                      <TableHead className="w-[280px] max-w-[280px]">Descrição</TableHead>
+                      <TableHead className="text-right w-[150px] max-w-[150px]">Previsto</TableHead>
+                      <TableHead className="text-right w-[150px] max-w-[150px]">Realizado</TableHead>
+                      <TableHead className="text-right w-[150px] max-w-[150px]">Diferença</TableHead>
+                      <TableHead className="text-right w-[200px] max-w-[200px]">Progresso</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                      <TableCell className="w-[40px]"></TableCell>
-                      <TableCell className="w-[250px]">
+                      <TableCell className="w-[40px] max-w-[40px]"></TableCell>
+                      <TableCell className="w-[280px] max-w-[280px]">
                         <div className="flex items-center gap-2">
                           <div className="w-3 h-3 rounded-full flex-shrink-0 bg-blue-500" />
                           <span className="break-words">Saldo do período anterior</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right w-[140px]">-</TableCell>
-                      <TableCell className="text-right font-medium w-[140px]">
+                      <TableCell className="text-right w-[150px] max-w-[150px]">-</TableCell>
+                      <TableCell className="text-right font-medium w-[150px] max-w-[150px]">
                         {maskValue(formatCurrency(previousBalance))}
                       </TableCell>
-                      <TableCell className="text-right w-[140px]">-</TableCell>
-                      <TableCell className="text-right w-[180px]">-</TableCell>
+                      <TableCell className="text-right w-[150px] max-w-[150px]">-</TableCell>
+                      <TableCell className="text-right w-[200px] max-w-[200px]">-</TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
