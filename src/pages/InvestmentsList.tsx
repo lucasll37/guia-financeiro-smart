@@ -302,6 +302,11 @@ function InvestmentCard({
   const { data: currentValue = 0 } = useInvestmentCurrentValue(investment.id);
   const { returns = [] } = useMonthlyReturns(investment.id);
   const { maskValue } = useMaskValues();
+  
+  // Formatar mês de referência
+  const referenceMonth = investment.initial_month 
+    ? new Date(investment.initial_month).toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' })
+    : '';
   const { canShareAccounts } = usePlanLimits();
 
   // Calcular aportes nominais totais
@@ -415,17 +420,17 @@ function InvestmentCard({
 
         {/* Breakdown de Retornos */}
         <div className="space-y-2">
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="text-xs font-medium text-muted-foreground">Retorno Nominal</span>
+          <div className="flex items-baseline justify-between gap-2 pt-2 border-t-2">
+            <span className="text-sm font-semibold">Retorno Nominal</span>
             <div className={`text-right ${isPositive ? "text-green-600" : "text-red-600"}`}>
-              <div className="text-base font-semibold">
+              <div className="text-xl font-bold">
                 {isPositive ? "+" : ""}
                 {maskValue(new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
                 }).format(nominalGain))}
               </div>
-              <div className="text-[10px] opacity-75">
+              <div className="text-xs font-medium opacity-90">
                 {isPositive ? "+" : ""}{maskValue(`${gainPercentage.toFixed(1)}%`)}
               </div>
             </div>
@@ -446,17 +451,19 @@ function InvestmentCard({
             </div>
           </div>
 
-          <div className="flex items-baseline justify-between gap-2 pt-2 border-t-2">
-            <span className="text-sm font-semibold">Retorno Real</span>
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-xs font-medium text-muted-foreground">
+              Retorno Real {referenceMonth && `(ref. ${referenceMonth})`}
+            </span>
             <div className={`text-right ${isRealPositive ? "text-green-600" : "text-red-600"}`}>
-              <div className="text-xl font-bold">
+              <div className="text-base font-semibold">
                 {isRealPositive ? "+" : ""}
                 {maskValue(new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
                 }).format(realGain))}
               </div>
-              <div className="text-xs font-medium opacity-90">
+              <div className="text-[10px] opacity-75">
                 {isRealPositive ? "+" : ""}{maskValue(`${realGainPercentage.toFixed(1)}%`)}
               </div>
             </div>
