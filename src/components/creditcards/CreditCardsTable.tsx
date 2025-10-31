@@ -42,7 +42,11 @@ export function CreditCardsTable({
 
   const getCreatorName = (createdBy: string) => {
     if (createdBy === user?.id) {
-      return { name: 'Você', email: null };
+      const member = accountMembers.find(m => m.user_id === user?.id);
+      return {
+        name: member?.user?.name || user?.user_metadata?.name || 'Sem nome',
+        email: member?.user?.email || user?.email || null
+      };
     }
     const member = accountMembers.find(m => m.user_id === createdBy);
     return {
