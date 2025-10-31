@@ -247,7 +247,7 @@ export default function AccountsList() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">
                       Clique para acessar
                     </span>
