@@ -3,6 +3,7 @@ import { AppSidebar } from "./AppSidebar";
 import { Header } from "./Header";
 import { FeedbackButton } from "./FeedbackButton";
 import { CookieConsent } from "@/components/CookieConsent";
+import { GeneralMessageModal } from "@/components/GeneralMessageModal";
 import { Outlet } from "react-router-dom";
 
 export const DashboardLayout = () => {
@@ -25,6 +26,7 @@ export const DashboardLayout = () => {
         </div>
         <FeedbackButton />
         <CookieConsent />
+        <GeneralMessageModal />
       </div>
     </SidebarProvider>
   );
