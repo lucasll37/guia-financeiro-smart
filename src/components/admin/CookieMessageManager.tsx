@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { AlertCircle, Save, RefreshCw, Eye } from "lucide-react";
+import { AlertCircle, Save, RefreshCw, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
+import { CookieConsent } from "@/components/CookieConsent";
 
 const DEFAULT_MESSAGE = `Este site utiliza cookies e armazena dados localmente para melhorar sua experiência de uso. 
 Ao continuar navegando, você concorda com nossa política de privacidade e com o tratamento 
@@ -15,6 +17,7 @@ de dados conforme a LGPD (Lei Geral de Proteção de Dados). Seus dados financei
 armazenados de forma segura e criptografada.`;
 
 interface CookieSettings {
+  enabled: boolean;
   message: string;
   version: number;
 }
@@ -22,7 +25,9 @@ interface CookieSettings {
 export const CookieMessageManager = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [enabled, setEnabled] = useState(false);
   const [message, setMessage] = useState("");
+  const [showTestModal, setShowTestModal] = useState(false);
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ["admin-cookie-settings"],
@@ -36,6 +41,7 @@ export const CookieMessageManager = () => {
       if (error && error.code !== "PGRST116") throw error;
       
       const settingsData = data?.setting_value as unknown as CookieSettings | null;
+      setEnabled(settingsData?.enabled || false);
       const messageText = settingsData?.message || DEFAULT_MESSAGE;
       setMessage(messageText);
       
@@ -44,21 +50,23 @@ export const CookieMessageManager = () => {
   });
 
   const updateMessageMutation = useMutation({
-    mutationFn: async (newMessage: string) => {
-      const newVersion = Date.now();
+    mutationFn: async () => {
+      const settingsData = settings?.setting_value as unknown as CookieSettings | null;
+      const currentVersion = settingsData?.version || 0;
       
       const { error } = await supabase
         .from("admin_settings")
         .upsert({
           setting_key: "cookie_consent_message",
           setting_value: {
-            message: newMessage,
-            version: newVersion,
+            enabled,
+            message,
+            version: currentVersion,
           },
         });
 
       if (error) throw error;
-      return newVersion;
+      return currentVersion;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-cookie-settings"] });
@@ -81,15 +89,13 @@ export const CookieMessageManager = () => {
     mutationFn: async () => {
       const newVersion = Date.now();
       
-      const settingsData = settings?.setting_value as unknown as CookieSettings | null;
-      const currentMessage = settingsData?.message || message || DEFAULT_MESSAGE;
-      
       const { error } = await supabase
         .from("admin_settings")
         .upsert({
           setting_key: "cookie_consent_message",
           setting_value: {
-            message: currentMessage,
+            enabled,
+            message,
             version: newVersion,
           },
         });
@@ -115,7 +121,7 @@ export const CookieMessageManager = () => {
   });
 
   const handleSave = () => {
-    updateMessageMutation.mutate(message);
+    updateMessageMutation.mutate();
   };
 
   const handleForceShow = () => {
@@ -140,6 +146,29 @@ export const CookieMessageManager = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <Label htmlFor="cookie-enabled" className="text-base">
+              Mensagem Ativa
+            </Label>
+            <p className="text-sm text-muted-foreground">
+              Ative ou desative a exibição da mensagem para os usuários
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {enabled ? (
+              <Eye className="h-4 w-4 text-green-600" />
+            ) : (
+              <EyeOff className="h-4 w-4 text-muted-foreground" />
+            )}
+            <Switch
+              id="cookie-enabled"
+              checked={enabled}
+              onCheckedChange={setEnabled}
+            />
+          </div>
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="cookie-message">Mensagem</Label>
           <Textarea
@@ -171,10 +200,7 @@ export const CookieMessageManager = () => {
 
           <Button
             variant="secondary"
-            onClick={() => {
-              localStorage.removeItem("prospera-cookie-consent");
-              window.location.reload();
-            }}
+            onClick={() => setShowTestModal(true)}
           >
             <Eye className="h-4 w-4 mr-2" />
             Testar Localmente
@@ -185,9 +211,17 @@ export const CookieMessageManager = () => {
           <AlertDescription className="text-xs">
             <strong>Dica:</strong> Ao clicar em "Forçar Exibição para Todos", a mensagem será exibida 
             novamente para todos os usuários, mesmo aqueles que marcaram "Não mostrar novamente".
+            A mensagem só será exibida se estiver ativa.
           </AlertDescription>
         </Alert>
       </CardContent>
+      
+      {showTestModal && (
+        <CookieConsent 
+          forceShow={true}
+          onClose={() => setShowTestModal(false)}
+        />
+      )}
     </Card>
   );
 };

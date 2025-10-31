@@ -15,8 +15,13 @@ interface GeneralMessageSettings {
   version: number | null;
 }
 
-export const GeneralMessageModal = () => {
-  const [isVisible, setIsVisible] = useState(false);
+interface GeneralMessageModalProps {
+  forceShow?: boolean;
+  onClose?: () => void;
+}
+
+export const GeneralMessageModal = ({ forceShow = false, onClose }: GeneralMessageModalProps = {}) => {
+  const [isVisible, setIsVisible] = useState(forceShow);
   const [dontShowAgain, setDontShowAgain] = useState(false);
 
   const { data: settings } = useQuery({
@@ -39,6 +44,12 @@ export const GeneralMessageModal = () => {
   });
 
   useEffect(() => {
+    // Se forceShow estiver ativo, não processar lógica de localStorage
+    if (forceShow) {
+      setIsVisible(true);
+      return;
+    }
+
     // Não mostrar se não estiver habilitado
     if (!settings?.enabled || !settings?.message) {
       return;
@@ -64,19 +75,20 @@ export const GeneralMessageModal = () => {
       // Se houver erro ao parsear, mostrar novamente
       setIsVisible(true);
     }
-  }, [settings]);
+  }, [settings, forceShow]);
 
   const handleClose = () => {
-    if (dontShowAgain && settings?.version) {
+    if (!forceShow && dontShowAgain && settings?.version) {
       localStorage.setItem(
         GENERAL_MESSAGE_KEY,
         JSON.stringify({ version: settings.version })
       );
     }
     setIsVisible(false);
+    onClose?.();
   };
 
-  if (!isVisible || !settings?.enabled) return null;
+  if (!isVisible || (!forceShow && !settings?.enabled)) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">

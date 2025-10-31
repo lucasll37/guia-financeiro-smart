@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { MessageSquare, Save, RefreshCw, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { GeneralMessageModal } from "@/components/GeneralMessageModal";
 
 interface GeneralMessageSettings {
   enabled: boolean;
@@ -24,6 +25,7 @@ export const GeneralMessageManager = () => {
   const [enabled, setEnabled] = useState(false);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
+  const [showTestModal, setShowTestModal] = useState(false);
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ["admin-general-message-settings"],
@@ -208,10 +210,7 @@ export const GeneralMessageManager = () => {
 
           <Button
             variant="secondary"
-            onClick={() => {
-              localStorage.removeItem("prospera-general-message");
-              window.location.reload();
-            }}
+            onClick={() => setShowTestModal(true)}
           >
             <Eye className="h-4 w-4 mr-2" />
             Testar Localmente
@@ -226,6 +225,13 @@ export const GeneralMessageManager = () => {
           </AlertDescription>
         </Alert>
       </CardContent>
+      
+      {showTestModal && (
+        <GeneralMessageModal 
+          forceShow={true}
+          onClose={() => setShowTestModal(false)}
+        />
+      )}
     </Card>
   );
 };

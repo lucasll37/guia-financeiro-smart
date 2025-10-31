@@ -13,12 +13,18 @@ de dados conforme a LGPD (Lei Geral de Proteção de Dados). Seus dados financei
 armazenados de forma segura e criptografada.`;
 
 interface CookieSettings {
+  enabled: boolean;
   message: string;
   version: number | null;
 }
 
-export const CookieConsent = () => {
-  const [isVisible, setIsVisible] = useState(false);
+interface CookieConsentProps {
+  forceShow?: boolean;
+  onClose?: () => void;
+}
+
+export const CookieConsent = ({ forceShow = false, onClose }: CookieConsentProps = {}) => {
+  const [isVisible, setIsVisible] = useState(forceShow);
   const [dontShowAgain, setDontShowAgain] = useState(false);
 
   const { data: settings } = useQuery({
@@ -31,11 +37,26 @@ export const CookieConsent = () => {
         .single();
 
       if (error && error.code !== "PGRST116") throw error;
-      return (data?.setting_value as unknown as CookieSettings) || { message: DEFAULT_MESSAGE, version: null };
+      return (data?.setting_value as unknown as CookieSettings) || { 
+        enabled: false,
+        message: DEFAULT_MESSAGE, 
+        version: null 
+      };
     },
   });
 
   useEffect(() => {
+    // Se forceShow estiver ativo, não processar lógica de localStorage
+    if (forceShow) {
+      setIsVisible(true);
+      return;
+    }
+
+    // Não mostrar se não estiver habilitado
+    if (!settings?.enabled) {
+      return;
+    }
+
     const storedConsent = localStorage.getItem(COOKIE_CONSENT_KEY);
     
     if (!storedConsent) {
@@ -56,19 +77,20 @@ export const CookieConsent = () => {
       // Se houver erro ao parsear, mostrar novamente
       setIsVisible(true);
     }
-  }, [settings]);
+  }, [settings, forceShow]);
 
   const handleClose = () => {
-    if (dontShowAgain && settings?.version) {
+    if (!forceShow && dontShowAgain && settings?.version) {
       localStorage.setItem(
         COOKIE_CONSENT_KEY,
         JSON.stringify({ version: settings.version })
       );
     }
     setIsVisible(false);
+    onClose?.();
   };
 
-  if (!isVisible) return null;
+  if (!isVisible || (!forceShow && !settings?.enabled)) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
