@@ -15,14 +15,14 @@ export function MaskValuesProvider({ children }: { children: ReactNode }) {
     if (saved) {
       try {
         const prefs = JSON.parse(saved);
-        // Se showValuesByDefault for true, valores NÃO devem estar mascarados
-        // Se showValuesByDefault for false (padrão), valores devem estar mascarados
-        return !prefs.showValuesByDefault;
+        // Se hideValuesOnLogin for true, valores devem estar mascarados
+        // Se hideValuesOnLogin for false (padrão), valores devem estar visíveis
+        return prefs.hideValuesOnLogin === true;
       } catch {
-        return true; // Padrão: mascarado
+        return false; // Padrão: valores visíveis
       }
     }
-    return true; // Padrão: mascarado
+    return false; // Padrão: valores visíveis
   });
 
   // Sincronizar com mudanças nas preferências
@@ -32,7 +32,7 @@ export function MaskValuesProvider({ children }: { children: ReactNode }) {
       if (saved) {
         try {
           const prefs = JSON.parse(saved);
-          setIsMasked(!prefs.showValuesByDefault);
+          setIsMasked(prefs.hideValuesOnLogin === true);
         } catch {
           // Ignorar erros de parsing
         }

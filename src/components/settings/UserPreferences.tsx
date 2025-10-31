@@ -148,16 +148,16 @@ export function UserPreferences() {
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="showValues">Mostrar Valores ao fazer login</Label>
+              <Label htmlFor="showValues">Ocultar Valores ao fazer login</Label>
               <p className="text-sm text-muted-foreground">
-                Quando desabilitado, os valores aparecem mascarados ao fazer login
+                Quando ativado, os valores sempre aparecem mascarados ao fazer login
               </p>
             </div>
             <Switch
               id="showValues"
-              checked={preferences.showValuesByDefault}
+              checked={preferences.hideValuesOnLogin}
               onCheckedChange={(checked) => {
-                updatePreferences({ showValuesByDefault: checked });
+                updatePreferences({ hideValuesOnLogin: checked });
                 toast({
                   title: "Preferência atualizada",
                   description: "Suas configurações foram salvas com sucesso",
