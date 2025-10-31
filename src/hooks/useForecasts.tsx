@@ -145,22 +145,39 @@ export function useForecasts(accountId?: string | null) {
       accountId: string;
       isCasaAccount?: boolean;
     }) => {
-      // Buscar previsões do período de origem
+      console.log("Copiando previsões:", { sourcePeriodStart, targetPeriodStart, accountId, isCasaAccount });
+      
+      // Buscar TODAS as previsões da conta
       const { data: sourceForecasts, error: fetchError } = await supabase
         .from("account_period_forecasts")
         .select("*, categories(type)")
-        .eq("account_id", accountId)
-        .eq("period_start", sourcePeriodStart);
+        .eq("account_id", accountId);
+
+      console.log("Todas previsões da conta:", sourceForecasts);
 
       if (fetchError) throw fetchError;
       if (!sourceForecasts || sourceForecasts.length === 0) {
-        throw new Error("Nenhuma previsão encontrada no período de origem");
+        throw new Error("Nenhuma previsão encontrada na conta");
       }
 
-      // Filtrar apenas despesas se for conta tipo casa
-      const forecastsToCopy = isCasaAccount 
-        ? sourceForecasts.filter(f => (f.categories as any)?.type === "despesa")
-        : sourceForecasts;
+      // Filtrar apenas as do mês de origem (compara apenas YYYY-MM)
+      const sourceMonthStart = sourcePeriodStart.substring(0, 7); // "YYYY-MM"
+      let forecastsToCopy = sourceForecasts.filter(f => {
+        const fMonthStart = f.period_start.substring(0, 7);
+        return fMonthStart === sourceMonthStart;
+      });
+
+      console.log("Previsões do mês de origem:", forecastsToCopy);
+
+      if (forecastsToCopy.length === 0) {
+        throw new Error("Nenhuma previsão encontrada no período de origem (mês " + sourceMonthStart + ")");
+      }
+
+      // Filtrar apenas despesas se for conta casa
+      if (isCasaAccount) {
+        forecastsToCopy = forecastsToCopy.filter(f => (f.categories as any)?.type === "despesa");
+        console.log("Após filtrar despesas:", forecastsToCopy);
+      }
 
       if (forecastsToCopy.length === 0) {
         throw new Error(isCasaAccount 
@@ -177,6 +194,8 @@ export function useForecasts(accountId?: string | null) {
         forecasted_amount: f.forecasted_amount,
         notes: f.notes,
       }));
+
+      console.log("Criando previsões no período de destino:", newForecasts);
 
       const { data, error } = await supabase
         .from("account_period_forecasts")
