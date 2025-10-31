@@ -155,21 +155,37 @@ export function TransactionFilters({ accounts, categories, filters, onFilterChan
       {filters.viewMode === "monthly" ? (
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="month-filter">Mês</Label>
-          <Select
-            value={filters.selectedMonth}
-            onValueChange={handleMonthChange}
-          >
-            <SelectTrigger id="month-filter">
-              <SelectValue placeholder="Selecione o mês" />
-            </SelectTrigger>
-            <SelectContent>
-              {monthOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                id="month-filter"
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {filters.selectedMonth 
+                  ? format(new Date(filters.selectedMonth + "-01"), "MMMM 'de' yyyy", { locale: ptBR })
+                  : "Selecione o mês"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <CalendarComponent
+                mode="single"
+                selected={filters.selectedMonth ? new Date(filters.selectedMonth + "-01") : undefined}
+                onSelect={(date) => {
+                  if (date) {
+                    const month = format(date, "yyyy-MM");
+                    handleMonthChange(month);
+                  }
+                }}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+                locale={ptBR}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       ) : (
         <>
