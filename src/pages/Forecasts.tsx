@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Copy, Wand2 } from "lucide-react";
+import { Plus, Copy, Wand2, CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAccounts } from "@/hooks/useAccounts";
@@ -12,12 +12,15 @@ import { ForecastFilters } from "@/components/forecasts/ForecastFilters";
 import { BudgetWizard } from "@/components/forecasts/BudgetWizard";
 import { useAccountEditPermissions } from "@/hooks/useAccountEditPermissions";
 import { CasaRevenueSplitManager } from "@/components/accounts/CasaRevenueSplitManager";
-import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, parseISO } from "date-fns";
+import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, parseISO, addMonths, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,7 +56,7 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedForecast, setSelectedForecast] = useState<any>(null);
   const [copyDialogOpen, setCopyDialogOpen] = useState(false);
-  const [copyTargetMonth, setCopyTargetMonth] = useState<string>("");
+  const [copyTargetMonth, setCopyTargetMonth] = useState<Date | undefined>(undefined);
   const [wizardOpen, setWizardOpen] = useState(false);
   
   // Update filters when propAccountId changes
@@ -143,10 +146,8 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
     const sourceDate = new Date(y, (m || 1) - 1, 1);
     const sourcePeriodStart = format(startOfMonth(sourceDate), "yyyy-MM-dd");
     
-    const [ty, tm] = copyTargetMonth.split("-").map(Number);
-    const targetDate = new Date(ty, (tm || 1) - 1, 1);
-    const targetPeriodStart = format(startOfMonth(targetDate), "yyyy-MM-dd");
-    const targetPeriodEnd = format(endOfMonth(targetDate), "yyyy-MM-dd");
+    const targetPeriodStart = format(startOfMonth(copyTargetMonth), "yyyy-MM-dd");
+    const targetPeriodEnd = format(endOfMonth(copyTargetMonth), "yyyy-MM-dd");
 
     await copyForecast.mutateAsync({
       sourcePeriodStart,
@@ -157,7 +158,7 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
     });
 
     setCopyDialogOpen(false);
-    setCopyTargetMonth("");
+    setCopyTargetMonth(undefined);
   };
 
   const handleWizardSave = async (forecasts: any[]) => {
@@ -334,20 +335,60 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
               }
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <Select value={copyTargetMonth} onValueChange={setCopyTargetMonth}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione o mês de destino" />
-            </SelectTrigger>
-            <SelectContent>
-              {monthOptions
-                .filter((opt) => opt.value !== filters.selectedMonth)
-                .map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col gap-3">
+            <label className="text-sm font-medium">Mês de destino</label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => setCopyTargetMonth(prev => prev ? subMonths(prev, 1) : subMonths(new Date(), 1))}
+                className="shrink-0"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "flex-1 justify-start text-left font-normal",
+                      !copyTargetMonth && "text-muted-foreground"
+                    )}
+                  >
+                    {copyTargetMonth ? (
+                      format(copyTargetMonth, "MMMM 'de' yyyy", { locale: ptBR })
+                    ) : (
+                      <span>Selecione o mês</span>
+                    )}
+                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={copyTargetMonth}
+                    onSelect={(date) => setCopyTargetMonth(date)}
+                    disabled={(date) =>
+                      date < new Date("1900-01-01")
+                    }
+                    initialFocus
+                    defaultMonth={copyTargetMonth || new Date()}
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => setCopyTargetMonth(prev => prev ? addMonths(prev, 1) : addMonths(new Date(), 1))}
+                className="shrink-0"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleCopyForecast} disabled={!copyTargetMonth}>
