@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Lock } from "lucide-react";
+import { PasswordStrengthIndicator, validatePassword } from "@/components/auth/PasswordStrengthIndicator";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
@@ -34,9 +35,10 @@ const ResetPassword = () => {
     setError("");
     setLoading(true);
 
-    // Validações
-    if (password.length < 6) {
-      setError("A senha deve ter pelo menos 6 caracteres");
+    // Validar força da senha
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      setError("A senha não atende aos requisitos de segurança. Verifique os critérios abaixo.");
       setLoading(false);
       return;
     }
@@ -123,7 +125,6 @@ const ResetPassword = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  minLength={6}
                   disabled={loading}
                   className="pr-10"
                 />
@@ -136,9 +137,7 @@ const ResetPassword = () => {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Mínimo de 6 caracteres
-              </p>
+              <PasswordStrengthIndicator password={password} />
             </div>
 
             <div className="space-y-2">
@@ -151,7 +150,6 @@ const ResetPassword = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  minLength={6}
                   disabled={loading}
                   className="pr-10"
                 />

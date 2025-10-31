@@ -7,13 +7,18 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Lock, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
+import { PasswordStrengthIndicator, validatePassword } from "@/components/auth/PasswordStrengthIndicator";
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, "Senha atual é obrigatória"),
   newPassword: z
     .string()
-    .min(6, "A nova senha deve ter no mínimo 6 caracteres")
-    .max(100, "A senha deve ter no máximo 100 caracteres"),
+    .min(8, "A nova senha deve ter no mínimo 8 caracteres")
+    .max(100, "A senha deve ter no máximo 100 caracteres")
+    .regex(/[A-Z]/, "A senha deve conter pelo menos uma letra maiúscula")
+    .regex(/[a-z]/, "A senha deve conter pelo menos uma letra minúscula")
+    .regex(/[0-9]/, "A senha deve conter pelo menos um número")
+    .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, "A senha deve conter pelo menos um caractere especial"),
   confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
 }).refine((data) => data.newPassword === data.confirmPassword, {
   message: "As senhas não coincidem",
@@ -49,6 +54,15 @@ export function SecuritySection() {
 
   const handleChangePassword = async () => {
     setErrors({});
+    
+    // Validar força da senha primeiro
+    const passwordValidation = validatePassword(formData.newPassword);
+    if (!passwordValidation.isValid) {
+      setErrors({ 
+        newPassword: "A senha não atende aos requisitos de segurança. Verifique os critérios abaixo." 
+      });
+      return;
+    }
     
     // Validar com zod
     const validation = passwordSchema.safeParse(formData);
@@ -194,9 +208,7 @@ export function SecuritySection() {
           {errors.newPassword && (
             <p className="text-sm text-destructive">{errors.newPassword}</p>
           )}
-          <p className="text-xs text-muted-foreground">
-            Mínimo de 6 caracteres
-          </p>
+          <PasswordStrengthIndicator password={formData.newPassword} />
         </div>
 
         <div className="space-y-2">
