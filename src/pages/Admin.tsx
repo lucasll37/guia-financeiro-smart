@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown, Bell, Send, CreditCard, Settings, FileText, AlertTriangle, Loader2, Copy, MessageSquare, FolderTree } from "lucide-react";
+import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown, Bell, Send, CreditCard, Settings, FileText, AlertTriangle, Loader2, Copy, MessageSquare, FolderTree, Mail } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { z } from "zod";
 import { UserGrowthChart } from "@/components/admin/UserGrowthChart";
@@ -26,6 +26,7 @@ import { LogRetentionSettings } from "@/components/admin/LogRetentionSettings";
 import { FeedbackManager } from "@/components/admin/FeedbackManager";
 import { SeedCategoriesManager } from "@/components/admin/SeedCategoriesManager";
 import { VersionSettings } from "@/components/admin/VersionSettings";
+import { EmailTemplatesManager } from "@/components/admin/EmailTemplatesManager";
 const couponSchema = z.object({
   code: z.string().trim().min(3, "Código deve ter no mínimo 3 caracteres").max(50, "Código muito longo"),
   discount_percent: z.number().min(1, "Desconto deve ser entre 1 e 100").max(100, "Desconto deve ser entre 1 e 100"),
@@ -437,6 +438,10 @@ export default function Admin() {
             <TabsTrigger value="logs" className="flex items-center gap-2 data-[state=active]:bg-muted">
               <FileText className="h-4 w-4" />
               <span>Logs</span>
+            </TabsTrigger>
+            <TabsTrigger value="emails" className="flex items-center gap-2 data-[state=active]:bg-muted">
+              <Mail className="h-4 w-4" />
+              <span>Emails</span>
             </TabsTrigger>
           </TabsList>
         </div>
@@ -850,6 +855,11 @@ export default function Admin() {
         {/* Feedback Tab */}
         <TabsContent value="feedback" className="space-y-4">
           <FeedbackManager />
+        </TabsContent>
+
+        {/* Email Templates Tab */}
+        <TabsContent value="emails" className="space-y-4">
+          <EmailTemplatesManager />
         </TabsContent>
       </Tabs>
 
