@@ -40,7 +40,7 @@ export function AccountCard({
     const now = currentDate;
     const monthStart = startOfMonth(now);
     const monthEnd = endOfMonth(now);
-    const currentPeriod = format(now, "MMMM 'de' yyyy", {
+    const currentPeriod = format(now, "MMMM ' - ' yyyy", {
       locale: ptBR
     });
     const periodMonth = format(monthEnd, "yyyy-MM");
