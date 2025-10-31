@@ -92,6 +92,24 @@ export function useCreditCards(accountId?: string) {
 
   const deleteCreditCard = useMutation({
     mutationFn: async (id: string) => {
+      // Verificar se há transações futuras ou do mês atual para este cartão
+      const currentMonth = new Date();
+      currentMonth.setDate(1);
+      currentMonth.setHours(0, 0, 0, 0);
+
+      const { data: futureTransactions, error: checkError } = await supabase
+        .from("transactions")
+        .select("id")
+        .eq("credit_card_id", id)
+        .gte("payment_month", currentMonth.toISOString().split('T')[0])
+        .limit(1);
+
+      if (checkError) throw checkError;
+
+      if (futureTransactions && futureTransactions.length > 0) {
+        throw new Error("Não é possível excluir o cartão pois existem faturas pendentes do mês atual ou futuras");
+      }
+
       const { error } = await supabase
         .from("credit_cards")
         .delete()
