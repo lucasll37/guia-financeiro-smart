@@ -87,7 +87,7 @@ export const Header = () => {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
-      <div className="flex h-14 md:h-16 items-center gap-2 md:gap-4 px-2 md:px-4">
+      <div className="relative flex h-14 md:h-16 items-center gap-2 md:gap-4 px-2 md:px-4">
         <SidebarTrigger />
         
         {/* Logo Prospera */}
@@ -98,6 +98,13 @@ export const Header = () => {
               Prospera
             </span>
           </div>
+        </div>
+        
+        {/* Slogan Centralizado */}
+        <div className="absolute left-1/2 -translate-x-1/2 hidden md:block">
+          <span className="text-sm font-medium text-muted-foreground tracking-wide">
+            Gestor Financeiro
+          </span>
         </div>
         
         <Breadcrumb className="hidden sm:flex">
