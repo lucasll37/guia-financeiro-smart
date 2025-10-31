@@ -4,6 +4,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { Slider } from "@/components/ui/slider";
 import { Info, ArrowUpDown, ArrowUp, ArrowDown, Download } from "lucide-react";
 import { useMaskValues } from "@/hooks/useMaskValues";
@@ -363,24 +364,12 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="rate">Rendimento Mensal (%)</Label>
-              <Input
+              <DecimalInput
                 id="rate-input"
-                type="text"
-                inputMode="decimal"
-                step="0.01"
-                min={-2}
-                max={2}
+                placeholder="0,00"
                 value={monthlyRate}
-                onChange={(e) => {
-                  let value = e.target.value.replace(/[^\d.,-]/g, "");
-                  value = value.replace(",", ".");
-                  const parts = value.split(".");
-                  if (parts.length > 2) {
-                    value = parts[0] + "." + parts.slice(1).join("");
-                  }
-                  const numValue = parseFloat(value) || 0;
-                  setMonthlyRate(Math.min(2, Math.max(-2, numValue)));
-                }}
+                onValueChange={(num) => setMonthlyRate(Math.min(2, Math.max(-2, num ?? 0)))}
+                allowNegative={true}
                 className="w-20 h-8 text-center"
               />
             </div>
@@ -397,24 +386,12 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="rateStdDev">Desvio Padrão Rendimento (%)</Label>
-              <Input
+              <DecimalInput
                 id="rateStdDev-input"
-                type="text"
-                inputMode="decimal"
-                step="0.01"
-                min={0}
-                max={1}
+                placeholder="0,00"
                 value={rateStdDev}
-                onChange={(e) => {
-                  let value = e.target.value.replace(/[^\d.,-]/g, "");
-                  value = value.replace(",", ".");
-                  const parts = value.split(".");
-                  if (parts.length > 2) {
-                    value = parts[0] + "." + parts.slice(1).join("");
-                  }
-                  const numValue = parseFloat(value) || 0;
-                  setRateStdDev(Math.min(1, Math.max(0, numValue)));
-                }}
+                onValueChange={(num) => setRateStdDev(Math.min(1, Math.max(0, num ?? 0)))}
+                allowNegative={false}
                 className="w-20 h-8 text-center"
               />
             </div>
@@ -431,24 +408,12 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="inflation">Inflação Mensal (%)</Label>
-              <Input
+              <DecimalInput
                 id="inflation-input"
-                type="text"
-                inputMode="decimal"
-                step="0.01"
-                min={-2}
-                max={2}
+                placeholder="0,00"
                 value={inflationRate}
-                onChange={(e) => {
-                  let value = e.target.value.replace(/[^\d.,-]/g, "");
-                  value = value.replace(",", ".");
-                  const parts = value.split(".");
-                  if (parts.length > 2) {
-                    value = parts[0] + "." + parts.slice(1).join("");
-                  }
-                  const numValue = parseFloat(value) || 0;
-                  setInflationRate(Math.min(2, Math.max(-2, numValue)));
-                }}
+                onValueChange={(num) => setInflationRate(Math.min(2, Math.max(-2, num ?? 0)))}
+                allowNegative={true}
                 className="w-20 h-8 text-center"
               />
             </div>
@@ -465,24 +430,12 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="inflationStdDev">Desvio Padrão Inflação (%)</Label>
-              <Input
+              <DecimalInput
                 id="inflationStdDev-input"
-                type="text"
-                inputMode="decimal"
-                step="0.01"
-                min={0}
-                max={1}
+                placeholder="0,00"
                 value={inflationStdDev}
-                onChange={(e) => {
-                  let value = e.target.value.replace(/[^\d.,-]/g, "");
-                  value = value.replace(",", ".");
-                  const parts = value.split(".");
-                  if (parts.length > 2) {
-                    value = parts[0] + "." + parts.slice(1).join("");
-                  }
-                  const numValue = parseFloat(value) || 0;
-                  setInflationStdDev(Math.min(1, Math.max(0, numValue)));
-                }}
+                onValueChange={(num) => setInflationStdDev(Math.min(1, Math.max(0, num ?? 0)))}
+                allowNegative={false}
                 className="w-20 h-8 text-center"
               />
             </div>
@@ -499,24 +452,12 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="contribution">Aporte Mensal (R$)</Label>
-              <Input
+              <DecimalInput
                 id="contribution-input"
-                type="text"
-                inputMode="decimal"
-                step="100"
-                min={0}
-                max={20000}
+                placeholder="0,00"
                 value={monthlyContribution}
-                onChange={(e) => {
-                  let value = e.target.value.replace(/[^\d.,-]/g, "");
-                  value = value.replace(",", ".");
-                  const parts = value.split(".");
-                  if (parts.length > 2) {
-                    value = parts[0] + "." + parts.slice(1).join("");
-                  }
-                  const numValue = parseFloat(value) || 0;
-                  setMonthlyContribution(Math.min(20000, Math.max(0, numValue)));
-                }}
+                onValueChange={(num) => setMonthlyContribution(Math.min(20000, Math.max(0, num ?? 0)))}
+                allowNegative={false}
                 className="w-24 h-8 text-center"
               />
             </div>

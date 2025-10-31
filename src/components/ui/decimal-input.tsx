@@ -9,21 +9,32 @@ interface DecimalInputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 function sanitizeRaw(raw: string, allowNegative: boolean) {
-  let v = raw.replace(/,/g, ".");
-  // Remove invalid chars
-  v = v.replace(allowNegative ? /[^0-9.\-]/g : /[^0-9.]/g, "");
+  let v = raw;
+  // Remove invalid chars (allow comma)
+  v = v.replace(allowNegative ? /[^0-9,\-]/g : /[^0-9,]/g, "");
   // Keep only a single leading minus
   if (allowNegative) {
     v = v.replace(/(?!^)-/g, "");
   } else {
     v = v.replace(/-/g, "");
   }
-  // Keep only first dot
-  const firstDot = v.indexOf(".");
-  if (firstDot !== -1) {
-    v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, "");
+  // Keep only first comma
+  const firstComma = v.indexOf(",");
+  if (firstComma !== -1) {
+    v = v.slice(0, firstComma + 1) + v.slice(firstComma + 1).replace(/,/g, "");
   }
   return v;
+}
+
+function parseValue(raw: string): number | null {
+  const normalized = raw.replace(",", ".");
+  const parsed = normalized === "" || normalized === "." || normalized === "-" || normalized === "-." ? null : Number(normalized);
+  return Number.isNaN(parsed as number) ? null : parsed;
+}
+
+function formatForDisplay(value: number | null | undefined): string {
+  if (value === null || value === undefined) return "";
+  return String(value).replace(".", ",");
 }
 
 export function DecimalInput({
@@ -34,14 +45,14 @@ export function DecimalInput({
   onChange,
   ...props
 }: DecimalInputProps) {
-  const [raw, setRaw] = useState<string>(value ?? value === 0 ? String(value) : "");
+  const [raw, setRaw] = useState<string>(formatForDisplay(value));
 
   useEffect(() => {
     // Sync when external value changes (e.g., form reset)
-    const normalized = value ?? value === 0 ? String(value) : "";
-    // Don't override while user is typing trailing dot
-    if (raw !== normalized && raw !== normalized + ".") {
-      setRaw(normalized);
+    const formatted = formatForDisplay(value);
+    // Don't override while user is typing trailing comma
+    if (raw !== formatted && raw !== formatted + ",") {
+      setRaw(formatted);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
@@ -54,13 +65,8 @@ export function DecimalInput({
       onChange={(e) => {
         const sanitized = sanitizeRaw(e.target.value, allowNegative);
         setRaw(sanitized);
-        const parsed = sanitized === "" || sanitized === "." || sanitized === "-" || sanitized === "-." ? null : Number(sanitized);
-        if (!Number.isNaN(parsed as number) && parsed !== null) {
-          onValueChange(parsed as number, sanitized);
-        } else {
-          // For empty or partial values, propagate null but keep raw in input
-          onValueChange(null, sanitized);
-        }
+        const parsed = parseValue(sanitized);
+        onValueChange(parsed, sanitized);
         onChange?.(e);
       }}
       className={cn(className)}

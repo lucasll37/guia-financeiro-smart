@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -413,20 +414,11 @@ export function BudgetWizard({
                                   }
                                   className="text-sm"
                                 />
-                                <Input
-                                  type="text"
-                                  inputMode="decimal"
-                                  placeholder="R$ 0.00"
-                                  value={entry.amount}
-                                  onChange={(e) => {
-                                    let value = e.target.value.replace(/[^\d.,-]/g, "");
-                                    value = value.replace(",", ".");
-                                    const parts = value.split(".");
-                                    if (parts.length > 2) {
-                                      value = parts[0] + "." + parts.slice(1).join("");
-                                    }
-                                    updateEntry(sub.id, "amount", value, true);
-                                  }}
+                                <DecimalInput
+                                  placeholder="R$ 0,00"
+                                  value={entry.amount ? parseFloat(entry.amount) : null}
+                                  onValueChange={(num) => updateEntry(sub.id, "amount", num !== null ? String(num) : "", true)}
+                                  allowNegative={false}
                                   className="text-right font-semibold text-sm"
                                 />
                               </div>
@@ -670,20 +662,11 @@ export function BudgetWizard({
                                         }
                                         className="text-sm"
                                       />
-                                      <Input
-                                        type="text"
-                                        inputMode="decimal"
-                                        placeholder="R$ 0.00"
-                                        value={entry.amount}
-                                        onChange={(e) => {
-                                          let value = e.target.value.replace(/[^\d.,-]/g, "");
-                                          value = value.replace(",", ".");
-                                          const parts = value.split(".");
-                                          if (parts.length > 2) {
-                                            value = parts[0] + "." + parts.slice(1).join("");
-                                          }
-                                          updateEntry(sub.id, "amount", value, false);
-                                        }}
+                                      <DecimalInput
+                                        placeholder="R$ 0,00"
+                                        value={entry.amount ? parseFloat(entry.amount) : null}
+                                        onValueChange={(num) => updateEntry(sub.id, "amount", num !== null ? String(num) : "", false)}
+                                        allowNegative={false}
                                         className="text-right font-semibold text-sm"
                                       />
                                     </div>

@@ -30,6 +30,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -194,23 +195,11 @@ export function ForecastDialog({
                       Valor Previsto
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        placeholder="0.00"
-                        {...field}
-                        onChange={(e) => {
-                          // Permitir vírgula e ponto como separador decimal
-                          let value = e.target.value.replace(/[^\d.,-]/g, "");
-                          // Substituir vírgula por ponto
-                          value = value.replace(",", ".");
-                          // Permitir apenas um ponto decimal
-                          const parts = value.split(".");
-                          if (parts.length > 2) {
-                            value = parts[0] + "." + parts.slice(1).join("");
-                          }
-                          field.onChange(value);
-                        }}
+                      <DecimalInput
+                        placeholder="0,00"
+                        value={field.value ? parseFloat(field.value) : null}
+                        onValueChange={(num) => field.onChange(num !== null ? String(num) : "")}
+                        allowNegative={true}
                         className="text-lg"
                       />
                     </FormControl>

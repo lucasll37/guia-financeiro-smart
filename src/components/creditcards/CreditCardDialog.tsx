@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Database } from "@/integrations/supabase/types";
@@ -134,24 +135,12 @@ export function CreditCardDialog({
 
           <div className="space-y-2">
             <Label htmlFor="credit_limit">Limite (Opcional)</Label>
-            <Input
+            <DecimalInput
               id="credit_limit"
-              type="text"
-              inputMode="decimal"
-              value={formData.credit_limit || ""}
-              onChange={(e) => {
-                let value = e.target.value.replace(/[^\d.,-]/g, "");
-                value = value.replace(",", ".");
-                const parts = value.split(".");
-                if (parts.length > 2) {
-                  value = parts[0] + "." + parts.slice(1).join("");
-                }
-                setFormData({
-                  ...formData,
-                  credit_limit: value ? parseFloat(value) || undefined : undefined,
-                });
-              }}
-              placeholder="0.00"
+              placeholder="0,00"
+              value={formData.credit_limit ?? null}
+              onValueChange={(num) => setFormData({ ...formData, credit_limit: num ?? undefined })}
+              allowNegative={false}
             />
           </div>
 
