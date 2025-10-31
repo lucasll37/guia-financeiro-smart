@@ -81,10 +81,10 @@ export function AppSidebar() {
                         )}
                       >
                         <item.icon 
-                          className={cn(
-                            "h-5 w-5 flex-shrink-0 text-foreground opacity-100",
-                            isActive && "text-primary"
-                          )} 
+                          className="h-5 w-5 flex-shrink-0"
+                          style={{ color: 'hsl(var(--foreground))' }}
+                          absoluteStrokeWidth
+                          strokeWidth={2}
                         />
                         {!isCollapsed && (
                           <span className="flex-1 truncate text-sm">
