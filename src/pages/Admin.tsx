@@ -27,6 +27,7 @@ import { FeedbackManager } from "@/components/admin/FeedbackManager";
 import { SeedCategoriesManager } from "@/components/admin/SeedCategoriesManager";
 import { VersionSettings } from "@/components/admin/VersionSettings";
 import { EmailTemplatesManager } from "@/components/admin/EmailTemplatesManager";
+import { CookieMessageManager } from "@/components/admin/CookieMessageManager";
 const couponSchema = z.object({
   code: z.string().trim().min(3, "Código deve ter no mínimo 3 caracteres").max(50, "Código muito longo"),
   discount_percent: z.number().min(1, "Desconto deve ser entre 1 e 100").max(100, "Desconto deve ser entre 1 e 100"),
@@ -834,6 +835,7 @@ export default function Admin() {
         <TabsContent value="limits" className="space-y-4">
           <PlanLimitsManager />
           <VersionSettings />
+          <CookieMessageManager />
         </TabsContent>
 
         {/* Seed Categories Tab */}

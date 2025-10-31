@@ -1,25 +1,69 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { X, Cookie } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
 
 const COOKIE_CONSENT_KEY = "prospera-cookie-consent";
+const DEFAULT_MESSAGE = `Este site utiliza cookies e armazena dados localmente para melhorar sua experiência de uso. 
+Ao continuar navegando, você concorda com nossa política de privacidade e com o tratamento 
+de dados conforme a LGPD (Lei Geral de Proteção de Dados). Seus dados financeiros são 
+armazenados de forma segura e criptografada.`;
+
+interface CookieSettings {
+  message: string;
+  version: number | null;
+}
 
 export const CookieConsent = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
 
+  const { data: settings } = useQuery({
+    queryKey: ["cookie-consent-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("admin_settings")
+        .select("setting_value")
+        .eq("setting_key", "cookie_consent_message")
+        .single();
+
+      if (error && error.code !== "PGRST116") throw error;
+      return (data?.setting_value as unknown as CookieSettings) || { message: DEFAULT_MESSAGE, version: null };
+    },
+  });
+
   useEffect(() => {
-    const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
-    if (!consent) {
+    const storedConsent = localStorage.getItem(COOKIE_CONSENT_KEY);
+    
+    if (!storedConsent) {
+      setIsVisible(true);
+      return;
+    }
+
+    // Verificar se a versão mudou
+    try {
+      const { version: storedVersion } = JSON.parse(storedConsent);
+      const currentVersion = settings?.version;
+
+      // Se há uma nova versão, mostrar novamente
+      if (currentVersion && storedVersion !== currentVersion) {
+        setIsVisible(true);
+      }
+    } catch {
+      // Se houver erro ao parsear, mostrar novamente
       setIsVisible(true);
     }
-  }, []);
+  }, [settings]);
 
   const handleClose = () => {
-    if (dontShowAgain) {
-      localStorage.setItem(COOKIE_CONSENT_KEY, "accepted");
+    if (dontShowAgain && settings?.version) {
+      localStorage.setItem(
+        COOKIE_CONSENT_KEY,
+        JSON.stringify({ version: settings.version })
+      );
     }
     setIsVisible(false);
   };
@@ -40,11 +84,8 @@ export const CookieConsent = () => {
                   <h3 className="font-semibold text-lg mb-2">
                     Aviso sobre Cookies e Privacidade
                   </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Este site utiliza cookies e armazena dados localmente para melhorar sua experiência de uso. 
-                    Ao continuar navegando, você concorda com nossa política de privacidade e com o tratamento 
-                    de dados conforme a LGPD (Lei Geral de Proteção de Dados). Seus dados financeiros são 
-                    armazenados de forma segura e criptografada.
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                    {settings?.message || DEFAULT_MESSAGE}
                   </p>
                 </div>
                 <Button
