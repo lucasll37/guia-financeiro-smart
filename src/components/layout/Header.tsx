@@ -90,19 +90,15 @@ export const Header = () => {
       <div className="relative flex h-14 md:h-16 items-center gap-2 md:gap-4 px-2 md:px-4">
         <SidebarTrigger />
         
-        {/* Logo Prospera */}
-        <div className="flex items-center gap-2 mr-2 md:mr-4">
-          <div className="flex items-center gap-2 px-2 py-1 rounded-md">
-            <Wallet className="h-5 w-5 md:h-6 md:w-6 text-primary" />
-            <span className="font-display text-base md:text-xl font-bold text-foreground">
+        {/* Logo e Slogan Centralizados */}
+        <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center leading-none">
+          <div className="flex items-center gap-1.5">
+            <Wallet className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+            <span className="font-display text-lg md:text-2xl font-bold text-foreground">
               Prospera
             </span>
           </div>
-        </div>
-        
-        {/* Slogan Centralizado */}
-        <div className="absolute left-1/2 -translate-x-1/2 hidden md:block">
-          <span className="text-sm font-medium text-muted-foreground tracking-wide">
+          <span className="text-[10px] md:text-xs text-muted-foreground font-medium tracking-wide mt-0.5">
             Gestor Financeiro
           </span>
         </div>
