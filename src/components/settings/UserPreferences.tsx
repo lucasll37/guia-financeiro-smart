@@ -148,7 +148,7 @@ export function UserPreferences() {
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="showValues">Mostrar valores por padrão</Label>
+              <Label htmlFor="showValues">Mostrar Valores ao fazer login</Label>
               <p className="text-sm text-muted-foreground">
                 Quando desabilitado, os valores aparecem mascarados ao fazer login
               </p>
