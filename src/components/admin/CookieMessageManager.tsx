@@ -191,7 +191,7 @@ export const CookieMessageManager = () => {
             disabled={updateMessageMutation.isPending}
           >
             <Save className="h-4 w-4 mr-2" />
-            Salvar Mensagem
+            Salvar Configurações
           </Button>
 
           <Button
