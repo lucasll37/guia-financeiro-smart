@@ -4,7 +4,7 @@ import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, ChevronDown, ChevronRight as ChevronRightIcon, TrendingUp, Receipt, BarChart3, Lightbulb, CalendarIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronRight as ChevronRightIcon, TrendingUp, Receipt, BarChart3, Lightbulb, CalendarIcon, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useTransactions } from "@/hooks/useTransactions";
@@ -49,7 +49,23 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
   const [incomeExpanded, setIncomeExpanded] = useState(true);
   const [expenseExpanded, setExpenseExpanded] = useState(true);
   const [balanceExpanded, setBalanceExpanded] = useState(true);
+  const [sortField, setSortField] = useState<'category' | 'forecasted' | 'actual' | 'difference' | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const { maskValue } = useMaskValues();
+  
+  const handleSort = (field: 'category' | 'forecasted' | 'actual' | 'difference') => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const renderSortIcon = (field: 'category' | 'forecasted' | 'actual' | 'difference') => {
+    if (sortField !== field) return <ArrowUpDown className="h-3 w-3 ml-1" />;
+    return sortDirection === 'asc' ? <ArrowUp className="h-3 w-3 ml-1" /> : <ArrowDown className="h-3 w-3 ml-1" />;
+  };
   
   const toggleCategoryExpansion = (categoryKey: string) => {
     setExpandedCategories(prev => {
@@ -181,18 +197,45 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
       Object.entries(expenseCategories).filter(([_, cat]) => cat.actual > 0 || cat.forecasted > 0)
     );
 
+    // Aplicar ordenamento
+    const sortCategories = (categories: typeof filteredIncomeCategories) => {
+      if (!sortField) return categories;
+      
+      const entries = Object.entries(categories);
+      entries.sort(([, a], [, b]) => {
+        let comparison = 0;
+        
+        if (sortField === 'category') {
+          comparison = a.categoryName.localeCompare(b.categoryName);
+        } else if (sortField === 'forecasted') {
+          comparison = a.forecasted - b.forecasted;
+        } else if (sortField === 'actual') {
+          comparison = a.actual - b.actual;
+        } else if (sortField === 'difference') {
+          comparison = (a.forecasted - a.actual) - (b.forecasted - b.actual);
+        }
+        
+        return sortDirection === 'asc' ? comparison : -comparison;
+      });
+      
+      return Object.fromEntries(entries);
+    };
+
+    const sortedIncomeCategories = sortCategories(filteredIncomeCategories);
+    const sortedExpenseCategories = sortCategories(filteredExpenseCategories);
+
     // totalIncome já é positivo, totalExpense já é positivo (valor absoluto)
     const incomeTotal = Object.values(filteredIncomeCategories).reduce((sum, cat) => sum + cat.actual, 0);
     const expenseTotal = Object.values(filteredExpenseCategories).reduce((sum, cat) => sum + cat.actual, 0);
 
     return {
-      incomeTotals: filteredIncomeCategories,
-      expenseTotals: filteredExpenseCategories,
+      incomeTotals: sortedIncomeCategories,
+      expenseTotals: sortedExpenseCategories,
       totalIncome: incomeTotal,
       totalExpense: expenseTotal,
       categoryTransactionsMap: new Map(Object.entries({ ...filteredIncomeCategories, ...filteredExpenseCategories }).map(([k, v]) => [k, v.transactions])),
     };
-  }, [periodTransactions, forecasts, periodStart, categories]);
+  }, [periodTransactions, forecasts, periodStart, categories, sortField, sortDirection]);
 
   // Saldo do Período = Saldo Anterior + Receitas - Despesas
   // previousBalance já considera todas as transações anteriores (receitas - despesas)
@@ -297,10 +340,50 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-[40px] max-w-[40px]"></TableHead>
-                      <TableHead className="w-[280px] max-w-[280px]">Categoria</TableHead>
-                      <TableHead className="text-right w-[150px] max-w-[150px]">Previsto</TableHead>
-                      <TableHead className="text-right w-[150px] max-w-[150px]">Realizado</TableHead>
-                      <TableHead className="text-right w-[150px] max-w-[150px]">Diferença</TableHead>
+                      <TableHead className="w-[280px] max-w-[280px]">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleSort('category')}
+                          className="flex items-center gap-1 p-0 h-auto font-medium hover:bg-transparent"
+                        >
+                          Categoria
+                          {renderSortIcon('category')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-right w-[150px] max-w-[150px]">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleSort('forecasted')}
+                          className="flex items-center gap-1 p-0 h-auto font-medium ml-auto hover:bg-transparent"
+                        >
+                          Previsto
+                          {renderSortIcon('forecasted')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-right w-[150px] max-w-[150px]">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleSort('actual')}
+                          className="flex items-center gap-1 p-0 h-auto font-medium ml-auto hover:bg-transparent"
+                        >
+                          Realizado
+                          {renderSortIcon('actual')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-right w-[150px] max-w-[150px]">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleSort('difference')}
+                          className="flex items-center gap-1 p-0 h-auto font-medium ml-auto hover:bg-transparent"
+                        >
+                          Diferença
+                          {renderSortIcon('difference')}
+                        </Button>
+                      </TableHead>
                       <TableHead className="text-right w-[200px] max-w-[200px]">Progresso</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -462,10 +545,50 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-[40px] max-w-[40px]"></TableHead>
-                      <TableHead className="w-[280px] max-w-[280px]">Categoria</TableHead>
-                      <TableHead className="text-right w-[150px] max-w-[150px]">Previsto</TableHead>
-                      <TableHead className="text-right w-[150px] max-w-[150px]">Realizado</TableHead>
-                      <TableHead className="text-right w-[150px] max-w-[150px]">Diferença</TableHead>
+                      <TableHead className="w-[280px] max-w-[280px]">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleSort('category')}
+                          className="flex items-center gap-1 p-0 h-auto font-medium hover:bg-transparent"
+                        >
+                          Categoria
+                          {renderSortIcon('category')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-right w-[150px] max-w-[150px]">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleSort('forecasted')}
+                          className="flex items-center gap-1 p-0 h-auto font-medium ml-auto hover:bg-transparent"
+                        >
+                          Previsto
+                          {renderSortIcon('forecasted')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-right w-[150px] max-w-[150px]">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleSort('actual')}
+                          className="flex items-center gap-1 p-0 h-auto font-medium ml-auto hover:bg-transparent"
+                        >
+                          Realizado
+                          {renderSortIcon('actual')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-right w-[150px] max-w-[150px]">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleSort('difference')}
+                          className="flex items-center gap-1 p-0 h-auto font-medium ml-auto hover:bg-transparent"
+                        >
+                          Diferença
+                          {renderSortIcon('difference')}
+                        </Button>
+                      </TableHead>
                       <TableHead className="text-right w-[200px] max-w-[200px]">Progresso</TableHead>
                     </TableRow>
                   </TableHeader>
