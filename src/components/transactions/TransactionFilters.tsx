@@ -47,7 +47,9 @@ export function TransactionFilters({ accounts, categories, filters, onFilterChan
   }, []);
 
   const handleMonthChange = (month: string) => {
-    const monthDate = new Date(month + "-01");
+    // Evitar parsing UTC com new Date("yyyy-MM-01") que causa shift de mês
+    const [y, m] = month.split("-").map(Number);
+    const monthDate = new Date(y, (m || 1) - 1, 1);
     const startDate = format(startOfMonth(monthDate), "yyyy-MM-dd");
     const endDate = format(endOfMonth(monthDate), "yyyy-MM-dd");
     
