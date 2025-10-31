@@ -50,8 +50,11 @@ export function CategoryDialog({
   // Verifica se é categoria gerada pelo sistema (não pode ser editada)
   const isSystemGenerated = category?.is_system_generated || false;
   
-  // Verifica se é conta tipo casa tentando criar/editar receita
-  const isCasaRevenueRestricted = (accountType === "casa" && formData.type === "receita") || isSystemGenerated;
+  // Verifica se é conta tipo casa tentando criar nova receita
+  const isCasaTryingToCreateRevenue = !category && accountType === "casa" && formData.type === "receita";
+  
+  // Bloquear edição se for categoria do sistema OU tentando criar receita em conta casa
+  const isRestricted = isSystemGenerated || isCasaTryingToCreateRevenue;
 
   useEffect(() => {
     if (category) {
@@ -136,12 +139,12 @@ export function CategoryDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          {isCasaRevenueRestricted && (
+          {isRestricted && (
             <div className="p-3 border border-amber-500/50 bg-amber-500/10 rounded-md">
               <p className="text-sm text-amber-600 dark:text-amber-400">
                 <strong>Atenção:</strong> {isSystemGenerated 
                   ? "Esta categoria foi criada automaticamente pelo sistema e não pode ser editada."
-                  : "Em contas tipo Casa, as subcategorias de receita são criadas automaticamente baseadas nos membros da conta e não podem ser editadas manualmente."}
+                  : "Em contas tipo Casa, as subcategorias de receita são criadas automaticamente baseadas nos membros da conta e não podem ser criadas manualmente."}
               </p>
             </div>
           )}
@@ -153,7 +156,7 @@ export function CategoryDialog({
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Ex: Alimentação"
-              disabled={isCasaRevenueRestricted}
+              disabled={isRestricted}
             />
             {errors.name && (
               <p className="text-sm text-destructive">{errors.name}</p>
@@ -167,7 +170,7 @@ export function CategoryDialog({
               onValueChange={(value: any) =>
                 setFormData({ ...formData, type: value })
               }
-              disabled={!!category || (accountType === "casa" && formData.type === "receita")}
+              disabled={isSystemGenerated || !!category}
             >
               <SelectTrigger id="type">
                 <SelectValue />
@@ -194,7 +197,7 @@ export function CategoryDialog({
                   parent_id: value === "none" ? null : value,
                 })
               }
-              disabled={isCasaRevenueRestricted}
+              disabled={isRestricted}
             >
               <SelectTrigger id="parent">
                 <SelectValue placeholder="Sem categoria pai" />
@@ -227,7 +230,7 @@ export function CategoryDialog({
                   }`}
                   style={{ backgroundColor: color }}
                   onClick={() => setFormData({ ...formData, color })}
-                  disabled={isCasaRevenueRestricted}
+                  disabled={isRestricted}
                 />
               ))}
             </div>
@@ -236,7 +239,7 @@ export function CategoryDialog({
               value={formData.color}
               onChange={(e) => setFormData({ ...formData, color: e.target.value })}
               className="w-full h-10"
-              disabled={isCasaRevenueRestricted}
+              disabled={isRestricted}
             />
           </div>
         </div>
@@ -245,7 +248,7 @@ export function CategoryDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={isCasaRevenueRestricted}>
+          <Button onClick={handleSubmit} disabled={isRestricted}>
             {category ? "Salvar" : "Criar Categoria"}
           </Button>
         </DialogFooter>
