@@ -35,21 +35,62 @@ import { cn } from "@/lib/utils";
 const ITEMS_PER_PAGE = 50;
 
 const ACTION_LABELS: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+  // Contas
   create_account: { label: "Conta Criada", variant: "default" },
+  update_account: { label: "Conta Editada", variant: "outline" },
+  delete_account: { label: "Conta Apagada", variant: "destructive" },
+  
+  // Compartilhamento de Contas
+  share_account: { label: "Conta Compartilhada", variant: "default" },
+  update_account_share: { label: "Compartilhamento Atualizado", variant: "outline" },
+  remove_account_share: { label: "Compartilhamento Removido", variant: "destructive" },
+  
+  // Lançamentos
   create_transaction: { label: "Transação Criada", variant: "secondary" },
   update_transaction: { label: "Transação Atualizada", variant: "outline" },
   delete_transaction: { label: "Transação Excluída", variant: "destructive" },
+  
+  // Previsões
+  create_forecast: { label: "Previsão Criada", variant: "default" },
+  update_forecast: { label: "Previsão Editada", variant: "outline" },
+  delete_forecast: { label: "Previsão Apagada", variant: "destructive" },
+  
+  // Investimentos
   create_investment: { label: "Investimento Criado", variant: "default" },
+  update_investment: { label: "Investimento Editado", variant: "outline" },
+  delete_investment: { label: "Investimento Apagado", variant: "destructive" },
+  
+  // Compartilhamento de Investimentos
+  share_investment: { label: "Investimento Compartilhado", variant: "default" },
+  update_investment_share: { label: "Compartilhamento Atualizado", variant: "outline" },
+  remove_investment_share: { label: "Compartilhamento Removido", variant: "destructive" },
+  
+  // Retornos Mensais
+  create_monthly_return: { label: "Rentabilidade Registrada", variant: "default" },
+  update_monthly_return: { label: "Rentabilidade Editada", variant: "outline" },
+  delete_monthly_return: { label: "Rentabilidade Apagada", variant: "destructive" },
+  
+  // Metas
   create_goal: { label: "Meta Criada", variant: "default" },
+  update_goal: { label: "Meta Editada", variant: "outline" },
+  delete_goal: { label: "Meta Apagada", variant: "destructive" },
+  
+  // Cartões de Crédito
   create_credit_card: { label: "Cartão Criado", variant: "default" },
+  update_credit_card: { label: "Cartão Editado", variant: "outline" },
+  delete_credit_card: { label: "Cartão Apagado", variant: "destructive" },
 };
 
 const ENTITY_LABELS: Record<string, string> = {
   account: "Conta",
+  account_member: "Compartilhamento de Conta",
   transaction: "Transação",
-  investment: "Investimento",
+  forecast: "Previsão",
   goal: "Meta",
-  credit_card: "Cartão",
+  investment: "Investimento",
+  investment_member: "Compartilhamento de Investimento",
+  monthly_return: "Rentabilidade Mensal",
+  credit_card: "Cartão de Crédito",
 };
 
 export function UserActionLogs() {
