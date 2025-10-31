@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar, CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
-import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, addMonths, subMonths } from "date-fns";
+import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, addMonths, subMonths, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
@@ -43,13 +43,15 @@ export function ForecastFilters({ accounts, filters, onFilterChange, accountId, 
   };
 
   const handlePreviousMonth = () => {
-    const currentDate = new Date(filters.selectedMonth + "-01T00:00:00");
+    const [y, m] = filters.selectedMonth.split("-").map(Number);
+    const currentDate = new Date(y, (m || 1) - 1, 1);
     const previousMonth = subMonths(currentDate, 1);
     handleMonthChange(previousMonth);
   };
 
   const handleNextMonth = () => {
-    const currentDate = new Date(filters.selectedMonth + "-01T00:00:00");
+    const [y, m] = filters.selectedMonth.split("-").map(Number);
+    const currentDate = new Date(y, (m || 1) - 1, 1);
     const nextMonth = addMonths(currentDate, 1);
     handleMonthChange(nextMonth);
   };
@@ -94,15 +96,13 @@ export function ForecastFilters({ accounts, filters, onFilterChange, accountId, 
             {filters.viewMode === "monthly" ? "Visualização Mensal" : "Período Personalizado"}
           </span>
         </div>
-        {!isCasaAccount && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={toggleViewMode}
-          >
-            {filters.viewMode === "monthly" ? "Personalizar Período" : "Voltar para Mensal"}
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={toggleViewMode}
+        >
+          {filters.viewMode === "monthly" ? "Personalizar Período" : "Voltar para Mensal"}
+        </Button>
       </div>
 
       <div className={`grid gap-4 p-4 border rounded-lg bg-card ${accountId ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
@@ -152,7 +152,7 @@ export function ForecastFilters({ accounts, filters, onFilterChange, accountId, 
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {filters.selectedMonth 
-                    ? format(new Date(filters.selectedMonth + "-01T00:00:00"), "MMMM 'de' yyyy", { locale: ptBR })
+                    ? format(parseISO(filters.selectedMonth + "-01"), "MMMM 'de' yyyy", { locale: ptBR })
                     : "Selecione o mês"
                   }
                 </Button>
@@ -160,7 +160,7 @@ export function ForecastFilters({ accounts, filters, onFilterChange, accountId, 
               <PopoverContent className="w-auto p-0" align="start">
                 <CalendarComponent
                   mode="single"
-                  selected={filters.selectedMonth ? new Date(filters.selectedMonth + "-01T00:00:00") : undefined}
+                  selected={filters.selectedMonth ? parseISO(filters.selectedMonth + "-01") : undefined}
                   onSelect={handleMonthChange}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
@@ -192,13 +192,13 @@ export function ForecastFilters({ accounts, filters, onFilterChange, accountId, 
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {filters.startDate ? format(new Date(filters.startDate + "T00:00:00"), "dd/MM/yyyy") : "Selecione"}
+                  {filters.startDate ? format(parseISO(filters.startDate), "dd/MM/yyyy") : "Selecione"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <CalendarComponent
                   mode="single"
-                  selected={filters.startDate ? new Date(filters.startDate + "T00:00:00") : undefined}
+                  selected={filters.startDate ? parseISO(filters.startDate) : undefined}
                   onSelect={(date) => date && onFilterChange({ ...filters, startDate: format(date, "yyyy-MM-dd") })}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
@@ -220,15 +220,15 @@ export function ForecastFilters({ accounts, filters, onFilterChange, accountId, 
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {filters.endDate ? format(new Date(filters.endDate + "T00:00:00"), "dd/MM/yyyy") : "Selecione"}
+                  {filters.endDate ? format(parseISO(filters.endDate), "dd/MM/yyyy") : "Selecione"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <CalendarComponent
                   mode="single"
-                  selected={filters.endDate ? new Date(filters.endDate + "T00:00:00") : undefined}
+                  selected={filters.endDate ? parseISO(filters.endDate) : undefined}
                   onSelect={(date) => date && onFilterChange({ ...filters, endDate: format(date, "yyyy-MM-dd") })}
-                  disabled={(date) => (filters.startDate ? date < new Date(filters.startDate + "T00:00:00") : false)}
+                  disabled={(date) => (filters.startDate ? date < parseISO(filters.startDate) : false)}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
                   locale={ptBR}

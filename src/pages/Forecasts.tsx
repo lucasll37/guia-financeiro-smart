@@ -12,7 +12,7 @@ import { ForecastFilters } from "@/components/forecasts/ForecastFilters";
 import { BudgetWizard } from "@/components/forecasts/BudgetWizard";
 import { useAccountEditPermissions } from "@/hooks/useAccountEditPermissions";
 import { CasaRevenueSplitManager } from "@/components/accounts/CasaRevenueSplitManager";
-import { format, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
+import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -102,11 +102,11 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
   const filteredForecasts = useMemo(() => {
     if (!forecasts) return [];
     
-    const startDate = new Date(filters.startDate);
-    const endDate = new Date(filters.endDate);
+    const startDate = parseISO(filters.startDate);
+    const endDate = parseISO(filters.endDate);
     
     return forecasts.filter((f) => {
-      const forecastStart = new Date(f.period_start);
+      const forecastStart = parseISO(f.period_start);
       return forecastStart >= startDate && forecastStart <= endDate;
     });
   }, [forecasts, filters.startDate, filters.endDate]);
@@ -139,8 +139,12 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
   const handleCopyForecast = async () => {
     if (!copyTargetMonth || filters.accountId === "all") return;
 
-    const sourcePeriodStart = format(startOfMonth(new Date(filters.selectedMonth + "-01T00:00:00")), "yyyy-MM-dd");
-    const targetDate = new Date(copyTargetMonth + "-01T00:00:00");
+    const [y, m] = filters.selectedMonth.split("-").map(Number);
+    const sourceDate = new Date(y, (m || 1) - 1, 1);
+    const sourcePeriodStart = format(startOfMonth(sourceDate), "yyyy-MM-dd");
+    
+    const [ty, tm] = copyTargetMonth.split("-").map(Number);
+    const targetDate = new Date(ty, (tm || 1) - 1, 1);
     const targetPeriodStart = format(startOfMonth(targetDate), "yyyy-MM-dd");
     const targetPeriodEnd = format(endOfMonth(targetDate), "yyyy-MM-dd");
 
@@ -325,8 +329,8 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             <AlertDialogTitle>Copiar Previsões</AlertDialogTitle>
             <AlertDialogDescription>
               {selectedAccount?.type === "casa" 
-                ? `Copiar apenas as despesas previstas de ${format(new Date(filters.selectedMonth + "-01T00:00:00"), "MMMM 'de' yyyy", { locale: ptBR })} para qual mês? (As receitas serão calculadas automaticamente)`
-                : `Copiar todas as previsões de ${format(new Date(filters.selectedMonth + "-01T00:00:00"), "MMMM 'de' yyyy", { locale: ptBR })} para qual mês?`
+                ? `Copiar apenas as despesas previstas de ${format(parseISO(filters.selectedMonth + "-01"), "MMMM 'de' yyyy", { locale: ptBR })} para qual mês? (As receitas serão calculadas automaticamente)`
+                : `Copiar todas as previsões de ${format(parseISO(filters.selectedMonth + "-01"), "MMMM 'de' yyyy", { locale: ptBR })} para qual mês?`
               }
             </AlertDialogDescription>
           </AlertDialogHeader>
