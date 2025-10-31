@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface MaskValuesContextType {
   isMasked: boolean;
@@ -22,6 +23,18 @@ export function MaskValuesProvider({ children }: { children: ReactNode }) {
     }
     return false;
   });
+
+  const { user } = useAuth();
+  useEffect(() => {
+    if (!user) return;
+    try {
+      const saved = localStorage.getItem("user-preferences");
+      if (saved) {
+        const prefs = JSON.parse(saved);
+        setIsMasked(prefs.hideValuesOnLogin === true);
+      }
+    } catch {}
+  }, [user?.id]);
 
   const toggleMask = () => setIsMasked((prev) => !prev);
 

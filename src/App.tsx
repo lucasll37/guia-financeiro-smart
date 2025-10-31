@@ -70,13 +70,13 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <MaskValuesProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <PageMeta />
-            <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <PageMeta />
+          <AuthProvider>
+            <MaskValuesProvider>
               <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/auth" element={<Auth />} />
@@ -103,10 +103,10 @@ const App = () => (
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </MaskValuesProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
-      </MaskValuesProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
