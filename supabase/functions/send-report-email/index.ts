@@ -45,7 +45,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Prospera <noreply@prospera.lucaslima.ai>",
+        from: "Prospera! <noreply@prospera.lucaslima.ai>",
         to: [email],
         subject: `📊 Seu Relatório Financeiro - ${reportPeriod}`,
         html: `

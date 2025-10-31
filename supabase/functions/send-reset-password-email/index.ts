@@ -82,7 +82,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Enviar email estilizado
     const emailResponse = await resend.emails.send({
-      from: "Prospera <noreply@prospera.lucaslima.ai>",
+      from: "Prospera! <noreply@prospera.lucaslima.ai>",
       to: [email],
       subject: "Redefinição de Senha - Controle Financeiro",
       html: `
