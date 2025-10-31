@@ -18,6 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Mail, CheckCircle, Loader2, Check, X } from "lucide-react";
+import { PasswordStrengthIndicator, validatePassword } from "@/components/auth/PasswordStrengthIndicator";
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
@@ -168,8 +169,10 @@ export default function Auth() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("A senha deve ter pelo menos 6 caracteres");
+    // Validar força da senha
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      setError("A senha não atende aos requisitos de segurança. Verifique os critérios abaixo.");
       return;
     }
 
@@ -417,6 +420,7 @@ export default function Auth() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
+                  <PasswordStrengthIndicator password={password} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="confirm-password">{t("auth.confirmPassword")}</Label>
