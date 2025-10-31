@@ -68,7 +68,7 @@ export const CookieMessageManager = () => {
             message,
             version: currentVersion,
           },
-        });
+        }, { onConflict: "setting_key" });
 
       if (error) throw error;
       return currentVersion;
@@ -103,7 +103,7 @@ export const CookieMessageManager = () => {
             message,
             version: newVersion,
           },
-        });
+        }, { onConflict: "setting_key" });
 
       if (error) throw error;
       return newVersion;

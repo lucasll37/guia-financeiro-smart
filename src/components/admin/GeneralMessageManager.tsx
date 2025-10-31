@@ -66,7 +66,7 @@ export const GeneralMessageManager = () => {
             message,
             version: currentVersion,
           },
-        });
+        }, { onConflict: "setting_key" });
 
       if (error) throw error;
       return currentVersion;
@@ -102,7 +102,7 @@ export const GeneralMessageManager = () => {
             message,
             version: newVersion,
           },
-        });
+        }, { onConflict: "setting_key" });
 
       if (error) throw error;
       return newVersion;
