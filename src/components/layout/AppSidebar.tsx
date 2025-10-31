@@ -72,7 +72,7 @@ export function AppSidebar() {
                           "flex items-center rounded-lg overflow-visible",
                           isCollapsed ? "justify-center" : "gap-3 px-3 py-2.5",
                           "hover:bg-accent/50 transition-colors",
-                          isActive ? "text-primary font-medium" : "text-foreground/60 hover:text-foreground/80",
+                          isActive ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground",
                           isActive && [
                             !isCollapsed && "before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2",
                             !isCollapsed && "before:h-8 before:w-1 before:rounded-r-full before:bg-primary",
