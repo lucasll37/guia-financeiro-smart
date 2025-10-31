@@ -3,6 +3,22 @@ import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
+// Função auxiliar para registrar ações de autenticação
+const logAuthAction = async (userId: string, action: string, metadata?: any) => {
+  try {
+    await supabase
+      .from("user_action_logs")
+      .insert({
+        user_id: userId,
+        action,
+        entity_type: "auth",
+        metadata: metadata || {},
+      });
+  } catch (error) {
+    console.error("Erro ao registrar log de autenticação:", error);
+  }
+};
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -85,14 +101,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+
+    // Registrar log de login bem-sucedido
+    if (!error && data.user) {
+      setTimeout(() => {
+        logAuthAction(data.user.id, "login", { email });
+      }, 0);
+    }
+
     return { error };
   };
 
   const signOut = async () => {
+    // Registrar log de logout antes de limpar estado
+    if (user) {
+      setTimeout(() => {
+        logAuthAction(user.id, "logout", { email: user.email });
+      }, 0);
+    }
+
     // Limpar estado local imediatamente
     setSession(null);
     setUser(null);
@@ -118,6 +149,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (functionError) {
         throw functionError;
+      }
+
+      // Buscar user_id pelo email para registrar log
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("email", email)
+        .single();
+
+      if (profiles) {
+        setTimeout(() => {
+          logAuthAction(profiles.id, "reset_password_request", { email });
+        }, 0);
       }
 
       return { error: null };

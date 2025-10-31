@@ -212,6 +212,23 @@ export function ProfileSection() {
 
       if (error) throw error;
 
+      // Registrar log de solicitação de exclusão
+      if (user?.id) {
+        setTimeout(() => {
+          supabase
+            .from("user_action_logs")
+            .insert({
+              user_id: user.id,
+              action: "delete_account_request",
+              entity_type: "auth",
+              metadata: { email: user.email },
+            })
+            .then(({ error: logError }) => {
+              if (logError) console.error("Erro ao registrar log:", logError);
+            });
+        }, 0);
+      }
+
       toast({
         title: "Email enviado",
         description: "Verifique seu email para confirmar a exclusão da conta",

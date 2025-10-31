@@ -96,6 +96,22 @@ const handler = async (req: Request): Promise<Response> => {
 
     const userId = tokenData.user_id;
 
+    // Registrar log de exclusão de conta ANTES de deletar os dados
+    try {
+      await supabaseClient
+        .from("user_action_logs")
+        .insert({
+          user_id: userId,
+          action: "delete_account",
+          entity_type: "auth",
+          metadata: {
+            confirmed_at: new Date().toISOString(),
+          },
+        });
+    } catch (logError) {
+      console.error("Erro ao registrar log de exclusão:", logError);
+    }
+
     // Marcar token como usado
     await supabaseClient
       .from("account_deletion_tokens")

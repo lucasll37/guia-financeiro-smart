@@ -51,12 +51,29 @@ const ResetPassword = () => {
 
     try {
       // Atualizar senha
-      const { error: updateError } = await supabase.auth.updateUser({
+      const { data, error: updateError } = await supabase.auth.updateUser({
         password: password,
       });
 
       if (updateError) {
         throw updateError;
+      }
+
+      // Registrar log de reset de senha concluído
+      if (data.user) {
+        setTimeout(() => {
+          supabase
+            .from("user_action_logs")
+            .insert({
+              user_id: data.user.id,
+              action: "reset_password_completed",
+              entity_type: "auth",
+              metadata: { email: data.user.email },
+            })
+            .then(({ error: logError }) => {
+              if (logError) console.error("Erro ao registrar log:", logError);
+            });
+        }, 0);
       }
 
       setSuccess(true);
