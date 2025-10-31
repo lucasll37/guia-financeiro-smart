@@ -139,10 +139,13 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
   const handleCopyForecast = async () => {
     if (!copyTargetMonth || filters.accountId === "all") return;
 
-    const sourcePeriodStart = format(startOfMonth(new Date(filters.selectedMonth + "-01")), "yyyy-MM-dd");
-    const targetDate = new Date(copyTargetMonth + "-01");
+    const sourcePeriodStart = format(startOfMonth(new Date(filters.selectedMonth + "-01T00:00:00")), "yyyy-MM-dd");
+    const targetDate = new Date(copyTargetMonth + "-01T00:00:00");
     const targetPeriodStart = format(startOfMonth(targetDate), "yyyy-MM-dd");
     const targetPeriodEnd = format(endOfMonth(targetDate), "yyyy-MM-dd");
+
+    console.log("Copiando de:", filters.selectedMonth, "para:", copyTargetMonth);
+    console.log("Source period start:", sourcePeriodStart);
 
     await copyForecast.mutateAsync({
       sourcePeriodStart,
