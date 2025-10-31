@@ -80,6 +80,19 @@ export function TransactionFilters({ accounts, categories, filters, onFilterChan
       // Reset to current month when switching back to monthly view
       const currentMonth = format(new Date(), "yyyy-MM");
       handleMonthChange(currentMonth);
+    } else {
+      // Set to first and last day of current year for custom period
+      const today = new Date();
+      const startDate = format(new Date(today.getFullYear(), 0, 1), "yyyy-MM-dd");
+      const endDate = format(new Date(today.getFullYear(), 11, 31), "yyyy-MM-dd");
+      
+      onFilterChange({
+        ...filters,
+        viewMode: newMode,
+        startDate,
+        endDate,
+      });
+      return;
     }
     
     onFilterChange({
