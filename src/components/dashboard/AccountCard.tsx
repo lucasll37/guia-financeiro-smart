@@ -56,7 +56,14 @@ export function AccountCard({
         const txDate = parseISO(t.date);
         return txDate < monthStart;
       }
-    }).reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+    }).reduce((sum, t) => {
+      if (t.categories?.type === "receita") {
+        return sum + Number(t.amount);
+      } else if (t.categories?.type === "despesa") {
+        return sum - Number(t.amount);
+      }
+      return sum;
+    }, 0) || 0;
 
     // Transações do período selecionado
     const periodTransactions = transactions?.filter(t => {
@@ -71,15 +78,15 @@ export function AccountCard({
       }
     }) || [];
 
-    // Receitas do período (valores positivos)
+    // Receitas do período
     const periodIncome = periodTransactions
-      .filter(t => Number(t.amount) > 0)
+      .filter(t => t.categories?.type === "receita")
       .reduce((sum, t) => sum + Number(t.amount), 0);
 
-    // Despesas do período (valores negativos, mas usamos em valor absoluto)
+    // Despesas do período
     const expenses = periodTransactions
-      .filter(t => Number(t.amount) < 0)
-      .reduce((sum, t) => sum + Math.abs(Number(t.amount)), 0);
+      .filter(t => t.categories?.type === "despesa")
+      .reduce((sum, t) => sum + Number(t.amount), 0);
 
     // Saldo do período = Saldo Anterior + Receitas - Despesas
     const balance = previousBalance + periodIncome - expenses;
