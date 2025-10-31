@@ -1,45 +1,49 @@
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "next-themes";
 import { useEffect } from "react";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 export const ThemeToggle = () => {
-  const { preferences, updatePreferences } = useUserPreferences();
+  const { theme, setTheme } = useTheme();
+  const { updatePreferences } = useUserPreferences();
 
+  // Sincronizar next-themes com useUserPreferences
   useEffect(() => {
-    // Aplicar tema ao montar o componente
-    const applyTheme = (theme: "light" | "dark" | "system") => {
-      if (theme === "system") {
-        const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        document.documentElement.classList.toggle("dark", systemPrefersDark);
-      } else {
-        document.documentElement.classList.toggle("dark", theme === "dark");
-      }
-    };
+    if (theme) {
+      updatePreferences({ theme: theme as "light" | "dark" | "system" });
+    }
+  }, [theme]);
 
-    applyTheme(preferences.theme);
-  }, [preferences.theme]);
-
-  const toggleTheme = () => {
-    const isDark = document.documentElement.classList.contains("dark");
-    const newTheme = isDark ? "light" : "dark";
-    updatePreferences({ theme: newTheme });
+  const cycleTheme = () => {
+    const themes = ["light", "dark", "system"] as const;
+    const currentIndex = themes.indexOf(theme as typeof themes[number]);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    setTheme(themes[nextIndex]);
   };
 
-  const isDark = document.documentElement.classList.contains("dark");
+  const getIcon = () => {
+    switch (theme) {
+      case "light":
+        return <Sun className="h-5 w-5" />;
+      case "dark":
+        return <Moon className="h-5 w-5" />;
+      case "system":
+        return <Monitor className="h-5 w-5" />;
+      default:
+        return <Sun className="h-5 w-5" />;
+    }
+  };
 
   return (
     <Button
       variant="ghost"
       size="icon"
-      onClick={toggleTheme}
+      onClick={cycleTheme}
       aria-label="Alternar tema"
+      title={`Tema atual: ${theme === "light" ? "Claro" : theme === "dark" ? "Escuro" : "Sistema"}`}
     >
-      {isDark ? (
-        <Sun className="h-5 w-5" />
-      ) : (
-        <Moon className="h-5 w-5" />
-      )}
+      {getIcon()}
     </Button>
   );
 };

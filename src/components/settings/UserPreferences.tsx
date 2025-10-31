@@ -26,6 +26,15 @@ export function UserPreferences() {
     });
   };
 
+  const handleThemeChange = (newTheme: string) => {
+    setTheme(newTheme);
+    updatePreferences({ theme: newTheme as "light" | "dark" | "system" });
+    toast({
+      title: "Tema atualizado",
+      description: "Suas configurações foram salvas com sucesso",
+    });
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -41,7 +50,7 @@ export function UserPreferences() {
         <CardContent>
           <div className="space-y-2">
             <Label htmlFor="theme">Aparência</Label>
-            <Select value={theme} onValueChange={setTheme}>
+            <Select value={theme} onValueChange={handleThemeChange}>
               <SelectTrigger id="theme">
                 <SelectValue placeholder="Selecione o tema" />
               </SelectTrigger>
