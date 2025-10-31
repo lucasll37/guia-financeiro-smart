@@ -35,8 +35,8 @@ export function TransactionsTable({
   canEdit = true,
   accountType,
 }: TransactionsTableProps) {
-  const [sortField, setSortField] = useState<'date' | 'description' | 'amount' | 'category' | null>(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [sortField, setSortField] = useState<'date' | 'description' | 'amount' | 'category' | null>('date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [incomeExpanded, setIncomeExpanded] = useState(true);
   const [expenseExpanded, setExpenseExpanded] = useState(true);
   const { maskValue } = useMaskValues();
@@ -46,7 +46,8 @@ export function TransactionsTable({
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
-      setSortDirection('desc');
+      // Para data, começar com asc (mais antigo primeiro), para outros desc
+      setSortDirection(field === 'date' ? 'asc' : 'desc');
     }
   };
 
