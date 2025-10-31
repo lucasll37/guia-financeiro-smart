@@ -44,16 +44,18 @@ export function CasaRevenueSplitManager({ accountId, periodStart }: CasaRevenueS
 
   // Calcular totais e percentuais
   const totalWeight = useMemo(() => {
-    return Object.values(weights).reduce((sum, w) => sum + w, 0);
+    const total = Object.values(weights).reduce((sum, w) => sum + w, 0);
+    // Garantir que sempre há um peso mínimo
+    return Math.max(0.01, total);
   }, [weights]);
 
   const percentages = useMemo(() => {
-    if (totalWeight === 0) return {};
     return Object.fromEntries(
-      Object.entries(weights).map(([userId, weight]) => [
-        userId,
-        (weight / totalWeight) * 100
-      ])
+      Object.entries(weights).map(([userId, weight]) => {
+        const percentage = (weight / totalWeight) * 100;
+        // Validar que o percentual é um número válido
+        return [userId, isFinite(percentage) ? percentage : 0];
+      })
     );
   }, [weights, totalWeight]);
 
@@ -68,25 +70,54 @@ export function CasaRevenueSplitManager({ accountId, periodStart }: CasaRevenueS
   };
 
   const handleWeightChange = (userId: string, value: number) => {
+    // Validar input: prevenir NaN, Infinity e valores negativos
+    if (!isFinite(value) || isNaN(value) || value < 0) {
+      return;
+    }
+    
     setWeights(prev => ({
       ...prev,
-      [userId]: Math.max(0, value)
+      [userId]: Math.max(0, Math.min(1000, value)) // Limitar entre 0 e 1000
     }));
   };
 
   const handlePercentageChange = (userId: string, percentage: number) => {
+    // Validar input: prevenir valores inválidos
+    if (!isFinite(percentage) || isNaN(percentage)) {
+      return;
+    }
+    
+    // Limitar percentual entre 0 e 99.9 para evitar divisão por zero
+    const safePercentage = Math.max(0, Math.min(99.9, percentage));
+    
     // Calcular o peso baseado no percentual desejado
     const otherUsersWeight = Object.entries(weights)
       .filter(([id]) => id !== userId)
       .reduce((sum, [, w]) => sum + w, 0);
     
+    // Prevenir divisão por zero
+    if (safePercentage >= 99.9) {
+      // Se o usuário quer quase 100%, dar peso muito maior que os outros
+      const maxWeight = Math.max(1, otherUsersWeight * 100);
+      setWeights(prev => ({
+        ...prev,
+        [userId]: maxWeight
+      }));
+      return;
+    }
+    
     const newWeight = otherUsersWeight > 0 
-      ? (percentage * otherUsersWeight) / (100 - percentage)
-      : percentage;
+      ? (safePercentage * otherUsersWeight) / (100 - safePercentage)
+      : safePercentage / 10; // Valor padrão se não houver outros pesos
+    
+    // Validar que o resultado é um número válido
+    if (!isFinite(newWeight) || isNaN(newWeight)) {
+      return;
+    }
     
     setWeights(prev => ({
       ...prev,
-      [userId]: Math.max(0, newWeight)
+      [userId]: Math.max(0.1, Math.min(1000, newWeight))
     }));
   };
 
@@ -230,10 +261,16 @@ export function CasaRevenueSplitManager({ accountId, periodStart }: CasaRevenueS
                     <Input
                       id={`weight-${member.user_id}`}
                       type="number"
-                      min="0"
+                      min="0.1"
+                      max="1000"
                       step="0.1"
-                      value={weight.toFixed(1)}
-                      onChange={(e) => handleWeightChange(member.user_id, parseFloat(e.target.value) || 0)}
+                      value={isFinite(weight) ? weight.toFixed(1) : "1.0"}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value);
+                        if (!isNaN(value) && isFinite(value)) {
+                          handleWeightChange(member.user_id, value);
+                        }
+                      }}
                       className="w-20 h-7 text-xs"
                     />
                     <span className="text-muted-foreground">
