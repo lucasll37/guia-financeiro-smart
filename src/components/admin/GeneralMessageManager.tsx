@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,15 +37,19 @@ export const GeneralMessageManager = () => {
         .single();
 
       if (error && error.code !== "PGRST116") throw error;
-      
-      const settingsData = data?.setting_value as unknown as GeneralMessageSettings | null;
-      setEnabled(settingsData?.enabled || false);
-      setTitle(settingsData?.title || "");
-      setMessage(settingsData?.message || "");
-      
       return data;
     },
   });
+
+  // Sincronizar estado local com dados da query
+  useEffect(() => {
+    if (settings) {
+      const settingsData = settings.setting_value as unknown as GeneralMessageSettings | null;
+      setEnabled(settingsData?.enabled || false);
+      setTitle(settingsData?.title || "");
+      setMessage(settingsData?.message || "");
+    }
+  }, [settings]);
 
   const updateMessageMutation = useMutation({
     mutationFn: async () => {

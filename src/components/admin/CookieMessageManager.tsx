@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,15 +39,20 @@ export const CookieMessageManager = () => {
         .single();
 
       if (error && error.code !== "PGRST116") throw error;
-      
-      const settingsData = data?.setting_value as unknown as CookieSettings | null;
-      setEnabled(settingsData?.enabled || false);
-      const messageText = settingsData?.message || DEFAULT_MESSAGE;
-      setMessage(messageText);
-      
       return data;
     },
   });
+
+  // Sincronizar estado local com dados da query
+  useEffect(() => {
+    if (settings) {
+      const settingsData = settings.setting_value as unknown as CookieSettings | null;
+      // Compatibilidade com dados legados: enabled padrão é true se não existir
+      setEnabled(settingsData?.enabled !== undefined ? settingsData.enabled : true);
+      const messageText = settingsData?.message || DEFAULT_MESSAGE;
+      setMessage(messageText);
+    }
+  }, [settings]);
 
   const updateMessageMutation = useMutation({
     mutationFn: async () => {

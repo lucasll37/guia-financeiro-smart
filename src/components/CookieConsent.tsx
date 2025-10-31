@@ -37,8 +37,13 @@ export const CookieConsent = ({ forceShow = false, onClose }: CookieConsentProps
         .single();
 
       if (error && error.code !== "PGRST116") throw error;
-      return (data?.setting_value as unknown as CookieSettings) || { 
-        enabled: false,
+      const settingsData = (data?.setting_value as unknown as CookieSettings) || null;
+      // Compatibilidade com dados legados: enabled padrão é true se não existir
+      return settingsData ? {
+        ...settingsData,
+        enabled: settingsData.enabled !== undefined ? settingsData.enabled : true
+      } : { 
+        enabled: true,
         message: DEFAULT_MESSAGE, 
         version: null 
       };
