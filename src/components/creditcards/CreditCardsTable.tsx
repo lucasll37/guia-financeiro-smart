@@ -216,74 +216,88 @@ export function CreditCardsTable({
                   </TableRow>
                   {isCardExpanded(card.id) && (
                     <TableRow>
-                      <TableCell colSpan={8} className="p-0">
-                        <div className="bg-muted/30 p-4 md:p-6">
-                          <h4 className="font-semibold mb-4 text-base md:text-lg">Faturas por Mês</h4>
+                      <TableCell colSpan={8} className="p-0 bg-muted/20">
+                        <div className="p-6 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-semibold text-lg">Faturas por Mês</h4>
+                            <Badge variant="secondary" className="text-sm">
+                              {monthlyTransactions.length} {monthlyTransactions.length === 1 ? 'fatura' : 'faturas'}
+                            </Badge>
+                          </div>
                           {monthlyTransactions.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">Nenhuma transação encontrada</p>
+                            <div className="text-center py-8">
+                              <p className="text-muted-foreground">Nenhuma transação encontrada</p>
+                            </div>
                           ) : (
-                            <Accordion type="multiple" className="space-y-2">
+                            <Accordion type="multiple" className="space-y-3">
                               {monthlyTransactions.map(([month, txs]) => {
                                 const monthTotal = txs.reduce((sum, t) => sum + Number(t.amount), 0);
                                 return (
                                   <AccordionItem 
                                     key={month} 
                                     value={month}
-                                    className="border rounded-lg bg-background shadow-sm overflow-hidden"
+                                    className="border-none rounded-xl bg-background shadow-sm overflow-hidden"
                                   >
-                                    <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/50 transition-colors">
+                                    <AccordionTrigger className="px-5 py-4 hover:no-underline hover:bg-muted/50 transition-all duration-200 [&[data-state=open]]:bg-muted/30">
                                       <div className="flex flex-1 justify-between items-center pr-4">
-                                        <h5 className="font-semibold text-base capitalize">
-                                          {new Date(month).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
-                                        </h5>
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-sm text-muted-foreground">Total:</span>
-                                          <span className="font-bold text-destructive text-base">
+                                        <div className="flex flex-col items-start gap-1">
+                                          <h5 className="font-semibold text-base capitalize">
+                                            {new Date(month).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                                          </h5>
+                                          <span className="text-xs text-muted-foreground">
+                                            {txs.length} {txs.length === 1 ? 'transação' : 'transações'}
+                                          </span>
+                                        </div>
+                                        <div className="flex flex-col items-end gap-1">
+                                          <span className="text-xs text-muted-foreground font-medium">Total da fatura</span>
+                                          <span className="font-bold text-destructive text-lg">
                                             {formatCurrency(monthTotal)}
                                           </span>
                                         </div>
                                       </div>
                                     </AccordionTrigger>
                                     <AccordionContent className="p-0">
-                                      <div className="border-t pl-8">
-                                        <Table>
-                                          <TableHeader>
-                                            <TableRow className="bg-muted/30 hover:bg-muted/30">
-                                              <TableHead className="h-9 text-xs">Data</TableHead>
-                                              <TableHead className="h-9 text-xs">Categoria</TableHead>
-                                              <TableHead className="h-9 text-xs">Descrição</TableHead>
-                                              <TableHead className="h-9 text-xs text-right">Valor</TableHead>
-                                            </TableRow>
-                                          </TableHeader>
-                                          <TableBody>
-                                            {txs.map(t => (
-                                              <TableRow key={t.id} className="hover:bg-muted/20">
-                                                <TableCell className="text-xs py-2">
-                                                  {new Date(t.date).toLocaleDateString('pt-BR')}
-                                                </TableCell>
-                                                <TableCell className="py-2">
-                                                  {t.categories && (
-                                                    <div className="flex items-center gap-2">
-                                                      <div 
-                                                        className="h-3 w-3 rounded-full flex-shrink-0" 
-                                                        style={{ backgroundColor: t.categories.color }}
-                                                      />
-                                                      <span className="text-xs text-muted-foreground truncate">
-                                                        {t.categories.name}
-                                                      </span>
-                                                    </div>
-                                                  )}
-                                                </TableCell>
-                                                <TableCell className="text-sm py-2">
-                                                  {t.description}
-                                                </TableCell>
-                                                <TableCell className="text-right text-sm font-medium py-2">
-                                                  {formatCurrency(Number(t.amount))}
-                                                </TableCell>
+                                      <div className="border-t bg-muted/20">
+                                        <div className="overflow-x-auto">
+                                          <Table>
+                                            <TableHeader>
+                                              <TableRow className="bg-muted/40 hover:bg-muted/40 border-none">
+                                                <TableHead className="h-10 text-xs font-semibold">Data</TableHead>
+                                                <TableHead className="h-10 text-xs font-semibold">Categoria</TableHead>
+                                                <TableHead className="h-10 text-xs font-semibold">Descrição</TableHead>
+                                                <TableHead className="h-10 text-xs font-semibold text-right">Valor</TableHead>
                                               </TableRow>
-                                            ))}
-                                          </TableBody>
-                                        </Table>
+                                            </TableHeader>
+                                            <TableBody>
+                                              {txs.map(t => (
+                                                <TableRow key={t.id} className="hover:bg-muted/30 transition-colors border-b border-border/50 last:border-0">
+                                                  <TableCell className="py-3 text-sm font-medium">
+                                                    {new Date(t.date).toLocaleDateString('pt-BR')}
+                                                  </TableCell>
+                                                  <TableCell className="py-3">
+                                                    {t.categories && (
+                                                      <div className="flex items-center gap-2.5">
+                                                        <div 
+                                                          className="h-3 w-3 rounded-full flex-shrink-0 ring-1 ring-offset-1 ring-offset-background" 
+                                                          style={{ backgroundColor: t.categories.color }}
+                                                        />
+                                                        <span className="text-sm text-foreground/90 truncate">
+                                                          {t.categories.name}
+                                                        </span>
+                                                      </div>
+                                                    )}
+                                                  </TableCell>
+                                                  <TableCell className="py-3 text-sm text-foreground/80">
+                                                    {t.description}
+                                                  </TableCell>
+                                                  <TableCell className="text-right py-3 text-sm font-semibold">
+                                                    {formatCurrency(Number(t.amount))}
+                                                  </TableCell>
+                                                </TableRow>
+                                              ))}
+                                            </TableBody>
+                                          </Table>
+                                        </div>
                                       </div>
                                     </AccordionContent>
                                   </AccordionItem>
