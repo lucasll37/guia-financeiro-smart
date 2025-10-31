@@ -24,10 +24,9 @@ interface ForecastsTableProps {
   categories?: any[];
   canEdit?: boolean;
   accountType?: string;
-  revenueHeaderActions?: React.ReactNode;
 }
 
-export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, viewMode = "monthly", categories = [], canEdit = true, accountType, revenueHeaderActions }: ForecastsTableProps) {
+export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, viewMode = "monthly", categories = [], canEdit = true, accountType }: ForecastsTableProps) {
   const { formatCurrency } = useUserPreferences();
   const [sortField, setSortField] = useState<'account' | 'category' | 'amount' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -297,10 +296,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
           <div className="border rounded-lg">
             <CollapsibleTrigger asChild>
               <div className="bg-green-50 dark:bg-green-950/20 px-4 py-3 border-b cursor-pointer hover:bg-green-100 dark:hover:bg-green-950/30 transition-colors flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <h3 className="font-semibold text-green-700 dark:text-green-400">Receitas Previstas</h3>
-                  {revenueHeaderActions}
-                </div>
+                <h3 className="font-semibold text-green-700 dark:text-green-400">Receitas Previstas</h3>
                 <div className="flex items-center gap-2">
                   {incomeExpanded ? (
                     <ChevronDown className="h-4 w-4 text-green-700 dark:text-green-400" />

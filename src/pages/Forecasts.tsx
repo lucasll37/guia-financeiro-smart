@@ -246,16 +246,24 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
               <span>Manual</span>
             </Button>
             {filters.viewMode === "monthly" && (
-              <Button
-                variant="outline"
-                onClick={() => setCopyDialogOpen(true)}
-                disabled={filters.accountId === "all" || filteredForecasts.length === 0 || !canEdit}
-                className="gap-2"
-                size={isMobile ? "sm" : "default"}
-              >
-                <Copy className="h-4 w-4" />
-                <span>Copiar</span>
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setCopyDialogOpen(true)}
+                  disabled={filters.accountId === "all" || filteredForecasts.length === 0 || !canEdit}
+                  className="gap-2"
+                  size={isMobile ? "sm" : "default"}
+                >
+                  <Copy className="h-4 w-4" />
+                  <span>Copiar</span>
+                </Button>
+                {selectedAccount?.type === "casa" && filters.accountId !== "all" && (
+                  <CasaRevenueSplitManager 
+                    accountId={filters.accountId} 
+                    periodStart={filters.selectedMonth + "-01"}
+                  />
+                )}
+              </>
             )}
           </div>
         </div>
@@ -286,14 +294,6 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             categories={categories || []}
             canEdit={canEdit}
             accountType={selectedAccount?.type}
-            revenueHeaderActions={
-              selectedAccount?.type === "casa" && filters.accountId !== "all" ? (
-                <CasaRevenueSplitManager 
-                  accountId={filters.accountId} 
-                  periodStart={filters.selectedMonth + "-01"}
-                />
-              ) : undefined
-            }
           />
         )}
       </div>
