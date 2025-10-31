@@ -365,12 +365,22 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
               <Label htmlFor="rate">Rendimento Mensal (%)</Label>
               <Input
                 id="rate-input"
-                type="number"
+                type="text"
+                inputMode="decimal"
                 step="0.01"
                 min={-2}
                 max={2}
                 value={monthlyRate}
-                onChange={(e) => setMonthlyRate(Math.min(2, Math.max(-2, Number(e.target.value))))}
+                onChange={(e) => {
+                  let value = e.target.value.replace(/[^\d.,-]/g, "");
+                  value = value.replace(",", ".");
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  const numValue = parseFloat(value) || 0;
+                  setMonthlyRate(Math.min(2, Math.max(-2, numValue)));
+                }}
                 className="w-20 h-8 text-center"
               />
             </div>
@@ -389,12 +399,22 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
               <Label htmlFor="rateStdDev">Desvio Padrão Rendimento (%)</Label>
               <Input
                 id="rateStdDev-input"
-                type="number"
+                type="text"
+                inputMode="decimal"
                 step="0.01"
                 min={0}
                 max={1}
                 value={rateStdDev}
-                onChange={(e) => setRateStdDev(Math.min(1, Math.max(0, Number(e.target.value))))}
+                onChange={(e) => {
+                  let value = e.target.value.replace(/[^\d.,-]/g, "");
+                  value = value.replace(",", ".");
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  const numValue = parseFloat(value) || 0;
+                  setRateStdDev(Math.min(1, Math.max(0, numValue)));
+                }}
                 className="w-20 h-8 text-center"
               />
             </div>
@@ -413,12 +433,22 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
               <Label htmlFor="inflation">Inflação Mensal (%)</Label>
               <Input
                 id="inflation-input"
-                type="number"
+                type="text"
+                inputMode="decimal"
                 step="0.01"
                 min={-2}
                 max={2}
                 value={inflationRate}
-                onChange={(e) => setInflationRate(Math.min(2, Math.max(-2, Number(e.target.value))))}
+                onChange={(e) => {
+                  let value = e.target.value.replace(/[^\d.,-]/g, "");
+                  value = value.replace(",", ".");
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  const numValue = parseFloat(value) || 0;
+                  setInflationRate(Math.min(2, Math.max(-2, numValue)));
+                }}
                 className="w-20 h-8 text-center"
               />
             </div>
@@ -437,12 +467,22 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
               <Label htmlFor="inflationStdDev">Desvio Padrão Inflação (%)</Label>
               <Input
                 id="inflationStdDev-input"
-                type="number"
+                type="text"
+                inputMode="decimal"
                 step="0.01"
                 min={0}
                 max={1}
                 value={inflationStdDev}
-                onChange={(e) => setInflationStdDev(Math.min(1, Math.max(0, Number(e.target.value))))}
+                onChange={(e) => {
+                  let value = e.target.value.replace(/[^\d.,-]/g, "");
+                  value = value.replace(",", ".");
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  const numValue = parseFloat(value) || 0;
+                  setInflationStdDev(Math.min(1, Math.max(0, numValue)));
+                }}
                 className="w-20 h-8 text-center"
               />
             </div>
@@ -461,12 +501,22 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
               <Label htmlFor="contribution">Aporte Mensal (R$)</Label>
               <Input
                 id="contribution-input"
-                type="number"
+                type="text"
+                inputMode="decimal"
                 step="100"
                 min={0}
                 max={20000}
                 value={monthlyContribution}
-                onChange={(e) => setMonthlyContribution(Math.min(20000, Math.max(0, Number(e.target.value))))}
+                onChange={(e) => {
+                  let value = e.target.value.replace(/[^\d.,-]/g, "");
+                  value = value.replace(",", ".");
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  const numValue = parseFloat(value) || 0;
+                  setMonthlyContribution(Math.min(20000, Math.max(0, numValue)));
+                }}
                 className="w-24 h-8 text-center"
               />
             </div>

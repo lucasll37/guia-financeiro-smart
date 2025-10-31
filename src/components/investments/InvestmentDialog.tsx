@@ -201,7 +201,12 @@ export function InvestmentDialog({
                       placeholder="0.00"
                       value={field.value || ""}
                       onChange={(e) => {
-                        const value = e.target.value.replace(/[^\d.-]/g, "");
+                        let value = e.target.value.replace(/[^\d.,-]/g, "");
+                        value = value.replace(",", ".");
+                        const parts = value.split(".");
+                        if (parts.length > 2) {
+                          value = parts[0] + "." + parts.slice(1).join("");
+                        }
                         field.onChange(value === "" ? 0 : parseFloat(value) || 0);
                       }}
                     />

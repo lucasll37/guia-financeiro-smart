@@ -400,8 +400,16 @@ export function TransactionDialog({
                 placeholder="0.00"
                 value={formData.amount || ""}
                 onChange={(e) => {
-                  const value = e.target.value.replace(/[^\d.-]/g, "");
-                  setFormData({ ...formData, amount: value === "" ? 0 : Number(value) });
+                  // Permitir vírgula e ponto como separador decimal
+                  let value = e.target.value.replace(/[^\d.,-]/g, "");
+                  // Substituir vírgula por ponto para armazenamento
+                  value = value.replace(",", ".");
+                  // Permitir apenas um ponto decimal
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  setFormData({ ...formData, amount: value === "" ? 0 : parseFloat(value) || 0 });
                 }}
               />
               {errors.amount && <p className="text-sm text-destructive">{errors.amount}</p>}
@@ -561,13 +569,20 @@ export function TransactionDialog({
                           className="flex-1"
                         />
                         <Input
-                          type="number"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="%"
                           value={member.percent || ""}
-                          onChange={(e) => updateSplitMember(index, "percent", Number(e.target.value))}
+                          onChange={(e) => {
+                            let value = e.target.value.replace(/[^\d.,-]/g, "");
+                            value = value.replace(",", ".");
+                            const parts = value.split(".");
+                            if (parts.length > 2) {
+                              value = parts[0] + "." + parts.slice(1).join("");
+                            }
+                            updateSplitMember(index, "percent", parseFloat(value) || 0);
+                          }}
                           className="w-24"
-                          min={0}
-                          max={100}
                         />
                         <Button
                           type="button"

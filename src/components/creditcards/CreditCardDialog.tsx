@@ -136,15 +136,21 @@ export function CreditCardDialog({
             <Label htmlFor="credit_limit">Limite (Opcional)</Label>
             <Input
               id="credit_limit"
-              type="number"
-              step="0.01"
+              type="text"
+              inputMode="decimal"
               value={formData.credit_limit || ""}
-              onChange={(e) =>
+              onChange={(e) => {
+                let value = e.target.value.replace(/[^\d.,-]/g, "");
+                value = value.replace(",", ".");
+                const parts = value.split(".");
+                if (parts.length > 2) {
+                  value = parts[0] + "." + parts.slice(1).join("");
+                }
                 setFormData({
                   ...formData,
-                  credit_limit: e.target.value ? parseFloat(e.target.value) : undefined,
-                })
-              }
+                  credit_limit: value ? parseFloat(value) || undefined : undefined,
+                });
+              }}
               placeholder="0.00"
             />
           </div>

@@ -105,8 +105,13 @@ export function GoalDialog({ open, onOpenChange, onSave, goal }: GoalDialogProps
                 placeholder="0.00"
                 value={formData.target_amount || ""}
                 onChange={(e) => {
-                  const value = e.target.value.replace(/[^\d.-]/g, "");
-                  setFormData({ ...formData, target_amount: value === "" ? 0 : Number(value) });
+                  let value = e.target.value.replace(/[^\d.,-]/g, "");
+                  value = value.replace(",", ".");
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  setFormData({ ...formData, target_amount: value === "" ? 0 : parseFloat(value) || 0 });
                 }}
               />
               {errors.target && <p className="text-sm text-destructive">{errors.target}</p>}
@@ -121,8 +126,13 @@ export function GoalDialog({ open, onOpenChange, onSave, goal }: GoalDialogProps
                 placeholder="0.00"
                 value={formData.current_amount || ""}
                 onChange={(e) => {
-                  const value = e.target.value.replace(/[^\d.-]/g, "");
-                  setFormData({ ...formData, current_amount: value === "" ? 0 : Number(value) });
+                  let value = e.target.value.replace(/[^\d.,-]/g, "");
+                  value = value.replace(",", ".");
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  setFormData({ ...formData, current_amount: value === "" ? 0 : parseFloat(value) || 0 });
                 }}
               />
               {errors.current && <p className="text-sm text-destructive">{errors.current}</p>}

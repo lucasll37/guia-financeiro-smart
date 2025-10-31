@@ -131,11 +131,19 @@ export function MonthlyReturnsDialog({
                   <FormLabel>Rendimento (%)</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
                       placeholder="0.00"
                       value={field.value}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      onChange={(e) => {
+                        let value = e.target.value.replace(/[^\d.,-]/g, "");
+                        value = value.replace(",", ".");
+                        const parts = value.split(".");
+                        if (parts.length > 2) {
+                          value = parts[0] + "." + parts.slice(1).join("");
+                        }
+                        field.onChange(parseFloat(value) || 0);
+                      }}
                     />
                   </FormControl>
                   <FormDescription>Percentual de rendimento no período</FormDescription>
@@ -152,11 +160,19 @@ export function MonthlyReturnsDialog({
                   <FormLabel>Inflação Mensal (%)</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
                       placeholder="0.00"
                       value={field.value}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      onChange={(e) => {
+                        let value = e.target.value.replace(/[^\d.,-]/g, "");
+                        value = value.replace(",", ".");
+                        const parts = value.split(".");
+                        if (parts.length > 2) {
+                          value = parts[0] + "." + parts.slice(1).join("");
+                        }
+                        field.onChange(parseFloat(value) || 0);
+                      }}
                     />
                   </FormControl>
                   <FormDescription>Taxa de inflação do período</FormDescription>
@@ -173,11 +189,19 @@ export function MonthlyReturnsDialog({
                   <FormLabel>Aporte</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
                       placeholder="0.00"
                       value={field.value}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      onChange={(e) => {
+                        let value = e.target.value.replace(/[^\d.,-]/g, "");
+                        value = value.replace(",", ".");
+                        const parts = value.split(".");
+                        if (parts.length > 2) {
+                          value = parts[0] + "." + parts.slice(1).join("");
+                        }
+                        field.onChange(parseFloat(value) || 0);
+                      }}
                     />
                   </FormControl>
                   <FormDescription>

@@ -418,14 +418,15 @@ export function BudgetWizard({
                                   inputMode="decimal"
                                   placeholder="R$ 0.00"
                                   value={entry.amount}
-                                  onChange={(e) =>
-                                    updateEntry(
-                                      sub.id,
-                                      "amount",
-                                      e.target.value.replace(/[^\d.-]/g, ""),
-                                      true
-                                    )
-                                  }
+                                  onChange={(e) => {
+                                    let value = e.target.value.replace(/[^\d.,-]/g, "");
+                                    value = value.replace(",", ".");
+                                    const parts = value.split(".");
+                                    if (parts.length > 2) {
+                                      value = parts[0] + "." + parts.slice(1).join("");
+                                    }
+                                    updateEntry(sub.id, "amount", value, true);
+                                  }}
                                   className="text-right font-semibold text-sm"
                                 />
                               </div>
@@ -674,14 +675,15 @@ export function BudgetWizard({
                                         inputMode="decimal"
                                         placeholder="R$ 0.00"
                                         value={entry.amount}
-                                        onChange={(e) =>
-                                          updateEntry(
-                                            sub.id,
-                                            "amount",
-                                            e.target.value.replace(/[^\d.-]/g, ""),
-                                            false
-                                          )
-                                        }
+                                        onChange={(e) => {
+                                          let value = e.target.value.replace(/[^\d.,-]/g, "");
+                                          value = value.replace(",", ".");
+                                          const parts = value.split(".");
+                                          if (parts.length > 2) {
+                                            value = parts[0] + "." + parts.slice(1).join("");
+                                          }
+                                          updateEntry(sub.id, "amount", value, false);
+                                        }}
                                         className="text-right font-semibold text-sm"
                                       />
                                     </div>

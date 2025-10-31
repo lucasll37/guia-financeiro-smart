@@ -200,7 +200,15 @@ export function ForecastDialog({
                         placeholder="0.00"
                         {...field}
                         onChange={(e) => {
-                          const value = e.target.value.replace(/[^\d.-]/g, "");
+                          // Permitir vírgula e ponto como separador decimal
+                          let value = e.target.value.replace(/[^\d.,-]/g, "");
+                          // Substituir vírgula por ponto
+                          value = value.replace(",", ".");
+                          // Permitir apenas um ponto decimal
+                          const parts = value.split(".");
+                          if (parts.length > 2) {
+                            value = parts[0] + "." + parts.slice(1).join("");
+                          }
                           field.onChange(value);
                         }}
                         className="text-lg"
