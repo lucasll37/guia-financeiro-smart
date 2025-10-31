@@ -69,8 +69,8 @@ export function AppSidebar() {
                        <NavLink
                         to={item.url}
                         className={cn(
-                          "flex items-center rounded-lg",
-                          isCollapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2.5",
+                          "flex items-center rounded-lg overflow-visible",
+                          isCollapsed ? "justify-center" : "gap-3 px-3 py-2.5",
                           "hover:bg-accent/50 transition-colors",
                           isActive && [
                             "text-primary font-medium",
@@ -83,7 +83,7 @@ export function AppSidebar() {
                         <item.icon 
                           className={cn(
                             "h-5 w-5 flex-shrink-0 transition-all duration-200",
-                            isActive ? "text-primary scale-110" : "text-muted-foreground group-hover:text-foreground"
+                            isActive ? "text-primary scale-110" : "text-foreground/80"
                           )} 
                         />
                         {!isCollapsed && (
