@@ -7,7 +7,12 @@ import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import type { Database } from "@/integrations/supabase/types";
 
-type CreditCard = Database["public"]["Tables"]["credit_cards"]["Row"];
+type CreditCard = Database["public"]["Tables"]["credit_cards"]["Row"] & {
+  creator?: {
+    name: string | null;
+    email: string | null;
+  };
+};
 type Transaction = Database["public"]["Tables"]["transactions"]["Row"] & {
   categories: {
     name: string;
@@ -120,6 +125,7 @@ export function CreditCardsTable({
                 {renderSortIcon('name')}
               </Button>
             </TableHead>
+            <TableHead className="text-center">Criado por</TableHead>
             <TableHead className="text-center">Fechamento</TableHead>
             <TableHead className="text-center">Vencimento</TableHead>
             <TableHead className="text-right">Limite</TableHead>
@@ -135,7 +141,7 @@ export function CreditCardsTable({
         <TableBody>
           {sortedCreditCards.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="text-center text-muted-foreground">
+              <TableCell colSpan={8} className="text-center text-muted-foreground">
                 Nenhum cartão cadastrado
               </TableCell>
             </TableRow>
@@ -144,6 +150,7 @@ export function CreditCardsTable({
               const isExpanded = expandedCards.has(card.id);
               const monthlyTransactions = getTransactionsByMonth(card.id);
               const totalToPay = getCardTotal(card.id);
+              const creatorDisplay = card.creator?.name || card.creator?.email || 'N/A';
 
               return (
                 <>
@@ -154,6 +161,9 @@ export function CreditCardsTable({
                       </Button>
                     </TableCell>
                     <TableCell className="font-medium">{card.name}</TableCell>
+                    <TableCell className="text-center text-sm text-muted-foreground">
+                      {creatorDisplay}
+                    </TableCell>
                     <TableCell className="text-center">Dia {card.closing_day}</TableCell>
                     <TableCell className="text-center">Dia {card.due_day}</TableCell>
                     <TableCell className="text-right">
@@ -187,7 +197,7 @@ export function CreditCardsTable({
                   </TableRow>
                   {isCardExpanded(card.id) && (
                     <TableRow>
-                      <TableCell colSpan={7} className="p-0">
+                      <TableCell colSpan={8} className="p-0">
                         <div className="bg-muted/30 p-4 md:p-6">
                           <h4 className="font-semibold mb-4 text-base md:text-lg">Faturas por Mês</h4>
                           {monthlyTransactions.length === 0 ? (

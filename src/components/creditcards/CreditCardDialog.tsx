@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { Database } from "@/integrations/supabase/types";
 
 type CreditCard = Database["public"]["Tables"]["credit_cards"]["Row"];
-type CreditCardInsert = Database["public"]["Tables"]["credit_cards"]["Insert"];
+type CreditCardInsert = Omit<Database["public"]["Tables"]["credit_cards"]["Insert"], 'created_by'>;
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
 
 interface CreditCardDialogProps {

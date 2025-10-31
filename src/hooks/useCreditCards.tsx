@@ -1,31 +1,52 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import type { Database } from "@/integrations/supabase/types";
 
-type CreditCard = Database["public"]["Tables"]["credit_cards"]["Row"];
+type CreditCard = Database["public"]["Tables"]["credit_cards"]["Row"] & {
+  creator?: {
+    name: string | null;
+    email: string | null;
+  };
+};
 type CreditCardInsert = Database["public"]["Tables"]["credit_cards"]["Insert"];
 type CreditCardUpdate = Database["public"]["Tables"]["credit_cards"]["Update"];
 
 export function useCreditCards(accountId?: string) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { data: creditCards, isLoading } = useQuery({
     queryKey: ["credit_cards", accountId],
     queryFn: async () => {
       let query = supabase
         .from("credit_cards")
-        .select("*");
+        .select(`
+          *,
+          creator:profiles!credit_cards_created_by_fkey(name, email)
+        `);
 
       if (accountId) {
         query = query.eq("account_id", accountId);
       }
 
-      const { data, error } = await query.order("name", { ascending: true });
+      const { data, error } = await query
+        .order("name", { ascending: true })
+        .returns<(Database["public"]["Tables"]["credit_cards"]["Row"] & {
+          creator: { name: string | null; email: string | null } | null;
+        })[]>();
 
       if (error) throw error;
-      return data;
+      
+      // Transform array creator to single object
+      return (data || []).map(card => ({
+        ...card,
+        creator: Array.isArray(card.creator) && card.creator.length > 0 
+          ? card.creator[0] 
+          : card.creator
+      })) as CreditCard[];
     },
     enabled: !!accountId || accountId === undefined,
   });
@@ -34,7 +55,10 @@ export function useCreditCards(accountId?: string) {
     mutationFn: async (creditCard: CreditCardInsert) => {
       const { data, error } = await supabase
         .from("credit_cards")
-        .insert(creditCard)
+        .insert({
+          ...creditCard,
+          created_by: user?.id,
+        })
         .select()
         .single();
 
