@@ -41,9 +41,14 @@ export function CreditCardsTable({
   const { user } = useAuth();
 
   const getCreatorName = (createdBy: string) => {
-    if (createdBy === user?.id) return 'Você';
+    if (createdBy === user?.id) {
+      return { name: 'Você', email: null };
+    }
     const member = accountMembers.find(m => m.user_id === createdBy);
-    return member?.user?.name || member?.user?.email || 'N/A';
+    return {
+      name: member?.user?.name || 'Sem nome',
+      email: member?.user?.email || null
+    };
   };
 
   const toggleCard = (id: string) => {
@@ -155,7 +160,7 @@ export function CreditCardsTable({
               const isExpanded = expandedCards.has(card.id);
               const monthlyTransactions = getTransactionsByMonth(card.id);
               const totalToPay = getCardTotal(card.id);
-              const creatorDisplay = getCreatorName(card.created_by);
+              const creator = getCreatorName(card.created_by);
 
               return (
                 <>
@@ -166,8 +171,13 @@ export function CreditCardsTable({
                       </Button>
                     </TableCell>
                     <TableCell className="font-medium">{card.name}</TableCell>
-                    <TableCell className="text-center text-sm text-muted-foreground">
-                      {creatorDisplay}
+                    <TableCell className="text-center">
+                      <div className="text-sm">
+                        <div className="font-medium">{creator.name}</div>
+                        {creator.email && (
+                          <div className="text-xs text-muted-foreground">{creator.email}</div>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-center">Dia {card.closing_day}</TableCell>
                     <TableCell className="text-center">Dia {card.due_day}</TableCell>
