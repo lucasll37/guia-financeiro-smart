@@ -114,7 +114,14 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
           return txDate <= prev.periodEnd;
         }
       })
-      .reduce((sum, t) => sum + Number(t.amount), 0);
+      .reduce((sum, t) => {
+        if (t.categories?.type === "receita") {
+          return sum + Number(t.amount);
+        } else if (t.categories?.type === "despesa") {
+          return sum - Number(t.amount);
+        }
+        return sum;
+      }, 0);
   }, [transactions, currentDate, closingDay]);
 
   // Agrupar por categoria e tipo
