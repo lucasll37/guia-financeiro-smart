@@ -66,14 +66,14 @@ export function AppSidebar() {
                         isActive && "bg-primary/10 hover:bg-primary/15"
                       )}
                     >
-                       <NavLink
+                      <NavLink
                         to={item.url}
                         className={cn(
-                          "flex items-center rounded-lg overflow-visible text-foreground",
+                          "flex items-center rounded-lg overflow-visible",
                           isCollapsed ? "justify-center" : "gap-3 px-3 py-2.5",
                           "hover:bg-accent/50 transition-colors",
+                          isActive ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground",
                           isActive && [
-                            "text-primary font-medium",
                             !isCollapsed && "before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2",
                             !isCollapsed && "before:h-8 before:w-1 before:rounded-r-full before:bg-primary",
                             !isCollapsed && "before:shadow-[0_0_8px_rgba(var(--primary),0.5)]"
