@@ -376,6 +376,7 @@ export type Database = {
           color: string
           created_at: string
           id: string
+          is_system_generated: boolean
           name: string
           parent_id: string | null
           type: Database["public"]["Enums"]["category_type"]
@@ -385,6 +386,7 @@ export type Database = {
           color?: string
           created_at?: string
           id?: string
+          is_system_generated?: boolean
           name: string
           parent_id?: string | null
           type: Database["public"]["Enums"]["category_type"]
@@ -394,6 +396,7 @@ export type Database = {
           color?: string
           created_at?: string
           id?: string
+          is_system_generated?: boolean
           name?: string
           parent_id?: string | null
           type?: Database["public"]["Enums"]["category_type"]
