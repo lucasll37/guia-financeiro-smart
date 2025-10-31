@@ -158,17 +158,9 @@ export function UserPreferences() {
               checked={preferences.hideValuesOnLogin}
               onCheckedChange={(checked) => {
                 updatePreferences({ hideValuesOnLogin: checked });
-                
-                // Disparar evento customizado para sincronizar o estado
-                window.dispatchEvent(
-                  new CustomEvent("preferencesChanged", {
-                    detail: { hideValuesOnLogin: checked },
-                  })
-                );
-                
                 toast({
                   title: "Preferência atualizada",
-                  description: "Suas configurações foram salvas com sucesso",
+                  description: "Esta configuração será aplicada no próximo login",
                 });
               }}
             />
