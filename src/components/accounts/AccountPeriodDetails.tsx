@@ -4,7 +4,7 @@ import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, ChevronDown, ChevronRight as ChevronRightIcon, TrendingUp, Receipt, BarChart3, Lightbulb } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronRight as ChevronRightIcon, TrendingUp, Receipt, BarChart3, Lightbulb, CalendarIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useTransactions } from "@/hooks/useTransactions";
@@ -15,6 +15,8 @@ import { useMaskValues } from "@/hooks/useMaskValues";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { Database } from "@/integrations/supabase/types";
 
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
@@ -239,9 +241,29 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
           <Button variant="outline" size="icon" onClick={handlePreviousPeriod}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <div className="font-medium">
-            {format(periodStart, "dd/MM/yyyy")} - {format(periodEnd, "dd/MM/yyyy")}
-          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "justify-start text-left font-medium min-w-[280px]"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {format(periodStart, "dd/MM/yyyy")} - {format(periodEnd, "dd/MM/yyyy")}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={currentDate}
+                onSelect={(date) => date && setCurrentDate(date)}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+                locale={ptBR}
+              />
+            </PopoverContent>
+          </Popover>
           <Button variant="outline" size="icon" onClick={handleNextPeriod}>
             <ChevronRight className="h-4 w-4" />
           </Button>
