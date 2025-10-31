@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, Save, Eye } from "lucide-react";
+import { Loader2, Mail, Save, Eye, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -29,6 +29,7 @@ export function EmailTemplatesManager() {
     subject: "",
     html_content: "",
   });
+  const [testEmail, setTestEmail] = useState("");
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Update preview when content changes
@@ -104,6 +105,41 @@ export function EmailTemplatesManager() {
     onError: (error: any) => {
       toast({
         title: "Erro ao atualizar template",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Send test email mutation
+  const sendTestEmail = useMutation({
+    mutationFn: async () => {
+      if (!selectedTemplate || !testEmail) {
+        throw new Error("Template e email são obrigatórios");
+      }
+
+      const { data, error } = await supabase.functions.invoke("send-test-email", {
+        body: {
+          to: testEmail,
+          templateKey: selectedTemplate.template_key,
+          subject: editForm.subject,
+          htmlContent: editForm.html_content,
+        },
+      });
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Email de teste enviado!",
+        description: `Um email foi enviado para ${testEmail}`,
+      });
+      setTestEmail("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao enviar email de teste",
         description: error.message,
         variant: "destructive",
       });
@@ -315,6 +351,39 @@ export function EmailTemplatesManager() {
                           Assunto:
                         </Label>
                         <p className="text-sm">{editForm.subject || "Sem assunto"}</p>
+                      </div>
+
+                      {/* Envio de teste */}
+                      <div className="p-4 border rounded-lg bg-background">
+                        <Label className="text-sm font-medium mb-3 block">
+                          Enviar Email de Teste
+                        </Label>
+                        <div className="flex gap-2">
+                          <Input
+                            type="email"
+                            placeholder="seu.email@exemplo.com"
+                            value={testEmail}
+                            onChange={(e) => setTestEmail(e.target.value)}
+                            className="flex-1"
+                          />
+                          <Button
+                            onClick={() => sendTestEmail.mutate()}
+                            disabled={!testEmail || sendTestEmail.isPending}
+                            variant="secondary"
+                          >
+                            {sendTestEmail.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <>
+                                <Send className="mr-2 h-4 w-4" />
+                                Enviar Teste
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          O email será enviado com dados de exemplo para teste
+                        </p>
                       </div>
 
                       {/* Preview do conteúdo */}
