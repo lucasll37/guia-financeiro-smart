@@ -93,12 +93,12 @@ export const Header = () => {
         {/* Logo e Slogan Centralizados */}
         <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center leading-none">
           <div className="flex items-center gap-1.5">
-            <Wallet className="h-4 w-4 md:h-5 md:w-5 text-primary" />
-            <span className="font-display text-lg md:text-2xl font-bold text-foreground">
-              Prospera
+            <Wallet className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+            <span className="font-display text-xl md:text-3xl font-bold text-foreground">
+              Prospera!
             </span>
           </div>
-          <span className="text-[10px] md:text-xs text-muted-foreground font-medium tracking-wide mt-0.5">
+          <span className="text-xs md:text-sm text-muted-foreground font-medium tracking-wide mt-0.5">
             Gestor Financeiro
           </span>
         </div>
