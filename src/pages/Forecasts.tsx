@@ -256,8 +256,7 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
                   variant="outline"
                   onClick={() => {
                     // Define o mês default como o próximo mês baseado no mês de origem
-                    const [y, m] = filters.selectedMonth.split("-").map(Number);
-                    const sourceDate = new Date(y, (m || 1) - 1, 1);
+                    const sourceDate = parseISO(filters.selectedMonth + "-01");
                     const nextMonth = addMonths(sourceDate, 1);
                     setCopyTargetMonth(nextMonth);
                     setCopyDialogOpen(true);
