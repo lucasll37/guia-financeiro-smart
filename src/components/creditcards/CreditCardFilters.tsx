@@ -3,8 +3,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar, CalendarIcon } from "lucide-react";
-import { format, startOfMonth, endOfMonth, parse } from "date-fns";
+import { Calendar, CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { format, startOfMonth, endOfMonth, parse, addMonths, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -51,6 +51,18 @@ export function CreditCardFilters({ accounts, filters, onFilterChange, accountId
       startDate,
       endDate,
     });
+  };
+
+  const handlePreviousMonth = () => {
+    const currentDate = parse(filters.selectedMonth, "yyyy-MM", new Date());
+    const previousMonth = subMonths(currentDate, 1);
+    handleMonthChange(format(previousMonth, "yyyy-MM"));
+  };
+
+  const handleNextMonth = () => {
+    const currentDate = parse(filters.selectedMonth, "yyyy-MM", new Date());
+    const nextMonth = addMonths(currentDate, 1);
+    handleMonthChange(format(nextMonth, "yyyy-MM"));
   };
 
   const toggleViewMode = () => {
@@ -129,21 +141,50 @@ export function CreditCardFilters({ accounts, filters, onFilterChange, accountId
         {filters.viewMode === "monthly" ? (
           <div className={`space-y-2 ${accountId ? 'md:col-span-3' : 'md:col-span-3'}`}>
             <Label htmlFor="month-filter">Mês</Label>
-            <Select
-              value={filters.selectedMonth}
-              onValueChange={handleMonthChange}
-            >
-              <SelectTrigger id="month-filter">
-                <SelectValue placeholder="Selecione o mês" />
-              </SelectTrigger>
-              <SelectContent>
-                {monthOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handlePreviousMonth}
+                className="shrink-0"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="month-filter"
+                    variant="outline"
+                    className={cn(
+                      "flex-1 justify-start text-left font-normal"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {filters.selectedMonth 
+                      ? format(parse(filters.selectedMonth, "yyyy-MM", new Date()), "MMMM 'de' yyyy", { locale: ptBR })
+                      : "Selecione o mês"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={filters.selectedMonth ? parse(filters.selectedMonth, "yyyy-MM", new Date()) : undefined}
+                    onSelect={(date) => date && handleMonthChange(format(date, "yyyy-MM"))}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                    locale={ptBR}
+                  />
+                </PopoverContent>
+              </Popover>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleNextMonth}
+                className="shrink-0"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         ) : (
           <>

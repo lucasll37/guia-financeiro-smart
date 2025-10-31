@@ -3,8 +3,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar, CalendarIcon } from "lucide-react";
-import { format, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
+import { Calendar, CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, addMonths, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
@@ -40,6 +40,18 @@ export function ForecastFilters({ accounts, filters, onFilterChange, accountId, 
       startDate,
       endDate,
     });
+  };
+
+  const handlePreviousMonth = () => {
+    const currentDate = new Date(filters.selectedMonth + "-01T00:00:00");
+    const previousMonth = subMonths(currentDate, 1);
+    handleMonthChange(previousMonth);
+  };
+
+  const handleNextMonth = () => {
+    const currentDate = new Date(filters.selectedMonth + "-01T00:00:00");
+    const nextMonth = addMonths(currentDate, 1);
+    handleMonthChange(nextMonth);
   };
 
   const toggleViewMode = () => {
@@ -119,34 +131,52 @@ export function ForecastFilters({ accounts, filters, onFilterChange, accountId, 
       {filters.viewMode === "monthly" ? (
         <div className={`space-y-2 ${accountId ? 'md:col-span-3' : 'md:col-span-3'}`}>
           <Label htmlFor="month-filter">Mês</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                id="month-filter"
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !filters.selectedMonth && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {filters.selectedMonth 
-                  ? format(new Date(filters.selectedMonth + "-01T00:00:00"), "MMMM 'de' yyyy", { locale: ptBR })
-                  : "Selecione o mês"
-                }
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <CalendarComponent
-                mode="single"
-                selected={filters.selectedMonth ? new Date(filters.selectedMonth + "-01T00:00:00") : undefined}
-                onSelect={handleMonthChange}
-                initialFocus
-                className={cn("p-3 pointer-events-auto")}
-                locale={ptBR}
-              />
-            </PopoverContent>
-          </Popover>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handlePreviousMonth}
+              className="shrink-0"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="month-filter"
+                  variant="outline"
+                  className={cn(
+                    "flex-1 justify-start text-left font-normal",
+                    !filters.selectedMonth && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {filters.selectedMonth 
+                    ? format(new Date(filters.selectedMonth + "-01T00:00:00"), "MMMM 'de' yyyy", { locale: ptBR })
+                    : "Selecione o mês"
+                  }
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={filters.selectedMonth ? new Date(filters.selectedMonth + "-01T00:00:00") : undefined}
+                  onSelect={handleMonthChange}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                  locale={ptBR}
+                />
+              </PopoverContent>
+            </Popover>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleNextMonth}
+              className="shrink-0"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       ) : (
         <>
