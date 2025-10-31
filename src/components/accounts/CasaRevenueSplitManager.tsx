@@ -149,11 +149,11 @@ export function CasaRevenueSplitManager({ accountId, periodStart }: CasaRevenueS
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 mt-6">
+        <div className="space-y-4 mt-4">
           {/* Visualização gráfica do rateio */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <h4 className="text-sm font-medium">Distribuição Visual</h4>
-            <div className="flex gap-1 h-12 rounded-lg overflow-hidden border">
+            <div className="flex gap-1 h-8 rounded-md overflow-hidden border">
               {members.map((member, index) => {
                 const percentage = percentages[member.user_id] || 0;
                 const colors = [
@@ -172,7 +172,7 @@ export function CasaRevenueSplitManager({ accountId, periodStart }: CasaRevenueS
                     className={cn("relative transition-all duration-300 flex items-center justify-center", color)}
                     style={{ width: `${percentage}%` }}
                   >
-                    {percentage >= 10 && (
+                    {percentage >= 15 && (
                       <span className="text-xs font-semibold text-white">
                         {percentage.toFixed(0)}%
                       </span>
@@ -184,7 +184,7 @@ export function CasaRevenueSplitManager({ accountId, periodStart }: CasaRevenueS
           </div>
 
           {/* Controles de ajuste individual */}
-          <div className="space-y-5">
+          <div className="space-y-3">
             <h4 className="text-sm font-medium">Ajuste Individual</h4>
             {members.map((member, index) => {
               const percentage = percentages[member.user_id] || 0;
@@ -200,21 +200,19 @@ export function CasaRevenueSplitManager({ accountId, periodStart }: CasaRevenueS
               const borderColor = colors[index % colors.length];
 
               return (
-                <div key={member.user_id} className={cn("space-y-3 p-4 rounded-lg border-2", borderColor)}>
+                <div key={member.user_id} className={cn("space-y-2 p-3 rounded-lg border-2", borderColor)}>
                   <div className="flex items-center justify-between">
-                    <Label className="text-base font-medium">
+                    <Label className="text-sm font-medium">
                       {member.name}
-                      {member.email && <span className="text-muted-foreground text-sm ml-1">({member.email})</span>}
+                      {member.email && <span className="text-muted-foreground text-xs ml-1">({member.email})</span>}
                     </Label>
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl font-bold text-primary">
-                        {percentage.toFixed(1)}%
-                      </span>
-                    </div>
+                    <span className="text-xl font-bold text-primary">
+                      {percentage.toFixed(1)}%
+                    </span>
                   </div>
 
                   {/* Slider visual */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Slider
                       value={[percentage]}
                       onValueChange={([value]) => handlePercentageChange(member.user_id, value)}
@@ -222,16 +220,11 @@ export function CasaRevenueSplitManager({ accountId, periodStart }: CasaRevenueS
                       step={0.1}
                       className="cursor-pointer"
                     />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>0%</span>
-                      <span>50%</span>
-                      <span>100%</span>
-                    </div>
                   </div>
 
                   {/* Input manual do peso */}
-                  <div className="flex items-center gap-3">
-                    <Label htmlFor={`weight-${member.user_id}`} className="text-sm whitespace-nowrap">
+                  <div className="flex items-center gap-2 text-xs">
+                    <Label htmlFor={`weight-${member.user_id}`} className="whitespace-nowrap">
                       Peso:
                     </Label>
                     <Input
@@ -241,10 +234,10 @@ export function CasaRevenueSplitManager({ accountId, periodStart }: CasaRevenueS
                       step="0.1"
                       value={weight.toFixed(1)}
                       onChange={(e) => handleWeightChange(member.user_id, parseFloat(e.target.value) || 0)}
-                      className="w-24"
+                      className="w-20 h-7 text-xs"
                     />
-                    <span className="text-sm text-muted-foreground">
-                      de {totalWeight.toFixed(1)} total
+                    <span className="text-muted-foreground">
+                      de {totalWeight.toFixed(1)}
                     </span>
                   </div>
                 </div>
@@ -253,7 +246,7 @@ export function CasaRevenueSplitManager({ accountId, periodStart }: CasaRevenueS
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
+        <div className="flex justify-end gap-2 mt-4 pt-3 border-t">
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancelar
           </Button>
