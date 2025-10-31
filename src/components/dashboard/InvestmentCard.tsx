@@ -49,24 +49,6 @@ export function InvestmentCard({ investment }: InvestmentCardProps) {
   // Retorno nominal é a diferença entre valor atual e total investido
   const nominalReturn = currentValue - totalInvested;
 
-  // Calcular retorno real descontando a inflação acumulada
-  const realReturn = useMemo(() => {
-    if (!returns || returns.length === 0) return nominalReturn;
-    
-    // Calcular inflação acumulada
-    const accumulatedInflation = returns.reduce((acc, r) => {
-      const monthlyInflation = Number(r.inflation_rate || 0) / 100;
-      return acc * (1 + monthlyInflation);
-    }, 1) - 1;
-    
-    // Retorno real = valor atual - total investido corrigido pela inflação
-    const inflationAdjustedInvested = totalInvested * (1 + accumulatedInflation);
-    return currentValue - inflationAdjustedInvested;
-  }, [returns, currentValue, totalInvested, nominalReturn]);
-
-  // Formatar mês/ano de referência
-  const referenceMonth = format(new Date(investment.initial_month), "MMM/yy", { locale: ptBR });
-
   return (
     <Card 
       className="group relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl border-2 hover:border-primary/50" 
@@ -117,7 +99,7 @@ export function InvestmentCard({ investment }: InvestmentCardProps) {
             </LineChart>
           </ResponsiveContainer>
         </div>
-        <div className="mt-3 space-y-1.5 text-sm">
+        <div className="mt-3 space-y-1 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Total Investido</span>
             <span className="font-medium">
@@ -127,22 +109,13 @@ export function InvestmentCard({ investment }: InvestmentCardProps) {
               }).format(totalInvested))}
             </span>
           </div>
-          <div className="flex justify-between items-center pt-1">
-            <span className="font-medium text-foreground">Retorno Nominal</span>
-            <span className={`text-lg font-bold ${nominalReturn >= 0 ? "text-green-600" : "text-red-600"}`}>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Retorno Nominal</span>
+            <span className={`font-medium ${nominalReturn >= 0 ? "text-green-600" : "text-red-600"}`}>
               {maskValue(new Intl.NumberFormat("pt-BR", {
                 style: "currency",
                 currency: "BRL",
               }).format(nominalReturn))}
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-muted-foreground">Retorno Real (ref. {referenceMonth})</span>
-            <span className={`text-xs font-medium ${realReturn >= 0 ? "text-green-600/80" : "text-red-600/80"}`}>
-              {maskValue(new Intl.NumberFormat("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              }).format(realReturn))}
             </span>
           </div>
         </div>
