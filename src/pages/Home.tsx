@@ -173,7 +173,7 @@ const Home = () => {
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <Wallet className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">Prospera</span>
+            <span className="text-xl font-bold">Prospera!</span>
           </div>
           <div className="flex items-center gap-4">
             <Button variant="ghost" onClick={() => navigate("/auth?tab=login")}>
@@ -305,7 +305,7 @@ const Home = () => {
               O que nossos usuários dizem
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Veja como o Prospera tem ajudado pessoas a organizarem suas finanças
+              Veja como o Prospera! tem ajudado pessoas a organizarem suas finanças
             </p>
           </div>
 
@@ -383,11 +383,11 @@ const Home = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
               <Wallet className="h-5 w-5 text-primary" />
-              <span className="font-semibold">Prospera</span>
+              <span className="font-semibold">Prospera!</span>
             </div>
             
             <div className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Prospera. Todos os direitos reservados.
+              © {new Date().getFullYear()} Prospera! Todos os direitos reservados.
             </div>
 
             <Button variant="link" onClick={() => navigate("/auth?tab=login")}>
