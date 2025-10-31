@@ -174,6 +174,7 @@ export function TransactionFilters({ accounts, categories, filters, onFilterChan
               <CalendarComponent
                 mode="single"
                 selected={filters.selectedMonth ? new Date(filters.selectedMonth + "-01") : undefined}
+                defaultMonth={filters.selectedMonth ? new Date(filters.selectedMonth + "-01") : new Date()}
                 onSelect={(date) => {
                   if (date) {
                     const month = format(date, "yyyy-MM");
