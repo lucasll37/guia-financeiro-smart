@@ -87,32 +87,18 @@ export const Header = () => {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
-      <div className="flex h-14 md:h-16 items-center gap-2 md:gap-4 px-2 md:px-4">
+      <div className="relative flex h-14 md:h-16 items-center gap-2 md:gap-4 px-2 md:px-4">
         <SidebarTrigger />
         
-        {/* Logo e Slogan */}
-        <div className="flex items-center gap-2 md:gap-3 border-r pr-2 md:pr-4">
-          <div className="flex flex-col leading-none">
-            <span className="font-display text-lg md:text-2xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
-              Prospera!
-            </span>
-            <span className="text-[10px] md:text-xs text-muted-foreground font-medium tracking-wide">
-              Gestor Financeiro
-            </span>
-          </div>
+        {/* Logo e Slogan Centralizados */}
+        <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center leading-none">
+          <span className="font-display text-lg md:text-2xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+            Prospera!
+          </span>
+          <span className="text-[10px] md:text-xs text-muted-foreground font-medium tracking-wide">
+            Gestor Financeiro
+          </span>
         </div>
-        
-        <Breadcrumb className="hidden sm:flex">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/app/dashboard">Home</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>{currentRoute}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
 
         <div className="ml-auto flex items-center gap-1 md:gap-4">
           <Button
