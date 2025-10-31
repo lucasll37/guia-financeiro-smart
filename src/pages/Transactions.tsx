@@ -113,7 +113,7 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
     setDialogOpen(true);
   };
 
-  const handleSaveTransaction = async (transactionData: TransactionInsert) => {
+  const handleSaveTransaction = async (transactionData: TransactionInsert & { _silent?: boolean }) => {
     const isInstallment = transactionData.description?.includes("(Compra em");
     
     if (selectedTransaction) {
@@ -126,7 +126,8 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
         diff: transactionData as any,
       });
     } else {
-      const newTransaction = await createTransaction.mutateAsync(transactionData);
+      const result = await createTransaction.mutateAsync(transactionData);
+      const newTransaction = result?.data;
       
       if (newTransaction) {
         logAction.mutate({
@@ -138,8 +139,8 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
       }
     }
     
-    // Mostrar toast apenas para transações únicas ou na última parcela
-    if (!isInstallment) {
+    // Não fechar o dialog se for parcela silenciosa
+    if (!transactionData._silent) {
       setDialogOpen(false);
       setSelectedTransaction(null);
     }

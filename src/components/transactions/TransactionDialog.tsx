@@ -16,6 +16,7 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
 import { useCreditCards } from "@/hooks/useCreditCards";
+import { useToast } from "@/hooks/use-toast";
 
 type Account = Database["public"]["Tables"]["accounts"]["Row"];
 type Category = Database["public"]["Tables"]["categories"]["Row"];
@@ -24,7 +25,7 @@ type TransactionInsert = Database["public"]["Tables"]["transactions"]["Insert"];
 interface TransactionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (transaction: TransactionInsert) => Promise<void>;
+  onSave: (transaction: TransactionInsert & { _silent?: boolean }) => Promise<void>;
   transaction?: any;
   accounts: Account[];
   categories: Category[];
@@ -47,6 +48,7 @@ export function TransactionDialog({
   currentUserId,
   defaultAccountId,
 }: TransactionDialogProps) {
+  const { toast } = useToast();
   const [formData, setFormData] = useState<TransactionInsert>({
     account_id: defaultAccountId || "",
     category_id: "",
@@ -179,7 +181,7 @@ export function TransactionDialog({
       const purchaseDate = format(new Date(formData.date), "dd/MM/yyyy");
       
       // Criar array de transações
-      const transactions: TransactionInsert[] = [];
+      const transactions: (TransactionInsert & { _silent?: boolean })[] = [];
       
       // Pegar ano e mês do payment_month para evitar problemas de timezone
       const [year, month] = formData.payment_month 
@@ -209,13 +211,22 @@ export function TransactionDialog({
           description: `${formData.description} - ${cardName} (Compra em ${purchaseDate}) (${i + 1}/${installmentCount})`,
           payment_month: parcelDate,
           split_override: isShared && useCustomSplit ? (splitMembers as any) : null,
+          _silent: true, // Marcar como silencioso
         });
       }
       
-      // Salvar todas as parcelas sequencialmente sem mostrar toast individual
+      // Salvar todas as parcelas sequencialmente
       for (const transaction of transactions) {
         await onSave(transaction);
       }
+      
+      // Mostrar toast único ao final
+      toast({
+        title: "Lançamentos criados",
+        description: `${installmentCount} parcelas foram criadas com sucesso`,
+      });
+      
+      onOpenChange(false);
     } else {
       // Lançamento único
       let transactionData = {
@@ -237,9 +248,8 @@ export function TransactionDialog({
       }
 
       await onSave(transactionData);
+      onOpenChange(false);
     }
-    
-    onOpenChange(false);
   };
 
   const addSplitMember = () => {

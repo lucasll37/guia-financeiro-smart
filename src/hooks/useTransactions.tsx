@@ -32,17 +32,18 @@ export function useTransactions(accountId?: string) {
   });
 
   const createTransaction = useMutation({
-    mutationFn: async (transaction: TransactionInsert) => {
+    mutationFn: async (transaction: TransactionInsert & { _silent?: boolean }) => {
+      const { _silent, ...transactionData } = transaction;
       const { data, error } = await supabase
         .from("transactions")
-        .insert(transaction)
+        .insert(transactionData)
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      return { data, _silent };
     },
-    onSuccess: async (data) => {
+    onSuccess: async ({ data, _silent }) => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       
       // Atualizar saldo do próximo mês
@@ -50,10 +51,13 @@ export function useTransactions(accountId?: string) {
         await updateNextMonthBalance(data.account_id, data.date);
       }
       
-      toast({
-        title: "Lançamento criado",
-        description: "Seu lançamento foi criado com sucesso",
-      });
+      // Mostrar toast apenas se não for silencioso
+      if (!_silent) {
+        toast({
+          title: "Lançamento criado",
+          description: "Seu lançamento foi criado com sucesso",
+        });
+      }
     },
     onError: (error: Error) => {
       toast({
