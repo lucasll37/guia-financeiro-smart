@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Plus, Trash2, CalendarIcon } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { format, addMonths, startOfMonth, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -31,11 +31,6 @@ interface TransactionDialogProps {
   categories: Category[];
   currentUserId: string;
   defaultAccountId?: string; // Conta pré-selecionada do contexto
-}
-
-interface SplitMember {
-  user_id: string;
-  percent: number;
 }
 
 export function TransactionDialog({
@@ -67,8 +62,6 @@ export function TransactionDialog({
 
   const { creditCards } = useCreditCards();
 
-  const [useCustomSplit, setUseCustomSplit] = useState(false);
-  const [splitMembers, setSplitMembers] = useState<SplitMember[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -85,11 +78,6 @@ export function TransactionDialog({
         credit_card_id: transaction.credit_card_id || null,
         payment_month: transaction.payment_month || null,
       });
-      
-      if (transaction.split_override) {
-        setUseCustomSplit(true);
-        setSplitMembers(transaction.split_override as any);
-      }
     } else {
       setFormData({
         account_id: defaultAccountId || "",
@@ -103,8 +91,6 @@ export function TransactionDialog({
         credit_card_id: null,
         payment_month: null,
       });
-      setUseCustomSplit(false);
-      setSplitMembers([]);
       setInstallmentType("single");
       setInstallmentCount(2);
     }
@@ -156,13 +142,6 @@ export function TransactionDialog({
     if (!formData.description.trim()) newErrors.description = "Descrição é obrigatória";
     if (formData.amount <= 0) newErrors.amount = "Valor deve ser maior que zero";
 
-    if (isShared && useCustomSplit) {
-      const total = splitMembers.reduce((sum, m) => sum + m.percent, 0);
-      if (total !== 100) {
-        newErrors.split = "A soma dos percentuais deve ser exatamente 100%";
-      }
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -210,7 +189,7 @@ export function TransactionDialog({
           amount: Math.round(installmentAmount * 100) / 100,
           description: `${formData.description} - ${cardName} (Compra em ${purchaseDate}) (${i + 1}/${installmentCount})`,
           payment_month: parcelDate,
-          split_override: isShared && useCustomSplit ? (splitMembers as any) : null,
+          split_override: null,
           _silent: true, // Marcar como silencioso
         });
       }
@@ -231,7 +210,7 @@ export function TransactionDialog({
       // Lançamento único
       let transactionData = {
         ...formData,
-        split_override: isShared && useCustomSplit ? (splitMembers as any) : null,
+        split_override: null,
       };
 
       // Se for compra de cartão de crédito, adicionar data real na descrição e usar primeiro dia do mês de pagamento
@@ -251,22 +230,6 @@ export function TransactionDialog({
       onOpenChange(false);
     }
   };
-
-  const addSplitMember = () => {
-    setSplitMembers([...splitMembers, { user_id: "", percent: 0 }]);
-  };
-
-  const removeSplitMember = (index: number) => {
-    setSplitMembers(splitMembers.filter((_, i) => i !== index));
-  };
-
-  const updateSplitMember = (index: number, field: keyof SplitMember, value: any) => {
-    const updated = [...splitMembers];
-    updated[index] = { ...updated[index], [field]: value };
-    setSplitMembers(updated);
-  };
-
-  const totalPercent = splitMembers.reduce((sum, m) => sum + m.percent, 0);
 
   // Filtrar apenas subcategorias (que possuem parent_id)
   const filteredCategories = categories.filter((c) => 
@@ -529,75 +492,6 @@ export function TransactionDialog({
                   </p>
                 </div>
               )}
-            </>
-          )}
-
-          {isShared && (
-            <>
-              <Separator />
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="custom-split"
-                    checked={useCustomSplit}
-                    onCheckedChange={setUseCustomSplit}
-                  />
-                  <Label htmlFor="custom-split">Usar divisão personalizada</Label>
-                </div>
-
-                {useCustomSplit && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label>Divisão por Membro</Label>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={addSplitMember}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Adicionar
-                      </Button>
-                    </div>
-
-                    {splitMembers.map((member, index) => (
-                      <div key={index} className="flex gap-2">
-                        <Input
-                          placeholder="ID do usuário"
-                          value={member.user_id}
-                          onChange={(e) => updateSplitMember(index, "user_id", e.target.value)}
-                          className="flex-1"
-                        />
-                        <DecimalInput
-                          placeholder="%"
-                          value={member.percent ?? null}
-                          onValueChange={(num) => {
-                            updateSplitMember(index, "percent", (num ?? 0));
-                          }}
-                          className="w-24"
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeSplitMember(index)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Total:</span>
-                      <span className={totalPercent === 100 ? "text-green-600 font-medium" : "text-destructive font-medium"}>
-                        {totalPercent}%
-                      </span>
-                    </div>
-
-                    {errors.split && <p className="text-sm text-destructive">{errors.split}</p>}
-                  </div>
-                )}
-              </div>
             </>
           )}
         </div>
