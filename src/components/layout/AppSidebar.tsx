@@ -82,8 +82,8 @@ export function AppSidebar() {
                       >
                         <item.icon 
                           className={cn(
-                            "h-5 w-5 flex-shrink-0 transition-all duration-200",
-                            isActive ? "text-primary scale-110" : "text-foreground/80"
+                            "h-5 w-5 flex-shrink-0 text-foreground opacity-100",
+                            isActive && "text-primary"
                           )} 
                         />
                         {!isCollapsed && (
