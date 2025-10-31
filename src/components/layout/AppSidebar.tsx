@@ -69,7 +69,7 @@ export function AppSidebar() {
                        <NavLink
                         to={item.url}
                         className={cn(
-                          "flex items-center rounded-lg overflow-visible",
+                          "flex items-center rounded-lg overflow-visible text-foreground",
                           isCollapsed ? "justify-center" : "gap-3 px-3 py-2.5",
                           "hover:bg-accent/50 transition-colors",
                           isActive && [
