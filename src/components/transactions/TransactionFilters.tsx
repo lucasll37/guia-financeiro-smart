@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, Calendar, CalendarIcon } from "lucide-react";
-import { format, startOfMonth, endOfMonth } from "date-fns";
+import { format, startOfMonth, endOfMonth, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -166,15 +166,15 @@ export function TransactionFilters({ accounts, categories, filters, onFilterChan
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {filters.selectedMonth 
-                  ? format(new Date(filters.selectedMonth + "-01"), "MMMM 'de' yyyy", { locale: ptBR })
+                  ? format(parse(filters.selectedMonth, "yyyy-MM", new Date()), "MMMM 'de' yyyy", { locale: ptBR })
                   : "Selecione o mês"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <CalendarComponent
                 mode="single"
-                selected={filters.selectedMonth ? new Date(filters.selectedMonth + "-01") : undefined}
-                defaultMonth={filters.selectedMonth ? new Date(filters.selectedMonth + "-01") : new Date()}
+                selected={filters.selectedMonth ? parse(filters.selectedMonth, "yyyy-MM", new Date()) : undefined}
+                defaultMonth={filters.selectedMonth ? parse(filters.selectedMonth, "yyyy-MM", new Date()) : new Date()}
                 onSelect={(date) => {
                   if (date) {
                     const month = format(date, "yyyy-MM");
