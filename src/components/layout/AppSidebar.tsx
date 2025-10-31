@@ -104,15 +104,17 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="border-t bg-gradient-to-t from-muted/30 to-transparent p-4">
+      <SidebarFooter className="p-3">
         {!isCollapsed ? (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Sparkles className="h-3.5 w-3.5 text-primary/70" />
-            <span className="font-medium">Versão {version}</span>
+          <div className="flex items-center justify-center gap-2 rounded-lg bg-sidebar-accent/50 px-3 py-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-xs font-medium text-sidebar-foreground">
+              Versão {version}
+            </span>
           </div>
         ) : (
-          <div className="flex justify-center">
-            <Sparkles className="h-4 w-4 text-primary/70" />
+          <div className="flex justify-center rounded-lg bg-sidebar-accent/50 py-2">
+            <Sparkles className="h-4 w-4 text-primary" />
           </div>
         )}
       </SidebarFooter>
