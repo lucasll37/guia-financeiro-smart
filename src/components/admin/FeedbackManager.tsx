@@ -21,7 +21,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Bug, Lightbulb, CheckCircle2, Clock, PlayCircle, XCircle, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Bug, Lightbulb, CheckCircle2, Clock, PlayCircle, XCircle, ArrowUpDown, ArrowUp, ArrowDown, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 interface Feedback {
@@ -115,6 +115,27 @@ export function FeedbackManager() {
     onError: (error: any) => {
       toast({
         title: "Erro ao atualizar status",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteFeedback = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("feedback")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-feedbacks"] });
+      toast({ title: "Feedback deletado com sucesso!" });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao deletar feedback",
         description: error.message,
         variant: "destructive",
       });
@@ -325,22 +346,36 @@ export function FeedbackManager() {
                         })}
                       </TableCell>
                       <TableCell>
-                        <Select
-                          value={feedback.status}
-                          onValueChange={(status) =>
-                            updateStatus.mutate({ id: feedback.id, status })
-                          }
-                        >
-                          <SelectTrigger className="w-[140px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="pending">Pendente</SelectItem>
-                            <SelectItem value="in_progress">Em Progresso</SelectItem>
-                            <SelectItem value="resolved">Resolvido</SelectItem>
-                            <SelectItem value="closed">Fechado</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <div className="flex items-center gap-2">
+                          <Select
+                            value={feedback.status}
+                            onValueChange={(status) =>
+                              updateStatus.mutate({ id: feedback.id, status })
+                            }
+                          >
+                            <SelectTrigger className="w-[140px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pendente</SelectItem>
+                              <SelectItem value="in_progress">Em Progresso</SelectItem>
+                              <SelectItem value="resolved">Resolvido</SelectItem>
+                              <SelectItem value="closed">Fechado</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              if (confirm("Tem certeza que deseja deletar este feedback?")) {
+                                deleteFeedback.mutate(feedback.id);
+                              }
+                            }}
+                            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
