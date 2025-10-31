@@ -78,7 +78,55 @@ Deno.serve(async (req) => {
       .eq('user_id', userId);
     if (notificationsError) console.error('Error deleting notifications:', notificationsError);
 
-    // 2. Get user's accounts to delete related data
+    // 2. Delete feedback
+    await supabaseClient
+      .from('feedback')
+      .delete()
+      .eq('user_id', userId);
+
+    // 3. Delete coupons created by user
+    await supabaseClient
+      .from('coupons')
+      .delete()
+      .eq('created_by', userId);
+
+    // 4. Delete user's goals (by user_id, not account_id)
+    await supabaseClient
+      .from('goals')
+      .delete()
+      .eq('user_id', userId);
+
+    // 5. Delete casa_revenue_splits
+    await supabaseClient
+      .from('casa_revenue_splits')
+      .delete()
+      .eq('user_id', userId);
+
+    // 6. Delete account_members where user was invited by this user
+    await supabaseClient
+      .from('account_members')
+      .delete()
+      .eq('invited_by', userId);
+
+    // 7. Delete account_members where this user is a member
+    await supabaseClient
+      .from('account_members')
+      .delete()
+      .eq('user_id', userId);
+
+    // 8. Delete investment_members where user was invited by this user
+    await supabaseClient
+      .from('investment_members')
+      .delete()
+      .eq('invited_by', userId);
+
+    // 9. Delete investment_members where this user is a member
+    await supabaseClient
+      .from('investment_members')
+      .delete()
+      .eq('user_id', userId);
+
+    // 10. Get user's accounts to delete related data
     const { data: userAccounts } = await supabaseClient
       .from('accounts')
       .select('id')
@@ -96,12 +144,6 @@ Deno.serve(async (req) => {
       // Delete budgets
       await supabaseClient
         .from('budgets')
-        .delete()
-        .in('account_id', accountIds);
-
-      // Delete goals
-      await supabaseClient
-        .from('goals')
         .delete()
         .in('account_id', accountIds);
 
@@ -123,12 +165,6 @@ Deno.serve(async (req) => {
         .delete()
         .in('account_id', accountIds);
 
-      // Delete account members
-      await supabaseClient
-        .from('account_members')
-        .delete()
-        .in('account_id', accountIds);
-
       // Delete audit logs
       await supabaseClient
         .from('audit_logs')
@@ -136,13 +172,13 @@ Deno.serve(async (req) => {
         .in('entity_id', accountIds);
     }
 
-    // 3. Delete accounts
+    // 11. Delete accounts
     await supabaseClient
       .from('accounts')
       .delete()
       .eq('owner_id', userId);
 
-    // 4. Get user's investments to delete related data
+    // 12. Get user's investments to delete related data
     const { data: userInvestments } = await supabaseClient
       .from('investment_assets')
       .select('id')
@@ -156,51 +192,45 @@ Deno.serve(async (req) => {
         .from('investment_monthly_returns')
         .delete()
         .in('investment_id', investmentIds);
-
-      // Delete investment members
-      await supabaseClient
-        .from('investment_members')
-        .delete()
-        .in('investment_id', investmentIds);
     }
 
-    // 5. Delete investments
+    // 13. Delete investments
     await supabaseClient
       .from('investment_assets')
       .delete()
       .eq('owner_id', userId);
 
-    // 6. Delete subscriptions
+    // 14. Delete subscriptions
     await supabaseClient
       .from('subscriptions')
       .delete()
       .eq('user_id', userId);
 
-    // 7. Delete user roles
+    // 15. Delete user roles
     await supabaseClient
       .from('user_roles')
       .delete()
       .eq('user_id', userId);
 
-    // 8. Delete user action logs
+    // 16. Delete user action logs
     await supabaseClient
       .from('user_action_logs')
       .delete()
       .eq('user_id', userId);
 
-    // 9. Delete account deletion tokens
+    // 17. Delete account deletion tokens
     await supabaseClient
       .from('account_deletion_tokens')
       .delete()
       .eq('user_id', userId);
 
-    // 10. Delete profile
+    // 18. Delete profile
     await supabaseClient
       .from('profiles')
       .delete()
       .eq('id', userId);
 
-    // 11. Delete from storage (avatar)
+    // 19. Delete from storage (avatar)
     const { data: storageFiles } = await supabaseClient
       .storage
       .from('avatars')
@@ -214,7 +244,7 @@ Deno.serve(async (req) => {
         .remove(filePaths);
     }
 
-    // 12. Finally, delete user from auth
+    // 20. Finally, delete user from auth
     const { error: deleteAuthError } = await supabaseClient.auth.admin.deleteUser(userId);
 
     if (deleteAuthError) {
