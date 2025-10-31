@@ -92,8 +92,12 @@ export function AccountCard({
     const balance = previousBalance + periodIncome - expenses;
 
     // Forecast total for selected period (only expenses)
-    const accountForecasts = forecasts?.filter(f => f.account_id === account.id && f.period_end === periodEndStr && Number(f.forecasted_amount) < 0) || [];
-    const budgetTotal = accountForecasts.reduce((sum, f) => sum + Math.abs(Number(f.forecasted_amount)), 0);
+    const accountForecasts = forecasts?.filter(f => 
+      f.account_id === account.id && 
+      f.period_end === periodEndStr && 
+      f.categories?.type === 'despesa'
+    ) || [];
+    const budgetTotal = accountForecasts.reduce((sum, f) => sum + Number(f.forecasted_amount), 0);
     const completion = budgetTotal > 0 ? expenses / budgetTotal * 100 : 0;
     return {
       balance,
