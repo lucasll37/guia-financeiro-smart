@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Palette } from "lucide-react";
+import { Palette, Eye } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useUserPreferences, Language, Currency, DateFormat } from "@/hooks/useUserPreferences";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
@@ -130,6 +131,41 @@ export function UserPreferences() {
                 <SelectItem value="yyyy-MM-dd">AAAA-MM-DD</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Eye className="h-5 w-5" />
+            Exibição de Valores
+          </CardTitle>
+          <CardDescription>
+            Configure como os valores financeiros são exibidos ao fazer login
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="showValues">Mostrar valores por padrão</Label>
+              <p className="text-sm text-muted-foreground">
+                Quando desabilitado, os valores aparecem mascarados ao fazer login
+              </p>
+            </div>
+            <Switch
+              id="showValues"
+              checked={preferences.showValuesByDefault}
+              onCheckedChange={(checked) => {
+                updatePreferences({ showValuesByDefault: checked });
+                toast({
+                  title: "Preferência atualizada",
+                  description: "Suas configurações foram salvas com sucesso",
+                });
+                // Recarregar a página para aplicar a mudança imediatamente
+                window.location.reload();
+              }}
+            />
           </div>
         </CardContent>
       </Card>

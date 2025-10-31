@@ -9,6 +9,7 @@ export interface UserPreferences {
   currency: Currency;
   dateFormat: DateFormat;
   theme: "light" | "dark" | "system";
+  showValuesByDefault: boolean;
 }
 
 const defaultPreferences: UserPreferences = {
@@ -16,6 +17,7 @@ const defaultPreferences: UserPreferences = {
   currency: "BRL",
   dateFormat: "dd/MM/yyyy",
   theme: "system",
+  showValuesByDefault: false,
 };
 
 export function useUserPreferences() {
