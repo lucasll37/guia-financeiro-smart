@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useMaskValues } from "@/hooks/useMaskValues";
+import { useAuth } from "@/hooks/useAuth";
 export type Language = "pt-BR" | "en-US";
 export type Currency = "BRL" | "USD" | "EUR";
 export type DateFormat = "dd/MM/yyyy" | "MM/dd/yyyy" | "yyyy-MM-dd";
@@ -21,8 +22,10 @@ const defaultPreferences: UserPreferences = {
 };
 
 export function useUserPreferences() {
+  const { user } = useAuth();
+  const storageKey = user?.id ? `user-preferences:${user.id}` : "user-preferences";
   const [preferences, setPreferences] = useState<UserPreferences>(() => {
-    const saved = localStorage.getItem("user-preferences");
+    const saved = localStorage.getItem(storageKey);
     if (saved) {
       try {
         return { ...defaultPreferences, ...JSON.parse(saved) };
@@ -36,8 +39,21 @@ export function useUserPreferences() {
   const { maskValue, isMasked } = useMaskValues();
 
   useEffect(() => {
-    localStorage.setItem("user-preferences", JSON.stringify(preferences));
-  }, [preferences]);
+    localStorage.setItem(storageKey, JSON.stringify(preferences));
+  }, [preferences, storageKey]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      try {
+        setPreferences({ ...defaultPreferences, ...JSON.parse(saved) });
+      } catch {
+        setPreferences(defaultPreferences);
+      }
+    } else {
+      setPreferences(defaultPreferences);
+    }
+  }, [storageKey]);
   const updatePreferences = (updates: Partial<UserPreferences>) => {
     setPreferences((prev) => ({ ...prev, ...updates }));
   };

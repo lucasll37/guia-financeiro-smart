@@ -10,30 +10,23 @@ interface MaskValuesContextType {
 const MaskValuesContext = createContext<MaskValuesContextType | undefined>(undefined);
 
 export function MaskValuesProvider({ children }: { children: ReactNode }) {
-  const [isMasked, setIsMasked] = useState(() => {
-    // Inicializar APENAS no primeiro load com base na preferência do usuário
-    const saved = localStorage.getItem("user-preferences");
-    if (saved) {
-      try {
-        const prefs = JSON.parse(saved);
-        return prefs.hideValuesOnLogin === true;
-      } catch {
-        return false;
-      }
-    }
-    return false;
-  });
+  const [isMasked, setIsMasked] = useState(false);
 
   const { user } = useAuth();
   useEffect(() => {
-    if (!user) return;
+    if (!user?.id) return;
     try {
-      const saved = localStorage.getItem("user-preferences");
+      const key = `user-preferences:${user.id}`;
+      const saved = localStorage.getItem(key);
       if (saved) {
         const prefs = JSON.parse(saved);
         setIsMasked(prefs.hideValuesOnLogin === true);
+      } else {
+        setIsMasked(false);
       }
-    } catch {}
+    } catch {
+      setIsMasked(false);
+    }
   }, [user?.id]);
 
   const toggleMask = () => setIsMasked((prev) => !prev);
