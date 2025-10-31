@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -86,6 +86,13 @@ export function BudgetWizard({
   const [openCategories, setOpenCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  // Atualizar o mês de trabalho quando o dialog abre ou selectedMonth muda
+  useEffect(() => {
+    if (open) {
+      setWorkingMonth(parseSelectedMonth(selectedMonth));
+    }
+  }, [open, selectedMonth]);
 
   // Agrupar categorias por tipo
   const categoryGroups = useMemo(() => {
