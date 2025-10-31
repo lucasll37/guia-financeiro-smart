@@ -80,13 +80,12 @@ export function AppSidebar() {
                           ]
                         )}
                       >
-                        <span className="inline-flex w-5 h-5 items-center justify-center shrink-0 text-foreground">
-                          <item.icon 
-                            className="h-5 w-5"
-                            absoluteStrokeWidth
-                            strokeWidth={2}
-                          />
-                        </span>
+                        <item.icon 
+                          className={cn(
+                            "h-5 w-5 shrink-0",
+                            isActive ? "text-primary" : "text-current"
+                          )}
+                        />
                         {!isCollapsed && (
                           <span className="flex-1 truncate text-sm">
                             {item.title}
