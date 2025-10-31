@@ -85,10 +85,13 @@ export const CookieConsent = ({ forceShow = false, onClose }: CookieConsentProps
   }, [settings, forceShow]);
 
   const handleClose = () => {
-    if (!forceShow && dontShowAgain && settings?.version) {
+    if (!forceShow && dontShowAgain && settings?.version !== undefined) {
       localStorage.setItem(
         COOKIE_CONSENT_KEY,
-        JSON.stringify({ version: settings.version })
+        JSON.stringify({ 
+          version: settings.version,
+          dont_show_permanently: true 
+        })
       );
     }
     setIsVisible(false);

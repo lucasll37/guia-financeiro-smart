@@ -78,10 +78,13 @@ export const GeneralMessageModal = ({ forceShow = false, onClose }: GeneralMessa
   }, [settings, forceShow]);
 
   const handleClose = () => {
-    if (!forceShow && dontShowAgain && settings?.version) {
+    if (!forceShow && dontShowAgain && settings?.version !== undefined) {
       localStorage.setItem(
         GENERAL_MESSAGE_KEY,
-        JSON.stringify({ version: settings.version })
+        JSON.stringify({ 
+          version: settings.version,
+          dont_show_permanently: true 
+        })
       );
     }
     setIsVisible(false);

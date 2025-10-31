@@ -85,12 +85,21 @@ export const DashboardLayout = () => {
     }
 
     try {
-      const { version: storedVersion } = JSON.parse(storedConsent);
-      const currentVersion = cookieSettings?.version;
-
-      if (currentVersion && storedVersion !== currentVersion) {
-        setShowCookieModal(true);
+      const { version: storedVersion, dont_show_permanently } = JSON.parse(storedConsent);
+      
+      // Se usuário marcou "não mostrar novamente", respeitar isso
+      // Apenas "Forçar Exibição" (que muda a versão) pode sobrescrever
+      if (dont_show_permanently) {
+        const currentVersion = cookieSettings?.version;
+        // Só mostrar se a versão mudou (admin forçou exibição)
+        if (currentVersion && storedVersion !== currentVersion) {
+          setShowCookieModal(true);
+        }
+        return;
       }
+      
+      // Se não marcou "não mostrar", comportamento padrão (não aparece mais)
+      setShowCookieModal(false);
     } catch {
       setShowCookieModal(true);
     }
@@ -112,12 +121,21 @@ export const DashboardLayout = () => {
     }
 
     try {
-      const { version: storedVersion } = JSON.parse(storedMessage);
-      const currentVersion = generalSettings?.version;
-
-      if (currentVersion && storedVersion !== currentVersion) {
-        setShowGeneralModal(true);
+      const { version: storedVersion, dont_show_permanently } = JSON.parse(storedMessage);
+      
+      // Se usuário marcou "não mostrar novamente", respeitar isso
+      // Apenas "Forçar Exibição" (que muda a versão) pode sobrescrever
+      if (dont_show_permanently) {
+        const currentVersion = generalSettings?.version;
+        // Só mostrar se a versão mudou (admin forçou exibição)
+        if (currentVersion && storedVersion !== currentVersion) {
+          setShowGeneralModal(true);
+        }
+        return;
       }
+
+      // Se não marcou "não mostrar", comportamento padrão (não aparece mais)
+      setShowGeneralModal(false);
     } catch {
       setShowGeneralModal(true);
     }
