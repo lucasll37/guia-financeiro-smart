@@ -30,6 +30,7 @@ export function EmailTemplatesManager() {
     html_content: "",
   });
   const [testEmail, setTestEmail] = useState("");
+  const [activeTab, setActiveTab] = useState("editor");
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const getPreviewHTML = () => {
@@ -53,9 +54,9 @@ export function EmailTemplatesManager() {
     return html;
   };
 
-  // Update preview when content changes
+  // Update preview when content changes or tab changes
   useEffect(() => {
-    if (iframeRef.current && editForm.html_content) {
+    if (iframeRef.current && editForm.html_content && activeTab === "preview") {
       const iframe = iframeRef.current;
       
       // Wait for iframe to be ready
@@ -76,7 +77,7 @@ export function EmailTemplatesManager() {
       updateIframe();
       iframe.onload = updateIframe;
     }
-  }, [editForm.html_content]);
+  }, [editForm.html_content, activeTab]);
 
   // Fetch templates
   const { data: templates, isLoading } = useQuery({
@@ -271,7 +272,7 @@ export function EmailTemplatesManager() {
             </CardHeader>
             <CardContent>
               {selectedTemplate ? (
-                <Tabs defaultValue="editor" className="w-full">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="editor">
                       <Mail className="mr-2 h-4 w-4" />
