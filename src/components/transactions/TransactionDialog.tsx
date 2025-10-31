@@ -157,7 +157,7 @@ export function TransactionDialog({
       
       const selectedCard = creditCards?.find(c => c.id === formData.credit_card_id);
       const cardName = selectedCard?.name || "Cartão";
-      const purchaseDate = format(new Date(formData.date), "dd/MM/yyyy");
+      const purchaseDate = format(parseISO(formData.date), "dd/MM/yyyy");
       
       // Criar array de transações
       const transactions: (TransactionInsert & { _silent?: boolean })[] = [];
@@ -217,7 +217,7 @@ export function TransactionDialog({
       if (formData.credit_card_id && formData.payment_month) {
         const selectedCard = creditCards?.find(c => c.id === formData.credit_card_id);
         const cardName = selectedCard?.name || "Cartão";
-        const purchaseDate = format(new Date(formData.date), "dd/MM/yyyy");
+        const purchaseDate = format(parseISO(formData.date), "dd/MM/yyyy");
         
         transactionData = {
           ...transactionData,
@@ -346,13 +346,13 @@ export function TransactionDialog({
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.date ? format(new Date(formData.date), "dd/MM/yyyy") : "Selecione a data"}
+                    {formData.date ? format(parseISO(formData.date), "dd/MM/yyyy") : "Selecione a data"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={formData.date ? new Date(formData.date) : undefined}
+                    selected={formData.date ? parseISO(formData.date) : undefined}
                     onSelect={(date) => {
                       if (date) {
                         setFormData({ ...formData, date: format(date, "yyyy-MM-dd") });
