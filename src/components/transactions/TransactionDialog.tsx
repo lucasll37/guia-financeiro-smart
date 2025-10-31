@@ -10,8 +10,8 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
-import { format, addMonths, startOfMonth, parseISO } from "date-fns";
+import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { format, addMonths, subMonths, startOfMonth, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
@@ -417,37 +417,69 @@ export function TransactionDialog({
             <>
               <div className="space-y-2">
                 <Label htmlFor="payment_month">Mês de Pagamento</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !formData.payment_month && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.payment_month 
-                        ? format(parseISO(formData.payment_month), "MMMM 'de' yyyy", { locale: ptBR }) 
-                        : "Selecione o mês"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={formData.payment_month ? parseISO(formData.payment_month) : undefined}
-                      onSelect={(date) => {
-                        if (date) {
-                          const firstDay = startOfMonth(date);
-                          setFormData({ ...formData, payment_month: format(firstDay, "yyyy-MM-dd") });
-                        }
-                      }}
-                      initialFocus
-                      locale={ptBR}
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      const currentMonth = formData.payment_month 
+                        ? parseISO(formData.payment_month) 
+                        : new Date();
+                      const prevMonth = subMonths(currentMonth, 1);
+                      setFormData({ ...formData, payment_month: format(startOfMonth(prevMonth), "yyyy-MM-dd") });
+                    }}
+                    className="shrink-0"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "flex-1 justify-start text-left font-normal",
+                          !formData.payment_month && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formData.payment_month 
+                          ? format(parseISO(formData.payment_month), "MMMM 'de' yyyy", { locale: ptBR }) 
+                          : "Selecione o mês"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={formData.payment_month ? parseISO(formData.payment_month) : undefined}
+                        onSelect={(date) => {
+                          if (date) {
+                            const firstDay = startOfMonth(date);
+                            setFormData({ ...formData, payment_month: format(firstDay, "yyyy-MM-dd") });
+                          }
+                        }}
+                        initialFocus
+                        locale={ptBR}
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      const currentMonth = formData.payment_month 
+                        ? parseISO(formData.payment_month) 
+                        : new Date();
+                      const nextMonth = addMonths(currentMonth, 1);
+                      setFormData({ ...formData, payment_month: format(startOfMonth(nextMonth), "yyyy-MM-dd") });
+                    }}
+                    className="shrink-0"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Calculado automaticamente. Ajuste se necessário.
                 </p>

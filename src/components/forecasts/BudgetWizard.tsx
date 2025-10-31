@@ -28,10 +28,11 @@ import {
   Calendar,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
-import { format, startOfMonth, endOfMonth } from "date-fns";
+import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -312,28 +313,48 @@ export function BudgetWizard({
                     </div>
                   </div>
 
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal h-10 text-sm"
-                        )}
-                      >
-                        {format(workingMonth, "MMMM 'de' yyyy", { locale: ptBR })}
-                        <Calendar className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        selected={workingMonth}
-                        onSelect={(date) => date && handleMonthSelect(date)}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setWorkingMonth(subMonths(workingMonth, 1))}
+                      className="shrink-0 h-10"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "flex-1 justify-start text-left font-normal h-10 text-sm"
+                          )}
+                        >
+                          {format(workingMonth, "MMMM 'de' yyyy", { locale: ptBR })}
+                          <Calendar className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={workingMonth}
+                          onSelect={(date) => date && handleMonthSelect(date)}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setWorkingMonth(addMonths(workingMonth, 1))}
+                      className="shrink-0 h-10"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="flex justify-end pt-2 border-t">
