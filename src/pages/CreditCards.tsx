@@ -9,6 +9,7 @@ import { useCreditCards } from "@/hooks/useCreditCards";
 import { useTransactions } from "@/hooks/useTransactions";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { useAccountEditPermissions } from "@/hooks/useAccountEditPermissions";
+import { useAccountMembers } from "@/hooks/useAccountMembers";
 import { useToast } from "@/hooks/use-toast";
 import { CreditCardsTable } from "@/components/creditcards/CreditCardsTable";
 import { CreditCardDialog } from "@/components/creditcards/CreditCardDialog";
@@ -54,6 +55,10 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
   const { transactions } = useTransactions(filters.accountId !== "all" ? filters.accountId : undefined);
 
   const { data: canEdit = false } = useAccountEditPermissions(
+    filters.accountId !== "all" ? filters.accountId : undefined
+  );
+
+  const { members } = useAccountMembers(
     filters.accountId !== "all" ? filters.accountId : undefined
   );
 
@@ -147,6 +152,7 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
           onEdit={handleEditCard}
           onDelete={handleDeleteCard}
           canEdit={canEdit}
+          accountMembers={members || []}
         />
       )}
 

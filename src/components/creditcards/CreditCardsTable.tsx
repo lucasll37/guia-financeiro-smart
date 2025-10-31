@@ -4,15 +4,11 @@ import { Edit, Trash2, ChevronDown, ChevronRight, ArrowUpDown, ArrowUp, ArrowDow
 import { useState, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { useAuth } from "@/hooks/useAuth";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import type { Database } from "@/integrations/supabase/types";
 
-type CreditCard = Database["public"]["Tables"]["credit_cards"]["Row"] & {
-  creator?: {
-    name: string | null;
-    email: string | null;
-  };
-};
+type CreditCard = Database["public"]["Tables"]["credit_cards"]["Row"];
 type Transaction = Database["public"]["Tables"]["transactions"]["Row"] & {
   categories: {
     name: string;
@@ -27,6 +23,7 @@ interface CreditCardsTableProps {
   onEdit: (creditCard: CreditCard) => void;
   onDelete: (id: string) => void;
   canEdit?: boolean;
+  accountMembers?: Array<{ user_id: string; user?: { name: string | null; email: string | null } | null }>;
 }
 
 export function CreditCardsTable({
@@ -35,11 +32,19 @@ export function CreditCardsTable({
   onEdit,
   onDelete,
   canEdit = true,
+  accountMembers = [],
 }: CreditCardsTableProps) {
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [sortField, setSortField] = useState<'name' | 'total' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const { formatCurrency } = useUserPreferences();
+  const { user } = useAuth();
+
+  const getCreatorName = (createdBy: string) => {
+    if (createdBy === user?.id) return 'Você';
+    const member = accountMembers.find(m => m.user_id === createdBy);
+    return member?.user?.name || member?.user?.email || 'N/A';
+  };
 
   const toggleCard = (id: string) => {
     setExpandedCards(prev => {
@@ -150,7 +155,7 @@ export function CreditCardsTable({
               const isExpanded = expandedCards.has(card.id);
               const monthlyTransactions = getTransactionsByMonth(card.id);
               const totalToPay = getCardTotal(card.id);
-              const creatorDisplay = card.creator?.name || card.creator?.email || 'N/A';
+              const creatorDisplay = getCreatorName(card.created_by);
 
               return (
                 <>

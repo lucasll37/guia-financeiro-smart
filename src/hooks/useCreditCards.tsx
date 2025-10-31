@@ -4,13 +4,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import type { Database } from "@/integrations/supabase/types";
 
-type CreditCard = Database["public"]["Tables"]["credit_cards"]["Row"] & {
-  creator?: {
-    name: string | null;
-    email: string | null;
-  };
-};
-type CreditCardInsert = Database["public"]["Tables"]["credit_cards"]["Insert"];
+type CreditCard = Database["public"]["Tables"]["credit_cards"]["Row"];
+type CreditCardInsert = Omit<Database["public"]["Tables"]["credit_cards"]["Insert"], 'created_by'>;
 type CreditCardUpdate = Database["public"]["Tables"]["credit_cards"]["Update"];
 
 export function useCreditCards(accountId?: string) {
@@ -23,30 +18,16 @@ export function useCreditCards(accountId?: string) {
     queryFn: async () => {
       let query = supabase
         .from("credit_cards")
-        .select(`
-          *,
-          creator:profiles!credit_cards_created_by_fkey(name, email)
-        `);
+        .select("*");
 
       if (accountId) {
         query = query.eq("account_id", accountId);
       }
 
-      const { data, error } = await query
-        .order("name", { ascending: true })
-        .returns<(Database["public"]["Tables"]["credit_cards"]["Row"] & {
-          creator: { name: string | null; email: string | null } | null;
-        })[]>();
+      const { data, error } = await query.order("name", { ascending: true });
 
       if (error) throw error;
-      
-      // Transform array creator to single object
-      return (data || []).map(card => ({
-        ...card,
-        creator: Array.isArray(card.creator) && card.creator.length > 0 
-          ? card.creator[0] 
-          : card.creator
-      })) as CreditCard[];
+      return data as CreditCard[];
     },
     enabled: !!accountId || accountId === undefined,
   });
