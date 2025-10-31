@@ -68,12 +68,29 @@ export function useNotifications(userId?: string) {
       message: string;
       metadata?: any;
     }) => {
-      const { error } = await supabase.from("notifications").insert({
-        ...notification,
-        metadata: notification.metadata as any,
-      });
+      // Check for existing similar notifications in the last 24h to avoid duplicates
+      const { data: recent } = await supabase
+        .from("notifications")
+        .select("type, metadata")
+        .eq("user_id", notification.user_id)
+        .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 
-      if (error) throw error;
+      // Check if a similar notification already exists
+      const isDuplicate = recent?.some(
+        (r) =>
+          r.type === notification.type &&
+          JSON.stringify(r.metadata) === JSON.stringify(notification.metadata)
+      );
+
+      // Only insert if not duplicate
+      if (!isDuplicate) {
+        const { error } = await supabase.from("notifications").insert({
+          ...notification,
+          metadata: notification.metadata as any,
+        });
+
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
