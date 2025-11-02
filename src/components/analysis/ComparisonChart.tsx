@@ -30,13 +30,13 @@ export function ComparisonChart({ data, accountId }: ComparisonChartProps) {
     categoria: item.name,
     Previsto: item.forecasted,
     Realizado: Math.abs(item.actual),
-    Diferença: item.actual - item.forecasted,
+    Diferença: item.forecasted - item.actual,
   }));
 
   // Calculate totals
   const totalForecasted = data.reduce((sum, item) => sum + item.forecasted, 0);
   const totalActual = data.reduce((sum, item) => sum + Math.abs(item.actual), 0);
-  const totalDifference = totalActual - totalForecasted;
+  const totalDifference = totalForecasted - totalActual;
   const percentageDifference = totalForecasted !== 0 
     ? ((totalDifference / totalForecasted) * 100).toFixed(1)
     : "0";
