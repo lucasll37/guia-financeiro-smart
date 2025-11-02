@@ -90,15 +90,15 @@ export const Header = () => {
       <div className="flex h-14 md:h-16 items-center gap-2 md:gap-4 px-2 md:px-4">
         <SidebarTrigger className="shrink-0" />
         
-        {/* Logo e Slogan - Centralizado */}
-        <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center leading-none pointer-events-none">
+        {/* Logo e Slogan - Oculto em telas pequenas */}
+        <div className="hidden min-[500px]:flex absolute left-1/2 -translate-x-1/2 flex-col items-center leading-none pointer-events-none">
           <div className="flex items-center gap-1 md:gap-1.5">
             <Wallet className="h-5 w-5 md:h-6 md:w-6 text-primary" />
             <span className="font-display text-xl md:text-3xl font-bold text-foreground">
               Prospera!
             </span>
           </div>
-          <span className="hidden min-[500px]:block text-xs md:text-sm text-muted-foreground font-medium tracking-wide mt-0.5">
+          <span className="text-xs md:text-sm text-muted-foreground font-medium tracking-wide mt-0.5">
             Gestor Financeiro
           </span>
         </div>
