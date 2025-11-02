@@ -69,7 +69,7 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
   const [isExplanationOpen, setIsExplanationOpen] = useState(false);
   const [sortField, setSortField] = useState<'month' | 'contribution' | 'returns' | 'balance' | 'presentValue' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [simulationTrigger, setSimulationTrigger] = useState(0);
+  const [seed, setSeed] = useState<number>(() => Date.now());
 
   // Save to localStorage when values change
   useEffect(() => {
@@ -96,17 +96,29 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
     localStorage.setItem('projectionTable.inflationStdDev', String(inflationStdDev));
   }, [inflationStdDev]);
 
-  // Box-Muller transform for normal distribution
-  const generateNormalRandom = (mean: number, stdDev: number) => {
+  // Seeded PRNG to keep randomness stable until user clicks "Gerar Simulação"
+  const createPRNG = (seed: number) => {
+    let t = seed >>> 0;
+    return () => {
+      t += 0x6D2B79F5;
+      let r = Math.imul(t ^ (t >>> 15), 1 | t);
+      r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
+      return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+    };
+  };
+
+  // Box-Muller transform for normal distribution using seeded RNG
+  const generateNormalRandom = (mean: number, stdDev: number, rng: () => number) => {
     if (stdDev === 0) return mean;
-    const u1 = Math.random();
-    const u2 = Math.random();
+    const u1 = Math.max(rng(), Number.EPSILON);
+    const u2 = rng();
     const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
     return mean + z0 * stdDev;
   };
-
+  const initialMonthKey = initialMonth.getFullYear() * 12 + initialMonth.getMonth();
   const projectionData = useMemo(() => {
-    const data = [];
+    const rng = createPRNG(seed);
+    const data: any[] = [];
     let balance = currentBalance;
     let cumulativeInflation = 0;
     let cumulativeContribution = 0;
@@ -117,8 +129,8 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
       const contribution = monthlyContribution;
       
       // Apply variability using normal distribution
-      const actualMonthlyRate = generateNormalRandom(monthlyRate, rateStdDev);
-      const actualInflationRate = generateNormalRandom(inflationRate, inflationStdDev);
+      const actualMonthlyRate = generateNormalRandom(monthlyRate, rateStdDev, rng);
+      const actualInflationRate = generateNormalRandom(inflationRate, inflationStdDev, rng);
       
       const returns = (balance + contribution) * (actualMonthlyRate / 100);
       balance = balance + contribution + returns;
@@ -150,7 +162,7 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
     }
 
     return data;
-  }, [currentBalance, initialMonth, months, monthlyRate, inflationRate, monthlyContribution, rateStdDev, inflationStdDev, simulationTrigger]);
+  }, [currentBalance, initialMonthKey, months, monthlyRate, inflationRate, monthlyContribution, rateStdDev, inflationStdDev, seed]);
 
   // Notify parent components when config or data changes
   useEffect(() => {
@@ -248,7 +260,7 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
         <div className="flex items-center justify-between">
           <CardTitle>Projeção de Investimento</CardTitle>
           <div className="flex gap-2">
-            <Button onClick={() => setSimulationTrigger(prev => prev + 1)} variant="default" size="sm">
+            <Button onClick={() => setSeed(prev => prev + 1)} variant="default" size="sm">
               Gerar Simulação
             </Button>
             <Button onClick={resetToDefaults} variant="outline" size="sm">
