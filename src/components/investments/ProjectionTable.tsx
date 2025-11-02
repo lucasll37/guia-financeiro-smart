@@ -8,6 +8,7 @@ import { DecimalInput } from "@/components/ui/decimal-input";
 import { Slider } from "@/components/ui/slider";
 import { Info, ArrowUpDown, ArrowUp, ArrowDown, Download } from "lucide-react";
 import { useMaskValues } from "@/hooks/useMaskValues";
+import { useInvestmentSimulationSettings } from "@/hooks/useInvestmentSimulationSettings";
 import {
   Table,
   TableBody,
@@ -34,37 +35,37 @@ interface ProjectionTableProps {
 
 export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, onProjectionDataChange }: ProjectionTableProps) {
   const { maskValue } = useMaskValues();
-  // Load initial values from localStorage
+  const { settings, isLoading: settingsLoading } = useInvestmentSimulationSettings();
+  
+  // Load initial values from localStorage or settings
   const [months, setMonths] = useState(() => {
     const saved = localStorage.getItem('projectionTable.months');
-    return saved ? Number(saved) : 12;
+    return saved ? Number(saved) : (settings?.months_config?.default ?? 12);
   });
-  const DEFAULT_VALUES = {
-    monthlyRate: 0.83,
-    inflationRate: 0.35,
-    rateStdDev: 0.15,
-    inflationStdDev: 0.25,
-  };
-
+  
   const [monthlyRate, setMonthlyRate] = useState(() => {
     const saved = localStorage.getItem('projectionTable.monthlyRate');
-    return saved ? Number(saved) : DEFAULT_VALUES.monthlyRate;
+    return saved ? Number(saved) : (settings?.monthly_rate_config?.default ?? 0.83);
   });
+  
   const [inflationRate, setInflationRate] = useState(() => {
     const saved = localStorage.getItem('projectionTable.inflationRate');
-    return saved ? Number(saved) : DEFAULT_VALUES.inflationRate;
+    return saved ? Number(saved) : (settings?.inflation_rate_config?.default ?? 0.35);
   });
+  
   const [monthlyContribution, setMonthlyContribution] = useState(() => {
     const saved = localStorage.getItem('projectionTable.monthlyContribution');
-    return saved ? Number(saved) : 0;
+    return saved ? Number(saved) : (settings?.contribution_config?.default ?? 0);
   });
+  
   const [rateStdDev, setRateStdDev] = useState(() => {
     const saved = localStorage.getItem('projectionTable.rateStdDev');
-    return saved ? Number(saved) : DEFAULT_VALUES.rateStdDev;
+    return saved ? Number(saved) : (settings?.rate_std_dev_config?.default ?? 0.15);
   });
+  
   const [inflationStdDev, setInflationStdDev] = useState(() => {
     const saved = localStorage.getItem('projectionTable.inflationStdDev');
-    return saved ? Number(saved) : DEFAULT_VALUES.inflationStdDev;
+    return saved ? Number(saved) : (settings?.inflation_std_dev_config?.default ?? 0.25);
   });
   const [isExplanationOpen, setIsExplanationOpen] = useState(false);
   const [sortField, setSortField] = useState<'month' | 'contribution' | 'returns' | 'balance' | 'presentValue' | null>(null);
@@ -228,10 +229,10 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
   };
 
   const resetToDefaults = () => {
-    setMonthlyRate(DEFAULT_VALUES.monthlyRate);
-    setInflationRate(DEFAULT_VALUES.inflationRate);
-    setRateStdDev(DEFAULT_VALUES.rateStdDev);
-    setInflationStdDev(DEFAULT_VALUES.inflationStdDev);
+    setMonthlyRate(settings?.monthly_rate_config?.default ?? 0.83);
+    setInflationRate(settings?.inflation_rate_config?.default ?? 0.35);
+    setRateStdDev(settings?.rate_std_dev_config?.default ?? 0.15);
+    setInflationStdDev(settings?.inflation_std_dev_config?.default ?? 0.25);
   };
 
   const exportToExcel = () => {
@@ -379,17 +380,20 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
                   <Input
                     id="months-input"
                     type="number"
-                    min={1}
-                    max={360}
+                    min={settings?.months_config?.min ?? 1}
+                    max={settings?.months_config?.max ?? 360}
                     value={months}
-                    onChange={(e) => setMonths(Math.min(360, Math.max(1, parseInt(e.target.value) || 1)))}
+                    onChange={(e) => setMonths(Math.min(
+                      settings?.months_config?.max ?? 360, 
+                      Math.max(settings?.months_config?.min ?? 1, parseInt(e.target.value) || 1)
+                    ))}
                     className="w-20 h-8 text-sm text-center"
                   />
                 </div>
                 <Slider
                   id="months"
-                  min={1}
-                  max={360}
+                  min={settings?.months_config?.min ?? 1}
+                  max={settings?.months_config?.max ?? 360}
                   step={1}
                   value={[months]}
                   onValueChange={(value) => setMonths(value[0])}
@@ -409,7 +413,10 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
                       id="contribution-input"
                       placeholder="0,00"
                       value={monthlyContribution}
-                      onValueChange={(num) => setMonthlyContribution(Math.min(100000, Math.max(0, num ?? 0)))}
+                      onValueChange={(num) => setMonthlyContribution(Math.min(
+                        settings?.contribution_config?.max_input ?? 100000, 
+                        Math.max(settings?.contribution_config?.min ?? 0, num ?? 0)
+                      ))}
                       allowNegative={false}
                       className="w-28 h-7 text-xs text-right"
                     />
@@ -417,8 +424,8 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
                 </div>
                 <Slider
                   id="contribution"
-                  min={0}
-                  max={20000}
+                  min={settings?.contribution_config?.min ?? 0}
+                  max={settings?.contribution_config?.max_slider ?? 20000}
                   step={100}
                   value={[monthlyContribution]}
                   onValueChange={(value) => setMonthlyContribution(value[0])}
@@ -439,15 +446,18 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
                     id="rate-input"
                     placeholder="0,00"
                     value={monthlyRate}
-                    onValueChange={(num) => setMonthlyRate(Math.min(5, Math.max(-2, num ?? 0)))}
+                    onValueChange={(num) => setMonthlyRate(Math.min(
+                      settings?.monthly_rate_config?.max ?? 5, 
+                      Math.max(settings?.monthly_rate_config?.min ?? -2, num ?? 0)
+                    ))}
                     allowNegative={true}
                     className="w-14 h-7 text-xs text-center"
                   />
                 </div>
                 <Slider
                   id="rate"
-                  min={-2}
-                  max={5}
+                  min={settings?.monthly_rate_config?.min ?? -2}
+                  max={settings?.monthly_rate_config?.max ?? 5}
                   step={0.01}
                   value={[monthlyRate]}
                   onValueChange={(value) => setMonthlyRate(value[0])}
@@ -462,15 +472,18 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
                     id="rateStdDev-input"
                     placeholder="0,00"
                     value={rateStdDev}
-                    onValueChange={(num) => setRateStdDev(Math.min(2, Math.max(0, num ?? 0)))}
+                    onValueChange={(num) => setRateStdDev(Math.min(
+                      settings?.rate_std_dev_config?.max ?? 5, 
+                      Math.max(settings?.rate_std_dev_config?.min ?? 0, num ?? 0)
+                    ))}
                     allowNegative={false}
                     className="w-14 h-7 text-xs text-center"
                   />
                 </div>
                 <Slider
                   id="rateStdDev"
-                  min={0}
-                  max={2}
+                  min={settings?.rate_std_dev_config?.min ?? 0}
+                  max={settings?.rate_std_dev_config?.max ?? 5}
                   step={0.01}
                   value={[rateStdDev]}
                   onValueChange={(value) => setRateStdDev(value[0])}
@@ -491,15 +504,18 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
                     id="inflation-input"
                     placeholder="0,00"
                     value={inflationRate}
-                    onValueChange={(num) => setInflationRate(Math.min(3, Math.max(-2, num ?? 0)))}
+                    onValueChange={(num) => setInflationRate(Math.min(
+                      settings?.inflation_rate_config?.max ?? 10, 
+                      Math.max(settings?.inflation_rate_config?.min ?? -2, num ?? 0)
+                    ))}
                     allowNegative={true}
                     className="w-14 h-7 text-xs text-center"
                   />
                 </div>
                 <Slider
                   id="inflation"
-                  min={-2}
-                  max={3}
+                  min={settings?.inflation_rate_config?.min ?? -2}
+                  max={settings?.inflation_rate_config?.max ?? 10}
                   step={0.01}
                   value={[inflationRate]}
                   onValueChange={(value) => setInflationRate(value[0])}
@@ -514,15 +530,18 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
                     id="inflationStdDev-input"
                     placeholder="0,00"
                     value={inflationStdDev}
-                    onValueChange={(num) => setInflationStdDev(Math.min(1, Math.max(0, num ?? 0)))}
+                    onValueChange={(num) => setInflationStdDev(Math.min(
+                      settings?.inflation_std_dev_config?.max ?? 5, 
+                      Math.max(settings?.inflation_std_dev_config?.min ?? 0, num ?? 0)
+                    ))}
                     allowNegative={false}
                     className="w-14 h-7 text-xs text-center"
                   />
                 </div>
                 <Slider
                   id="inflationStdDev"
-                  min={0}
-                  max={1}
+                  min={settings?.inflation_std_dev_config?.min ?? 0}
+                  max={settings?.inflation_std_dev_config?.max ?? 5}
                   step={0.01}
                   value={[inflationStdDev]}
                   onValueChange={(value) => setInflationStdDev(value[0])}
