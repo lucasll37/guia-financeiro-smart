@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { Users, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import { Users, ArrowUpCircle, ArrowDownCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Database } from "@/integrations/supabase/types";
 
 type SubscriptionPlan = Database["public"]["Enums"]["subscription_plan"];
@@ -24,16 +26,25 @@ export function SubscriptionManager() {
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
   const [searchEmail, setSearchEmail] = useState("");
+  const [planFilter, setPlanFilter] = useState<string>("all");
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Fetch users with subscriptions
-  const { data: users, isLoading } = useQuery({
-    queryKey: ["admin-users-subscriptions"],
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-users-subscriptions", page, itemsPerPage, searchEmail, planFilter],
     queryFn: async () => {
-      // First get profiles
-      const { data: profiles, error: profilesError } = await supabase
+      const from = (page - 1) * itemsPerPage;
+      const to = from + itemsPerPage - 1;
+
+      // First get profiles with pagination
+      let profilesQuery = supabase
         .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select("*", { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(from, to);
+
+      const { data: profiles, error: profilesError, count } = await profilesQuery;
 
       if (profilesError) throw profilesError;
 
@@ -50,9 +61,12 @@ export function SubscriptionManager() {
         subscription: subscriptions.find(s => s.user_id === profile.id) || null
       }));
 
-      return usersWithSubs;
+      return { users: usersWithSubs, total: count || 0 };
     },
   });
+
+  const users = data?.users || [];
+  const totalUsers = data?.total || 0;
 
   // Update subscription mutation
   const updateSubscription = useMutation({
@@ -105,9 +119,13 @@ export function SubscriptionManager() {
     return <Badge variant="secondary">Free</Badge>;
   };
 
-  const filteredUsers = users?.filter(u => 
-    !searchEmail || u.profile.email?.toLowerCase().includes(searchEmail.toLowerCase())
-  );
+  const filteredUsers = users.filter(u => {
+    const matchesEmail = !searchEmail || u.profile.email?.toLowerCase().includes(searchEmail.toLowerCase());
+    const matchesPlan = planFilter === "all" || (u.subscription?.plan || "free") === planFilter;
+    return matchesEmail && matchesPlan;
+  });
+
+  const totalPages = Math.ceil(totalUsers / itemsPerPage);
 
   if (isLoading) {
     return (
@@ -132,66 +150,115 @@ export function SubscriptionManager() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="flex gap-2">
-            <input
+          {/* Filtros */}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Input
               type="text"
               placeholder="Buscar por email..."
               value={searchEmail}
               onChange={(e) => setSearchEmail(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-1"
             />
+            <Select value={planFilter} onValueChange={setPlanFilter}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Filtrar por plano" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os planos</SelectItem>
+                <SelectItem value="free">Free</SelectItem>
+                <SelectItem value="pro">Pro</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="space-y-2">
-            {filteredUsers?.map((user) => (
-              <div
-                key={user.profile.id}
-                className="flex items-center justify-between p-4 border rounded-lg"
-              >
-                <div className="flex-1">
-                  <div className="font-medium">{user.profile.name || "Sem nome"}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {user.profile.email}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  {getPlanBadge(user.subscription?.plan || "free")}
-                  
-                  {/* Só mostrar botão de promover se o plano for free */}
-                  {(user.subscription?.plan === "free" || !user.subscription) && (
-                    <Button
-                      size="sm"
-                      onClick={() => handlePromote(user.profile.id)}
-                      disabled={updateSubscription.isPending}
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                    >
-                      <ArrowUpCircle className="h-4 w-4" />
-                      {!isMobile && <span className="ml-2">Promover para Pro</span>}
-                    </Button>
-                  )}
-                  
-                  {/* Só mostrar botão de rebaixar se o plano for pro */}
-                  {user.subscription?.plan === "pro" && (
-                    <Button
-                      size="sm"
-                      onClick={() => handleDemote(user.profile.id)}
-                      disabled={updateSubscription.isPending}
-                      className="bg-orange-600 hover:bg-orange-700 text-white"
-                    >
-                      <ArrowDownCircle className="h-4 w-4" />
-                      {!isMobile && <span className="ml-2">Rebaixar para Free</span>}
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ))}
+          {/* Tabela */}
+          <div className="border rounded-lg">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Plano</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.map((user) => (
+                  <TableRow key={user.profile.id}>
+                    <TableCell className="font-medium">
+                      {user.profile.name || "Sem nome"}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {user.profile.email}
+                    </TableCell>
+                    <TableCell>
+                      {getPlanBadge(user.subscription?.plan || "free")}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {(user.subscription?.plan === "free" || !user.subscription) && (
+                          <Button
+                            size="sm"
+                            onClick={() => handlePromote(user.profile.id)}
+                            disabled={updateSubscription.isPending}
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                          >
+                            <ArrowUpCircle className="h-4 w-4" />
+                            {!isMobile && <span className="ml-2">Promover</span>}
+                          </Button>
+                        )}
+                        {user.subscription?.plan === "pro" && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleDemote(user.profile.id)}
+                            disabled={updateSubscription.isPending}
+                            className="bg-orange-600 hover:bg-orange-700 text-white"
+                          >
+                            <ArrowDownCircle className="h-4 w-4" />
+                            {!isMobile && <span className="ml-2">Rebaixar</span>}
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
 
-          {filteredUsers?.length === 0 && (
+          {filteredUsers.length === 0 && (
             <p className="text-center text-muted-foreground py-8">
               Nenhum usuário encontrado
             </p>
+          )}
+
+          {/* Paginação */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Página {page} de {totalPages}
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  {!isMobile && <span className="ml-2">Anterior</span>}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                >
+                  {!isMobile && <span className="mr-2">Próxima</span>}
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           )}
         </div>
       </CardContent>
