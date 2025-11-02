@@ -102,8 +102,9 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
       // Ignorar lançamentos de Saldo Anterior para não duplicar saldos
       if (t.description === "Saldo Anterior") return false;
       if (t.credit_card_id && t.payment_month) {
-        // Para transações de cartão, comparar payment_month normalizado (YYYY-MM)
-        const pm = format(parseISO(t.payment_month as string), "yyyy-MM");
+        // Para transações de cartão, extrair YYYY-MM diretamente da string sem parseISO
+        // para evitar problemas de timezone
+        const pm = (t.payment_month as string).substring(0, 7); // "YYYY-MM-DD" -> "YYYY-MM"
         return pm === periodMonth;
       } else {
         // Para transações normais, comparar o mês calendário da data com o mês de referência do período
