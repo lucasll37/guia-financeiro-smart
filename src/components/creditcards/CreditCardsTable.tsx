@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { useAuth } from "@/hooks/useAuth";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { parseISO, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import type { Database } from "@/integrations/supabase/types";
 
 type CreditCard = Database["public"]["Tables"]["credit_cards"]["Row"];
@@ -239,10 +241,10 @@ export function CreditCardsTable({
                                     className="border-none rounded-xl bg-background shadow-sm overflow-hidden"
                                   >
                                     <AccordionTrigger className="px-5 py-4 hover:no-underline hover:bg-muted/50 transition-all duration-200 [&[data-state=open]]:bg-muted/30">
-                                      <div className="flex flex-1 justify-between items-center pr-4">
+                                       <div className="flex flex-1 justify-between items-center pr-4">
                                         <div className="flex flex-col items-start gap-1">
                                           <h5 className="font-semibold text-base capitalize">
-                                            {new Date(month).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                                            {format(parseISO(month), "MMMM 'de' yyyy", { locale: ptBR })}
                                           </h5>
                                           <span className="text-xs text-muted-foreground">
                                             {txs.length} {txs.length === 1 ? 'transação' : 'transações'}
