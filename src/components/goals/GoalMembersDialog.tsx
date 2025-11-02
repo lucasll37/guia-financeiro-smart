@@ -91,6 +91,9 @@ export function GoalMembersDialog({
                 <UserPlus className="h-4 w-4" />
                 Adicionar Membro
               </h3>
+              <p className="text-sm text-muted-foreground">
+                Digite o email de um usuário cadastrado no Prospera para compartilhar esta meta.
+              </p>
               <div className="grid gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email do usuário</Label>

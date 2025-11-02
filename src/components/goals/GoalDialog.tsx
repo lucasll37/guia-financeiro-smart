@@ -33,8 +33,6 @@ export function GoalDialog({ open, onOpenChange, onSave, goal }: GoalDialogProps
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [showMembersDialog, setShowMembersDialog] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  
-  const { isOwner } = useGoalPermissions(goal?.id);
 
   useEffect(() => {
     if (goal) {
