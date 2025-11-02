@@ -1,6 +1,6 @@
+import React, { useState, useMemo } from "react";
 import { Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight, FolderTree, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useMemo } from "react";
 import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format } from "date-fns";
@@ -94,13 +94,22 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
       
       fcs.forEach(forecast => {
         const category = forecast.categories;
-        const parentId = category?.parent_id || forecast.category_id;
+        
+        // Determinar a categoria pai real
+        let parentCategory;
+        let parentId;
+        
+        if (category?.parent_id) {
+          // É subcategoria - usar a categoria pai
+          parentCategory = categories.find(c => c.id === category.parent_id);
+          parentId = category.parent_id;
+        } else {
+          // É categoria pai ou não tem categoria
+          parentCategory = category;
+          parentId = forecast.category_id;
+        }
         
         if (!grouped[parentId]) {
-          const parentCategory = category?.parent_id 
-            ? categories.find(c => c.id === category.parent_id)
-            : category;
-          
           grouped[parentId] = {
             parent: parentCategory || category,
             children: [],
@@ -188,9 +197,9 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
       const isExpanded = expandedCategories.has(parentId);
       
       return (
-        <>
+        <React.Fragment key={parentId}>
           {/* Categoria Pai */}
-          <TableRow 
+          <TableRow
             key={parentId} 
             className="cursor-pointer hover:bg-muted/50 font-medium"
             onClick={() => toggleCategoryExpansion(parentId)}
@@ -276,7 +285,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
               </TableRow>
             );
           })}
-        </>
+        </React.Fragment>
       );
     });
   };

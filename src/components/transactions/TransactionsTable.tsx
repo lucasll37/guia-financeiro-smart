@@ -1,10 +1,10 @@
+import React, { useMemo, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, CreditCard, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight, FolderTree, List } from "lucide-react";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useMemo, useState } from "react";
 import { useMaskValues } from "@/hooks/useMaskValues";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -126,13 +126,22 @@ export function TransactionsTable({
       
       txs.forEach(transaction => {
         const category = categories.find(c => c.id === transaction.category_id);
-        const parentId = category?.parent_id || transaction.category_id;
+        
+        // Determinar a categoria pai real
+        let parentCategory;
+        let parentId;
+        
+        if (category?.parent_id) {
+          // É subcategoria - usar a categoria pai
+          parentCategory = categories.find(c => c.id === category.parent_id);
+          parentId = category.parent_id;
+        } else {
+          // É categoria pai ou não tem categoria
+          parentCategory = category;
+          parentId = transaction.category_id;
+        }
         
         if (!grouped[parentId]) {
-          const parentCategory = category?.parent_id 
-            ? categories.find(c => c.id === category.parent_id)
-            : category;
-          
           grouped[parentId] = {
             parent: parentCategory,
             children: [],
@@ -222,9 +231,9 @@ export function TransactionsTable({
       const isExpanded = expandedCategories.has(parentId);
       
       return (
-        <>
+        <React.Fragment key={parentId}>
           {/* Categoria Pai */}
-          <TableRow 
+          <TableRow
             key={parentId} 
             className="cursor-pointer hover:bg-muted/50 font-medium bg-muted/20"
             onClick={() => toggleCategoryExpansion(parentId)}
@@ -304,7 +313,7 @@ export function TransactionsTable({
               </TableCell>
             </TableRow>
           ))}
-        </>
+        </React.Fragment>
       );
     });
   };
