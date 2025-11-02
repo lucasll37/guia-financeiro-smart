@@ -419,27 +419,57 @@ export function InvestmentCharts({
                 />
               )}
               <Area
-                type="monotone"
+                type="linear"
                 dataKey="saldoAparente"
                 name="Saldo Aparente"
                 stroke="hsl(var(--primary))"
-                strokeWidth={3}
+                strokeWidth={2.5}
                 fill="url(#colorSaldoAparente)"
-                dot={false}
+                dot={(props: any) => {
+                  const { cx, cy, payload } = props;
+                  if (!payload.isProjection) {
+                    return (
+                      <circle
+                        cx={cx}
+                        cy={cy}
+                        r={4}
+                        fill="hsl(var(--primary))"
+                        stroke="hsl(var(--background))"
+                        strokeWidth={2}
+                      />
+                    );
+                  }
+                  return null;
+                }}
                 activeDot={{ r: 6, strokeWidth: 2 }}
               />
               <Area
-                type="monotone"
+                type="linear"
                 dataKey="saldoValorPresente"
                 name="Saldo VP"
                 stroke="hsl(var(--chart-2))"
-                strokeWidth={3}
+                strokeWidth={2.5}
                 fill="url(#colorSaldoVP)"
-                dot={false}
+                dot={(props: any) => {
+                  const { cx, cy, payload } = props;
+                  if (!payload.isProjection) {
+                    return (
+                      <circle
+                        cx={cx}
+                        cy={cy}
+                        r={4}
+                        fill="hsl(var(--chart-2))"
+                        stroke="hsl(var(--background))"
+                        strokeWidth={2}
+                      />
+                    );
+                  }
+                  return null;
+                }}
                 activeDot={{ r: 6, strokeWidth: 2 }}
               />
               <Line
-                type="monotone"
+                type="linear"
                 dataKey="aportesAparente"
                 name="Aportes Acumulados"
                 stroke="hsl(var(--chart-3))"
@@ -496,42 +526,42 @@ export function InvestmentCharts({
                   iconType="line"
                 />
                 <Area
-                  type="monotone"
+                  type="linear"
                   dataKey="saldoAparente"
                   name="Saldo Aparente"
                   stroke="hsl(var(--primary))"
-                  strokeWidth={3}
+                  strokeWidth={2.5}
                   fill="url(#colorHistoricoSaldo)"
-                  dot={{ r: 4, strokeWidth: 2, fill: 'hsl(var(--background))' }}
-                  activeDot={{ r: 6, strokeWidth: 2 }}
+                  dot={{ r: 5, strokeWidth: 2, fill: 'hsl(var(--primary))', stroke: 'hsl(var(--background))' }}
+                  activeDot={{ r: 7, strokeWidth: 2 }}
                 />
                 <Area
-                  type="monotone"
+                  type="linear"
                   dataKey="saldoValorPresente"
                   name="Saldo VP"
                   stroke="hsl(var(--chart-2))"
-                  strokeWidth={3}
+                  strokeWidth={2.5}
                   fill="url(#colorHistoricoVP)"
-                  dot={{ r: 4, strokeWidth: 2, fill: 'hsl(var(--background))' }}
-                  activeDot={{ r: 6, strokeWidth: 2 }}
+                  dot={{ r: 5, strokeWidth: 2, fill: 'hsl(var(--chart-2))', stroke: 'hsl(var(--background))' }}
+                  activeDot={{ r: 7, strokeWidth: 2 }}
                 />
                 <Line
-                  type="monotone"
+                  type="linear"
                   dataKey="aportesAparente"
                   name="Aportes Acum. Aparente"
                   stroke="hsl(var(--chart-3))"
                   strokeWidth={2}
                   strokeDasharray="5 5"
-                  dot={false}
+                  dot={{ r: 3, fill: 'hsl(var(--chart-3))' }}
                 />
                 <Line
-                  type="monotone"
+                  type="linear"
                   dataKey="aportesValorPresente"
                   name="Aportes Acum. VP"
                   stroke="hsl(var(--chart-4))"
                   strokeWidth={2}
                   strokeDasharray="5 5"
-                  dot={false}
+                  dot={{ r: 3, fill: 'hsl(var(--chart-4))' }}
                 />
               </AreaChart>
             </ResponsiveContainer>
