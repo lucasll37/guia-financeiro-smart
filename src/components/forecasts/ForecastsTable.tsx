@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight, FolderTree, List } from "lucide-react";
+import { Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight, FolderTree, List, CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -21,12 +21,13 @@ interface ForecastsTableProps {
   onDelete: (id: string) => void;
   showAccountName?: boolean;
   viewMode?: "monthly" | "custom";
+  onViewModeChange?: (mode: "monthly" | "custom") => void;
   categories?: any[];
   canEdit?: boolean;
   accountType?: string;
 }
 
-export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, viewMode = "monthly", categories = [], canEdit = true, accountType }: ForecastsTableProps) {
+export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, viewMode = "monthly", onViewModeChange, categories = [], canEdit = true, accountType }: ForecastsTableProps) {
   const { formatCurrency } = useUserPreferences();
   const [sortField, setSortField] = useState<'account' | 'category' | 'amount' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -490,8 +491,32 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
 
   return (
     <div className="space-y-4">
-      {/* Toggle para visualização agrupada - em ambos os modos */}
-      <div className="flex justify-end">
+      {/* Toggles para visualização */}
+      <div className="flex flex-wrap gap-3 justify-end">
+        {/* Toggle de Período */}
+        {onViewModeChange && (
+          <div className="flex items-center gap-3 px-4 py-2 bg-muted/50 rounded-lg">
+            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+            <span className={`text-sm font-medium ${viewMode === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}>
+              Mensal
+            </span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={viewMode === 'custom'}
+                onChange={() => onViewModeChange(viewMode === 'monthly' ? 'custom' : 'monthly')}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring peer-focus:ring-offset-2 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+            <span className={`text-sm font-medium ${viewMode === 'custom' ? 'text-foreground' : 'text-muted-foreground'}`}>
+              Personalizado
+            </span>
+            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+          </div>
+        )}
+        
+        {/* Toggle de Visualização */}
         <div className="flex items-center gap-3 px-4 py-2 bg-muted/50 rounded-lg">
           <List className="h-4 w-4 text-muted-foreground" />
           <span className={`text-sm font-medium ${!groupByCategory ? 'text-foreground' : 'text-muted-foreground'}`}>

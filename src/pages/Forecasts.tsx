@@ -301,6 +301,7 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
             onDelete={handleDeleteForecast}
             showAccountName={filters.accountId === "all"}
             viewMode={filters.viewMode}
+            onViewModeChange={(mode) => setFilters(prev => ({ ...prev, viewMode: mode }))}
             categories={categories || []}
             canEdit={canEdit}
             accountType={selectedAccount?.type}
