@@ -127,7 +127,7 @@ export default function InvestmentDetails() {
     return labels[type] || type;
   };
 
-  if (isLoading) {
+  if (isLoading || !investments) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-12 w-64" />

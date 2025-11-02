@@ -57,7 +57,7 @@ export default function AccountDetails() {
     }
   }, [tabParam]);
 
-  if (isLoading) {
+  if (isLoading || !accounts) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-12 w-64" />
