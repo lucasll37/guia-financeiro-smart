@@ -250,9 +250,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                 <TableCell className="pl-12">
                   <div className="flex items-center gap-2">
                     <div className="w-0.5 h-8 bg-primary/30 ml-2" />
-                    <span className="text-sm">
-                      {format(new Date(forecast.period_start), "MMMM 'de' yyyy", { locale: ptBR })}
-                    </span>
+                    <span className="text-sm">{forecast.categories?.name || "Sem categoria"}</span>
                   </div>
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
