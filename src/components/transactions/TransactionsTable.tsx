@@ -235,21 +235,19 @@ export function TransactionsTable({
         <TableCell>
           {format(parse(String(transaction.date), "yyyy-MM-dd", new Date()), "dd/MM/yyyy")}
         </TableCell>
-        <TableCell>
+        <TableCell className="max-w-[280px]">
           {transaction.categories && (
             <div className="flex items-center gap-2">
               <div
-                className="w-3 h-3 rounded-full"
+                className="w-3 h-3 rounded-full flex-shrink-0"
                 style={{ backgroundColor: transaction.categories.color }}
               />
-              <span>{transaction.categories.name}</span>
+              <span className="break-words">{transaction.categories.name}</span>
             </div>
           )}
         </TableCell>
-        <TableCell>
-          <div className="flex flex-col gap-1">
-            <span>{transaction.description}</span>
-          </div>
+        <TableCell className="max-w-[200px] break-words">
+          {transaction.description}
         </TableCell>
         <TableCell className="text-right">
           <span className={isExpense ? "text-destructive" : "text-green-600"}>
@@ -377,7 +375,7 @@ export function TransactionsTable({
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
+                      <TableCell className="text-sm text-muted-foreground max-w-[200px] break-words">
                         {transaction.description}
                       </TableCell>
                       <TableCell className="text-right text-sm">
@@ -494,13 +492,13 @@ export function TransactionsTable({
                     </Button>
                   </TableHead>
                 )}
-                <TableHead className="w-[200px]">
+                <TableHead className="w-[280px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('category')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Categoria
                     {renderSortIcon('category')}
                   </Button>
                 </TableHead>
-                <TableHead>
+                <TableHead className="w-[200px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('description')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Descrição
                     {renderSortIcon('description')}
@@ -562,13 +560,13 @@ export function TransactionsTable({
                     </Button>
                   </TableHead>
                 )}
-                <TableHead className="w-[200px]">
+                <TableHead className="w-[280px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('category')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Categoria
                     {renderSortIcon('category')}
                   </Button>
                 </TableHead>
-                <TableHead>
+                <TableHead className="w-[200px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('description')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Descrição
                     {renderSortIcon('description')}

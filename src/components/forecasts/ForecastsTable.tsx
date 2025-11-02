@@ -211,16 +211,16 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
             {(forecast.accounts as any)?.name || "Sem conta"}
           </TableCell>
         )}
-        <TableCell>
+        <TableCell className="max-w-[280px]">
           <div className="flex items-center gap-2">
             <div
-              className="w-3 h-3 rounded-full"
+              className="w-3 h-3 rounded-full flex-shrink-0"
               style={{ backgroundColor: (forecast.categories as any)?.color || "#6366f1" }}
             />
-            <span>{(forecast.categories as any)?.name || "Sem categoria"}</span>
+            <span className="break-words">{(forecast.categories as any)?.name || "Sem categoria"}</span>
           </div>
         </TableCell>
-        <TableCell className="text-muted-foreground">
+        <TableCell className="text-muted-foreground max-w-[200px] break-words">
           {forecast.notes || "-"}
         </TableCell>
         <TableCell className="text-right font-medium">
@@ -352,7 +352,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">
+                        <TableCell className="text-muted-foreground text-sm max-w-[200px] break-words">
                           {forecast.notes || "-"}
                         </TableCell>
                         <TableCell className="text-right text-sm">
@@ -540,13 +540,13 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                     </Button>
                   </TableHead>
                 )}
-                <TableHead className="w-[200px]">
+                <TableHead className="w-[280px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('category')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Categoria
                     {renderSortIcon('category')}
                   </Button>
                 </TableHead>
-                <TableHead>Descrição</TableHead>
+                <TableHead className="w-[200px]">Descrição</TableHead>
                 <TableHead className="text-right w-[150px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Valor Previsto
@@ -603,13 +603,13 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                     </Button>
                   </TableHead>
                 )}
-                <TableHead className="w-[200px]">
+                <TableHead className="w-[280px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('category')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Categoria
                     {renderSortIcon('category')}
                   </Button>
                 </TableHead>
-                <TableHead>Descrição</TableHead>
+                <TableHead className="w-[200px]">Descrição</TableHead>
                 <TableHead className="text-right w-[150px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('amount')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Valor Previsto
