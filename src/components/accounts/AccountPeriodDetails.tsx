@@ -95,18 +95,17 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
     if (!transactions) return [];
     
     // Identificar o mês de referência do período (formato YYYY-MM)
-    // Usamos o mês que contém o periodEnd, pois é quando o período "fecha"
     const periodMonth = format(periodEnd, "yyyy-MM");
+    const selectedMonth = format(currentDate, "yyyy-MM");
     
     return transactions.filter(t => {
-      // Ignorar lançamentos de Saldo Anterior para não duplicar saldos
       if (t.description === "Saldo Anterior") return false;
       if (t.credit_card_id && t.payment_month) {
-        // Comparar apenas YYYY-MM sem conversões de data
+        // Para faturas de cartão, usar SEMPRE o mês selecionado no calendário
         const txMonth = (t.payment_month as string).substring(0, 7);
-        return txMonth === periodMonth;
+        return txMonth === selectedMonth;
       } else {
-        // Para transações normais, comparar o mês calendário da data com o mês de referência do período
+        // Para transações normais, usar o mês do período calculado pelo dia de viragem
         const txMonth = format(parseISO(t.date), "yyyy-MM");
         return txMonth === periodMonth;
       }
