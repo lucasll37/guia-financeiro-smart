@@ -110,7 +110,7 @@ export default function AccountDetails() {
             </CardHeader>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <CardContent className="pt-0 pb-4 animate-accordion-down">
+            <CardContent className="pt-4 pb-4 animate-accordion-down">
               <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground font-mono text-sm leading-relaxed">
                 <ReactMarkdown>{accountGuideText}</ReactMarkdown>
               </div>
