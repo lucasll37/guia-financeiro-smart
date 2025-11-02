@@ -142,6 +142,8 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
         cumulativeContribution,
         cumulativeContributionPV,
         monthIndex: i,
+        monthlyRatePercent: actualMonthlyRate,
+        inflationRatePercent: actualInflationRate,
       });
     }
 
@@ -215,6 +217,8 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
       "Aporte Acumulado Aparente": row.cumulativeContribution,
       "Aporte Acumulado VP": row.cumulativeContributionPV,
       "Rendimento": row.returns,
+      "Rendimento Mensal (%)": row.monthlyRatePercent,
+      "Inflação Mensal (%)": row.inflationRatePercent,
       "Saldo Aparente": row.balance,
       "Saldo VP": row.presentValue,
     }));
@@ -496,6 +500,8 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                     {renderSortIcon('returns')}
                   </Button>
                 </TableHead>
+                <TableHead className="text-right">Rend. Mensal (%)</TableHead>
+                <TableHead className="text-right">Inflação Mensal (%)</TableHead>
                 <TableHead className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('balance')} className="flex items-center gap-1 p-0 h-auto font-medium ml-auto">
                     Saldo Aparente
@@ -527,6 +533,12 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                   </TableCell>
                   <TableCell className="text-right">
                     {maskValue(formatCurrency(row.returns))}
+                  </TableCell>
+                  <TableCell className="text-right text-muted-foreground">
+                    {row.monthlyRatePercent.toFixed(2)}%
+                  </TableCell>
+                  <TableCell className="text-right text-muted-foreground">
+                    {row.inflationRatePercent.toFixed(2)}%
                   </TableCell>
                   <TableCell className="text-right font-medium">
                     {maskValue(formatCurrency(row.balance))}
