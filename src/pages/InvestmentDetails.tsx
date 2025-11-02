@@ -191,7 +191,7 @@ export default function InvestmentDetails() {
           </CollapsibleTrigger>
           <CollapsibleContent>
             <CardContent className="pt-0 pb-4 animate-accordion-down">
-              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground font-mono text-xs leading-relaxed">
                 <ReactMarkdown>{investmentGuideText}</ReactMarkdown>
               </div>
             </CardContent>
