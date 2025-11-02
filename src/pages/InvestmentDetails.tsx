@@ -229,7 +229,7 @@ export default function InvestmentDetails() {
         <TabsContent value="projecao">
           <ProjectionTable
             currentBalance={currentValue || investment.balance}
-            initialMonth={addMonths(lastReturnMonth, 1)}
+            initialMonth={returns && returns.length > 0 ? addMonths(lastReturnMonth, 1) : lastReturnMonth}
             onConfigChange={(config) => {
               setProjectionMonths(config.months);
               setProjectionRate(config.monthlyRate);
