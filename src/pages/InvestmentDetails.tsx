@@ -30,6 +30,7 @@ export default function InvestmentDetails() {
   const [projectionRate, setProjectionRate] = useState(1);
   const [projectionInflation, setProjectionInflation] = useState(0.5);
   const [projectionContribution, setProjectionContribution] = useState(0);
+  const [projectionData, setProjectionData] = useState<any[]>([]);
 
   const investment = investments?.find((inv) => inv.id === investmentId);
   const { data: currentValue } = useInvestmentCurrentValue(investmentId || "");
@@ -220,6 +221,7 @@ export default function InvestmentDetails() {
               setProjectionInflation(config.inflationRate);
               setProjectionContribution(config.monthlyContribution);
             }}
+            onProjectionDataChange={setProjectionData}
           />
         </TabsContent>
 
@@ -235,6 +237,7 @@ export default function InvestmentDetails() {
               inflationRate: projectionInflation,
               monthlyContribution: projectionContribution,
             }}
+            projectionData={projectionData}
           />
         </TabsContent>
       </Tabs>

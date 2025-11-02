@@ -36,6 +36,7 @@ interface InvestmentChartsProps {
   currentBalance: number;
   lastReturnMonth: Date;
   projectionConfig: ProjectionConfig;
+  projectionData?: any[];
 }
 
 export function InvestmentCharts({
@@ -44,6 +45,7 @@ export function InvestmentCharts({
   currentBalance,
   lastReturnMonth,
   projectionConfig,
+  projectionData = [],
 }: InvestmentChartsProps) {
   const { maskValue } = useMaskValues();
   
@@ -94,89 +96,22 @@ export function InvestmentCharts({
   const combinedData: ChartDataPoint[] = useMemo(() => {
     const data = [...realReturnsData];
     
-    // Se não houver histórico, começar com saldo inicial
-    if (returns.length === 0 && projectionConfig.months > 0) {
-      let balance = initialBalance;
-      let cumulativeContribution = 0;
-      let cumulativeContributionPV = 0;
-      let inflationAccumulator = 1;
-      
-      for (let i = 0; i <= projectionConfig.months; i++) {
-        const month = addMonths(lastReturnMonth, i);
-        
-        if (i === 0) {
-          // Ponto inicial
-          data.push({
-            month: format(month, "MMM/yy", { locale: ptBR }),
-            saldoAparente: balance,
-            saldoValorPresente: balance,
-            aportesAparente: 0,
-            aportesValorPresente: 0,
-            isProjection: true,
-          });
-          continue;
-        }
-        
-        const contribution = projectionConfig.monthlyContribution;
-        const returnAmount = (balance + contribution) * (projectionConfig.monthlyRate / 100);
-        balance = balance + contribution + returnAmount;
-        
-        cumulativeContribution += contribution;
-        const pvFactor = Math.pow(1 + projectionConfig.inflationRate / 100, -i);
-        cumulativeContributionPV += contribution * pvFactor;
-        
-        inflationAccumulator *= (1 + projectionConfig.inflationRate / 100);
-        const cumulativeInflation = inflationAccumulator - 1;
-        const balancePV = balance / (1 + cumulativeInflation);
-        
+    // Use dados da simulação se disponíveis
+    if (projectionData && projectionData.length > 0) {
+      projectionData.forEach((proj) => {
         data.push({
-          month: format(month, "MMM/yy", { locale: ptBR }),
-          saldoAparente: balance,
-          saldoValorPresente: balancePV,
-          aportesAparente: cumulativeContribution,
-          aportesValorPresente: cumulativeContributionPV,
+          month: format(proj.month, "MMM/yy", { locale: ptBR }),
+          saldoAparente: proj.balance,
+          saldoValorPresente: proj.presentValue,
+          aportesAparente: proj.cumulativeContribution,
+          aportesValorPresente: proj.cumulativeContributionPV,
           isProjection: true,
         });
-      }
-    } else if (returns && returns.length > 0 && projectionConfig.months > 0) {
-      // Continuar com projeção após histórico
-      let balance = currentBalance;
-      let cumulativeContribution = data[data.length - 1]?.aportesAparente || 0;
-      let cumulativeContributionPV = data[data.length - 1]?.aportesValorPresente || 0;
-      
-      let inflationAccumulator = 1;
-      returns.forEach((r) => {
-        inflationAccumulator *= (1 + Number(r.inflation_rate) / 100);
       });
-      
-      for (let i = 1; i <= projectionConfig.months; i++) {
-        const month = addMonths(lastReturnMonth, i);
-        const contribution = projectionConfig.monthlyContribution;
-        const returnAmount = (balance + contribution) * (projectionConfig.monthlyRate / 100);
-        balance = balance + contribution + returnAmount;
-        
-        cumulativeContribution += contribution;
-        const monthsFromNow = i;
-        const pvFactor = Math.pow(1 + projectionConfig.inflationRate / 100, -monthsFromNow);
-        cumulativeContributionPV += contribution * pvFactor;
-        
-        inflationAccumulator *= (1 + projectionConfig.inflationRate / 100);
-        const cumulativeInflation = inflationAccumulator - 1;
-        const balancePV = balance / (1 + cumulativeInflation);
-        
-        data.push({
-          month: format(month, "MMM/yy", { locale: ptBR }),
-          saldoAparente: balance,
-          saldoValorPresente: balancePV,
-          aportesAparente: cumulativeContribution,
-          aportesValorPresente: cumulativeContributionPV,
-          isProjection: true,
-        });
-      }
     }
     
     return data;
-  }, [realReturnsData, returns, currentBalance, initialBalance, lastReturnMonth, projectionConfig]);
+  }, [realReturnsData, projectionData]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {

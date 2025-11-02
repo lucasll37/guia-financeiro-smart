@@ -29,9 +29,10 @@ interface ProjectionTableProps {
     inflationRate: number;
     monthlyContribution: number;
   }) => void;
+  onProjectionDataChange?: (data: any[]) => void;
 }
 
-export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }: ProjectionTableProps) {
+export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, onProjectionDataChange }: ProjectionTableProps) {
   const { maskValue } = useMaskValues();
   // Load initial values from localStorage
   const [months, setMonths] = useState(() => {
@@ -155,6 +156,11 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
         inflationRate,
         monthlyContribution,
       });
+    }
+
+    // Notify parent of projection data changes
+    if (onProjectionDataChange) {
+      onProjectionDataChange(data);
     }
 
     return data;
