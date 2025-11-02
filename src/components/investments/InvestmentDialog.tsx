@@ -224,7 +224,11 @@ export function InvestmentDialog({
               control={form.control}
               name="initial_month"
               render={({ field }) => {
-                const selectedDate = field.value ? new Date(field.value + "-01") : null;
+                // Parse date avoiding timezone issues
+                const selectedDate = field.value ? (() => {
+                  const [year, month] = field.value.split('-').map(Number);
+                  return new Date(year, month - 1, 1);
+                })() : null;
                 
                 const handleMonthSelect = (date: Date | undefined) => {
                   if (date) {
