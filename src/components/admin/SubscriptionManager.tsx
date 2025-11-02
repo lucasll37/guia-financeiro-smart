@@ -34,21 +34,22 @@ export function SubscriptionManager() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-users-subscriptions", page, itemsPerPage, searchEmail, planFilter],
     queryFn: async () => {
-      const from = (page - 1) * itemsPerPage;
-      const to = from + itemsPerPage - 1;
-
-      // First get profiles with pagination
+      // First get all profiles (without pagination for search)
       let profilesQuery = supabase
         .from("profiles")
         .select("*", { count: "exact" })
-        .order("created_at", { ascending: false })
-        .range(from, to);
+        .order("created_at", { ascending: false });
 
-      const { data: profiles, error: profilesError, count } = await profilesQuery;
+      // Apply search filter if exists
+      if (searchEmail) {
+        profilesQuery = profilesQuery.or(`email.ilike.%${searchEmail}%,name.ilike.%${searchEmail}%`);
+      }
+
+      const { data: allProfiles, error: profilesError, count: totalCount } = await profilesQuery;
 
       if (profilesError) throw profilesError;
 
-      // Then get subscriptions for these users
+      // Then get subscriptions for all users
       const { data: subscriptions, error: subsError } = await supabase
         .from("subscriptions")
         .select("*");
@@ -56,12 +57,23 @@ export function SubscriptionManager() {
       if (subsError) throw subsError;
 
       // Combine the data
-      const usersWithSubs: UserWithSubscription[] = profiles.map(profile => ({
+      let usersWithSubs: UserWithSubscription[] = allProfiles.map(profile => ({
         profile,
         subscription: subscriptions.find(s => s.user_id === profile.id) || null
       }));
 
-      return { users: usersWithSubs, total: count || 0 };
+      // Apply plan filter
+      if (planFilter !== "all") {
+        usersWithSubs = usersWithSubs.filter(u => (u.subscription?.plan || "free") === planFilter);
+      }
+
+      // Apply pagination to filtered results
+      const total = usersWithSubs.length;
+      const from = (page - 1) * itemsPerPage;
+      const to = from + itemsPerPage;
+      const paginatedUsers = usersWithSubs.slice(from, to);
+
+      return { users: paginatedUsers, total };
     },
   });
 
@@ -118,14 +130,6 @@ export function SubscriptionManager() {
     }
     return <Badge variant="secondary">Free</Badge>;
   };
-
-  const filteredUsers = users.filter(u => {
-    const matchesSearch = !searchEmail || 
-      u.profile.email?.toLowerCase().includes(searchEmail.toLowerCase()) ||
-      u.profile.name?.toLowerCase().includes(searchEmail.toLowerCase());
-    const matchesPlan = planFilter === "all" || (u.subscription?.plan || "free") === planFilter;
-    return matchesSearch && matchesPlan;
-  });
 
   const totalPages = Math.ceil(totalUsers / itemsPerPage);
 
@@ -206,7 +210,7 @@ export function SubscriptionManager() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
+                {users.map((user) => (
                   <TableRow key={user.profile.id}>
                     <TableCell className="font-medium">
                       {user.profile.name || "Sem nome"}
@@ -249,7 +253,7 @@ export function SubscriptionManager() {
             </Table>
           </div>
 
-          {filteredUsers.length === 0 && (
+          {users.length === 0 && (
             <p className="text-center text-muted-foreground py-8">
               Nenhum usuário encontrado
             </p>
