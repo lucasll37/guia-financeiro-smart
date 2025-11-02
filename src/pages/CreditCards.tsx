@@ -63,13 +63,20 @@ export default function CreditCards({ accountId: propAccountId }: CreditCardsPro
   );
 
   // Filtrar transações por período
-  const filteredTransactions = transactions?.filter((t) => {
+  const filteredTransactions = (transactions?.filter((t) => {
     if (!t.credit_card_id || !t.payment_month) return false;
-    const paymentDate = new Date(t.payment_month);
-    const start = new Date(filters.startDate);
-    const end = new Date(filters.endDate);
-    return paymentDate >= start && paymentDate <= end;
-  }) || [];
+    if (filters.viewMode === "monthly") {
+      // Comparação robusta por mês, evitando timezone
+      const txMonth = (t.payment_month as string).substring(0, 7);
+      return txMonth === filters.selectedMonth;
+    } else {
+      // Visão customizada: mantém comparação por intervalo
+      const paymentDate = new Date(t.payment_month as string);
+      const start = new Date(filters.startDate);
+      const end = new Date(filters.endDate);
+      return paymentDate >= start && paymentDate <= end;
+    }
+  })) || [];
 
   const handleCreateCard = async () => {
     // Get the account ID to check
