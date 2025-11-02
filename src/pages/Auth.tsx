@@ -146,10 +146,11 @@ export default function Auth() {
       // Detectar erro de email não confirmado
       if (error.message.includes("Email not confirmed") || 
           error.message.includes("email_not_confirmed") ||
+          error.message.includes("Email link is invalid") ||
           error.message.includes("not confirmed")) {
         setConfirmationEmail(email);
         setShowEmailConfirmModal(true);
-        setError("");
+        setError("❗ Por favor, confirme seu email antes de fazer login. Verifique sua caixa de entrada.");
       } else {
         setError(error.message);
       }
@@ -522,6 +523,12 @@ export default function Auth() {
                 {confirmationEmail}
               </p>
             </div>
+
+            <Alert className="border-amber-500/50 bg-amber-500/10">
+              <AlertDescription className="text-sm font-medium text-amber-600 dark:text-amber-400">
+                ⚠️ Você só poderá fazer login após confirmar seu email
+              </AlertDescription>
+            </Alert>
 
             <div className="space-y-4">
               <div className="flex items-start gap-3 text-sm">
