@@ -65,6 +65,17 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
   const { incomeForecasts, expenseForecasts, totalIncome, totalExpense, incomeByParent, expenseByParent } = useMemo(() => {
     const income = forecasts.filter((f) => f.categories?.type === "receita");
     const expense = forecasts.filter((f) => f.categories?.type === "despesa");
+
+    // Mapa de categorias e helper para achar a raiz
+    const categoriesMap = new Map<string, any>(categories.map((c: any) => [c.id, c]));
+    const getRootParent = (cat: any | undefined | null): any | undefined => {
+      if (!cat) return undefined;
+      let current = cat;
+      while (current?.parent_id && categoriesMap.get(current.parent_id)) {
+        current = categoriesMap.get(current.parent_id);
+      }
+      return current;
+    };
     
     const sortForecasts = (fcs: any[]) => {
       if (!sortField) return fcs;
@@ -77,8 +88,12 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
           const bName = (b.accounts as any)?.name || '';
           comparison = aName.localeCompare(bName);
         } else if (sortField === 'category') {
-          const aName = (a.categories as any)?.name || '';
-          const bName = (b.categories as any)?.name || '';
+          const catA = categoriesMap.get((a.category_id as string));
+          const catB = categoriesMap.get((b.category_id as string));
+          const rootA = getRootParent(catA) || catA;
+          const rootB = getRootParent(catB) || catB;
+          const aName = rootA?.name || (a.categories as any)?.name || '';
+          const bName = rootB?.name || (b.categories as any)?.name || '';
           comparison = aName.localeCompare(bName);
         } else if (sortField === 'amount') {
           comparison = Number(a.forecasted_amount) - Number(b.forecasted_amount);
@@ -88,30 +103,18 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
       });
     };
     
-    // Agrupar por categoria pai
+    // Agrupar por categoria pai (raiz)
     const groupByParent = (fcs: any[]) => {
       const grouped: Record<string, { parent: any; children: any[]; total: number }> = {};
       
       fcs.forEach(forecast => {
-        const category = forecast.categories;
-        
-        // Determinar a categoria pai real
-        let parentCategory;
-        let parentId;
-        
-        if (category?.parent_id) {
-          // É subcategoria - usar a categoria pai
-          parentCategory = categories.find(c => c.id === category.parent_id);
-          parentId = category.parent_id;
-        } else {
-          // É categoria pai ou não tem categoria
-          parentCategory = category;
-          parentId = forecast.category_id;
-        }
+        const cat = categoriesMap.get((forecast.category_id as string)) || forecast.categories;
+        const root = getRootParent(cat) || cat;
+        const parentId = (root?.id as string) || (forecast.category_id as string);
         
         if (!grouped[parentId]) {
           grouped[parentId] = {
-            parent: parentCategory || category,
+            parent: root || cat,
             children: [],
             total: 0
           };

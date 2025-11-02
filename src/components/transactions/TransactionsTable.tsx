@@ -81,6 +81,19 @@ export function TransactionsTable({
   const { incomeTransactions, expenseTransactions, totalIncome, totalExpense, incomeByParent, expenseByParent } = useMemo(() => {
     const income = transactions.filter((t) => t.categories?.type === "receita");
     const expense = transactions.filter((t) => t.categories?.type === "despesa");
+
+    // Mapa de categorias para lookup rápido
+    const categoriesMap = new Map<string, any>(categories.map((c: any) => [c.id, c]));
+
+    // Encontra o PAI RAIZ (sobe toda a hierarquia)
+    const getRootParent = (cat: any | undefined | null): any | undefined => {
+      if (!cat) return undefined;
+      let current = cat;
+      while (current?.parent_id && categoriesMap.get(current.parent_id)) {
+        current = categoriesMap.get(current.parent_id);
+      }
+      return current;
+    };
     
     const sortTransactions = (txs: Transaction[]) => {
       if (!sortField) return txs;
@@ -95,20 +108,18 @@ export function TransactionsTable({
         } else if (sortField === 'amount') {
           comparison = a.amount - b.amount;
         } else if (sortField === 'category') {
-          // Buscar categoria pai para agrupar
-          const catA = categories.find(c => c.id === a.category_id);
-          const catB = categories.find(c => c.id === b.category_id);
-          
-          const parentA = catA?.parent_id ? categories.find(c => c.id === catA.parent_id) : null;
-          const parentB = catB?.parent_id ? categories.find(c => c.id === catB.parent_id) : null;
-          
-          // Primeiro comparar por categoria pai
-          const parentNameA = parentA?.name || catA?.name || '';
-          const parentNameB = parentB?.name || catB?.name || '';
+          // Buscar categoria raiz para ordenar
+          const catA = categoriesMap.get(a.category_id as any);
+          const catB = categoriesMap.get(b.category_id as any);
+          const rootA = getRootParent(catA) || catA;
+          const rootB = getRootParent(catB) || catB;
+
+          const parentNameA = rootA?.name || catA?.name || '';
+          const parentNameB = rootB?.name || catB?.name || '';
           
           comparison = parentNameA.localeCompare(parentNameB);
           
-          // Se mesma categoria pai, ordenar por subcategoria
+          // Se mesma raiz, ordenar por subcategoria
           if (comparison === 0) {
             const subNameA = catA?.name || '';
             const subNameB = catB?.name || '';
@@ -120,30 +131,18 @@ export function TransactionsTable({
       });
     };
     
-    // Agrupar por categoria pai
+    // Agrupar por categoria pai (raiz)
     const groupByParent = (txs: Transaction[]) => {
       const grouped: Record<string, { parent: any; children: Transaction[]; total: number }> = {};
       
       txs.forEach(transaction => {
-        const category = categories.find(c => c.id === transaction.category_id);
-        
-        // Determinar a categoria pai real
-        let parentCategory;
-        let parentId;
-        
-        if (category?.parent_id) {
-          // É subcategoria - usar a categoria pai
-          parentCategory = categories.find(c => c.id === category.parent_id);
-          parentId = category.parent_id;
-        } else {
-          // É categoria pai ou não tem categoria
-          parentCategory = category;
-          parentId = transaction.category_id;
-        }
+        const category = categoriesMap.get(transaction.category_id as any);
+        const root = getRootParent(category) || category;
+        const parentId = (root?.id as string) || (transaction.category_id as string);
         
         if (!grouped[parentId]) {
           grouped[parentId] = {
-            parent: parentCategory,
+            parent: root,
             children: [],
             total: 0
           };
