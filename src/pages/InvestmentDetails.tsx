@@ -106,6 +106,11 @@ export default function InvestmentDetails() {
     setReturnsDialogOpen(true);
   };
 
+  // Calculate next month for new returns
+  const nextReturnMonth = useMemo(() => {
+    return addMonths(lastReturnMonth, 1);
+  }, [lastReturnMonth]);
+
   const getInvestmentTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
       renda_fixa: "Renda Fixa",
@@ -235,6 +240,7 @@ export default function InvestmentDetails() {
         monthlyReturn={selectedReturn}
         investmentId={investment.id}
         onSubmit={handleSubmitReturn}
+        nextMonth={nextReturnMonth}
       />
     </div>
   );

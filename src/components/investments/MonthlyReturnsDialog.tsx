@@ -29,7 +29,7 @@ type MonthlyReturn = Database["public"]["Tables"]["investment_monthly_returns"][
 const returnSchema = z.object({
   actual_return: z.number(),
   inflation_rate: z.number(),
-  contribution: z.number().min(0, "Aporte deve ser positivo"),
+  contribution: z.number(),
   notes: z.string().optional(),
 });
 
@@ -41,6 +41,7 @@ interface MonthlyReturnsDialogProps {
   monthlyReturn: MonthlyReturn | null;
   investmentId: string;
   onSubmit: (data: any) => void;
+  nextMonth?: Date;
 }
 
 export function MonthlyReturnsDialog({
@@ -49,6 +50,7 @@ export function MonthlyReturnsDialog({
   monthlyReturn,
   investmentId,
   onSubmit,
+  nextMonth,
 }: MonthlyReturnsDialogProps) {
   const form = useForm<ReturnFormData>({
     resolver: zodResolver(returnSchema),
@@ -116,13 +118,22 @@ export function MonthlyReturnsDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            {monthlyReturn && (
-              <div className="p-3 bg-muted rounded-md">
-                <p className="text-sm text-muted-foreground">
-                  {(() => { const [y, m] = String(monthlyReturn.month).split('-'); const d = new Date(Number(y), Number(m)-1, 1); return `Mês de referência: ${d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`; })()}
+            {monthlyReturn ? (
+              <div className="p-3 bg-primary/10 rounded-md border border-primary/20">
+                <p className="text-sm font-medium text-primary">
+                  Mês de referência: {(() => { const [y, m] = String(monthlyReturn.month).split('-'); const d = new Date(Number(y), Number(m)-1, 1); return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }); })()}
                 </p>
               </div>
-            )}
+            ) : nextMonth ? (
+              <div className="p-3 bg-primary/10 rounded-md border border-primary/20">
+                <p className="text-sm font-medium text-primary">
+                  Mês de referência: {nextMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Este rendimento será registrado automaticamente para o próximo mês sequencial
+                </p>
+              </div>
+            ) : null}
             
             <FormField
               control={form.control}
@@ -173,6 +184,7 @@ export function MonthlyReturnsDialog({
                       placeholder="0.00"
                       value={field.value ?? null}
                       onValueChange={(num) => field.onChange(num ?? 0)}
+                      allowNegative={true}
                     />
                   </FormControl>
                   <FormDescription>
