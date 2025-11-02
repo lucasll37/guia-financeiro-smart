@@ -342,61 +342,62 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
         </Collapsible>
 
         <div className="space-y-4">
-          {/* Prazo da Simulação */}
-          <div className="p-3 bg-muted/20 rounded-md border">
-            <h3 className="text-xs font-semibold mb-2 text-primary">Prazo da Simulação</h3>
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="months" className="text-xs">Número de meses</Label>
-                <Input
-                  id="months-input"
-                  type="number"
-                  min={1}
-                  max={360}
-                  value={months}
-                  onChange={(e) => setMonths(Math.min(360, Math.max(1, parseInt(e.target.value) || 1)))}
-                  className="w-16 h-7 text-xs text-center"
-                />
-              </div>
-              <Slider
-                id="months"
-                min={1}
-                max={360}
-                step={1}
-                value={[months]}
-                onValueChange={(value) => setMonths(value[0])}
-                className="py-1"
-              />
-            </div>
-          </div>
-
-          {/* Aporte Mensal */}
-          <div className="p-3 bg-muted/20 rounded-md border">
-            <h3 className="text-xs font-semibold mb-2 text-primary">Aporte Mensal</h3>
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="contribution" className="text-xs">Valor do aporte</Label>
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-muted-foreground">R$</span>
-                  <DecimalInput
-                    id="contribution-input"
-                    placeholder="0,00"
-                    value={monthlyContribution}
-                    onValueChange={(num) => setMonthlyContribution(Math.min(100000, Math.max(0, num ?? 0)))}
-                    allowNegative={false}
-                    className="w-28 h-7 text-xs text-right"
+          {/* Prazo e Aporte */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="p-3 bg-muted/20 rounded-md border">
+              <h3 className="text-xs font-semibold mb-2 text-primary">Prazo da Simulação</h3>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="months" className="text-xs">Número de meses</Label>
+                  <Input
+                    id="months-input"
+                    type="number"
+                    min={1}
+                    max={360}
+                    value={months}
+                    onChange={(e) => setMonths(Math.min(360, Math.max(1, parseInt(e.target.value) || 1)))}
+                    className="w-16 h-7 text-xs text-center"
                   />
                 </div>
+                <Slider
+                  id="months"
+                  min={1}
+                  max={360}
+                  step={1}
+                  value={[months]}
+                  onValueChange={(value) => setMonths(value[0])}
+                  className="py-1"
+                />
               </div>
-              <Slider
-                id="contribution"
-                min={0}
-                max={20000}
-                step={100}
-                value={[monthlyContribution]}
-                onValueChange={(value) => setMonthlyContribution(value[0])}
-                className="py-1"
-              />
+            </div>
+
+            <div className="p-3 bg-muted/20 rounded-md border">
+              <h3 className="text-xs font-semibold mb-2 text-primary">Aporte Mensal</h3>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="contribution" className="text-xs">Valor do aporte</Label>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-muted-foreground">R$</span>
+                    <DecimalInput
+                      id="contribution-input"
+                      placeholder="0,00"
+                      value={monthlyContribution}
+                      onValueChange={(num) => setMonthlyContribution(Math.min(100000, Math.max(0, num ?? 0)))}
+                      allowNegative={false}
+                      className="w-28 h-7 text-xs text-right"
+                    />
+                  </div>
+                </div>
+                <Slider
+                  id="contribution"
+                  min={0}
+                  max={20000}
+                  step={100}
+                  value={[monthlyContribution]}
+                  onValueChange={(value) => setMonthlyContribution(value[0])}
+                  className="py-1"
+                />
+              </div>
             </div>
           </div>
 
