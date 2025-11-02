@@ -9,6 +9,7 @@ import { Users, ArrowUpCircle, ArrowDownCircle, ChevronLeft, ChevronRight } from
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -157,50 +158,75 @@ export function SubscriptionManager() {
       <CardContent>
         <div className="space-y-4">
           {/* Filtros */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <Input
-              type="text"
-              placeholder="Buscar por nome ou email..."
-              value={searchEmail}
-              onChange={(e) => {
-                setSearchEmail(e.target.value);
-                setPage(1);
-              }}
-              className="flex-1"
-            />
-            <Select value={planFilter} onValueChange={(value) => {
-              setPlanFilter(value);
-              setPage(1);
-            }}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Filtrar por plano" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os planos</SelectItem>
-                <SelectItem value="free">Free</SelectItem>
-                <SelectItem value="pro">Pro</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={itemsPerPage.toString()} onValueChange={(value) => {
-              setItemsPerPage(Number(value));
-              setPage(1);
-            }}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Itens por página" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="5">5 por página</SelectItem>
-                <SelectItem value="10">10 por página</SelectItem>
-                <SelectItem value="25">25 por página</SelectItem>
-                <SelectItem value="50">50 por página</SelectItem>
-                <SelectItem value="100">100 por página</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Filtros e Busca</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="search">Buscar por nome ou email</Label>
+                  <Input
+                    id="search"
+                    type="text"
+                    placeholder="Digite para buscar..."
+                    value={searchEmail}
+                    onChange={(e) => {
+                      setSearchEmail(e.target.value);
+                      setPage(1);
+                    }}
+                  />
+                </div>
 
-          {/* Tabela */}
-          <div className="border rounded-lg">
-            <Table>
+                <div className="space-y-2">
+                  <Label htmlFor="plan">Filtrar por plano</Label>
+                  <select
+                    id="plan"
+                    value={planFilter}
+                    onChange={(e) => {
+                      setPlanFilter(e.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="all">Todos os planos</option>
+                    <option value="free">Free</option>
+                    <option value="pro">Pro</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="itemsPerPage">Itens por página</Label>
+                  <select
+                    id="itemsPerPage"
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                      setItemsPerPage(Number(e.target.value));
+                      setPage(1);
+                    }}
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                  </select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Assinaturas de Usuários</CardTitle>
+              <CardDescription>
+                Total: {totalUsers} usuários
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+
+              <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
@@ -251,16 +277,15 @@ export function SubscriptionManager() {
                 ))}
               </TableBody>
             </Table>
-          </div>
 
-          {users.length === 0 && (
-            <p className="text-center text-muted-foreground py-8">
-              Nenhum usuário encontrado
-            </p>
-          )}
+            {users.length === 0 && (
+              <p className="text-center text-muted-foreground py-8">
+                Nenhum usuário encontrado
+              </p>
+            )}
 
-          {/* Paginação */}
-          {totalPages > 1 && (
+            {/* Paginação */}
+            {totalPages > 1 && (
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
                 Página {page} de {totalPages}
@@ -286,7 +311,9 @@ export function SubscriptionManager() {
                 </Button>
               </div>
             </div>
-          )}
+            )}
+            </CardContent>
+          </Card>
         </div>
       </CardContent>
     </Card>
