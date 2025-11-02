@@ -456,7 +456,7 @@ export function InvestmentCharts({
       {realReturnsData.length > 0 && (
         <Card className="overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-chart-4/10 to-chart-5/10 border-b">
-            <CardTitle>Dados Históricos Detalhados</CardTitle>
+            <CardTitle>Dados Históricos</CardTitle>
             <CardDescription>Evolução real registrada mês a mês • {realReturnsData.length} meses</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
