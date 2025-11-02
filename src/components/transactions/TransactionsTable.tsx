@@ -444,26 +444,27 @@ export function TransactionsTable({
 
   return (
     <div className="space-y-4">
-      {/* Botão de toggle para visualização agrupada */}
+      {/* Toggle para visualização agrupada */}
       <div className="flex justify-end">
-        <Button
-          variant={groupByCategory ? "default" : "outline"}
-          size="sm"
-          onClick={() => setGroupByCategory(!groupByCategory)}
-          className="gap-2"
-        >
-          {groupByCategory ? (
-            <>
-              <List className="h-4 w-4" />
-              Visualização Plano
-            </>
-          ) : (
-            <>
-              <FolderTree className="h-4 w-4" />
-              Visualização em Árvore
-            </>
-          )}
-        </Button>
+        <div className="flex items-center gap-3 px-4 py-2 bg-muted/50 rounded-lg">
+          <List className="h-4 w-4 text-muted-foreground" />
+          <span className={`text-sm font-medium ${!groupByCategory ? 'text-foreground' : 'text-muted-foreground'}`}>
+            Plano
+          </span>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={groupByCategory}
+              onChange={() => setGroupByCategory(!groupByCategory)}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring peer-focus:ring-offset-2 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+          </label>
+          <span className={`text-sm font-medium ${groupByCategory ? 'text-foreground' : 'text-muted-foreground'}`}>
+            Árvore
+          </span>
+          <FolderTree className="h-4 w-4 text-muted-foreground" />
+        </div>
       </div>
 
       {/* Receitas */}
