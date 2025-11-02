@@ -102,17 +102,9 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
       // Ignorar lançamentos de Saldo Anterior para não duplicar saldos
       if (t.description === "Saldo Anterior") return false;
       if (t.credit_card_id && t.payment_month) {
-        // Normalizar o mês de referência da fatura: se o dia estiver no fim do mês, considerar o mês seguinte
-        const parts = (t.payment_month as string).split('-');
-        let yy = Number(parts[0]);
-        let mm = Number(parts[1]);
-        const dd = parts[2] ? Number(parts[2]) : 1;
-        if (dd >= 28) {
-          mm += 1;
-          if (mm > 12) { mm = 1; yy += 1; }
-        }
-        const pm = `${yy}-${String(mm).padStart(2, '0')}`;
-        return pm === periodMonth;
+        // Comparar apenas YYYY-MM sem conversões de data
+        const txMonth = (t.payment_month as string).substring(0, 7);
+        return txMonth === periodMonth;
       } else {
         // Para transações normais, comparar o mês calendário da data com o mês de referência do período
         const txMonth = format(parseISO(t.date), "yyyy-MM");

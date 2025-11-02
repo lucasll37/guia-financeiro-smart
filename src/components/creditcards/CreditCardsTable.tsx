@@ -87,23 +87,6 @@ export function CreditCardsTable({
     return expandedCards.has(cardId);
   };
 
-  const normalizePaymentMonth = (dateStr: string) => {
-    const parts = dateStr.split("-");
-    const y = Number(parts[0]);
-    const m = Number(parts[1]);
-    const d = parts[2] ? Number(parts[2]) : 1;
-    let yy = y;
-    let mm = m;
-    if (d >= 28) {
-      mm += 1;
-      if (mm > 12) {
-        mm = 1;
-        yy += 1;
-      }
-    }
-    return `${yy}-${String(mm).padStart(2, "0")}`;
-  };
-
   const getCardTransactions = (cardId: string) => {
     return transactions.filter(t => t.credit_card_id === cardId);
   };
@@ -119,11 +102,12 @@ export function CreditCardsTable({
     
     cardTransactions.forEach(t => {
       if (t.payment_month) {
-        const key = normalizePaymentMonth(t.payment_month as string); // YYYY-MM normalizado
-        if (!byMonth.has(key)) {
-          byMonth.set(key, []);
+        // Extrair YYYY-MM da string diretamente, sem conversões de data
+        const monthKey = (t.payment_month as string).substring(0, 7); // "2024-11-01" -> "2024-11"
+        if (!byMonth.has(monthKey)) {
+          byMonth.set(monthKey, []);
         }
-        byMonth.get(key)!.push(t);
+        byMonth.get(monthKey)!.push(t);
       }
     });
     
@@ -261,6 +245,7 @@ export function CreditCardsTable({
                                        <div className="flex flex-1 justify-between items-center pr-4">
                                         <div className="flex flex-col items-start gap-1">
                                           <h5 className="font-semibold text-base capitalize">
+                                            {/* Criar data válida adicionando -01 para evitar timezone issues */}
                                             {format(parseISO(`${month}-01`), "MMMM 'de' yyyy", { locale: ptBR })}
                                           </h5>
                                           <span className="text-xs text-muted-foreground">

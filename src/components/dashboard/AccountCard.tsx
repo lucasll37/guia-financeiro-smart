@@ -68,15 +68,10 @@ export function AccountCard({
     // Transações do período selecionado
     const periodTransactions = transactions?.filter(t => {
       if (t.account_id !== account.id) return false;
-      if (t.description === "Saldo Anterior") return false; // evitar duplicidade do saldo anterior
+      if (t.description === "Saldo Anterior") return false;
       if (t.credit_card_id && t.payment_month) {
-        // Normalizar: se dia >= 28, considerar mês seguinte
-        const parts = (t.payment_month as string).split('-');
-        let yy = Number(parts[0]);
-        let mm = Number(parts[1]);
-        const dd = parts[2] ? Number(parts[2]) : 1;
-        if (dd >= 28) { mm += 1; if (mm > 12) { mm = 1; yy += 1; } }
-        const txMonth = `${yy}-${String(mm).padStart(2, '0')}`;
+        // Comparar apenas YYYY-MM sem conversões de data
+        const txMonth = (t.payment_month as string).substring(0, 7);
         return txMonth === periodMonth;
       } else {
         const txMonth = format(parseISO(t.date), "yyyy-MM");
