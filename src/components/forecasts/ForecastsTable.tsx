@@ -1,4 +1,4 @@
-import { Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight } from "lucide-react";
+import { Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight, FolderTree, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useMemo } from "react";
 import { ResponsiveTable } from "@/components/ui/responsive-table";
@@ -32,6 +32,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [incomeExpanded, setIncomeExpanded] = useState(true);
   const [expenseExpanded, setExpenseExpanded] = useState(true);
+  const [groupByCategory, setGroupByCategory] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   const handleSort = (field: 'account' | 'category' | 'amount') => {
@@ -60,7 +61,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
     return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 ml-1" /> : <ArrowDown className="h-4 w-4 ml-1" />;
   };
 
-  // Separar e ordenar previsões por tipo e agrupar por categoria pai no modo custom
+  // Separar e ordenar previsões por tipo e agrupar por categoria pai
   const { incomeForecasts, expenseForecasts, totalIncome, totalExpense, incomeByParent, expenseByParent } = useMemo(() => {
     const income = forecasts.filter((f) => f.categories?.type === "receita");
     const expense = forecasts.filter((f) => f.categories?.type === "despesa");
@@ -87,7 +88,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
       });
     };
     
-    // Agrupar por categoria pai no modo custom
+    // Agrupar por categoria pai
     const groupByParent = (fcs: any[]) => {
       const grouped: Record<string, { parent: any; children: any[]; total: number }> = {};
       
@@ -122,10 +123,10 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
       expenseForecasts: sortForecasts(expense),
       totalIncome: incomeTotal,
       totalExpense: expenseTotal,
-      incomeByParent: viewMode === "custom" ? groupByParent(income) : {},
-      expenseByParent: viewMode === "custom" ? groupByParent(expense) : {},
+      incomeByParent: (groupByCategory || viewMode === "custom") ? groupByParent(income) : {},
+      expenseByParent: (groupByCategory || viewMode === "custom") ? groupByParent(expense) : {},
     };
-  }, [forecasts, sortField, sortDirection, viewMode, categories]);
+  }, [forecasts, sortField, sortDirection, viewMode, categories, groupByCategory]);
 
   const balance = totalIncome - totalExpense;
 
@@ -290,8 +291,32 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
 
   return (
     <div className="space-y-4">
+      {/* Botão de toggle para visualização agrupada - apenas em modo monthly */}
+      {viewMode === "monthly" && (
+        <div className="flex justify-end">
+          <Button
+            variant={groupByCategory ? "default" : "outline"}
+            size="sm"
+            onClick={() => setGroupByCategory(!groupByCategory)}
+            className="gap-2"
+          >
+            {groupByCategory ? (
+              <>
+                <List className="h-4 w-4" />
+                Visualização Normal
+              </>
+            ) : (
+              <>
+                <FolderTree className="h-4 w-4" />
+                Agrupar por Categoria
+              </>
+            )}
+          </Button>
+        </div>
+      )}
+
       {/* Receitas */}
-      {incomeForecasts.length > 0 && (
+      {(incomeForecasts.length > 0 || Object.keys(incomeByParent).length > 0) && (
         <Collapsible open={incomeExpanded} onOpenChange={setIncomeExpanded}>
           <div className="border rounded-lg">
             <CollapsibleTrigger asChild>
@@ -335,7 +360,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
               </TableRow>
             </TableHeader>
             <TableBody>
-              {viewMode === "custom" && Object.keys(incomeByParent).length > 0
+              {(groupByCategory || viewMode === "custom") && Object.keys(incomeByParent).length > 0
                 ? renderGroupedForecasts(incomeByParent)
                 : incomeForecasts.map(renderForecastRow)}
                <TableRow className="bg-green-50/50 dark:bg-green-950/10 font-semibold">
@@ -356,7 +381,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
       )}
 
       {/* Despesas */}
-      {expenseForecasts.length > 0 && (
+      {(expenseForecasts.length > 0 || Object.keys(expenseByParent).length > 0) && (
         <Collapsible open={expenseExpanded} onOpenChange={setExpenseExpanded}>
           <div className="border rounded-lg">
             <CollapsibleTrigger asChild>
@@ -398,7 +423,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
               </TableRow>
             </TableHeader>
             <TableBody>
-              {viewMode === "custom" && Object.keys(expenseByParent).length > 0
+              {(groupByCategory || viewMode === "custom") && Object.keys(expenseByParent).length > 0
                 ? renderGroupedForecasts(expenseByParent)
                 : expenseForecasts.map(renderForecastRow)}
                <TableRow className="bg-red-50/50 dark:bg-red-950/10 font-semibold">

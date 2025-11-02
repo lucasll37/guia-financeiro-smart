@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, CreditCard, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight } from "lucide-react";
+import { Edit, Trash2, CreditCard, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight, FolderTree, List } from "lucide-react";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMemo, useState } from "react";
@@ -39,6 +39,8 @@ export function TransactionsTable({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [incomeExpanded, setIncomeExpanded] = useState(true);
   const [expenseExpanded, setExpenseExpanded] = useState(true);
+  const [groupByCategory, setGroupByCategory] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const { maskValue } = useMaskValues();
 
   const handleSort = (field: 'date' | 'description' | 'amount' | 'category') => {
@@ -49,6 +51,18 @@ export function TransactionsTable({
       // Para data, começar com asc (mais antigo primeiro), para outros desc
       setSortDirection(field === 'date' ? 'asc' : 'desc');
     }
+  };
+
+  const toggleCategoryExpansion = (categoryId: string) => {
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryId)) {
+        newSet.delete(categoryId);
+      } else {
+        newSet.add(categoryId);
+      }
+      return newSet;
+    });
   };
 
   const renderSortIcon = (field: 'date' | 'description' | 'amount' | 'category') => {
@@ -64,7 +78,7 @@ export function TransactionsTable({
   };
 
   // Separar e ordenar transações por tipo
-  const { incomeTransactions, expenseTransactions, totalIncome, totalExpense } = useMemo(() => {
+  const { incomeTransactions, expenseTransactions, totalIncome, totalExpense, incomeByParent, expenseByParent } = useMemo(() => {
     const income = transactions.filter((t) => t.categories?.type === "receita");
     const expense = transactions.filter((t) => t.categories?.type === "despesa");
     
@@ -106,6 +120,33 @@ export function TransactionsTable({
       });
     };
     
+    // Agrupar por categoria pai
+    const groupByParent = (txs: Transaction[]) => {
+      const grouped: Record<string, { parent: any; children: Transaction[]; total: number }> = {};
+      
+      txs.forEach(transaction => {
+        const category = categories.find(c => c.id === transaction.category_id);
+        const parentId = category?.parent_id || transaction.category_id;
+        
+        if (!grouped[parentId]) {
+          const parentCategory = category?.parent_id 
+            ? categories.find(c => c.id === category.parent_id)
+            : category;
+          
+          grouped[parentId] = {
+            parent: parentCategory,
+            children: [],
+            total: 0
+          };
+        }
+        
+        grouped[parentId].children.push(transaction);
+        grouped[parentId].total += transaction.amount;
+      });
+      
+      return grouped;
+    };
+    
     const incomeTotal = income.reduce((sum, t) => sum + t.amount, 0);
     const expenseTotal = expense.reduce((sum, t) => sum + t.amount, 0);
     
@@ -114,8 +155,10 @@ export function TransactionsTable({
       expenseTransactions: sortTransactions(expense),
       totalIncome: incomeTotal,
       totalExpense: expenseTotal,
+      incomeByParent: groupByCategory ? groupByParent(income) : {},
+      expenseByParent: groupByCategory ? groupByParent(expense) : {},
     };
-  }, [transactions, sortField, sortDirection]);
+  }, [transactions, sortField, sortDirection, groupByCategory, categories]);
 
   const balance = totalIncome - totalExpense;
 
@@ -174,6 +217,98 @@ export function TransactionsTable({
     );
   };
 
+  const renderGroupedTransactions = (groupedData: Record<string, { parent: any; children: Transaction[]; total: number }>, isExpense: boolean) => {
+    return Object.entries(groupedData).map(([parentId, data]) => {
+      const isExpanded = expandedCategories.has(parentId);
+      
+      return (
+        <>
+          {/* Categoria Pai */}
+          <TableRow 
+            key={parentId} 
+            className="cursor-pointer hover:bg-muted/50 font-medium bg-muted/20"
+            onClick={() => toggleCategoryExpansion(parentId)}
+          >
+            <TableCell>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6 p-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleCategoryExpansion(parentId);
+                  }}
+                >
+                  {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                </Button>
+              </div>
+            </TableCell>
+            <TableCell>
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: data.parent?.color || "#6366f1" }}
+                />
+                <span className="font-semibold">{data.parent?.name || "Sem categoria"}</span>
+                <span className="text-xs text-muted-foreground">({data.children.length})</span>
+              </div>
+            </TableCell>
+            <TableCell className="text-muted-foreground text-sm">
+              {data.children.length} lançamento(s)
+            </TableCell>
+            <TableCell className="text-right font-semibold">
+              <span className={isExpense ? "text-destructive" : "text-green-600"}>
+                {isExpense ? "-" : "+"} {maskValue(formatCurrency(data.total))}
+              </span>
+            </TableCell>
+            <TableCell />
+          </TableRow>
+          
+          {/* Subcategorias/Transações */}
+          {isExpanded && data.children.map((transaction) => (
+            <TableRow key={transaction.id} className="bg-background">
+              <TableCell className="pl-12 text-sm">
+                {format(parse(String(transaction.date), "yyyy-MM-dd", new Date()), "dd/MM/yyyy")}
+              </TableCell>
+              <TableCell className="pl-12">
+                <span className="text-sm">{transaction.categories?.name}</span>
+              </TableCell>
+              <TableCell className="text-sm">
+                {transaction.description}
+              </TableCell>
+              <TableCell className="text-right text-sm">
+                <span className={isExpense ? "text-destructive" : "text-green-600"}>
+                  {isExpense ? "-" : "+"} {maskValue(formatCurrency(transaction.amount))}
+                </span>
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onEdit(transaction)}
+                    disabled={!canEdit}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onDelete(transaction.id)}
+                    disabled={!canEdit}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </>
+      );
+    });
+  };
+
   if (transactions.length === 0) {
     return (
       <div className="border rounded-lg">
@@ -201,8 +336,30 @@ export function TransactionsTable({
 
   return (
     <div className="space-y-4">
+      {/* Botão de toggle para visualização agrupada */}
+      <div className="flex justify-end">
+        <Button
+          variant={groupByCategory ? "default" : "outline"}
+          size="sm"
+          onClick={() => setGroupByCategory(!groupByCategory)}
+          className="gap-2"
+        >
+          {groupByCategory ? (
+            <>
+              <List className="h-4 w-4" />
+              Visualização Normal
+            </>
+          ) : (
+            <>
+              <FolderTree className="h-4 w-4" />
+              Agrupar por Categoria
+            </>
+          )}
+        </Button>
+      </div>
+
       {/* Receitas */}
-      {incomeTransactions.length > 0 && (
+      {(incomeTransactions.length > 0 || Object.keys(incomeByParent).length > 0) && (
         <Collapsible open={incomeExpanded} onOpenChange={setIncomeExpanded}>
           <div className="border rounded-lg">
             <CollapsibleTrigger asChild>
@@ -247,7 +404,10 @@ export function TransactionsTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {incomeTransactions.map(renderTransactionRow)}
+              {groupByCategory 
+                ? renderGroupedTransactions(incomeByParent, false)
+                : incomeTransactions.map(renderTransactionRow)
+              }
               <TableRow className="bg-green-50/50 dark:bg-green-950/10 font-semibold">
                 <TableCell colSpan={3} className="text-right">
                   Total de Receitas:
@@ -265,7 +425,7 @@ export function TransactionsTable({
       )}
 
       {/* Despesas */}
-      {expenseTransactions.length > 0 && (
+      {(expenseTransactions.length > 0 || Object.keys(expenseByParent).length > 0) && (
         <Collapsible open={expenseExpanded} onOpenChange={setExpenseExpanded}>
           <div className="border rounded-lg">
             <CollapsibleTrigger asChild>
@@ -310,7 +470,10 @@ export function TransactionsTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {expenseTransactions.map(renderTransactionRow)}
+              {groupByCategory 
+                ? renderGroupedTransactions(expenseByParent, true)
+                : expenseTransactions.map(renderTransactionRow)
+              }
               <TableRow className="bg-red-50/50 dark:bg-red-950/10 font-semibold">
                 <TableCell colSpan={3} className="text-right">
                   Total de Despesas:
