@@ -25,6 +25,7 @@ import { useMaskValues } from "@/hooks/useMaskValues";
 import { useToast } from "@/hooks/use-toast";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { GoalDialog } from "@/components/goals/GoalDialog";
+import { GoalMembersDialog } from "@/components/goals/GoalMembersDialog";
 import ReactMarkdown from "react-markdown";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -41,6 +42,7 @@ export default function Goals() {
   const [instructionsOpen, setInstructionsOpen] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [membersDialogOpen, setMembersDialogOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState("");
 
@@ -101,6 +103,11 @@ export default function Goals() {
 
   const handleUpdateProgress = async (id: string, amount: number) => {
     await updateGoal.mutateAsync({ id, current_amount: amount });
+  };
+
+  const handleManageMembers = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setMembersDialogOpen(true);
   };
 
   const totalGoals = goals?.length || 0;
@@ -235,6 +242,7 @@ export default function Goals() {
               onEdit={handleEditGoal}
               onDelete={handleDeleteGoal}
               onUpdateProgress={handleUpdateProgress}
+              onManageMembers={handleManageMembers}
             />
           ))}
         </div>
@@ -254,6 +262,15 @@ export default function Goals() {
         onSave={handleSaveGoal}
         goal={selectedGoal}
       />
+
+      {selectedGoal && (
+        <GoalMembersDialog
+          goalId={selectedGoal.id}
+          goalName={selectedGoal.name}
+          open={membersDialogOpen}
+          onOpenChange={setMembersDialogOpen}
+        />
+      )}
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

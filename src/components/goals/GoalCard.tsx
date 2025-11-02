@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Target, Edit, Trash2, Calendar, TrendingUp, Users } from "lucide-react";
+import { Target, Edit, Trash2, Calendar, TrendingUp, Users, Share2 } from "lucide-react";
 import { format, isPast, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMaskValues } from "@/hooks/useMaskValues";
@@ -15,9 +15,10 @@ interface GoalCardProps {
   onEdit: (goal: Goal) => void;
   onDelete: (goal: Goal) => void;
   onUpdateProgress: (id: string, amount: number) => void;
+  onManageMembers: (goal: Goal) => void;
 }
 
-export function GoalCard({ goal, onEdit, onDelete, onUpdateProgress }: GoalCardProps) {
+export function GoalCard({ goal, onEdit, onDelete, onUpdateProgress, onManageMembers }: GoalCardProps) {
   const { maskValue } = useMaskValues();
   const { members } = useGoalMembers(goal.id);
   const percentage = (Number(goal.current_amount) / Number(goal.target_amount)) * 100;
@@ -54,6 +55,14 @@ export function GoalCard({ goal, onEdit, onDelete, onUpdateProgress }: GoalCardP
             )}
           </div>
           <div className="flex gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => onManageMembers(goal)}
+              title="Gerenciar membros"
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
             <Button variant="ghost" size="icon" onClick={() => onEdit(goal)}>
               <Edit className="h-4 w-4" />
             </Button>

@@ -6,12 +6,10 @@ import { DecimalInput } from "@/components/ui/decimal-input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Users } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
-import { GoalMembersDialog } from "./GoalMembersDialog";
-import { useGoalPermissions } from "@/hooks/useGoalPermissions";
 
 type Goal = Database["public"]["Tables"]["goals"]["Row"];
 type GoalInsert = Omit<Database["public"]["Tables"]["goals"]["Insert"], "user_id">;
@@ -31,7 +29,6 @@ export function GoalDialog({ open, onOpenChange, onSave, goal }: GoalDialogProps
     deadline: null,
   });
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [showMembersDialog, setShowMembersDialog] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -80,25 +77,11 @@ export function GoalDialog({ open, onOpenChange, onSave, goal }: GoalDialogProps
   };
 
   return (
-    <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <span>{goal ? "Editar Meta" : "Nova Meta"}</span>
-              {goal && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowMembersDialog(true)}
-                  className="gap-2"
-                >
-                  <Users className="h-4 w-4" />
-                  Membros
-                </Button>
-              )}
-            </DialogTitle>
-          </DialogHeader>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{goal ? "Editar Meta" : "Nova Meta"}</DialogTitle>
+        </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-2">
@@ -170,7 +153,6 @@ export function GoalDialog({ open, onOpenChange, onSave, goal }: GoalDialogProps
           </div>
         </div>
 
-
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
@@ -179,15 +161,5 @@ export function GoalDialog({ open, onOpenChange, onSave, goal }: GoalDialogProps
         </DialogFooter>
       </DialogContent>
     </Dialog>
-
-    {goal && (
-      <GoalMembersDialog
-        goalId={goal.id}
-        goalName={goal.name}
-        open={showMembersDialog}
-        onOpenChange={setShowMembersDialog}
-      />
-    )}
-  </>
   );
 }
