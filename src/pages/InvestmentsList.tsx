@@ -303,9 +303,14 @@ function InvestmentCard({
   const { returns = [] } = useMonthlyReturns(investment.id);
   const { maskValue } = useMaskValues();
   
-  // Formatar mês de referência
+  // Formatar mês de referência (evitando problemas de timezone)
   const referenceMonth = investment.initial_month 
-    ? new Date(investment.initial_month).toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' })
+    ? (() => {
+        const dateStr = String(investment.initial_month);
+        const [year, month] = dateStr.split('-').map(Number);
+        const date = new Date(year, month - 1, 1);
+        return date.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
+      })()
     : '';
   const { canShareAccounts } = usePlanLimits();
 
