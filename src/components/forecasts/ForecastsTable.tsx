@@ -347,16 +347,13 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                         <TableCell className="pl-16">
                           <div className="flex items-center gap-2">
                             <div className="w-0.5 h-6 bg-primary/20" />
-                            <span className="text-xs text-muted-foreground">Item</span>
+                            <span className="text-xs font-medium">
+                              {format(new Date(forecast.period_start), "MMMM 'de' yyyy", { locale: ptBR })}
+                            </span>
                           </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground text-sm">
-                          <div className="space-y-1">
-                            <div className="font-medium text-xs">
-                              {format(new Date(forecast.period_start), "MMMM 'de' yyyy", { locale: ptBR })}
-                            </div>
-                            <div className="text-xs">{forecast.notes || "-"}</div>
-                          </div>
+                          {forecast.notes || "-"}
                         </TableCell>
                         <TableCell className="text-right text-sm">
                           {formatCurrency(Number(forecast.forecasted_amount))}
