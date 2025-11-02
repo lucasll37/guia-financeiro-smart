@@ -28,7 +28,7 @@ export function SubscriptionManager() {
   const [searchEmail, setSearchEmail] = useState("");
   const [planFilter, setPlanFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Fetch users with subscriptions
   const { data, isLoading } = useQuery({
@@ -120,9 +120,11 @@ export function SubscriptionManager() {
   };
 
   const filteredUsers = users.filter(u => {
-    const matchesEmail = !searchEmail || u.profile.email?.toLowerCase().includes(searchEmail.toLowerCase());
+    const matchesSearch = !searchEmail || 
+      u.profile.email?.toLowerCase().includes(searchEmail.toLowerCase()) ||
+      u.profile.name?.toLowerCase().includes(searchEmail.toLowerCase());
     const matchesPlan = planFilter === "all" || (u.subscription?.plan || "free") === planFilter;
-    return matchesEmail && matchesPlan;
+    return matchesSearch && matchesPlan;
   });
 
   const totalPages = Math.ceil(totalUsers / itemsPerPage);
@@ -151,22 +153,43 @@ export function SubscriptionManager() {
       <CardContent>
         <div className="space-y-4">
           {/* Filtros */}
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <Input
               type="text"
-              placeholder="Buscar por email..."
+              placeholder="Buscar por nome ou email..."
               value={searchEmail}
-              onChange={(e) => setSearchEmail(e.target.value)}
+              onChange={(e) => {
+                setSearchEmail(e.target.value);
+                setPage(1);
+              }}
               className="flex-1"
             />
-            <Select value={planFilter} onValueChange={setPlanFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
+            <Select value={planFilter} onValueChange={(value) => {
+              setPlanFilter(value);
+              setPage(1);
+            }}>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Filtrar por plano" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os planos</SelectItem>
                 <SelectItem value="free">Free</SelectItem>
                 <SelectItem value="pro">Pro</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={itemsPerPage.toString()} onValueChange={(value) => {
+              setItemsPerPage(Number(value));
+              setPage(1);
+            }}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Itens por página" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5 por página</SelectItem>
+                <SelectItem value="10">10 por página</SelectItem>
+                <SelectItem value="25">25 por página</SelectItem>
+                <SelectItem value="50">50 por página</SelectItem>
+                <SelectItem value="100">100 por página</SelectItem>
               </SelectContent>
             </Select>
           </div>
