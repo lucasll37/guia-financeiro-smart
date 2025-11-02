@@ -160,27 +160,7 @@ export default function InvestmentDetails() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight">{investment.name}</h1>
-            {role === "owner" && (
-              <Badge variant="default" className="flex items-center gap-1">
-                <Crown className="h-3 w-3" />
-                Proprietário
-              </Badge>
-            )}
-            {role === "editor" && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <Edit className="h-3 w-3" />
-                Editor
-              </Badge>
-            )}
-            {role === "viewer" && (
-              <Badge variant="outline" className="flex items-center gap-1">
-                <Eye className="h-3 w-3" />
-                Visualizador
-              </Badge>
-            )}
-          </div>
+          <h1 className="text-3xl font-bold tracking-tight">{investment.name}</h1>
         </div>
       </div>
 
