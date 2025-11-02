@@ -255,11 +255,11 @@ export function TransactionsTable({
             <TableCell>
               <div className="flex items-center gap-2">
                 <div
-                  className="w-3 h-3 rounded-full"
+                  className="w-4 h-4 rounded-full"
                   style={{ backgroundColor: data.parent?.color || "#6366f1" }}
                 />
-                <span className="font-semibold">{data.parent?.name || "Sem categoria"}</span>
-                <span className="text-xs text-muted-foreground">({data.children.length})</span>
+                <span className="font-semibold text-base">{data.parent?.name || "Sem categoria"}</span>
+                <span className="text-xs text-muted-foreground font-normal">({data.children.length})</span>
               </div>
             </TableCell>
             <TableCell className="text-muted-foreground text-sm">
@@ -280,7 +280,10 @@ export function TransactionsTable({
                 {format(parse(String(transaction.date), "yyyy-MM-dd", new Date()), "dd/MM/yyyy")}
               </TableCell>
               <TableCell className="pl-12">
-                <span className="text-sm">{transaction.categories?.name}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-0.5 h-6 bg-primary/30" />
+                  <span className="text-sm font-medium">{transaction.categories?.name}</span>
+                </div>
               </TableCell>
               <TableCell className="text-sm">
                 {transaction.description}

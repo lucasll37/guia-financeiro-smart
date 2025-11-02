@@ -285,11 +285,11 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                     {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                   </Button>
                   <div
-                    className="w-3 h-3 rounded-full"
+                    className="w-4 h-4 rounded-full"
                     style={{ backgroundColor: data.parent?.color || "#6366f1" }}
                   />
-                  <span>{data.parent?.name || "Sem categoria"}</span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="font-semibold text-base">{data.parent?.name || "Sem categoria"}</span>
+                  <span className="text-xs text-muted-foreground font-normal">
                     ({(Object.values(data.subcategories) as any[]).reduce((sum: number, sub: any) => sum + sub.forecasts.length, 0)})
                   </span>
                 </div>
@@ -326,8 +326,8 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                           {isSubExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                         </Button>
                         <div className="w-0.5 h-6 bg-primary/30" />
-                        <span className="text-sm">{subData.subcategory?.name || "Sem subcategoria"}</span>
-                        <span className="text-xs text-muted-foreground">({subData.forecasts.length})</span>
+                        <span className="text-sm font-medium">{subData.subcategory?.name || "Sem subcategoria"}</span>
+                        <span className="text-xs text-muted-foreground font-normal">({subData.forecasts.length})</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm" />
@@ -347,7 +347,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                         <TableCell className="pl-16">
                           <div className="flex items-center gap-2">
                             <div className="w-0.5 h-6 bg-primary/20" />
-                            <span className="text-xs font-medium">
+                            <span className="text-xs font-normal text-muted-foreground">
                               {format(new Date(forecast.period_start), "MMMM 'de' yyyy", { locale: ptBR })}
                             </span>
                           </div>
@@ -415,11 +415,11 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                   {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                 </Button>
                 <div
-                  className="w-3 h-3 rounded-full"
+                  className="w-4 h-4 rounded-full"
                   style={{ backgroundColor: data.parent?.color || "#6366f1" }}
                 />
-                <span>{data.parent?.name || "Sem categoria"}</span>
-                <span className="text-xs text-muted-foreground">({data.children.length})</span>
+                <span className="font-semibold text-base">{data.parent?.name || "Sem categoria"}</span>
+                <span className="text-xs text-muted-foreground font-normal">({data.children.length})</span>
               </div>
             </TableCell>
             <TableCell className="text-muted-foreground" />
@@ -439,7 +439,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                 <TableCell className="pl-12">
                   <div className="flex items-center gap-2">
                     <div className="w-0.5 h-8 bg-primary/30 ml-2" />
-                    <span className="text-sm">{forecast.categories?.name || "Sem categoria"}</span>
+                    <span className="text-sm font-medium">{forecast.categories?.name || "Sem categoria"}</span>
                   </div>
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
