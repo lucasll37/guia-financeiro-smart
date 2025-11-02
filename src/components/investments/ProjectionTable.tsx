@@ -162,13 +162,15 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
         monthlyContribution,
       });
     }
-  }, [months, monthlyRate, inflationRate, monthlyContribution, onConfigChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [months, monthlyRate, inflationRate, monthlyContribution]);
 
   useEffect(() => {
     if (onProjectionDataChange && projectionData.length > 0) {
       onProjectionDataChange(projectionData);
     }
-  }, [projectionData, onProjectionDataChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectionData]);
 
   const handleSort = (field: 'month' | 'contribution' | 'returns' | 'balance' | 'presentValue') => {
     if (sortField === field) {
