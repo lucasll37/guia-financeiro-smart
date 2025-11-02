@@ -229,8 +229,10 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
   };
 
   const resetToDefaults = () => {
+    setMonths(settings?.months_config?.default ?? 12);
     setMonthlyRate(settings?.monthly_rate_config?.default ?? 0.83);
     setInflationRate(settings?.inflation_rate_config?.default ?? 0.35);
+    setMonthlyContribution(settings?.contribution_config?.default ?? 0);
     setRateStdDev(settings?.rate_std_dev_config?.default ?? 0.15);
     setInflationStdDev(settings?.inflation_std_dev_config?.default ?? 0.25);
   };
@@ -265,7 +267,7 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
               Gerar Simulação
             </Button>
             <Button onClick={resetToDefaults} variant="outline" size="sm">
-              Resetar taxas
+              Resetar Condições
             </Button>
             <Button onClick={exportToExcel} variant="outline" size="sm">
               <Download className="h-4 w-4 mr-2" />
