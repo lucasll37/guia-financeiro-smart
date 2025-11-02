@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -16,12 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, UserPlus } from "lucide-react";
+import { Trash2, UserPlus, Eye, Edit } from "lucide-react";
 import { useGoalMembers } from "@/hooks/useGoalMembers";
 import { useGoalPermissions } from "@/hooks/useGoalPermissions";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 interface GoalMembersDialogProps {
   goalId: string | undefined;
@@ -36,209 +37,171 @@ export function GoalMembersDialog({
   open,
   onOpenChange,
 }: GoalMembersDialogProps) {
-  const [newMemberEmail, setNewMemberEmail] = useState("");
-  const [newMemberRole, setNewMemberRole] = useState<"viewer" | "editor">("viewer");
+  const { toast } = useToast();
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState<"viewer" | "editor">("viewer");
   
-  const { members, isLoading, addMember, updateMemberRole, removeMember, leaveMember } =
+  const { members, isLoading, addMember, removeMember } =
     useGoalMembers(goalId);
   const { isOwner } = useGoalPermissions(goalId);
 
-  const handleAddMember = async () => {
-    if (!goalId || !newMemberEmail) return;
+  // Query to find user by email
+  const { refetch: searchUser } = useQuery({
+    queryKey: ["search-user", email],
+    queryFn: async () => {
+      if (!email) return null;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, email, name")
+        .eq("email", email.toLowerCase().trim())
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: false,
+  });
+
+  const handleInvite = async () => {
+    if (!goalId || !email) return;
+
+    // Search for user
+    const { data: user } = await searchUser();
+
+    if (!user) {
+      toast({
+        title: "Usuário não encontrado",
+        description: "Não foi possível encontrar um usuário com este e-mail",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if already a member
+    const alreadyMember = members?.some((m) => m.user_id === user.id);
+    if (alreadyMember) {
+      toast({
+        title: "Usuário já é membro",
+        description: "Este usuário já é um membro desta meta",
+        variant: "destructive",
+      });
+      return;
+    }
 
     await addMember.mutateAsync({
       goalId,
-      userEmail: newMemberEmail,
-      role: newMemberRole,
+      userEmail: email,
+      role,
     });
 
-    setNewMemberEmail("");
-    setNewMemberRole("viewer");
+    setEmail("");
+    setRole("viewer");
   };
 
-  const handleUpdateRole = async (memberId: string, role: "viewer" | "editor") => {
-    await updateMemberRole.mutateAsync({ memberId, role });
+  const getStatusBadge = (status: string) => {
+    return <Badge variant="default">Ativo</Badge>;
   };
 
-  const handleRemoveMember = async (memberId: string) => {
-    if (window.confirm("Deseja remover este membro?")) {
-      await removeMember.mutateAsync(memberId);
-    }
+  const getRoleIcon = (role: string) => {
+    return role === "editor" ? (
+      <Edit className="h-4 w-4" />
+    ) : (
+      <Eye className="h-4 w-4" />
+    );
   };
 
-  const handleLeaveMember = async (memberId: string) => {
-    if (window.confirm("Deseja sair desta meta compartilhada?")) {
-      await leaveMember.mutateAsync(memberId);
-      onOpenChange(false);
-    }
+  const getRoleLabel = (role: string) => {
+    return role === "editor" ? "Editor" : "Visualizador";
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Membros de {goalName}</DialogTitle>
+          <DialogTitle>Gerenciar Membros</DialogTitle>
           <DialogDescription>
-            Gerencie quem tem acesso a esta meta e suas permissões
+            Convide usuários para compartilhar a meta "{goalName}"
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Adicionar novo membro - apenas owner */}
+          {/* Invite Form (only for owners) */}
           {isOwner && (
-            <div className="space-y-4 p-4 border rounded-lg">
-              <h3 className="font-medium flex items-center gap-2">
-                <UserPlus className="h-4 w-4" />
-                Adicionar Membro
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Digite o email de um usuário cadastrado no Prospera para compartilhar esta meta.
-              </p>
+            <div className="space-y-4 border-b pb-4">
               <div className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email do usuário</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="email">E-mail do usuário</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="usuario@exemplo.com"
-                    value={newMemberEmail}
-                    onChange={(e) => setNewMemberEmail(e.target.value)}
+                    placeholder="usuario@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
-                <div className="grid gap-2">
+
+                <div className="space-y-2">
                   <Label htmlFor="role">Permissão</Label>
-                  <Select
-                    value={newMemberRole}
-                    onValueChange={(value: "viewer" | "editor") =>
-                      setNewMemberRole(value)
-                    }
-                  >
-                    <SelectTrigger id="role">
+                  <Select value={role} onValueChange={(v: "viewer" | "editor") => setRole(v)}>
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="viewer">Visualizador</SelectItem>
-                      <SelectItem value="editor">Editor</SelectItem>
+                      <SelectItem value="viewer">Visualizador (apenas leitura)</SelectItem>
+                      <SelectItem value="editor">Editor (pode editar)</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-sm text-muted-foreground">
-                    {newMemberRole === "viewer"
-                      ? "Pode apenas visualizar a meta"
-                      : "Pode visualizar e editar a meta"}
-                  </p>
                 </div>
-                <Button
-                  onClick={handleAddMember}
-                  disabled={!newMemberEmail || addMember.isPending}
-                >
-                  {addMember.isPending ? "Adicionando..." : "Adicionar"}
-                </Button>
               </div>
+
+              <Button onClick={handleInvite} disabled={!email || addMember.isPending}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Enviar Convite
+              </Button>
             </div>
           )}
 
-          {/* Lista de membros */}
-          <div className="space-y-4">
-            <h3 className="font-medium">Membros Atuais</h3>
-            {isLoading ? (
-              <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 border rounded-lg">
-                    <Skeleton className="h-10 w-10 rounded-full" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-3 w-48" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : members.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                Nenhum membro adicionado ainda
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {members.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center gap-3 p-3 border rounded-lg"
-                  >
-                    <Avatar>
-                      <AvatarImage src={member.user?.avatar_url || undefined} />
-                      <AvatarFallback>
-                        {member.user?.name?.charAt(0) || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="font-medium">
-                        {member.user?.name || "Sem nome"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {member.user?.email}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant={
-                          member.status === "accepted"
-                            ? "default"
-                            : member.status === "pending"
-                            ? "secondary"
-                            : "destructive"
-                        }
-                      >
-                        {member.status === "accepted"
-                          ? "Aceito"
-                          : member.status === "pending"
-                          ? "Pendente"
-                          : "Recusado"}
-                      </Badge>
-                      {isOwner ? (
-                        <>
-                          <Select
-                            value={member.role}
-                            onValueChange={(value: "viewer" | "editor") =>
-                              handleUpdateRole(member.id, value)
-                            }
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="viewer">Visualizador</SelectItem>
-                              <SelectItem value="editor">Editor</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleRemoveMember(member.id)}
-                            disabled={removeMember.isPending}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Badge variant="outline">
-                            {member.role === "editor" ? "Editor" : "Visualizador"}
+          {/* Members List - Only for owners */}
+          {isOwner && (
+            <div className="space-y-4">
+              <h3 className="font-semibold">Membros</h3>
+              {members && members.length > 0 ? (
+                <div className="space-y-2">
+                  {members.map((member) => (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium">{member.user?.name || "Sem nome"}</p>
+                        <p className="text-sm text-muted-foreground">{member.user?.email}</p>
+                        <div className="flex gap-2 mt-2">
+                          {getStatusBadge(member.status)}
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            {getRoleIcon(member.role)}
+                            {getRoleLabel(member.role)}
                           </Badge>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleLeaveMember(member.id)}
-                            disabled={leaveMember.isPending}
-                          >
-                            Sair
-                          </Button>
-                        </>
-                      )}
+                        </div>
+                      </div>
+
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeMember.mutate(member.id)}
+                        disabled={removeMember.isPending}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Nenhum membro convidado ainda
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
