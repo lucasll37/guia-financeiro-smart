@@ -153,13 +153,13 @@ export const DashboardLayout = () => {
     <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
-        <div className="flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col min-w-0">
           <Header />
-          <main className="flex-1 p-4 md:p-6 overflow-auto">
+          <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
             <Outlet />
           </main>
-          <footer className="border-t py-4 px-4 md:px-6">
-            <p className="text-center text-sm text-muted-foreground">
+          <footer className="border-t py-3 px-3 sm:py-4 sm:px-4 md:px-6">
+            <p className="text-center text-xs sm:text-sm text-muted-foreground">
               © {currentYear} Prospera - Gestão Financeira
             </p>
           </footer>
