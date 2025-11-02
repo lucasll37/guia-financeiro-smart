@@ -5,11 +5,11 @@ import { ArrowLeft, LayoutDashboard, Receipt, FolderTree, CreditCard, TrendingUp
 import { AccountPeriodDetails } from "@/components/accounts/AccountPeriodDetails";
 import { useAccounts } from "@/hooks/useAccounts";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect, useState, useMemo } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useForecasts } from "@/hooks/useForecasts";
-import { useTransactions } from "@/hooks/useTransactions";
+import { useAppSettings } from "@/hooks/useAppSettings";
+import ReactMarkdown from "react-markdown";
 
 // Import existing page components (we'll refactor these into tab components)
 import Transactions from "./Transactions";
@@ -31,19 +31,11 @@ export default function AccountDetails() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { accounts, isLoading } = useAccounts();
-  const [instructionsOpen, setInstructionsOpen] = useState(false);
+  const { accountGuideText } = useAppSettings();
+  const [instructionsOpen, setInstructionsOpen] = useState(true);
 
   const account = accounts?.find((a) => a.id === accountId);
   const tabParam = searchParams.get('tab');
-
-  const { forecasts } = useForecasts(accountId);
-  const { transactions } = useTransactions(accountId);
-
-  const showSuggestion = useMemo(() => {
-    const hasNoForecasts = !forecasts || forecasts.length === 0;
-    const hasNoTransactions = !transactions || transactions.length === 0;
-    return hasNoForecasts && hasNoTransactions;
-  }, [forecasts, transactions]);
 
   // Remove o parâmetro tab da URL ao carregar
   useEffect(() => {
@@ -98,61 +90,34 @@ export default function AccountDetails() {
         </div>
       </div>
 
-      {showSuggestion && (
-        <Collapsible open={instructionsOpen} onOpenChange={setInstructionsOpen}>
-          <Card className="border border-muted bg-muted/30">
-            <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Lightbulb className="h-4 w-4 text-muted-foreground" />
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      Como usar esta conta
-                    </CardTitle>
-                  </div>
-                  <ChevronDown 
-                    className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
-                      instructionsOpen ? 'transform rotate-180' : ''
-                    }`}
-                  />
+      <Collapsible open={instructionsOpen} onOpenChange={setInstructionsOpen}>
+        <Card className="border border-muted bg-muted/30">
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Como usar esta conta
+                  </CardTitle>
                 </div>
-              </CardHeader>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <CardContent className="pt-0 pb-4 animate-accordion-down">
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <div className="flex items-start gap-2">
-                    <span className="font-semibold text-foreground">1.</span>
-                    <p><span className="font-medium text-foreground">Crie previsões</span> - Defina quanto espera receber e gastar em cada categoria</p>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="font-semibold text-foreground">2.</span>
-                    <p><span className="font-medium text-foreground">Registre lançamentos</span> - Adicione suas receitas e despesas do dia a dia</p>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="font-semibold text-foreground">3.</span>
-                    <p><span className="font-medium text-foreground">Acompanhe a evolução</span> - Veja a comparação entre previsto x realizado e seu saldo</p>
-                  </div>
-                  
-                  <div className="pt-2 mt-2 border-t border-muted">
-                    <p className="text-xs text-muted-foreground mb-2">Opcional:</p>
-                    <div className="space-y-1.5">
-                      <div className="flex items-start gap-2">
-                        <span>•</span>
-                        <p><span className="font-medium text-foreground">Cartões de crédito</span> - Configure seus cartões para rastrear faturas</p>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <span>•</span>
-                        <p><span className="font-medium text-foreground">Categorias personalizadas</span> - Adapte as categorias às suas necessidades</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </CollapsibleContent>
-          </Card>
-        </Collapsible>
-      )}
+                <ChevronDown 
+                  className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
+                    instructionsOpen ? 'transform rotate-180' : ''
+                  }`}
+                />
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="pt-0 pb-4 animate-accordion-down">
+              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                <ReactMarkdown>{accountGuideText}</ReactMarkdown>
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       <Tabs defaultValue={tabParam || "visao-geral"} className="space-y-6">
         <TabsList className="grid w-full grid-cols-7 h-auto">

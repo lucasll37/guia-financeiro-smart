@@ -61,5 +61,8 @@ export const useAppSettings = () => {
     isLoading,
     updateSetting,
     version: settings?.software_version?.value || "1.0.0",
+    accountGuideText: settings?.account_guide_text?.value || "",
+    investmentGuideText: settings?.investment_guide_text?.value || "",
+    goalGuideText: settings?.goal_guide_text?.value || "",
   };
 };

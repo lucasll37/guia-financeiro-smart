@@ -1,11 +1,12 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, LineChart, TrendingDown } from "lucide-react";
+import { ArrowLeft, Calendar, LineChart, TrendingDown, Lightbulb, ChevronDown } from "lucide-react";
 import { useInvestments } from "@/hooks/useInvestments";
 import { useMonthlyReturns } from "@/hooks/useMonthlyReturns";
 import { useInvestmentCurrentValue } from "@/hooks/useInvestmentCurrentValue";
 import { useInvestmentPermissions } from "@/hooks/useInvestmentPermissions";
+import { useAppSettings } from "@/hooks/useAppSettings";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MonthlyReturnsTable } from "@/components/investments/MonthlyReturnsTable";
 import { InvestmentCharts } from "@/components/investments/InvestmentCharts";
@@ -14,7 +15,10 @@ import { ProjectionTable } from "@/components/investments/ProjectionTable";
 import { addMonths } from "date-fns";
 import { useState, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Eye, Edit, Crown } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 import type { Database } from "@/integrations/supabase/types";
 
@@ -24,6 +28,8 @@ export default function InvestmentDetails() {
   const { investmentId } = useParams<{ investmentId: string }>();
   const navigate = useNavigate();
   const { investments, isLoading } = useInvestments();
+  const { investmentGuideText } = useAppSettings();
+  const [instructionsOpen, setInstructionsOpen] = useState(true);
   const [returnsDialogOpen, setReturnsDialogOpen] = useState(false);
   const [selectedReturn, setSelectedReturn] = useState<MonthlyReturn | null>(null);
   const [projectionMonths, setProjectionMonths] = useState(12);
@@ -163,6 +169,35 @@ export default function InvestmentDetails() {
           <h1 className="text-3xl font-bold tracking-tight">{investment.name}</h1>
         </div>
       </div>
+
+      <Collapsible open={instructionsOpen} onOpenChange={setInstructionsOpen}>
+        <Card className="border border-muted bg-muted/30">
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Como usar seus investimentos
+                  </CardTitle>
+                </div>
+                <ChevronDown 
+                  className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
+                    instructionsOpen ? 'transform rotate-180' : ''
+                  }`}
+                />
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="pt-0 pb-4 animate-accordion-down">
+              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                <ReactMarkdown>{investmentGuideText}</ReactMarkdown>
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       <Tabs defaultValue="rendimentos" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3 max-w-2xl">

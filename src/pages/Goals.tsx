@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus, Copy, Target, TrendingUp, CheckCircle2 } from "lucide-react";
+import { Plus, Copy, Target, TrendingUp, CheckCircle2, Lightbulb, ChevronDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,10 +20,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useGoals } from "@/hooks/useGoals";
 import { useAuth } from "@/hooks/useAuth";
+import { useAppSettings } from "@/hooks/useAppSettings";
 import { useMaskValues } from "@/hooks/useMaskValues";
 import { useToast } from "@/hooks/use-toast";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { GoalDialog } from "@/components/goals/GoalDialog";
+import ReactMarkdown from "react-markdown";
 import type { Database } from "@/integrations/supabase/types";
 
 type Goal = Database["public"]["Tables"]["goals"]["Row"];
@@ -34,6 +37,8 @@ export default function Goals() {
   const isMobile = useIsMobile();
   const { maskValue } = useMaskValues();
   const { toast } = useToast();
+  const { goalGuideText } = useAppSettings();
+  const [instructionsOpen, setInstructionsOpen] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
@@ -140,6 +145,35 @@ export default function Goals() {
           {!isMobile && <span className="ml-2">Nova Meta</span>}
         </Button>
       </div>
+
+      <Collapsible open={instructionsOpen} onOpenChange={setInstructionsOpen}>
+        <Card className="border border-muted bg-muted/30">
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Como usar suas metas
+                  </CardTitle>
+                </div>
+                <ChevronDown 
+                  className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
+                    instructionsOpen ? 'transform rotate-180' : ''
+                  }`}
+                />
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="pt-0 pb-4 animate-accordion-down">
+              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                <ReactMarkdown>{goalGuideText}</ReactMarkdown>
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent hover:shadow-md transition-all duration-300">
