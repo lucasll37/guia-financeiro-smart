@@ -34,6 +34,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
   const [expenseExpanded, setExpenseExpanded] = useState(true);
   const [groupByCategory, setGroupByCategory] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [expandedSubcategories, setExpandedSubcategories] = useState<Set<string>>(new Set());
 
   const handleSort = (field: 'account' | 'category' | 'amount') => {
     if (sortField === field) {
@@ -51,6 +52,18 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
         newSet.delete(categoryId);
       } else {
         newSet.add(categoryId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSubcategoryExpansion = (subcategoryId: string) => {
+    setExpandedSubcategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(subcategoryId)) {
+        newSet.delete(subcategoryId);
+      } else {
+        newSet.add(subcategoryId);
       }
       return newSet;
     });
@@ -126,6 +139,48 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
       
       return grouped;
     };
+
+    // Agrupar por categoria pai e subcategoria (para período personalizável)
+    const groupByParentAndSubcategory = (fcs: any[]) => {
+      const grouped: Record<string, { 
+        parent: any; 
+        subcategories: Record<string, { 
+          subcategory: any; 
+          forecasts: any[]; 
+          total: number 
+        }>; 
+        total: number 
+      }> = {};
+      
+      fcs.forEach(forecast => {
+        const cat = categoriesMap.get((forecast.category_id as string)) || forecast.categories;
+        const root = getRootParent(cat) || cat;
+        const parentId = (root?.id as string) || (forecast.category_id as string);
+        const subcategoryId = (cat?.id as string) || (forecast.category_id as string);
+        
+        if (!grouped[parentId]) {
+          grouped[parentId] = {
+            parent: root || cat,
+            subcategories: {},
+            total: 0
+          };
+        }
+        
+        if (!grouped[parentId].subcategories[subcategoryId]) {
+          grouped[parentId].subcategories[subcategoryId] = {
+            subcategory: cat,
+            forecasts: [],
+            total: 0
+          };
+        }
+        
+        grouped[parentId].subcategories[subcategoryId].forecasts.push(forecast);
+        grouped[parentId].subcategories[subcategoryId].total += Number(forecast.forecasted_amount);
+        grouped[parentId].total += Number(forecast.forecasted_amount);
+      });
+      
+      return grouped;
+    };
     
     const incomeTotal = income.reduce((sum, f) => sum + Number(f.forecasted_amount), 0);
     const expenseTotal = expense.reduce((sum, f) => sum + Number(f.forecasted_amount), 0);
@@ -135,8 +190,12 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
       expenseForecasts: sortForecasts(expense),
       totalIncome: incomeTotal,
       totalExpense: expenseTotal,
-      incomeByParent: (groupByCategory || viewMode === "custom") ? groupByParent(income) : {},
-      expenseByParent: (groupByCategory || viewMode === "custom") ? groupByParent(expense) : {},
+      incomeByParent: viewMode === "custom" 
+        ? groupByParentAndSubcategory(income) 
+        : (groupByCategory ? groupByParent(income) : {}),
+      expenseByParent: viewMode === "custom" 
+        ? groupByParentAndSubcategory(expense) 
+        : (groupByCategory ? groupByParent(expense) : {}),
     };
   }, [forecasts, sortField, sortDirection, viewMode, categories, groupByCategory]);
 
@@ -195,15 +254,152 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
     );
   };
 
-  const renderGroupedForecasts = (groupedData: Record<string, { parent: any; children: any[]; total: number }>) => {
-    return Object.entries(groupedData).map(([parentId, data]) => {
+  const renderGroupedForecasts = (groupedData: any) => {
+    // Verifica se é agrupamento de dois níveis (custom) ou um nível (monthly)
+    const isCustomView = viewMode === "custom";
+    
+    return Object.entries(groupedData).map(([parentId, data]: [string, any]) => {
       const isExpanded = expandedCategories.has(parentId);
       
+      // Para modo custom (dois níveis)
+      if (isCustomView && data.subcategories) {
+        return (
+          <React.Fragment key={parentId}>
+            {/* Categoria Pai */}
+            <TableRow
+              className="cursor-pointer hover:bg-muted/50 font-medium"
+              onClick={() => toggleCategoryExpansion(parentId)}
+            >
+              {showAccountName && <TableCell />}
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-6 w-6 p-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleCategoryExpansion(parentId);
+                    }}
+                  >
+                    {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </Button>
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: data.parent?.color || "#6366f1" }}
+                  />
+                  <span>{data.parent?.name || "Sem categoria"}</span>
+                  <span className="text-xs text-muted-foreground">
+                    ({(Object.values(data.subcategories) as any[]).reduce((sum: number, sub: any) => sum + sub.forecasts.length, 0)})
+                  </span>
+                </div>
+              </TableCell>
+              <TableCell className="text-muted-foreground" />
+              <TableCell className="text-right font-medium">
+                {formatCurrency(data.total)}
+              </TableCell>
+              <TableCell className="text-right" />
+            </TableRow>
+            
+            {/* Subcategorias */}
+            {isExpanded && Object.entries(data.subcategories).map(([subcategoryId, subData]: [string, any]) => {
+              const isSubExpanded = expandedSubcategories.has(subcategoryId);
+              
+              return (
+                <React.Fragment key={subcategoryId}>
+                  <TableRow
+                    className="cursor-pointer hover:bg-muted/30 bg-muted/10"
+                    onClick={() => toggleSubcategoryExpansion(subcategoryId)}
+                  >
+                    {showAccountName && <TableCell />}
+                    <TableCell className="pl-8">
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-5 w-5 p-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSubcategoryExpansion(subcategoryId);
+                          }}
+                        >
+                          {isSubExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                        </Button>
+                        <div className="w-0.5 h-6 bg-primary/30" />
+                        <span className="text-sm">{subData.subcategory?.name || "Sem subcategoria"}</span>
+                        <span className="text-xs text-muted-foreground">({subData.forecasts.length})</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm" />
+                    <TableCell className="text-right text-sm font-medium">
+                      {formatCurrency(subData.total)}
+                    </TableCell>
+                    <TableCell className="text-right" />
+                  </TableRow>
+                  
+                  {/* Previsões individuais */}
+                  {isSubExpanded && subData.forecasts.map((forecast: any) => {
+                    const isCasaRevenue = accountType === "casa" && forecast.categories?.type === "receita";
+                    
+                    return (
+                      <TableRow key={forecast.id} className="bg-muted/20">
+                        {showAccountName && <TableCell />}
+                        <TableCell className="pl-16">
+                          <div className="flex items-center gap-2">
+                            <div className="w-0.5 h-6 bg-primary/20" />
+                            <span className="text-xs text-muted-foreground">Item</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          <div className="space-y-1">
+                            <div className="font-medium text-xs">
+                              {format(new Date(forecast.period_start), "MMMM 'de' yyyy", { locale: ptBR })}
+                            </div>
+                            <div className="text-xs">{forecast.notes || "-"}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right text-sm">
+                          {formatCurrency(Number(forecast.forecasted_amount))}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            {!isCasaRevenue && (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => onEdit(forecast)}
+                                  disabled={!canEdit}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => onDelete(forecast.id)}
+                                  disabled={!canEdit}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </React.Fragment>
+              );
+            })}
+          </React.Fragment>
+        );
+      }
+      
+      // Para modo monthly (um nível)
       return (
         <React.Fragment key={parentId}>
           {/* Categoria Pai */}
           <TableRow
-            key={parentId} 
             className="cursor-pointer hover:bg-muted/50 font-medium"
             onClick={() => toggleCategoryExpansion(parentId)}
           >
@@ -229,19 +425,15 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                 <span className="text-xs text-muted-foreground">({data.children.length})</span>
               </div>
             </TableCell>
-            <TableCell className="text-muted-foreground">
-              {/* Vazio para categorias agrupadas */}
-            </TableCell>
+            <TableCell className="text-muted-foreground" />
             <TableCell className="text-right font-medium">
               {formatCurrency(data.total)}
             </TableCell>
-            <TableCell className="text-right">
-              {/* Ações disponíveis apenas nas subcategorias */}
-            </TableCell>
+            <TableCell className="text-right" />
           </TableRow>
           
           {/* Subcategorias */}
-          {isExpanded && data.children.map((forecast) => {
+          {isExpanded && data.children.map((forecast: any) => {
             const isCasaRevenue = accountType === "casa" && forecast.categories?.type === "receita";
             
             return (
@@ -254,15 +446,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                   </div>
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
-                  {viewMode === "custom" && (
-                    <div className="space-y-1">
-                      <div className="font-medium">
-                        {format(new Date(forecast.period_start), "MMMM 'de' yyyy", { locale: ptBR })}
-                      </div>
-                      <div>{forecast.notes || "-"}</div>
-                    </div>
-                  )}
-                  {viewMode === "monthly" && (forecast.notes || "-")}
+                  {forecast.notes || "-"}
                 </TableCell>
                 <TableCell className="text-right text-sm">
                   {formatCurrency(Number(forecast.forecasted_amount))}
