@@ -341,13 +341,13 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
           </CollapsibleContent>
         </Collapsible>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Prazo da Simulação */}
-          <div className="p-4 bg-muted/30 rounded-lg">
-            <h3 className="text-sm font-semibold mb-4 text-primary">Prazo da Simulação</h3>
-            <div className="space-y-2">
+          <div className="p-3 bg-muted/20 rounded-md border">
+            <h3 className="text-xs font-semibold mb-2 text-primary">Prazo da Simulação</h3>
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label htmlFor="months">Número de meses</Label>
+                <Label htmlFor="months" className="text-xs">Número de meses</Label>
                 <Input
                   id="months-input"
                   type="number"
@@ -355,7 +355,7 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                   max={360}
                   value={months}
                   onChange={(e) => setMonths(Math.min(360, Math.max(1, parseInt(e.target.value) || 1)))}
-                  className="w-20 h-8 text-center"
+                  className="w-16 h-7 text-xs text-center"
                 />
               </div>
               <Slider
@@ -365,25 +365,26 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                 step={1}
                 value={[months]}
                 onValueChange={(value) => setMonths(value[0])}
+                className="py-1"
               />
             </div>
           </div>
 
           {/* Aporte Mensal */}
-          <div className="p-4 bg-muted/30 rounded-lg">
-            <h3 className="text-sm font-semibold mb-4 text-primary">Aporte Mensal</h3>
-            <div className="space-y-2">
+          <div className="p-3 bg-muted/20 rounded-md border">
+            <h3 className="text-xs font-semibold mb-2 text-primary">Aporte Mensal</h3>
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label htmlFor="contribution">Valor do aporte</Label>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">R$</span>
+                <Label htmlFor="contribution" className="text-xs">Valor do aporte</Label>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-muted-foreground">R$</span>
                   <DecimalInput
                     id="contribution-input"
                     placeholder="0,00"
                     value={monthlyContribution}
                     onValueChange={(num) => setMonthlyContribution(Math.min(100000, Math.max(0, num ?? 0)))}
                     allowNegative={false}
-                    className="w-32 h-8 text-right"
+                    className="w-28 h-7 text-xs text-right"
                   />
                 </div>
               </div>
@@ -394,27 +395,25 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                 step={100}
                 value={[monthlyContribution]}
                 onValueChange={(value) => setMonthlyContribution(value[0])}
+                className="py-1"
               />
-              <p className="text-xs text-muted-foreground">
-                Valor que será investido mensalmente
-              </p>
             </div>
           </div>
 
           {/* Rentabilidade */}
-          <div className="p-4 bg-muted/30 rounded-lg">
-            <h3 className="text-sm font-semibold mb-4 text-primary">Rentabilidade Esperada</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
+          <div className="p-3 bg-muted/20 rounded-md border">
+            <h3 className="text-xs font-semibold mb-2 text-primary">Rentabilidade Esperada</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="rate">Rendimento Mensal (%)</Label>
+                  <Label htmlFor="rate" className="text-xs">Retorno (%)</Label>
                   <DecimalInput
                     id="rate-input"
                     placeholder="0,00"
                     value={monthlyRate}
                     onValueChange={(num) => setMonthlyRate(Math.min(5, Math.max(-2, num ?? 0)))}
                     allowNegative={true}
-                    className="w-20 h-8 text-center"
+                    className="w-14 h-7 text-xs text-center"
                   />
                 </div>
                 <Slider
@@ -424,22 +423,20 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                   step={0.01}
                   value={[monthlyRate]}
                   onValueChange={(value) => setMonthlyRate(value[0])}
+                  className="py-1"
                 />
-                <p className="text-xs text-muted-foreground">
-                  Taxa média de retorno mensal
-                </p>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="rateStdDev">Variação (%)</Label>
+                  <Label htmlFor="rateStdDev" className="text-xs">Variação</Label>
                   <DecimalInput
                     id="rateStdDev-input"
                     placeholder="0,00"
                     value={rateStdDev}
                     onValueChange={(num) => setRateStdDev(Math.min(2, Math.max(0, num ?? 0)))}
                     allowNegative={false}
-                    className="w-20 h-8 text-center"
+                    className="w-14 h-7 text-xs text-center"
                   />
                 </div>
                 <Slider
@@ -449,28 +446,26 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                   step={0.01}
                   value={[rateStdDev]}
                   onValueChange={(value) => setRateStdDev(value[0])}
+                  className="py-1"
                 />
-                <p className="text-xs text-muted-foreground">
-                  Volatilidade do rendimento
-                </p>
               </div>
             </div>
           </div>
 
           {/* Inflação */}
-          <div className="p-4 bg-muted/30 rounded-lg">
-            <h3 className="text-sm font-semibold mb-4 text-primary">Inflação Projetada</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
+          <div className="p-3 bg-muted/20 rounded-md border">
+            <h3 className="text-xs font-semibold mb-2 text-primary">Inflação Projetada</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="inflation">Inflação Mensal (%)</Label>
+                  <Label htmlFor="inflation" className="text-xs">Taxa (%)</Label>
                   <DecimalInput
                     id="inflation-input"
                     placeholder="0,00"
                     value={inflationRate}
                     onValueChange={(num) => setInflationRate(Math.min(3, Math.max(-2, num ?? 0)))}
                     allowNegative={true}
-                    className="w-20 h-8 text-center"
+                    className="w-14 h-7 text-xs text-center"
                   />
                 </div>
                 <Slider
@@ -480,22 +475,20 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                   step={0.01}
                   value={[inflationRate]}
                   onValueChange={(value) => setInflationRate(value[0])}
+                  className="py-1"
                 />
-                <p className="text-xs text-muted-foreground">
-                  Taxa média de inflação mensal
-                </p>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="inflationStdDev">Variação (%)</Label>
+                  <Label htmlFor="inflationStdDev" className="text-xs">Variação</Label>
                   <DecimalInput
                     id="inflationStdDev-input"
                     placeholder="0,00"
                     value={inflationStdDev}
                     onValueChange={(num) => setInflationStdDev(Math.min(1, Math.max(0, num ?? 0)))}
                     allowNegative={false}
-                    className="w-20 h-8 text-center"
+                    className="w-14 h-7 text-xs text-center"
                   />
                 </div>
                 <Slider
@@ -505,10 +498,8 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange }
                   step={0.01}
                   value={[inflationStdDev]}
                   onValueChange={(value) => setInflationStdDev(value[0])}
+                  className="py-1"
                 />
-                <p className="text-xs text-muted-foreground">
-                  Volatilidade da inflação
-                </p>
               </div>
             </div>
           </div>
