@@ -90,15 +90,15 @@ export const Header = () => {
       <div className="flex h-14 md:h-16 items-center gap-2 md:gap-4 px-2 md:px-4">
         <SidebarTrigger className="shrink-0" />
         
-        {/* Logo e Slogan - Responsivo */}
-        <div className="flex flex-col items-center leading-none mx-auto md:absolute md:left-1/2 md:-translate-x-1/2">
+        {/* Logo e Slogan - Centralizado */}
+        <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center leading-none pointer-events-none">
           <div className="flex items-center gap-1 md:gap-1.5">
-            <Wallet className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary" />
-            <span className="font-display text-base sm:text-xl md:text-3xl font-bold text-foreground">
+            <Wallet className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+            <span className="font-display text-xl md:text-3xl font-bold text-foreground">
               Prospera!
             </span>
           </div>
-          <span className="hidden sm:block text-xs md:text-sm text-muted-foreground font-medium tracking-wide mt-0.5">
+          <span className="hidden min-[500px]:block text-xs md:text-sm text-muted-foreground font-medium tracking-wide mt-0.5">
             Gestor Financeiro
           </span>
         </div>
@@ -115,7 +115,7 @@ export const Header = () => {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="flex items-center gap-1 sm:gap-2 md:gap-4 shrink-0">
+        <div className="ml-auto flex items-center gap-1 sm:gap-2 md:gap-4 shrink-0">
           <Button
             variant={isMasked ? "destructive" : "ghost"}
             size="icon"
@@ -124,7 +124,7 @@ export const Header = () => {
             aria-pressed={isMasked}
             className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10"
           >
-            {isMasked ? <EyeOff className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" /> : <Eye className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" />}
+            {isMasked ? <EyeOff className="h-4 w-4 md:h-5 md:w-5" /> : <Eye className="h-4 w-4 md:h-5 md:w-5" />}
           </Button>
 
           {user && (
@@ -152,7 +152,7 @@ export const Header = () => {
                 <Avatar className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9">
                   <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.name || user?.email || "Usuário"} />
                   <AvatarFallback>
-                    <User className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" />
+                    <User className="h-4 w-4 md:h-5 md:w-5" />
                   </AvatarFallback>
                 </Avatar>
               </Button>
