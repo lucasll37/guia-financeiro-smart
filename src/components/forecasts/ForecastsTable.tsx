@@ -32,7 +32,7 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [incomeExpanded, setIncomeExpanded] = useState(true);
   const [expenseExpanded, setExpenseExpanded] = useState(true);
-  const [groupByCategory, setGroupByCategory] = useState(false);
+  const [groupByCategory, setGroupByCategory] = useState(true);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [expandedSubcategories, setExpandedSubcategories] = useState<Set<string>>(new Set());
 
@@ -501,12 +501,12 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
           {groupByCategory ? (
             <>
               <List className="h-4 w-4" />
-              Visualização Normal
+              Visualização Plano
             </>
           ) : (
             <>
               <FolderTree className="h-4 w-4" />
-              Agrupar por Categoria
+              Visualização em Árvore
             </>
           )}
         </Button>
