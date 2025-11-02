@@ -254,7 +254,15 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
                   </div>
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
-                  {forecast.notes || "-"}
+                  {viewMode === "custom" && (
+                    <div className="space-y-1">
+                      <div className="font-medium">
+                        {format(new Date(forecast.period_start), "MMMM 'de' yyyy", { locale: ptBR })}
+                      </div>
+                      <div>{forecast.notes || "-"}</div>
+                    </div>
+                  )}
+                  {viewMode === "monthly" && (forecast.notes || "-")}
                 </TableCell>
                 <TableCell className="text-right text-sm">
                   {formatCurrency(Number(forecast.forecasted_amount))}
@@ -301,29 +309,27 @@ export function ForecastsTable({ forecasts, onEdit, onDelete, showAccountName, v
 
   return (
     <div className="space-y-4">
-      {/* Botão de toggle para visualização agrupada - apenas em modo monthly */}
-      {viewMode === "monthly" && (
-        <div className="flex justify-end">
-          <Button
-            variant={groupByCategory ? "default" : "outline"}
-            size="sm"
-            onClick={() => setGroupByCategory(!groupByCategory)}
-            className="gap-2"
-          >
-            {groupByCategory ? (
-              <>
-                <List className="h-4 w-4" />
-                Visualização Normal
-              </>
-            ) : (
-              <>
-                <FolderTree className="h-4 w-4" />
-                Agrupar por Categoria
-              </>
-            )}
-          </Button>
-        </div>
-      )}
+      {/* Botão de toggle para visualização agrupada - em ambos os modos */}
+      <div className="flex justify-end">
+        <Button
+          variant={groupByCategory ? "default" : "outline"}
+          size="sm"
+          onClick={() => setGroupByCategory(!groupByCategory)}
+          className="gap-2"
+        >
+          {groupByCategory ? (
+            <>
+              <List className="h-4 w-4" />
+              Visualização Normal
+            </>
+          ) : (
+            <>
+              <FolderTree className="h-4 w-4" />
+              Agrupar por Categoria
+            </>
+          )}
+        </Button>
+      </div>
 
       {/* Receitas */}
       {(incomeForecasts.length > 0 || Object.keys(incomeByParent).length > 0) && (
