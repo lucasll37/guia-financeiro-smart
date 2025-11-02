@@ -306,10 +306,6 @@ export function TransactionsTable({
                   >
                     {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                   </Button>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2">
                   <div
                     className="w-4 h-4 rounded-full"
                     style={{ backgroundColor: data.parent?.color || "#6366f1" }}
@@ -341,8 +337,8 @@ export function TransactionsTable({
                     className="cursor-pointer hover:bg-muted/30 bg-muted/10"
                     onClick={() => toggleSubcategoryExpansion(subcategoryId)}
                   >
-                    <TableCell>
-                      <div className="flex items-center gap-2 pl-8">
+                    <TableCell className="pl-8">
+                      <div className="flex items-center gap-2">
                         <Button 
                           variant="ghost" 
                           size="icon" 
@@ -354,10 +350,6 @@ export function TransactionsTable({
                         >
                           {isSubExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                         </Button>
-                      </div>
-                    </TableCell>
-                    <TableCell className="pl-8">
-                      <div className="flex items-center gap-2">
                         <div className="w-0.5 h-6 bg-primary/30" />
                         <span className="text-sm font-medium">{subData.subcategory?.name || "Sem subcategoria"}</span>
                         <span className="text-xs text-muted-foreground font-normal">({subData.transactions.length})</span>
@@ -376,8 +368,8 @@ export function TransactionsTable({
                   
                   {/* Transações individuais */}
                   {isSubExpanded && subData.transactions.map((transaction: Transaction) => (
-                    <TableRow key={transaction.id} className="bg-background">
-                      <TableCell className="pl-16 text-sm">
+                    <TableRow key={transaction.id} className="bg-muted/20">
+                      <TableCell className="pl-16">
                         <div className="flex items-center gap-2">
                           <div className="w-0.5 h-6 bg-primary/20" />
                           <span className="text-xs font-normal text-muted-foreground">
@@ -385,10 +377,7 @@ export function TransactionsTable({
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="pl-16 text-sm">
-                        {/* Vazio, a categoria já está no nível acima */}
-                      </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell className="text-sm text-muted-foreground">
                         {transaction.description}
                       </TableCell>
                       <TableCell className="text-right text-sm">
@@ -497,12 +486,14 @@ export function TransactionsTable({
               <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[120px]">
-                  <Button variant="ghost" size="sm" onClick={() => handleSort('date')} className="flex items-center gap-1 p-0 h-auto font-medium">
-                    Data
-                    {renderSortIcon('date')}
-                  </Button>
-                </TableHead>
+                {!groupByCategory && (
+                  <TableHead className="w-[120px]">
+                    <Button variant="ghost" size="sm" onClick={() => handleSort('date')} className="flex items-center gap-1 p-0 h-auto font-medium">
+                      Data
+                      {renderSortIcon('date')}
+                    </Button>
+                  </TableHead>
+                )}
                 <TableHead className="w-[200px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('category')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Categoria
@@ -530,7 +521,7 @@ export function TransactionsTable({
                 : incomeTransactions.map(renderTransactionRow)
               }
               <TableRow className="bg-green-50/50 dark:bg-green-950/10 font-semibold">
-                <TableCell colSpan={3} className="text-right">
+                <TableCell colSpan={groupByCategory ? 2 : 3} className="text-right">
                   Total de Receitas:
                 </TableCell>
                 <TableCell className="text-right text-green-600">
@@ -563,12 +554,14 @@ export function TransactionsTable({
               <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[120px]">
-                  <Button variant="ghost" size="sm" onClick={() => handleSort('date')} className="flex items-center gap-1 p-0 h-auto font-medium">
-                    Data
-                    {renderSortIcon('date')}
-                  </Button>
-                </TableHead>
+                {!groupByCategory && (
+                  <TableHead className="w-[120px]">
+                    <Button variant="ghost" size="sm" onClick={() => handleSort('date')} className="flex items-center gap-1 p-0 h-auto font-medium">
+                      Data
+                      {renderSortIcon('date')}
+                    </Button>
+                  </TableHead>
+                )}
                 <TableHead className="w-[200px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('category')} className="flex items-center gap-1 p-0 h-auto font-medium">
                     Categoria
@@ -596,7 +589,7 @@ export function TransactionsTable({
                 : expenseTransactions.map(renderTransactionRow)
               }
               <TableRow className="bg-red-50/50 dark:bg-red-950/10 font-semibold">
-                <TableCell colSpan={3} className="text-right">
+                <TableCell colSpan={groupByCategory ? 2 : 3} className="text-right">
                   Total de Despesas:
                 </TableCell>
                 <TableCell className="text-right text-destructive">
