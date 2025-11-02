@@ -141,8 +141,9 @@ export const Header = () => {
             </>
           )}
 
-          <div className="hidden sm:flex items-center gap-1 sm:gap-2">
-            <ThemeToggle />
+          <ThemeToggle />
+          
+          <div className="hidden sm:block">
             <AssistantHeaderButton />
           </div>
 
