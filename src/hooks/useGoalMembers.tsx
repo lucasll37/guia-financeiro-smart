@@ -21,14 +21,34 @@ export const useGoalMembers = (goalId: string | undefined) => {
     queryFn: async () => {
       if (!goalId) return [];
 
-      const { data, error } = await supabase
+      // Buscar membros
+      const { data: membersData, error: membersError } = await supabase
         .from("goal_members")
-        .select("*, user:profiles!goal_members_user_id_fkey(name, email, avatar_url)")
+        .select("*")
         .eq("goal_id", goalId)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      return data as GoalMember[];
+      if (membersError) throw membersError;
+      if (!membersData || membersData.length === 0) return [];
+
+      // Buscar profiles dos membros
+      const userIds = membersData.map((m) => m.user_id);
+      const { data: profilesData, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, name, email, avatar_url")
+        .in("id", userIds);
+
+      if (profilesError) throw profilesError;
+
+      // Combinar dados
+      const profilesMap = new Map(
+        profilesData?.map((p) => [p.id, p]) || []
+      );
+
+      return membersData.map((member) => ({
+        ...member,
+        user: profilesMap.get(member.user_id),
+      }));
     },
     enabled: !!goalId,
   });

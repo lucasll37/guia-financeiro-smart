@@ -1,10 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Target, Edit, Trash2, Calendar, TrendingUp } from "lucide-react";
+import { Target, Edit, Trash2, Calendar, TrendingUp, Users } from "lucide-react";
 import { format, isPast, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMaskValues } from "@/hooks/useMaskValues";
+import { useGoalMembers } from "@/hooks/useGoalMembers";
 import type { Database } from "@/integrations/supabase/types";
 
 type Goal = Database["public"]["Tables"]["goals"]["Row"];
@@ -18,6 +19,7 @@ interface GoalCardProps {
 
 export function GoalCard({ goal, onEdit, onDelete, onUpdateProgress }: GoalCardProps) {
   const { maskValue } = useMaskValues();
+  const { members } = useGoalMembers(goal.id);
   const percentage = (Number(goal.current_amount) / Number(goal.target_amount)) * 100;
   const isComplete = percentage >= 100;
   const isOverdue = goal.deadline ? isPast(new Date(goal.deadline)) && !isComplete : false;
@@ -44,6 +46,12 @@ export function GoalCard({ goal, onEdit, onDelete, onUpdateProgress }: GoalCardP
           <div className="flex items-center gap-2">
             <Target className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg">{goal.name}</CardTitle>
+            {members.length > 0 && (
+              <Badge variant="outline" className="gap-1">
+                <Users className="h-3 w-3" />
+                {members.length}
+              </Badge>
+            )}
           </div>
           <div className="flex gap-2">
             <Button variant="ghost" size="icon" onClick={() => onEdit(goal)}>
