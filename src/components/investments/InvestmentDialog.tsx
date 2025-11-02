@@ -1,8 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { format, addMonths, subMonths } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import * as z from "zod";
 import {
   Dialog,
@@ -27,9 +30,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { DecimalInput } from "@/components/ui/decimal-input";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
 
 type Investment = Database["public"]["Tables"]["investment_assets"]["Row"];
@@ -213,21 +223,87 @@ export function InvestmentDialog({
             <FormField
               control={form.control}
               name="initial_month"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mês Inicial</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="month"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Mês de início do investimento. Os rendimentos mensais serão registrados sequencialmente a partir deste mês.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                const selectedDate = field.value ? new Date(field.value + "-01") : null;
+                
+                const handleMonthSelect = (date: Date | undefined) => {
+                  if (date) {
+                    field.onChange(format(date, "yyyy-MM"));
+                  }
+                };
+
+                const handlePreviousMonth = () => {
+                  if (selectedDate) {
+                    const newDate = subMonths(selectedDate, 1);
+                    field.onChange(format(newDate, "yyyy-MM"));
+                  }
+                };
+
+                const handleNextMonth = () => {
+                  if (selectedDate) {
+                    const newDate = addMonths(selectedDate, 1);
+                    field.onChange(format(newDate, "yyyy-MM"));
+                  }
+                };
+
+                return (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Mês Inicial</FormLabel>
+                    <Popover>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={handlePreviousMonth}
+                          disabled={!selectedDate}
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "flex-1 pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {selectedDate ? (
+                                format(selectedDate, "MMMM 'de' yyyy", { locale: ptBR })
+                              ) : (
+                                <span>Selecione o mês</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={handleNextMonth}
+                          disabled={!selectedDate}
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={selectedDate || undefined}
+                          onSelect={handleMonthSelect}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormDescription>
+                      Mês de início do investimento. Os rendimentos mensais serão registrados sequencialmente a partir deste mês.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
 
             <div className="flex justify-end gap-2">
