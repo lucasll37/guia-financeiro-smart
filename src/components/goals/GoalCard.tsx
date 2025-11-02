@@ -47,12 +47,6 @@ export function GoalCard({ goal, onEdit, onDelete, onUpdateProgress, onManageMem
           <div className="flex items-center gap-2">
             <Target className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg">{goal.name}</CardTitle>
-            {members.length > 0 && (
-              <Badge variant="outline" className="gap-1">
-                <Users className="h-3 w-3" />
-                {members.length}
-              </Badge>
-            )}
           </div>
           <div className="flex gap-2">
             <Button 
