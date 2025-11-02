@@ -561,6 +561,44 @@ export type Database = {
         }
         Relationships: []
       }
+      goal_members: {
+        Row: {
+          created_at: string
+          goal_id: string
+          id: string
+          invited_by: string
+          role: Database["public"]["Enums"]["account_member_role"]
+          status: Database["public"]["Enums"]["member_status"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          goal_id: string
+          id?: string
+          invited_by: string
+          role?: Database["public"]["Enums"]["account_member_role"]
+          status?: Database["public"]["Enums"]["member_status"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          goal_id?: string
+          id?: string
+          invited_by?: string
+          role?: Database["public"]["Enums"]["account_member_role"]
+          status?: Database["public"]["Enums"]["member_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_members_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goals: {
         Row: {
           account_id: string | null
@@ -1100,12 +1138,20 @@ export type Database = {
         Args: { account_uuid: string; user_uuid: string }
         Returns: boolean
       }
+      user_can_edit_goal: {
+        Args: { goal_uuid: string; user_uuid: string }
+        Returns: boolean
+      }
       user_can_edit_investment_returns: {
         Args: { investment_uuid: string; user_uuid: string }
         Returns: boolean
       }
       user_has_account_access: {
         Args: { account_uuid: string; user_uuid: string }
+        Returns: boolean
+      }
+      user_has_goal_access: {
+        Args: { _user_id: string; goal_uuid: string }
         Returns: boolean
       }
       user_has_investment_access: {
