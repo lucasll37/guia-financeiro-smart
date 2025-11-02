@@ -383,7 +383,7 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
                     max={360}
                     value={months}
                     onChange={(e) => setMonths(Math.min(360, Math.max(1, parseInt(e.target.value) || 1)))}
-                    className="w-16 h-7 text-xs text-center"
+                    className="w-20 h-8 text-sm text-center"
                   />
                 </div>
                 <Slider
