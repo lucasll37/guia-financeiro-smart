@@ -56,55 +56,9 @@ export function ForecastFilters({ accounts, filters, onFilterChange, accountId, 
     handleMonthChange(nextMonth);
   };
 
-  const toggleViewMode = () => {
-    const newMode = filters.viewMode === "monthly" ? "custom" : "monthly";
-    
-    if (newMode === "monthly") {
-      // Reset to current month when switching back to monthly view
-      handleMonthChange(new Date());
-    } else {
-      // When switching to custom view, set start date to first day of current year
-      // and end date to last day of current year
-      const today = new Date();
-      const firstDayOfYear = startOfYear(today);
-      const lastDayOfYear = endOfYear(today);
-      
-      const startDate = format(firstDayOfYear, "yyyy-MM-dd");
-      const endDate = format(lastDayOfYear, "yyyy-MM-dd");
-      
-      onFilterChange({
-        ...filters,
-        viewMode: newMode,
-        startDate,
-        endDate,
-      });
-      return;
-    }
-    
-    onFilterChange({
-      ...filters,
-      viewMode: newMode,
-    });
-  };
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">
-            {filters.viewMode === "monthly" ? "Visualização Mensal" : "Período Personalizado"}
-          </span>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={toggleViewMode}
-        >
-          {filters.viewMode === "monthly" ? "Personalizar Período" : "Voltar para Mensal"}
-        </Button>
-      </div>
-
       <div className={`grid gap-4 p-4 border rounded-lg bg-card ${accountId ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
       {!accountId && (
         <div className="space-y-2">
