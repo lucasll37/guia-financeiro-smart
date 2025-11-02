@@ -29,7 +29,7 @@ export default function InvestmentDetails() {
   const navigate = useNavigate();
   const { investments, isLoading } = useInvestments();
   const { investmentGuideText } = useAppSettings();
-  const [instructionsOpen, setInstructionsOpen] = useState(true);
+  const [instructionsOpen, setInstructionsOpen] = useState(false);
   const [returnsDialogOpen, setReturnsDialogOpen] = useState(false);
   const [selectedReturn, setSelectedReturn] = useState<MonthlyReturn | null>(null);
   const [projectionMonths, setProjectionMonths] = useState(12);

@@ -39,7 +39,7 @@ export default function Goals() {
   const { maskValue } = useMaskValues();
   const { toast } = useToast();
   const { goalGuideText } = useAppSettings();
-  const [instructionsOpen, setInstructionsOpen] = useState(true);
+  const [instructionsOpen, setInstructionsOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [membersDialogOpen, setMembersDialogOpen] = useState(false);

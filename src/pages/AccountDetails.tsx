@@ -32,7 +32,7 @@ export default function AccountDetails() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { accounts, isLoading } = useAccounts();
   const { accountGuideText } = useAppSettings();
-  const [instructionsOpen, setInstructionsOpen] = useState(true);
+  const [instructionsOpen, setInstructionsOpen] = useState(false);
 
   const account = accounts?.find((a) => a.id === accountId);
   const tabParam = searchParams.get('tab');
