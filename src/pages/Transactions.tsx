@@ -195,6 +195,23 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
           categories={categories || []}
           canEdit={canEdit}
           accountType={filters.accountId !== "all" ? accounts?.find(a => a.id === filters.accountId)?.type : undefined}
+          viewMode={filters.viewMode}
+          onViewModeChange={(mode) => {
+            const newFilters = { ...filters, viewMode: mode };
+            if (mode === "monthly") {
+              const currentMonth = format(new Date(), "yyyy-MM");
+              const [y, m] = currentMonth.split("-").map(Number);
+              const monthDate = new Date(y, (m || 1) - 1, 1);
+              newFilters.selectedMonth = currentMonth;
+              newFilters.startDate = format(startOfMonth(monthDate), "yyyy-MM-dd");
+              newFilters.endDate = format(endOfMonth(monthDate), "yyyy-MM-dd");
+            } else {
+              const today = new Date();
+              newFilters.startDate = format(new Date(today.getFullYear(), 0, 1), "yyyy-MM-dd");
+              newFilters.endDate = format(new Date(today.getFullYear(), 11, 31), "yyyy-MM-dd");
+            }
+            setFilters(newFilters);
+          }}
         />
       )}
 

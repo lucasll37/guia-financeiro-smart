@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search, Calendar, CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { format, startOfMonth, endOfMonth, parse, addMonths, subMonths, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMemo } from "react";
@@ -73,52 +73,8 @@ export function TransactionFilters({ accounts, categories, filters, onFilterChan
     handleMonthChange(format(nextMonth, "yyyy-MM"));
   };
 
-  const toggleViewMode = () => {
-    const newMode = filters.viewMode === "monthly" ? "custom" : "monthly";
-    
-    if (newMode === "monthly") {
-      // Reset to current month when switching back to monthly view
-      const currentMonth = format(new Date(), "yyyy-MM");
-      handleMonthChange(currentMonth);
-    } else {
-      // Set to first and last day of current year for custom period
-      const today = new Date();
-      const startDate = format(new Date(today.getFullYear(), 0, 1), "yyyy-MM-dd");
-      const endDate = format(new Date(today.getFullYear(), 11, 31), "yyyy-MM-dd");
-      
-      onFilterChange({
-        ...filters,
-        viewMode: newMode,
-        startDate,
-        endDate,
-      });
-      return;
-    }
-    
-    onFilterChange({
-      ...filters,
-      viewMode: newMode,
-    });
-  };
-
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">
-            {filters.viewMode === "monthly" ? "Visualização Mensal" : "Período Personalizado"}
-          </span>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={toggleViewMode}
-        >
-          {filters.viewMode === "monthly" ? "Personalizar Período" : "Voltar para Mensal"}
-        </Button>
-      </div>
-
       <div className={`grid gap-4 p-4 border rounded-lg bg-card ${accountId ? 'grid-cols-1 md:grid-cols-3 lg:grid-cols-5' : 'grid-cols-1 md:grid-cols-3 lg:grid-cols-6'}`}>
       {!accountId && (
         <div className="space-y-2">
