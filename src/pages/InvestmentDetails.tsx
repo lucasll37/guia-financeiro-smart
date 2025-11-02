@@ -108,8 +108,13 @@ export default function InvestmentDetails() {
 
   // Calculate next month for new returns
   const nextReturnMonth = useMemo(() => {
+    // Se não há retornos ainda, o próximo mês é o initial_month
+    if (!returns || returns.length === 0) {
+      return lastReturnMonth;
+    }
+    // Se já há retornos, adiciona 1 mês ao último
     return addMonths(lastReturnMonth, 1);
-  }, [lastReturnMonth]);
+  }, [lastReturnMonth, returns]);
 
   const getInvestmentTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
