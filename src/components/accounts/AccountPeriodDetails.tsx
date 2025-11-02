@@ -299,7 +299,7 @@ export function AccountPeriodDetails({ account }: AccountPeriodDetailsProps) {
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {format(periodStart, "dd/MM/yyyy")} - {format(periodEnd, "dd/MM/yyyy")}
+                {format(periodEnd, "MMMM ' - ' yyyy", { locale: ptBR })}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
