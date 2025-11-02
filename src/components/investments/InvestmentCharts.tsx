@@ -360,7 +360,7 @@ export function InvestmentCharts({
       {/* Main Chart */}
       <Card className="overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-primary/10 via-chart-2/10 to-chart-3/10 border-b">
-          <CardTitle className="text-2xl">Evolução do Investimento</CardTitle>
+          <CardTitle className="text-2xl">Evolução da Simulação</CardTitle>
           <CardDescription>
             {returns.length > 0 ? 'Histórico real e projeção futura' : 'Projeção futura do investimento'}
             {stats && ` • ${stats.months} meses`}
