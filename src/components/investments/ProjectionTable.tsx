@@ -69,6 +69,7 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
   const [isExplanationOpen, setIsExplanationOpen] = useState(false);
   const [sortField, setSortField] = useState<'month' | 'contribution' | 'returns' | 'balance' | 'presentValue' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [simulationTrigger, setSimulationTrigger] = useState(0);
 
   // Save to localStorage when values change
   useEffect(() => {
@@ -148,7 +149,11 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
       });
     }
 
-    // Notify parent of config changes
+    return data;
+  }, [currentBalance, initialMonth, months, monthlyRate, inflationRate, monthlyContribution, rateStdDev, inflationStdDev, simulationTrigger]);
+
+  // Notify parent components when config or data changes
+  useEffect(() => {
     if (onConfigChange) {
       onConfigChange({
         months,
@@ -157,14 +162,13 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
         monthlyContribution,
       });
     }
+  }, [months, monthlyRate, inflationRate, monthlyContribution, onConfigChange]);
 
-    // Notify parent of projection data changes
-    if (onProjectionDataChange) {
-      onProjectionDataChange(data);
+  useEffect(() => {
+    if (onProjectionDataChange && projectionData.length > 0) {
+      onProjectionDataChange(projectionData);
     }
-
-    return data;
-  }, [currentBalance, initialMonth, months, monthlyRate, inflationRate, monthlyContribution, rateStdDev, inflationStdDev, onConfigChange]);
+  }, [projectionData, onProjectionDataChange]);
 
   const handleSort = (field: 'month' | 'contribution' | 'returns' | 'balance' | 'presentValue') => {
     if (sortField === field) {
@@ -242,6 +246,9 @@ export function ProjectionTable({ currentBalance, initialMonth, onConfigChange, 
         <div className="flex items-center justify-between">
           <CardTitle>Projeção de Investimento</CardTitle>
           <div className="flex gap-2">
+            <Button onClick={() => setSimulationTrigger(prev => prev + 1)} variant="default" size="sm">
+              Gerar Simulação
+            </Button>
             <Button onClick={resetToDefaults} variant="outline" size="sm">
               Resetar taxas
             </Button>
