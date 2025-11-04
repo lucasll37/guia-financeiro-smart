@@ -144,7 +144,7 @@ export default function AccountDetails() {
           </TabsTrigger>
           <TabsTrigger 
             value="previsoes" 
-            className={`flex items-center gap-2 ${!hasForecastsForCurrentMonth ? 'animate-pulse' : ''}`}
+            className={`flex items-center gap-2 ${!hasForecastsForCurrentMonth ? 'pulse-primary' : ''}`}
           >
             <TrendingUp className="h-4 w-4" />
             <span className="hidden sm:inline">Previsões</span>
