@@ -5,11 +5,13 @@ import { ArrowLeft, LayoutDashboard, Receipt, FolderTree, CreditCard, TrendingUp
 import { AccountPeriodDetails } from "@/components/accounts/AccountPeriodDetails";
 import { useAccounts } from "@/hooks/useAccounts";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useAppSettings } from "@/hooks/useAppSettings";
 import ReactMarkdown from "react-markdown";
+import { useForecasts } from "@/hooks/useForecasts";
+import { startOfMonth, endOfMonth } from "date-fns";
 
 // Import existing page components (we'll refactor these into tab components)
 import Transactions from "./Transactions";
@@ -36,6 +38,21 @@ export default function AccountDetails() {
 
   const account = accounts?.find((a) => a.id === accountId);
   const tabParam = searchParams.get('tab');
+  
+  // Check if there are forecasts for the current month
+  const { forecasts } = useForecasts(accountId);
+  const hasForecastsForCurrentMonth = useMemo(() => {
+    if (!forecasts || forecasts.length === 0) return false;
+    
+    const now = new Date();
+    const currentMonthStart = startOfMonth(now);
+    const currentMonthEnd = endOfMonth(now);
+    
+    return forecasts.some(forecast => {
+      const forecastDate = new Date(forecast.period_start);
+      return forecastDate >= currentMonthStart && forecastDate <= currentMonthEnd;
+    });
+  }, [forecasts]);
 
   // Remove o parâmetro tab da URL ao carregar
   useEffect(() => {
@@ -125,7 +142,10 @@ export default function AccountDetails() {
             <LayoutDashboard className="h-4 w-4" />
             <span className="hidden sm:inline">Visão Geral</span>
           </TabsTrigger>
-          <TabsTrigger value="previsoes" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="previsoes" 
+            className={`flex items-center gap-2 ${!hasForecastsForCurrentMonth ? 'animate-pulse' : ''}`}
+          >
             <TrendingUp className="h-4 w-4" />
             <span className="hidden sm:inline">Previsões</span>
           </TabsTrigger>
