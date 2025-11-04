@@ -166,18 +166,20 @@ All colors MUST be HSL.
     @apply w-full h-[250px] sm:h-[300px] md:h-[350px];
   }
   
-  /* Subtle pulse animation with primary color */
+  /* Pulse animation with primary color glow */
   .pulse-primary {
-    animation: pulse-primary 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    animation: pulse-primary 1.5s ease-in-out infinite;
   }
   
   @keyframes pulse-primary {
     0%, 100% {
       opacity: 1;
+      text-shadow: none;
     }
     50% {
-      opacity: 0.7;
+      opacity: 0.85;
       color: hsl(var(--primary));
+      text-shadow: 0 0 8px hsl(var(--primary) / 0.6);
     }
   }
 }
