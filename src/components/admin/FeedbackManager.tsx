@@ -21,7 +21,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Bug, Lightbulb, CheckCircle2, Clock, PlayCircle, XCircle, ArrowUpDown, ArrowUp, ArrowDown, Trash2 } from "lucide-react";
+import { Bug, Lightbulb, CheckCircle2, Clock, PlayCircle, XCircle, ArrowUpDown, ArrowUp, ArrowDown, Trash2, ExternalLink } from "lucide-react";
 import { useState } from "react";
 
 interface Feedback {
@@ -31,6 +31,7 @@ interface Feedback {
   message: string;
   status: "pending" | "in_progress" | "resolved" | "closed";
   created_at: string;
+  image_url?: string | null;
   profiles?: {
     name: string;
     email: string;
@@ -297,6 +298,7 @@ export function FeedbackManager() {
                       </Button>
                     </TableHead>
                     <TableHead className="max-w-md">Mensagem</TableHead>
+                    <TableHead>Imagem</TableHead>
                     <TableHead>
                       <Button
                         variant="ghost"
@@ -338,6 +340,21 @@ export function FeedbackManager() {
                         <div className="whitespace-normal break-words max-w-md">
                           {feedback.message}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        {feedback.image_url ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(feedback.image_url!, '_blank')}
+                            className="gap-2"
+                          >
+                            Ver imagem
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">-</span>
+                        )}
                       </TableCell>
                       <TableCell>{getStatusBadge(feedback.status)}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">

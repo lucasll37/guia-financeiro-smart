@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { MessageSquare, Bug, Lightbulb, Send } from "lucide-react";
+import { useState, useRef } from "react";
+import { MessageSquare, Bug, Lightbulb, Send, Image, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -26,11 +26,52 @@ export function FeedbackButton() {
   const [feedbackType, setFeedbackType] = useState<FeedbackType>(null);
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const handleOpenDialog = (type: "bug" | "suggestion") => {
     setFeedbackType(type);
     setIsOpen(true);
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          title: "Arquivo muito grande",
+          description: "A imagem deve ter no máximo 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Tipo de arquivo inválido",
+          description: "Por favor, selecione apenas imagens",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleSubmit = async () => {
@@ -52,6 +93,30 @@ export function FeedbackButton() {
         throw new Error("Usuário não autenticado");
       }
 
+      let imageUrl = null;
+
+      // Upload da imagem se foi selecionada
+      if (selectedImage) {
+        const fileExt = selectedImage.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError, data: uploadData } = await supabase.storage
+          .from('feedback-images')
+          .upload(fileName, selectedImage);
+
+        if (uploadError) {
+          console.error("Erro ao fazer upload da imagem:", uploadError);
+          throw new Error("Erro ao fazer upload da imagem");
+        }
+
+        // Obter URL pública da imagem
+        const { data: { publicUrl } } = supabase.storage
+          .from('feedback-images')
+          .getPublicUrl(fileName);
+        
+        imageUrl = publicUrl;
+      }
+
       // Salvar feedback no banco de dados
       const { error } = await supabase
         .from("feedback")
@@ -59,6 +124,7 @@ export function FeedbackButton() {
           user_id: user.id,
           type: feedbackType,
           message: message.trim(),
+          image_url: imageUrl,
         });
 
       if (error) throw error;
@@ -71,8 +137,13 @@ export function FeedbackButton() {
       });
 
       setMessage("");
+      setSelectedImage(null);
+      setImagePreview(null);
       setIsOpen(false);
       setFeedbackType(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     } catch (error) {
       console.error("Erro ao enviar feedback:", error);
       toast({
@@ -183,6 +254,54 @@ export function FeedbackButton() {
                 className="resize-none"
               />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="image">
+                Imagem (opcional)
+              </Label>
+              <div className="flex flex-col gap-3">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  id="image"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={!!selectedImage}
+                  className="w-full justify-start gap-2"
+                >
+                  <Image className="h-4 w-4" />
+                  {selectedImage ? "Imagem selecionada" : "Adicionar captura de tela"}
+                </Button>
+                
+                {imagePreview && (
+                  <div className="relative rounded-lg border border-border overflow-hidden">
+                    <img 
+                      src={imagePreview} 
+                      alt="Preview" 
+                      className="w-full h-auto max-h-48 object-contain bg-muted"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-8 w-8"
+                      onClick={handleRemoveImage}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Máximo 5MB • PNG, JPG, JPEG, GIF
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="flex gap-3 justify-end">
@@ -192,6 +311,11 @@ export function FeedbackButton() {
                 setIsOpen(false);
                 setMessage("");
                 setFeedbackType(null);
+                setSelectedImage(null);
+                setImagePreview(null);
+                if (fileInputRef.current) {
+                  fileInputRef.current.value = '';
+                }
               }}
               disabled={isSubmitting}
             >
