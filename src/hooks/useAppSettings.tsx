@@ -64,5 +64,15 @@ export const useAppSettings = () => {
     accountGuideText: settings?.account_guide_text?.value || "",
     investmentGuideText: settings?.investment_guide_text?.value || "",
     goalGuideText: settings?.goal_guide_text?.value || "",
+    aiTutorTutorialText: settings?.ai_tutor_tutorial_text 
+      ? (typeof settings.ai_tutor_tutorial_text.value === 'string' 
+          ? JSON.parse(settings.ai_tutor_tutorial_text.value).text 
+          : settings.ai_tutor_tutorial_text.value.text)
+      : "",
+    aiTutorEnabled: settings?.ai_tutor_enabled
+      ? (typeof settings.ai_tutor_enabled.value === 'string'
+          ? JSON.parse(settings.ai_tutor_enabled.value).enabled
+          : settings.ai_tutor_enabled.value.enabled)
+      : false,
   };
 };

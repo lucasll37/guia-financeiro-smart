@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown, Bell, Send, CreditCard, Settings, FileText, AlertTriangle, Loader2, Copy, MessageSquare, FolderTree, Mail } from "lucide-react";
+import { Trash2, Gift, Users, ChevronLeft, ChevronRight, BarChart, ArrowUpDown, ArrowUp, ArrowDown, Bell, Send, CreditCard, Settings, FileText, AlertTriangle, Loader2, Copy, MessageSquare, FolderTree, Mail, Bot } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { z } from "zod";
 import { UserGrowthChart } from "@/components/admin/UserGrowthChart";
@@ -31,6 +31,7 @@ import { CookieMessageManager } from "@/components/admin/CookieMessageManager";
 import { GeneralMessageManager } from "@/components/admin/GeneralMessageManager";
 import { InvestmentSimulationSettings } from "@/components/admin/InvestmentSimulationSettings";
 import { GuideTextManager } from "@/components/admin/GuideTextManager";
+import { AiTutorManager } from "@/components/admin/AiTutorManager";
 const couponSchema = z.object({
   code: z.string().trim().min(3, "Código deve ter no mínimo 3 caracteres").max(50, "Código muito longo"),
   discount_percent: z.number().min(1, "Desconto deve ser entre 1 e 100").max(100, "Desconto deve ser entre 1 e 100"),
@@ -446,6 +447,10 @@ export default function Admin() {
             <TabsTrigger value="emails" className="flex items-center gap-2 data-[state=active]:bg-muted">
               <Mail className="h-4 w-4" />
               <span>Emails</span>
+            </TabsTrigger>
+            <TabsTrigger value="ai-tutor" className="flex items-center gap-2 data-[state=active]:bg-muted">
+              <Bot className="h-4 w-4" />
+              <span>Tutor IA</span>
             </TabsTrigger>
           </TabsList>
         </div>
@@ -868,6 +873,11 @@ export default function Admin() {
         {/* Email Templates Tab */}
         <TabsContent value="emails" className="space-y-4">
           <EmailTemplatesManager />
+        </TabsContent>
+
+        {/* AI Tutor Tab */}
+        <TabsContent value="ai-tutor" className="space-y-4">
+          <AiTutorManager />
         </TabsContent>
       </Tabs>
 
