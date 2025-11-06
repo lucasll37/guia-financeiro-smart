@@ -5,6 +5,7 @@ import { Header } from "./Header";
 import { FeedbackButton } from "./FeedbackButton";
 import { CookieConsent } from "@/components/CookieConsent";
 import { GeneralMessageModal } from "@/components/GeneralMessageModal";
+import { AiTutorButton } from "@/components/assistant/AiTutorButton";
 import { Outlet } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -165,6 +166,7 @@ export const DashboardLayout = () => {
           </footer>
         </div>
         <FeedbackButton />
+        <AiTutorButton />
         
         <CookieConsent 
           onVisibleChange={setShowCookieModal}

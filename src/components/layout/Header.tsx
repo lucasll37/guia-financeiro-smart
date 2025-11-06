@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { AssistantHeaderButton } from "@/components/assistant/AssistantHeaderButton";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   Breadcrumb,
@@ -142,10 +141,6 @@ export const Header = () => {
           )}
 
           <ThemeToggle />
-          
-          <div className="hidden sm:block">
-            <AssistantHeaderButton />
-          </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
