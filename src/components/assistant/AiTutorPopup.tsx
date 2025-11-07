@@ -19,15 +19,58 @@ interface Message {
 interface AiTutorPopupProps {
   isOpen: boolean;
   onClose: () => void;
+  buttonPosition: { x: number; y: number };
 }
 
-export function AiTutorPopup({ isOpen, onClose }: AiTutorPopupProps) {
+export function AiTutorPopup({ isOpen, onClose, buttonPosition }: AiTutorPopupProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { aiTutorTutorialText } = useAppSettings();
   const { toast } = useToast();
+
+  // Calculate popup position based on button position
+  const getPopupPosition = () => {
+    const popupWidth = 384; // w-96 = 384px
+    const popupHeight = 500;
+    const buttonSize = 56;
+    const gap = 12; // Gap between button and popup
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    let left = 0;
+    let top = 0;
+
+    // Determine horizontal position
+    const buttonCenterX = buttonPosition.x + buttonSize / 2;
+    if (buttonCenterX < viewportWidth / 2) {
+      // Button is on left half - show popup to the right
+      left = buttonPosition.x + buttonSize + gap;
+    } else {
+      // Button is on right half - show popup to the left
+      left = buttonPosition.x - popupWidth - gap;
+    }
+
+    // Determine vertical position
+    const buttonCenterY = buttonPosition.y + buttonSize / 2;
+    if (buttonCenterY < viewportHeight / 2) {
+      // Button is on top half - align top with button
+      top = buttonPosition.y;
+    } else {
+      // Button is on bottom half - align bottom with button
+      top = buttonPosition.y + buttonSize - popupHeight;
+    }
+
+    // Keep popup within viewport bounds
+    left = Math.max(gap, Math.min(left, viewportWidth - popupWidth - gap));
+    top = Math.max(gap, Math.min(top, viewportHeight - popupHeight - gap));
+
+    return { left, top };
+  };
+
+  const popupPosition = getPopupPosition();
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -118,7 +161,13 @@ export function AiTutorPopup({ isOpen, onClose }: AiTutorPopupProps) {
   if (!isOpen) return null;
 
   return (
-    <Card className="fixed bottom-24 right-6 w-96 h-[500px] shadow-2xl z-40 flex flex-col animate-scale-in">
+    <Card 
+      className="fixed w-96 h-[500px] shadow-2xl z-40 flex flex-col animate-scale-in"
+      style={{
+        left: `${popupPosition.left}px`,
+        top: `${popupPosition.top}px`,
+      }}
+    >
       <CardHeader className="pb-3 border-b flex-shrink-0">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">

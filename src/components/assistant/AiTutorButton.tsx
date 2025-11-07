@@ -164,7 +164,8 @@ export function AiTutorButton() {
 
       <AiTutorPopup 
         isOpen={isOpen} 
-        onClose={() => setIsOpen(false)} 
+        onClose={() => setIsOpen(false)}
+        buttonPosition={position}
       />
     </>
   );
