@@ -1,7 +1,7 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, LayoutDashboard, Receipt, FolderTree, CreditCard, TrendingUp, PieChart, FileText, Lightbulb, ChevronDown, BarChart3 } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, Receipt, FolderTree, CreditCard, TrendingUp, PieChart, FileText, Lightbulb, ChevronDown, Table2 } from "lucide-react";
 import { AccountPeriodDetails } from "@/components/accounts/AccountPeriodDetails";
 import { useAccounts } from "@/hooks/useAccounts";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,6 +20,7 @@ import CreditCards from "./CreditCards";
 import Forecasts from "./Forecasts";
 import Analysis from "./Analysis";
 import Reports from "./Reports";
+import { TabularYearView } from "@/components/forecasts/TabularYearView";
 
 const accountTypeLabels: Record<string, string> = {
   pessoal: "Conta Pessoal",
@@ -137,7 +138,7 @@ export default function AccountDetails() {
       </Collapsible>
 
       <Tabs defaultValue={tabParam || "visao-geral"} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7 h-auto">
+        <TabsList className="grid w-full grid-cols-8 h-auto">
           <TabsTrigger value="visao-geral" className="flex items-center gap-2">
             <LayoutDashboard className="h-4 w-4" />
             <span className="hidden sm:inline">Visão Geral</span>
@@ -148,6 +149,10 @@ export default function AccountDetails() {
           >
             <TrendingUp className="h-4 w-4" />
             <span className="hidden sm:inline">Previsões</span>
+          </TabsTrigger>
+          <TabsTrigger value="visao-tabular" className="flex items-center gap-2">
+            <Table2 className="h-4 w-4" />
+            <span className="hidden sm:inline">Visão Tabular</span>
           </TabsTrigger>
           <TabsTrigger value="lancamentos" className="flex items-center gap-2">
             <Receipt className="h-4 w-4" />
@@ -177,6 +182,10 @@ export default function AccountDetails() {
 
         <TabsContent value="previsoes">
           <Forecasts accountId={accountId} />
+        </TabsContent>
+
+        <TabsContent value="visao-tabular">
+          <TabularYearView accountId={accountId || ""} accountType={account.type} />
         </TabsContent>
 
         <TabsContent value="lancamentos">
