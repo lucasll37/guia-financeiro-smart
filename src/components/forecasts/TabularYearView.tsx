@@ -31,6 +31,7 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
   const { toast } = useToast();
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedType, setSelectedType] = useState<"receita" | "despesa">("despesa");
   const [editingCell, setEditingCell] = useState<string | null>(null);
   const [cellValues, setCellValues] = useState<Record<string, number>>({});
   const [pendingChanges, setPendingChanges] = useState<Record<string, CellData>>({});
@@ -39,19 +40,34 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
   const { forecasts, isLoading: forecastsLoading, createForecast, updateForecast } = useForecasts(accountId);
   const { data: canEdit = false } = useAccountEditPermissions(accountId);
 
-  // Filter only expense categories for casa type, all for others
+  // Filter categories by selected type
   const subcategories = useMemo(() => {
     if (!categories) return [];
-    const filtered = accountType === "casa" 
-      ? categories.filter(c => c.parent_id && c.type === "despesa")
-      : categories.filter(c => c.parent_id);
+    const filtered = accountType === "casa" && selectedType === "receita"
+      ? [] // Casa accounts don't manage revenue
+      : categories.filter(c => c.parent_id && c.type === selectedType);
     return filtered.sort((a, b) => {
       const parentA = categories.find(p => p.id === a.parent_id)?.name || "";
       const parentB = categories.find(p => p.id === b.parent_id)?.name || "";
       if (parentA !== parentB) return parentA.localeCompare(parentB);
       return a.name.localeCompare(b.name);
     });
-  }, [categories, accountType]);
+  }, [categories, accountType, selectedType]);
+
+  // Group subcategories by parent
+  const groupedCategories = useMemo(() => {
+    const groups: Record<string, { parent: any; children: any[] }> = {};
+    subcategories.forEach(cat => {
+      const parent = categories?.find(p => p.id === cat.parent_id);
+      if (parent) {
+        if (!groups[parent.id]) {
+          groups[parent.id] = { parent, children: [] };
+        }
+        groups[parent.id].children.push(cat);
+      }
+    });
+    return Object.values(groups);
+  }, [subcategories, categories]);
 
   // Create a map of forecasts by category and month
   const forecastMap = useMemo(() => {
@@ -164,6 +180,15 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
     }, 0);
   };
 
+  const getParentTotal = (parentId: string, monthIndex: number) => {
+    const children = groupedCategories.find(g => g.parent.id === parentId)?.children || [];
+    return children.reduce((sum, cat) => sum + getCellValue(cat.id, monthIndex), 0);
+  };
+
+  const getParentYearTotal = (parentId: string) => {
+    return MONTHS.reduce((sum, monthIndex) => sum + getParentTotal(parentId, monthIndex), 0);
+  };
+
   const yearTotal = MONTHS.reduce((sum, monthIndex) => sum + getMonthTotal(monthIndex), 0);
 
   if (categoriesLoading || forecastsLoading) {
@@ -206,6 +231,21 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
+
+          {accountType !== "casa" && (
+            <Select
+              value={selectedType}
+              onValueChange={(value: "receita" | "despesa") => setSelectedType(value)}
+            >
+              <SelectTrigger className="w-36">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="receita">Receitas</SelectItem>
+                <SelectItem value="despesa">Despesas</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
         
         <Button 
@@ -236,36 +276,59 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
             </tr>
           </thead>
           <tbody>
-            {subcategories.map((category, rowIndex) => (
-              <tr key={category.id} className={rowIndex % 2 === 0 ? "bg-background" : "bg-muted/30"}>
-                <td className="border border-border p-2 sticky left-0 z-10 font-medium bg-inherit">
-                  {category.name}
-                </td>
-                {MONTHS.map((monthIndex) => {
-                  const cellKey = `${category.id}-${monthIndex}`;
-                  return (
-                    <td key={cellKey} className="border border-border p-0">
-                      {canEdit ? (
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={getCellValue(category.id, monthIndex) || ""}
-                          onChange={(e) => handleCellChange(category.id, monthIndex, e.target.value)}
-                          className="w-full h-full text-right border-0 rounded-none focus-visible:ring-1 focus-visible:ring-primary bg-transparent px-2 py-2"
-                          placeholder="0.00"
-                        />
-                      ) : (
-                        <div className="text-right px-3 py-2">
-                          {parseFloat(getCellValue(category.id, monthIndex).toString() || "0").toFixed(2)}
-                        </div>
-                      )}
+            {groupedCategories.map((group, groupIndex) => (
+              <>
+                {group.children.map((category, childIndex) => (
+                  <tr key={category.id} className={childIndex % 2 === 0 ? "bg-background" : "bg-muted/30"}>
+                    <td className="border border-border p-2 sticky left-0 z-10 font-medium bg-inherit">
+                      <div className="pl-4">{category.name}</div>
                     </td>
-                  );
-                })}
-                <td className="border border-border p-2 bg-muted text-right font-semibold">
-                  {getCategoryTotal(category.id).toFixed(2)}
-                </td>
-              </tr>
+                    {MONTHS.map((monthIndex) => {
+                      const cellKey = `${category.id}-${monthIndex}`;
+                      return (
+                        <td key={cellKey} className="border border-border p-0">
+                          {canEdit ? (
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={getCellValue(category.id, monthIndex) || ""}
+                              onChange={(e) => handleCellChange(category.id, monthIndex, e.target.value)}
+                              className="w-full h-full text-right border-0 rounded-none focus-visible:ring-1 focus-visible:ring-primary bg-transparent px-2 py-2"
+                              placeholder="0.00"
+                            />
+                          ) : (
+                            <div className="text-right px-3 py-2">
+                              {parseFloat(getCellValue(category.id, monthIndex).toString() || "0").toFixed(2)}
+                            </div>
+                          )}
+                        </td>
+                      );
+                    })}
+                    <td className="border border-border p-2 bg-muted text-right font-semibold">
+                      {getCategoryTotal(category.id).toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+                <tr key={`subtotal-${group.parent.id}`} className="bg-amber-50 dark:bg-amber-950 font-bold">
+                  <td className="border border-border p-3 sticky left-0 z-10 bg-amber-100 dark:bg-amber-900">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full shrink-0"
+                        style={{ backgroundColor: group.parent.color }}
+                      />
+                      <span className="text-amber-900 dark:text-amber-100">Subtotal {group.parent.name}</span>
+                    </div>
+                  </td>
+                  {MONTHS.map((monthIndex) => (
+                    <td key={monthIndex} className="border border-border p-3 text-right text-amber-900 dark:text-amber-100">
+                      {getParentTotal(group.parent.id, monthIndex).toFixed(2)}
+                    </td>
+                  ))}
+                  <td className="border border-border p-3 bg-amber-100 dark:bg-amber-900 text-right text-amber-900 dark:text-amber-100">
+                    {getParentYearTotal(group.parent.id).toFixed(2)}
+                  </td>
+                </tr>
+              </>
             ))}
             <tr className="font-bold bg-teal-50 dark:bg-teal-950">
               <td className="border border-border p-3 sticky left-0 z-10 bg-teal-100 dark:bg-teal-900 text-teal-900 dark:text-teal-100">
