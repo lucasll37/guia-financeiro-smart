@@ -171,151 +171,118 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
   }
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Visão Tabular - Previsões Anuais</CardTitle>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setSelectedYear(y => y - 1)}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Select
-                value={selectedYear.toString()}
-                onValueChange={(v) => setSelectedYear(parseInt(v))}
-              >
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 10 }, (_, i) => currentYear - 5 + i).map(year => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setSelectedYear(y => y + 1)}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-              <Button
-                onClick={handleSaveAll}
-                disabled={!hasChanges || !canEdit}
-                className="gap-2"
-              >
-                <Save className="h-4 w-4" />
-                Salvar {hasChanges && `(${Object.keys(pendingChanges).length})`}
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="sticky left-0 bg-background p-3 text-left font-medium min-w-[200px] border-r border-border">
-                    Categoria
-                  </th>
-                  {MONTHS.map(monthIndex => (
-                    <th key={monthIndex} className="p-3 text-center font-medium min-w-[100px] border-r border-border">
-                      {format(new Date(selectedYear, monthIndex, 1), "MMM", { locale: ptBR })}
-                    </th>
-                  ))}
-                  <th className="p-3 text-center font-medium min-w-[120px] bg-muted">
-                    Total
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {subcategories.map(category => {
-                  const parent = categories?.find(c => c.id === category.parent_id);
-                  const categoryTotal = getCategoryTotal(category.id);
-                  
-                  return (
-                    <tr key={category.id} className="border-b border-border hover:bg-muted/50">
-                      <td className="sticky left-0 bg-background p-3 border-r border-border">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-3 h-3 rounded-full shrink-0"
-                            style={{ backgroundColor: category.color }}
-                          />
-                          <div className="min-w-0">
-                            <div className="text-xs text-muted-foreground truncate">
-                              {parent?.name}
-                            </div>
-                            <div className="font-medium truncate">{category.name}</div>
-                          </div>
-                        </div>
-                      </td>
-                      {MONTHS.map(monthIndex => {
-                        const key = `${category.id}-${monthIndex}`;
-                        const value = getCellValue(category.id, monthIndex);
-                        const isEditing = editingCell === key;
-                        const isPending = key in pendingChanges;
+    <Card className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setSelectedYear(prev => prev - 1)}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Select
+            value={selectedYear.toString()}
+            onValueChange={(value) => setSelectedYear(parseInt(value))}
+          >
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[...Array(10)].map((_, i) => {
+                const year = new Date().getFullYear() - 5 + i;
+                return (
+                  <SelectItem key={year} value={year.toString()}>
+                    {year}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setSelectedYear(prev => prev + 1)}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <Button 
+          onClick={handleSaveAll} 
+          disabled={!hasChanges || !canEdit}
+          className="gap-2"
+        >
+          <Save className="h-4 w-4" />
+          Salvar Tudo
+        </Button>
+      </div>
 
-                        return (
-                          <td
-                            key={monthIndex}
-                            className={cn(
-                              "p-1 text-center border-r border-border",
-                              isPending && "bg-primary/10"
-                            )}
-                          >
-                            {canEdit ? (
-                              <Input
-                                type="number"
-                                step="0.01"
-                                value={isEditing ? undefined : value || ""}
-                                onChange={(e) => handleCellChange(category.id, monthIndex, e.target.value)}
-                                onFocus={() => setEditingCell(key)}
-                                onBlur={() => setEditingCell(null)}
-                                className="h-8 text-center border-0 bg-transparent"
-                                disabled={!canEdit}
-                              />
-                            ) : (
-                              <div className="h-8 flex items-center justify-center">
-                                {value > 0 ? value.toFixed(2) : "-"}
-                              </div>
-                            )}
-                          </td>
-                        );
-                      })}
-                      <td className="p-3 text-center font-semibold bg-muted">
-                        {categoryTotal > 0 ? categoryTotal.toFixed(2) : "-"}
-                      </td>
-                    </tr>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              <th className="border border-border p-3 bg-teal-600 text-white text-left font-semibold sticky left-0 z-20 min-w-[200px]">
+                Categoria
+              </th>
+              {MONTHS.map((monthIndex) => (
+                <th key={monthIndex} className="border border-border p-3 bg-teal-600 text-white text-center font-semibold min-w-[100px]">
+                  {format(new Date(selectedYear, monthIndex, 1), "MMMM", { locale: ptBR })}
+                </th>
+              ))}
+              <th className="border border-border p-3 bg-teal-700 text-white text-center font-semibold min-w-[120px]">
+                Total
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {subcategories.map((category, rowIndex) => (
+              <tr key={category.id} className={rowIndex % 2 === 0 ? "bg-background" : "bg-muted/30"}>
+                <td className="border border-border p-2 sticky left-0 z-10 font-medium bg-inherit">
+                  {category.name}
+                </td>
+                {MONTHS.map((monthIndex) => {
+                  const cellKey = `${category.id}-${monthIndex}`;
+                  return (
+                    <td key={cellKey} className="border border-border p-0">
+                      {canEdit ? (
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={getCellValue(category.id, monthIndex) || ""}
+                          onChange={(e) => handleCellChange(category.id, monthIndex, e.target.value)}
+                          className="w-full h-full text-right border-0 rounded-none focus-visible:ring-1 focus-visible:ring-primary bg-transparent px-2 py-2"
+                          placeholder="0.00"
+                        />
+                      ) : (
+                        <div className="text-right px-3 py-2">
+                          {parseFloat(getCellValue(category.id, monthIndex).toString() || "0").toFixed(2)}
+                        </div>
+                      )}
+                    </td>
                   );
                 })}
-                <tr className="border-t-2 border-border bg-muted font-semibold">
-                  <td className="sticky left-0 bg-muted p-3 border-r border-border">
-                    Total do Mês
-                  </td>
-                  {MONTHS.map(monthIndex => {
-                    const total = getMonthTotal(monthIndex);
-                    return (
-                      <td key={monthIndex} className="p-3 text-center border-r border-border">
-                        {total > 0 ? total.toFixed(2) : "-"}
-                      </td>
-                    );
-                  })}
-                  <td className="p-3 text-center bg-primary text-primary-foreground">
-                    {yearTotal > 0 ? yearTotal.toFixed(2) : "-"}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+                <td className="border border-border p-2 bg-muted text-right font-semibold">
+                  {getCategoryTotal(category.id).toFixed(2)}
+                </td>
+              </tr>
+            ))}
+            <tr className="font-bold bg-teal-50 dark:bg-teal-950">
+              <td className="border border-border p-3 sticky left-0 z-10 bg-teal-100 dark:bg-teal-900 text-teal-900 dark:text-teal-100">
+                Total
+              </td>
+              {MONTHS.map((monthIndex) => (
+                <td key={monthIndex} className="border border-border p-3 text-right text-teal-900 dark:text-teal-100">
+                  {getMonthTotal(monthIndex).toFixed(2)}
+                </td>
+              ))}
+              <td className="border border-border p-3 bg-teal-100 dark:bg-teal-900 text-right text-teal-900 dark:text-teal-100">
+                {yearTotal.toFixed(2)}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </Card>
   );
 }

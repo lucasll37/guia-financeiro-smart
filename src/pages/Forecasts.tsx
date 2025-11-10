@@ -10,6 +10,7 @@ import { ForecastsTable } from "@/components/forecasts/ForecastsTable";
 import { ForecastDialog } from "@/components/forecasts/ForecastDialog";
 import { ForecastFilters } from "@/components/forecasts/ForecastFilters";
 import { BudgetWizard } from "@/components/forecasts/BudgetWizard";
+import { TabularYearView } from "@/components/forecasts/TabularYearView";
 import { useAccountEditPermissions } from "@/hooks/useAccountEditPermissions";
 import { CasaRevenueSplitManager } from "@/components/accounts/CasaRevenueSplitManager";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, parseISO, addMonths, subMonths } from "date-fns";
@@ -21,6 +22,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -291,23 +293,41 @@ export default function Forecasts({ accountId: propAccountId }: ForecastsProps) 
         </div>
       </div>
 
-      <div className="space-y-4">
-        {isLoading ? (
-          <p className="text-muted-foreground">Carregando previsões...</p>
-        ) : (
-          <ForecastsTable
-            forecasts={filteredForecasts}
-            onEdit={handleEditForecast}
-            onDelete={handleDeleteForecast}
-            showAccountName={filters.accountId === "all"}
-            viewMode={filters.viewMode}
-            onViewModeChange={(mode) => setFilters(prev => ({ ...prev, viewMode: mode }))}
-            categories={categories || []}
-            canEdit={canEdit}
-            accountType={selectedAccount?.type}
-          />
-        )}
-      </div>
+      <Tabs defaultValue="list" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="list">Lista</TabsTrigger>
+          <TabsTrigger value="tabular" disabled={filters.accountId === "all"}>
+            Visão Tabular
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="list" className="space-y-4">
+          {isLoading ? (
+            <p className="text-muted-foreground">Carregando previsões...</p>
+          ) : (
+            <ForecastsTable
+              forecasts={filteredForecasts}
+              onEdit={handleEditForecast}
+              onDelete={handleDeleteForecast}
+              showAccountName={filters.accountId === "all"}
+              viewMode={filters.viewMode}
+              onViewModeChange={(mode) => setFilters(prev => ({ ...prev, viewMode: mode }))}
+              categories={categories || []}
+              canEdit={canEdit}
+              accountType={selectedAccount?.type}
+            />
+          )}
+        </TabsContent>
+
+        <TabsContent value="tabular">
+          {filters.accountId !== "all" && (
+            <TabularYearView
+              accountId={filters.accountId}
+              accountType={selectedAccount?.type}
+            />
+          )}
+        </TabsContent>
+      </Tabs>
 
       <ForecastDialog
         open={dialogOpen}
