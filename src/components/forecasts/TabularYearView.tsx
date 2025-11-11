@@ -228,22 +228,22 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
         </Button>
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-6">
         {/* REVENUE SECTION */}
         {accountType !== "casa" && revenueCategories.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-border">
+          <div className="overflow-x-auto xl:overflow-visible">
+            <table className="w-full border-collapse border border-border text-sm">
               <thead>
                 <tr>
-                  <th className="border border-border p-3 bg-teal-500 text-white text-left font-semibold min-w-[200px]">
+                  <th className="border border-border px-2 py-1.5 bg-teal-500 text-white text-left font-semibold min-w-[160px]">
                     Receita
                   </th>
                   {MONTHS.map((monthIndex) => (
-                    <th key={monthIndex} className="border border-border p-3 bg-teal-500 text-white text-center font-semibold min-w-[110px]">
-                      {format(new Date(selectedYear, monthIndex, 1), "MMMM", { locale: ptBR })}
+                    <th key={monthIndex} className="border border-border px-2 py-1.5 bg-teal-500 text-white text-center font-semibold min-w-[85px]">
+                      {format(new Date(selectedYear, monthIndex, 1), "MMM", { locale: ptBR })}
                     </th>
                   ))}
-                  <th className="border border-border p-3 bg-teal-500 text-white text-center font-semibold min-w-[120px]">
+                  <th className="border border-border px-2 py-1.5 bg-teal-500 text-white text-center font-semibold min-w-[90px]">
                     Total
                   </th>
                 </tr>
@@ -251,7 +251,7 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
               <tbody>
                 {revenueCategories.map((category, idx) => (
                   <tr key={category.id} className={idx % 2 === 0 ? "bg-white dark:bg-background" : "bg-gray-50 dark:bg-muted/20"}>
-                    <td className="border border-border p-2 font-medium">
+                    <td className="border border-border px-2 py-1 font-medium">
                       {category.name}
                     </td>
                     {MONTHS.map((monthIndex) => {
@@ -265,32 +265,32 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
                               step="0.01"
                               value={value || ""}
                               onChange={(e) => handleCellChange(category.id, monthIndex, e.target.value)}
-                              className="w-full h-full text-right border-0 rounded-none focus-visible:ring-1 focus-visible:ring-primary bg-transparent px-2 py-2"
+                              className="w-full h-full text-right border-0 rounded-none focus-visible:ring-1 focus-visible:ring-primary bg-transparent px-1.5 py-1 text-sm"
                               placeholder="-"
                             />
                           ) : (
-                            <div className="text-right px-3 py-2">
+                            <div className="text-right px-2 py-1">
                               {formatCurrency(value)}
                             </div>
                           )}
                         </td>
                       );
                     })}
-                    <td className="border border-border p-2 bg-gray-100 dark:bg-muted/40 text-right font-semibold">
+                    <td className="border border-border px-2 py-1 bg-gray-100 dark:bg-muted/40 text-right font-semibold">
                       {formatCurrency(getCategoryTotal(category.id))}
                     </td>
                   </tr>
                 ))}
                 <tr className="font-bold bg-teal-600 text-white">
-                  <td className="border border-border p-3">
+                  <td className="border border-border px-2 py-1.5">
                     Total Receita
                   </td>
                   {MONTHS.map((monthIndex) => (
-                    <td key={monthIndex} className="border border-border p-3 text-right">
+                    <td key={monthIndex} className="border border-border px-2 py-1.5 text-right">
                       {formatCurrency(getRevenueMonthTotal(monthIndex))}
                     </td>
                   ))}
-                  <td className="border border-border p-3 text-right">
+                  <td className="border border-border px-2 py-1.5 text-right">
                     {formatCurrency(revenueYearTotal)}
                   </td>
                 </tr>
@@ -300,19 +300,19 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
         )}
 
         {/* EXPENSE SECTION */}
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-border">
+        <div className="overflow-x-auto xl:overflow-visible">
+          <table className="w-full border-collapse border border-border text-sm">
             <thead>
               <tr>
-                <th className="border border-border p-3 bg-teal-500 text-white text-left font-semibold min-w-[200px]">
+                <th className="border border-border px-2 py-1.5 bg-teal-500 text-white text-left font-semibold min-w-[160px]">
                   Despesa
                 </th>
                 {MONTHS.map((monthIndex) => (
-                  <th key={monthIndex} className="border border-border p-3 bg-teal-500 text-white text-center font-semibold min-w-[110px]">
-                    {format(new Date(selectedYear, monthIndex, 1), "MMMM", { locale: ptBR })}
+                  <th key={monthIndex} className="border border-border px-2 py-1.5 bg-teal-500 text-white text-center font-semibold min-w-[85px]">
+                    {format(new Date(selectedYear, monthIndex, 1), "MMM", { locale: ptBR })}
                   </th>
                 ))}
-                <th className="border border-border p-3 bg-teal-500 text-white text-center font-semibold min-w-[120px]">
+                <th className="border border-border px-2 py-1.5 bg-teal-500 text-white text-center font-semibold min-w-[90px]">
                   Total
                 </th>
               </tr>
@@ -322,7 +322,7 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
                 <>
                   {group.children.map((category, idx) => (
                     <tr key={category.id} className={idx % 2 === 0 ? "bg-white dark:bg-background" : "bg-gray-50 dark:bg-muted/20"}>
-                      <td className="border border-border p-2 font-medium pl-6">
+                      <td className="border border-border px-2 py-1 font-medium pl-4">
                         {category.name}
                       </td>
                       {MONTHS.map((monthIndex) => {
@@ -336,50 +336,50 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
                                 step="0.01"
                                 value={value || ""}
                                 onChange={(e) => handleCellChange(category.id, monthIndex, e.target.value)}
-                                className="w-full h-full text-right border-0 rounded-none focus-visible:ring-1 focus-visible:ring-primary bg-transparent px-2 py-2"
+                                className="w-full h-full text-right border-0 rounded-none focus-visible:ring-1 focus-visible:ring-primary bg-transparent px-1.5 py-1 text-sm"
                                 placeholder="-"
                               />
                             ) : (
-                              <div className="text-right px-3 py-2">
+                              <div className="text-right px-2 py-1">
                                 {formatCurrency(value)}
                               </div>
                             )}
                           </td>
                         );
                       })}
-                      <td className="border border-border p-2 bg-gray-100 dark:bg-muted/40 text-right font-semibold">
+                      <td className="border border-border px-2 py-1 bg-gray-100 dark:bg-muted/40 text-right font-semibold">
                         {formatCurrency(getCategoryTotal(category.id))}
                       </td>
                     </tr>
                   ))}
-                  <tr className="bg-gray-200 dark:bg-muted/50 font-bold">
-                    <td className="border border-border p-3">
+                  <tr className="bg-gradient-to-r from-amber-200 to-amber-100 dark:from-amber-900 dark:to-amber-800 font-bold">
+                    <td className="border border-border px-2 py-1.5">
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: group.parent.color }} />
-                        <span>Subtotal {group.parent.name}</span>
+                        <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: group.parent.color }} />
+                        <span className="text-amber-900 dark:text-amber-50">Subtotal {group.parent.name}</span>
                       </div>
                     </td>
                     {MONTHS.map((monthIndex) => (
-                      <td key={monthIndex} className="border border-border p-3 text-right">
+                      <td key={monthIndex} className="border border-border px-2 py-1.5 text-right text-amber-900 dark:text-amber-50">
                         {formatCurrency(getParentTotal(group.parent.id, monthIndex))}
                       </td>
                     ))}
-                    <td className="border border-border p-3 text-right">
+                    <td className="border border-border px-2 py-1.5 text-right text-amber-900 dark:text-amber-50">
                       {formatCurrency(getParentYearTotal(group.parent.id))}
                     </td>
                   </tr>
                 </>
               ))}
               <tr className="font-bold bg-teal-600 text-white">
-                <td className="border border-border p-3">
+                <td className="border border-border px-2 py-1.5">
                   Total Despesa
                 </td>
                 {MONTHS.map((monthIndex) => (
-                  <td key={monthIndex} className="border border-border p-3 text-right">
+                  <td key={monthIndex} className="border border-border px-2 py-1.5 text-right">
                     {formatCurrency(getExpenseMonthTotal(monthIndex))}
                   </td>
                 ))}
-                <td className="border border-border p-3 text-right">
+                <td className="border border-border px-2 py-1.5 text-right">
                   {formatCurrency(expenseYearTotal)}
                 </td>
               </tr>
