@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,9 +7,8 @@ import { ChevronLeft, ChevronRight, Save } from "lucide-react";
 import { useForecasts } from "@/hooks/useForecasts";
 import { useCategories } from "@/hooks/useCategories";
 import { useAccountEditPermissions } from "@/hooks/useAccountEditPermissions";
-import { format, startOfMonth, endOfMonth, addMonths } from "date-fns";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 interface TabularYearViewProps {
@@ -31,8 +30,6 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
   const { toast } = useToast();
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
-  const [selectedType, setSelectedType] = useState<"receita" | "despesa">("despesa");
-  const [editingCell, setEditingCell] = useState<string | null>(null);
   const [cellValues, setCellValues] = useState<Record<string, number>>({});
   const [pendingChanges, setPendingChanges] = useState<Record<string, CellData>>({});
 
@@ -40,24 +37,21 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
   const { forecasts, isLoading: forecastsLoading, createForecast, updateForecast } = useForecasts(accountId);
   const { data: canEdit = false } = useAccountEditPermissions(accountId);
 
-  // Filter categories by selected type
-  const subcategories = useMemo(() => {
-    if (!categories) return [];
-    const filtered = accountType === "casa" && selectedType === "receita"
-      ? [] // Casa accounts don't manage revenue
-      : categories.filter(c => c.parent_id && c.type === selectedType);
-    return filtered.sort((a, b) => {
-      const parentA = categories.find(p => p.id === a.parent_id)?.name || "";
-      const parentB = categories.find(p => p.id === b.parent_id)?.name || "";
-      if (parentA !== parentB) return parentA.localeCompare(parentB);
-      return a.name.localeCompare(b.name);
-    });
-  }, [categories, accountType, selectedType]);
+  // Separate revenue and expense categories
+  const revenueCategories = useMemo(() => {
+    if (!categories || accountType === "casa") return [];
+    return categories.filter(c => c.parent_id && c.type === "receita");
+  }, [categories, accountType]);
 
-  // Group subcategories by parent
-  const groupedCategories = useMemo(() => {
+  const expenseSubcategories = useMemo(() => {
+    if (!categories) return [];
+    return categories.filter(c => c.parent_id && c.type === "despesa");
+  }, [categories]);
+
+  // Group expense subcategories by parent
+  const groupedExpenses = useMemo(() => {
     const groups: Record<string, { parent: any; children: any[] }> = {};
-    subcategories.forEach(cat => {
+    expenseSubcategories.forEach(cat => {
       const parent = categories?.find(p => p.id === cat.parent_id);
       if (parent) {
         if (!groups[parent.id]) {
@@ -67,7 +61,7 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
       }
     });
     return Object.values(groups);
-  }, [subcategories, categories]);
+  }, [expenseSubcategories, categories]);
 
   // Create a map of forecasts by category and month
   const forecastMap = useMemo(() => {
@@ -166,22 +160,27 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
     return cellValues[key] ?? 0;
   };
 
+  const formatCurrency = (value: number): string => {
+    if (value === 0) return "-";
+    return value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
   const hasChanges = Object.keys(pendingChanges).length > 0;
 
-  const getMonthTotal = (monthIndex: number) => {
-    return subcategories.reduce((sum, cat) => {
-      return sum + getCellValue(cat.id, monthIndex);
-    }, 0);
+  const getRevenueMonthTotal = (monthIndex: number) => {
+    return revenueCategories.reduce((sum, cat) => sum + getCellValue(cat.id, monthIndex), 0);
+  };
+
+  const getExpenseMonthTotal = (monthIndex: number) => {
+    return expenseSubcategories.reduce((sum, cat) => sum + getCellValue(cat.id, monthIndex), 0);
   };
 
   const getCategoryTotal = (categoryId: string) => {
-    return MONTHS.reduce((sum, monthIndex) => {
-      return sum + getCellValue(categoryId, monthIndex);
-    }, 0);
+    return MONTHS.reduce((sum, monthIndex) => sum + getCellValue(categoryId, monthIndex), 0);
   };
 
   const getParentTotal = (parentId: string, monthIndex: number) => {
-    const children = groupedCategories.find(g => g.parent.id === parentId)?.children || [];
+    const children = groupedExpenses.find(g => g.parent.id === parentId)?.children || [];
     return children.reduce((sum, cat) => sum + getCellValue(cat.id, monthIndex), 0);
   };
 
@@ -189,7 +188,8 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
     return MONTHS.reduce((sum, monthIndex) => sum + getParentTotal(parentId, monthIndex), 0);
   };
 
-  const yearTotal = MONTHS.reduce((sum, monthIndex) => sum + getMonthTotal(monthIndex), 0);
+  const revenueYearTotal = MONTHS.reduce((sum, monthIndex) => sum + getRevenueMonthTotal(monthIndex), 0);
+  const expenseYearTotal = MONTHS.reduce((sum, monthIndex) => sum + getExpenseMonthTotal(monthIndex), 0);
 
   if (categoriesLoading || forecastsLoading) {
     return <div className="text-muted-foreground">Carregando...</div>;
@@ -199,17 +199,10 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
     <Card className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setSelectedYear(prev => prev - 1)}
-          >
+          <Button variant="outline" size="icon" onClick={() => setSelectedYear(prev => prev - 1)}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Select
-            value={selectedYear.toString()}
-            onValueChange={(value) => setSelectedYear(parseInt(value))}
-          >
+          <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>
@@ -224,127 +217,175 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
               })}
             </SelectContent>
           </Select>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setSelectedYear(prev => prev + 1)}
-          >
+          <Button variant="outline" size="icon" onClick={() => setSelectedYear(prev => prev + 1)}>
             <ChevronRight className="h-4 w-4" />
           </Button>
-
-          {accountType !== "casa" && (
-            <Select
-              value={selectedType}
-              onValueChange={(value: "receita" | "despesa") => setSelectedType(value)}
-            >
-              <SelectTrigger className="w-36">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="receita">Receitas</SelectItem>
-                <SelectItem value="despesa">Despesas</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
         </div>
         
-        <Button 
-          onClick={handleSaveAll} 
-          disabled={!hasChanges || !canEdit}
-          className="gap-2"
-        >
+        <Button onClick={handleSaveAll} disabled={!hasChanges || !canEdit} className="gap-2">
           <Save className="h-4 w-4" />
           Salvar Tudo
         </Button>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr>
-              <th className="border border-border p-3 bg-teal-600 text-white text-left font-semibold sticky left-0 z-20 min-w-[200px]">
-                Categoria
-              </th>
-              {MONTHS.map((monthIndex) => (
-                <th key={monthIndex} className="border border-border p-3 bg-teal-600 text-white text-center font-semibold min-w-[100px]">
-                  {format(new Date(selectedYear, monthIndex, 1), "MMMM", { locale: ptBR })}
-                </th>
-              ))}
-              <th className="border border-border p-3 bg-teal-700 text-white text-center font-semibold min-w-[120px]">
-                Total
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {groupedCategories.map((group, groupIndex) => (
-              <>
-                {group.children.map((category, childIndex) => (
-                  <tr key={category.id} className={childIndex % 2 === 0 ? "bg-background" : "bg-muted/30"}>
-                    <td className="border border-border p-2 sticky left-0 z-10 font-medium bg-inherit">
-                      <div className="pl-4">{category.name}</div>
+      <div className="space-y-8">
+        {/* REVENUE SECTION */}
+        {accountType !== "casa" && revenueCategories.length > 0 && (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-border">
+              <thead>
+                <tr>
+                  <th className="border border-border p-3 bg-teal-500 text-white text-left font-semibold min-w-[200px]">
+                    Receita
+                  </th>
+                  {MONTHS.map((monthIndex) => (
+                    <th key={monthIndex} className="border border-border p-3 bg-teal-500 text-white text-center font-semibold min-w-[110px]">
+                      {format(new Date(selectedYear, monthIndex, 1), "MMMM", { locale: ptBR })}
+                    </th>
+                  ))}
+                  <th className="border border-border p-3 bg-teal-500 text-white text-center font-semibold min-w-[120px]">
+                    Total
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {revenueCategories.map((category, idx) => (
+                  <tr key={category.id} className={idx % 2 === 0 ? "bg-white dark:bg-background" : "bg-gray-50 dark:bg-muted/20"}>
+                    <td className="border border-border p-2 font-medium">
+                      {category.name}
                     </td>
                     {MONTHS.map((monthIndex) => {
                       const cellKey = `${category.id}-${monthIndex}`;
+                      const value = getCellValue(category.id, monthIndex);
                       return (
                         <td key={cellKey} className="border border-border p-0">
                           {canEdit ? (
                             <Input
                               type="number"
                               step="0.01"
-                              value={getCellValue(category.id, monthIndex) || ""}
+                              value={value || ""}
                               onChange={(e) => handleCellChange(category.id, monthIndex, e.target.value)}
                               className="w-full h-full text-right border-0 rounded-none focus-visible:ring-1 focus-visible:ring-primary bg-transparent px-2 py-2"
-                              placeholder="0.00"
+                              placeholder="-"
                             />
                           ) : (
                             <div className="text-right px-3 py-2">
-                              {parseFloat(getCellValue(category.id, monthIndex).toString() || "0").toFixed(2)}
+                              {formatCurrency(value)}
                             </div>
                           )}
                         </td>
                       );
                     })}
-                    <td className="border border-border p-2 bg-muted text-right font-semibold">
-                      {getCategoryTotal(category.id).toFixed(2)}
+                    <td className="border border-border p-2 bg-gray-100 dark:bg-muted/40 text-right font-semibold">
+                      {formatCurrency(getCategoryTotal(category.id))}
                     </td>
                   </tr>
                 ))}
-                <tr key={`subtotal-${group.parent.id}`} className="bg-amber-50 dark:bg-amber-950 font-bold">
-                  <td className="border border-border p-3 sticky left-0 z-10 bg-amber-100 dark:bg-amber-900">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="w-3 h-3 rounded-full shrink-0"
-                        style={{ backgroundColor: group.parent.color }}
-                      />
-                      <span className="text-amber-900 dark:text-amber-100">Subtotal {group.parent.name}</span>
-                    </div>
+                <tr className="font-bold bg-teal-600 text-white">
+                  <td className="border border-border p-3">
+                    Total Receita
                   </td>
                   {MONTHS.map((monthIndex) => (
-                    <td key={monthIndex} className="border border-border p-3 text-right text-amber-900 dark:text-amber-100">
-                      {getParentTotal(group.parent.id, monthIndex).toFixed(2)}
+                    <td key={monthIndex} className="border border-border p-3 text-right">
+                      {formatCurrency(getRevenueMonthTotal(monthIndex))}
                     </td>
                   ))}
-                  <td className="border border-border p-3 bg-amber-100 dark:bg-amber-900 text-right text-amber-900 dark:text-amber-100">
-                    {getParentYearTotal(group.parent.id).toFixed(2)}
+                  <td className="border border-border p-3 text-right">
+                    {formatCurrency(revenueYearTotal)}
                   </td>
                 </tr>
-              </>
-            ))}
-            <tr className="font-bold bg-teal-50 dark:bg-teal-950">
-              <td className="border border-border p-3 sticky left-0 z-10 bg-teal-100 dark:bg-teal-900 text-teal-900 dark:text-teal-100">
-                Total
-              </td>
-              {MONTHS.map((monthIndex) => (
-                <td key={monthIndex} className="border border-border p-3 text-right text-teal-900 dark:text-teal-100">
-                  {getMonthTotal(monthIndex).toFixed(2)}
-                </td>
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* EXPENSE SECTION */}
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse border border-border">
+            <thead>
+              <tr>
+                <th className="border border-border p-3 bg-teal-500 text-white text-left font-semibold min-w-[200px]">
+                  Despesa
+                </th>
+                {MONTHS.map((monthIndex) => (
+                  <th key={monthIndex} className="border border-border p-3 bg-teal-500 text-white text-center font-semibold min-w-[110px]">
+                    {format(new Date(selectedYear, monthIndex, 1), "MMMM", { locale: ptBR })}
+                  </th>
+                ))}
+                <th className="border border-border p-3 bg-teal-500 text-white text-center font-semibold min-w-[120px]">
+                  Total
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {groupedExpenses.map((group) => (
+                <>
+                  {group.children.map((category, idx) => (
+                    <tr key={category.id} className={idx % 2 === 0 ? "bg-white dark:bg-background" : "bg-gray-50 dark:bg-muted/20"}>
+                      <td className="border border-border p-2 font-medium pl-6">
+                        {category.name}
+                      </td>
+                      {MONTHS.map((monthIndex) => {
+                        const cellKey = `${category.id}-${monthIndex}`;
+                        const value = getCellValue(category.id, monthIndex);
+                        return (
+                          <td key={cellKey} className="border border-border p-0">
+                            {canEdit ? (
+                              <Input
+                                type="number"
+                                step="0.01"
+                                value={value || ""}
+                                onChange={(e) => handleCellChange(category.id, monthIndex, e.target.value)}
+                                className="w-full h-full text-right border-0 rounded-none focus-visible:ring-1 focus-visible:ring-primary bg-transparent px-2 py-2"
+                                placeholder="-"
+                              />
+                            ) : (
+                              <div className="text-right px-3 py-2">
+                                {formatCurrency(value)}
+                              </div>
+                            )}
+                          </td>
+                        );
+                      })}
+                      <td className="border border-border p-2 bg-gray-100 dark:bg-muted/40 text-right font-semibold">
+                        {formatCurrency(getCategoryTotal(category.id))}
+                      </td>
+                    </tr>
+                  ))}
+                  <tr className="bg-gray-200 dark:bg-muted/50 font-bold">
+                    <td className="border border-border p-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: group.parent.color }} />
+                        <span>Subtotal {group.parent.name}</span>
+                      </div>
+                    </td>
+                    {MONTHS.map((monthIndex) => (
+                      <td key={monthIndex} className="border border-border p-3 text-right">
+                        {formatCurrency(getParentTotal(group.parent.id, monthIndex))}
+                      </td>
+                    ))}
+                    <td className="border border-border p-3 text-right">
+                      {formatCurrency(getParentYearTotal(group.parent.id))}
+                    </td>
+                  </tr>
+                </>
               ))}
-              <td className="border border-border p-3 bg-teal-100 dark:bg-teal-900 text-right text-teal-900 dark:text-teal-100">
-                {yearTotal.toFixed(2)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              <tr className="font-bold bg-teal-600 text-white">
+                <td className="border border-border p-3">
+                  Total Despesa
+                </td>
+                {MONTHS.map((monthIndex) => (
+                  <td key={monthIndex} className="border border-border p-3 text-right">
+                    {formatCurrency(getExpenseMonthTotal(monthIndex))}
+                  </td>
+                ))}
+                <td className="border border-border p-3 text-right">
+                  {formatCurrency(expenseYearTotal)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </Card>
   );
