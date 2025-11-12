@@ -231,9 +231,9 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
       <div className="space-y-6">
         {/* REVENUE SECTION */}
         {accountType !== "casa" && revenueCategories.length > 0 && (
-          <div className="overflow-x-auto xl:overflow-visible">
+          <div className="overflow-x-auto xl:overflow-visible -mx-6 px-6">
             <table className="w-full border-collapse border border-border text-sm">
-              <thead className="sticky top-0 z-20 shadow-sm">
+              <thead className="sticky top-0 z-30 shadow-md">
                 <tr>
                   <th className="border border-border px-2 py-1.5 bg-teal-500 text-white text-left font-semibold min-w-[160px]">
                     Receita
@@ -300,9 +300,9 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
         )}
 
         {/* EXPENSE SECTION */}
-        <div className="overflow-x-auto xl:overflow-visible">
+        <div className="overflow-x-auto xl:overflow-visible -mx-6 px-6">
           <table className="w-full border-collapse border border-border text-sm">
-            <thead className="sticky top-0 z-20 shadow-sm">
+            <thead className="sticky top-0 z-30 shadow-md">
               <tr>
                 <th className="border border-border px-2 py-1.5 bg-teal-500 text-white text-left font-semibold min-w-[160px]">
                   Despesa
