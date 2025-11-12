@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -318,8 +318,8 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
               </tr>
             </thead>
             <tbody>
-              {groupedExpenses.map((group) => (
-                <>
+              {groupedExpenses.map((group, groupIdx) => (
+                <React.Fragment key={group.parent.id}>
                   {group.children.map((category, idx) => (
                     <tr key={category.id} className={idx % 2 === 0 ? "bg-white dark:bg-background" : "bg-gray-50 dark:bg-muted/20"}>
                       <td className="border border-border px-2 py-1 font-medium pl-4">
@@ -368,7 +368,7 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
                       {formatCurrency(getParentYearTotal(group.parent.id))}
                     </td>
                   </tr>
-                </>
+                </React.Fragment>
               ))}
               <tr className="font-bold bg-teal-600 text-white">
                 <td className="border border-border px-2 py-1.5">
