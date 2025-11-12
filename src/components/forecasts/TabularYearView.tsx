@@ -196,8 +196,8 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
   }
 
   return (
-    <Card className="p-6">
-      <div className="flex items-center justify-between mb-6">
+    <Card className="p-6 flex flex-col max-h-[calc(100vh-12rem)]">
+      <div className="flex items-center justify-between mb-6 flex-shrink-0">
         <div className="flex items-center gap-3">
           <Button variant="outline" size="icon" onClick={() => setSelectedYear(prev => prev - 1)}>
             <ChevronLeft className="h-4 w-4" />
@@ -228,12 +228,12 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
         </Button>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 overflow-y-auto flex-1">
         {/* REVENUE SECTION */}
         {accountType !== "casa" && revenueCategories.length > 0 && (
-          <div className="overflow-x-auto xl:overflow-visible -mx-6 px-6">
+          <div className="overflow-x-auto xl:overflow-visible">
             <table className="w-full border-collapse border border-border text-sm">
-              <thead className="sticky top-0 z-30 shadow-md">
+              <thead className="sticky top-0 z-30 bg-teal-500">
                 <tr>
                   <th className="border border-border px-2 py-1.5 bg-teal-500 text-white text-left font-semibold min-w-[160px]">
                     Receita
@@ -300,9 +300,9 @@ export function TabularYearView({ accountId, accountType }: TabularYearViewProps
         )}
 
         {/* EXPENSE SECTION */}
-        <div className="overflow-x-auto xl:overflow-visible -mx-6 px-6">
+        <div className="overflow-x-auto xl:overflow-visible">
           <table className="w-full border-collapse border border-border text-sm">
-            <thead className="sticky top-0 z-30 shadow-md">
+            <thead className="sticky top-0 z-30 bg-teal-500">
               <tr>
                 <th className="border border-border px-2 py-1.5 bg-teal-500 text-white text-left font-semibold min-w-[160px]">
                   Despesa
