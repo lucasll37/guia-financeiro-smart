@@ -32,6 +32,8 @@ import { GeneralMessageManager } from "@/components/admin/GeneralMessageManager"
 import { InvestmentSimulationSettings } from "@/components/admin/InvestmentSimulationSettings";
 import { GuideTextManager } from "@/components/admin/GuideTextManager";
 import { AiTutorManager } from "@/components/admin/AiTutorManager";
+import { TutorialSettings } from "@/components/admin/TutorialSettings";
+
 const couponSchema = z.object({
   code: z.string().trim().min(3, "Código deve ter no mínimo 3 caracteres").max(50, "Código muito longo"),
   discount_percent: z.number().min(1, "Desconto deve ser entre 1 e 100").max(100, "Desconto deve ser entre 1 e 100"),
@@ -844,6 +846,7 @@ export default function Admin() {
           <PlanLimitsManager />
           <InvestmentSimulationSettings />
           <VersionSettings />
+          <TutorialSettings />
           <GuideTextManager />
           <CookieMessageManager />
           <GeneralMessageManager />
