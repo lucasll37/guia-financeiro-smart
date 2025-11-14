@@ -12,7 +12,10 @@ export function TutorialModal({ open, onOpenChange }: TutorialModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl w-full p-6">
+      <DialogContent 
+        className="max-w-4xl w-full p-6"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Tutorial</DialogTitle>
         </DialogHeader>

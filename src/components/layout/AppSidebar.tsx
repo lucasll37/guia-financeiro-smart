@@ -44,7 +44,7 @@ export function AppSidebar() {
   const location = useLocation();
   const [showTutorial, setShowTutorial] = React.useState(false);
   
-  const visibleMenuItems = isAdmin ? [...menuItems, adminMenuItem] : menuItems;
+  
 
   return (
     <>
@@ -60,8 +60,8 @@ export function AppSidebar() {
               {!isCollapsed && "Navegação"}
             </SidebarGroupLabel>
             <SidebarGroupContent className="px-2">
-              <SidebarMenu className="gap-1">
-                {visibleMenuItems.map((item) => {
+            <SidebarMenu className="gap-1">
+                {menuItems.map((item) => {
                 const isActive = location.pathname.startsWith(item.url);
                 return (
                   <SidebarMenuItem key={item.url}>
@@ -114,9 +114,9 @@ export function AppSidebar() {
                   className="relative transition-all duration-200 group"
                   onClick={() => setShowTutorial(true)}
                 >
-                  <button
+                  <div
                     className={cn(
-                      "flex items-center rounded-lg overflow-visible w-full",
+                      "flex items-center rounded-lg overflow-visible w-full cursor-pointer",
                       isCollapsed ? "justify-center" : "gap-3 px-3 py-2.5",
                       "hover:bg-accent/50 transition-colors",
                       "text-muted-foreground hover:text-foreground"
@@ -124,13 +124,57 @@ export function AppSidebar() {
                   >
                     <Video className="h-5 w-5 shrink-0" />
                     {!isCollapsed && (
-                      <span className="flex-1 truncate text-sm">
+                      <span className="flex-1 truncate text-sm text-left">
                         Tutorial
                       </span>
                     )}
-                  </button>
+                  </div>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              
+              {/* Admin Item */}
+              {isAdmin && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton 
+                    asChild 
+                    tooltip={adminMenuItem.title}
+                    className={cn(
+                      "relative transition-all duration-200 group",
+                      location.pathname.startsWith(adminMenuItem.url) && "bg-primary/10 hover:bg-primary/15"
+                    )}
+                  >
+                    <NavLink
+                      to={adminMenuItem.url}
+                      className={cn(
+                        "flex items-center rounded-lg overflow-visible",
+                        isCollapsed ? "justify-center" : "gap-3 px-3 py-2.5",
+                        "hover:bg-accent/50 transition-colors",
+                        location.pathname.startsWith(adminMenuItem.url) ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground",
+                        location.pathname.startsWith(adminMenuItem.url) && [
+                          !isCollapsed && "before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2",
+                          !isCollapsed && "before:h-8 before:w-1 before:rounded-r-full before:bg-primary",
+                          !isCollapsed && "before:shadow-[0_0_8px_rgba(var(--primary),0.5)]"
+                        ]
+                      )}
+                    >
+                      <adminMenuItem.icon 
+                        className={cn(
+                          "h-5 w-5 shrink-0",
+                          location.pathname.startsWith(adminMenuItem.url) ? "text-primary" : "text-current"
+                        )}
+                      />
+                      {!isCollapsed && (
+                        <span className="flex-1 truncate text-sm">
+                          {adminMenuItem.title}
+                        </span>
+                      )}
+                      {location.pathname.startsWith(adminMenuItem.url) && !isCollapsed && (
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                      )}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
