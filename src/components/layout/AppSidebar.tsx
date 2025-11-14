@@ -111,24 +111,18 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   tooltip="Tutorial"
-                  className="relative transition-all duration-200 group"
+                  className={cn(
+                    "relative transition-all duration-200 group",
+                    "hover:bg-accent/50"
+                  )}
                   onClick={() => setShowTutorial(true)}
                 >
-                  <div
-                    className={cn(
-                      "flex items-center rounded-lg overflow-visible w-full cursor-pointer",
-                      isCollapsed ? "justify-center" : "gap-3 px-3 py-2.5",
-                      "hover:bg-accent/50 transition-colors",
-                      "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    <Video className="h-5 w-5 shrink-0" />
-                    {!isCollapsed && (
-                      <span className="flex-1 truncate text-sm text-left">
-                        Tutorial
-                      </span>
-                    )}
-                  </div>
+                  <Video className="h-5 w-5 shrink-0" />
+                  {!isCollapsed && (
+                    <span className="flex-1 truncate text-sm">
+                      Tutorial
+                    </span>
+                  )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
               
