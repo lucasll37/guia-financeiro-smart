@@ -4,7 +4,8 @@ import {
   Target, 
   TrendingUp, 
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  Video
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -23,6 +24,8 @@ import { t } from "@/lib/i18n";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useAppSettings } from "@/hooks/useAppSettings";
 import { cn } from "@/lib/utils";
+import { TutorialModal } from "@/components/TutorialModal";
+import * as React from "react";
 
 const menuItems = [
   { title: t("nav.dashboard"), url: "/app/dashboard", icon: LayoutDashboard },
@@ -39,22 +42,26 @@ export function AppSidebar() {
   const { data: isAdmin } = useIsAdmin();
   const { version } = useAppSettings();
   const location = useLocation();
+  const [showTutorial, setShowTutorial] = React.useState(false);
   
   const visibleMenuItems = isAdmin ? [...menuItems, adminMenuItem] : menuItems;
 
   return (
-    <Sidebar 
-      collapsible="icon" 
-      className="border-r bg-gradient-to-b from-sidebar via-sidebar to-sidebar/95"
-    >
-      <SidebarContent className="gap-2">
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-4 py-3">
-            {!isCollapsed && "Navegação"}
-          </SidebarGroupLabel>
-          <SidebarGroupContent className="px-2">
-            <SidebarMenu className="gap-1">
-              {visibleMenuItems.map((item) => {
+    <>
+      <TutorialModal open={showTutorial} onOpenChange={setShowTutorial} />
+      
+      <Sidebar 
+        collapsible="icon" 
+        className="border-r bg-gradient-to-b from-sidebar via-sidebar to-sidebar/95"
+      >
+        <SidebarContent className="gap-2">
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-4 py-3">
+              {!isCollapsed && "Navegação"}
+            </SidebarGroupLabel>
+            <SidebarGroupContent className="px-2">
+              <SidebarMenu className="gap-1">
+                {visibleMenuItems.map((item) => {
                 const isActive = location.pathname.startsWith(item.url);
                 return (
                   <SidebarMenuItem key={item.url}>
@@ -99,6 +106,31 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 );
               })}
+              
+              {/* Tutorial Item */}
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  tooltip="Tutorial"
+                  className="relative transition-all duration-200 group"
+                  onClick={() => setShowTutorial(true)}
+                >
+                  <button
+                    className={cn(
+                      "flex items-center rounded-lg overflow-visible w-full",
+                      isCollapsed ? "justify-center" : "gap-3 px-3 py-2.5",
+                      "hover:bg-accent/50 transition-colors",
+                      "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <Video className="h-5 w-5 shrink-0" />
+                    {!isCollapsed && (
+                      <span className="flex-1 truncate text-sm">
+                        Tutorial
+                      </span>
+                    )}
+                  </button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -118,6 +150,7 @@ export function AppSidebar() {
           </div>
         )}
       </SidebarFooter>
-    </Sidebar>
+      </Sidebar>
+    </>
   );
 }

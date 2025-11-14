@@ -74,5 +74,6 @@ export const useAppSettings = () => {
           ? JSON.parse(settings.ai_tutor_enabled.value).enabled
           : settings.ai_tutor_enabled.value.enabled)
       : false,
+    tutorialVideoUrl: settings?.tutorial_video_url?.value || "",
   };
 };
