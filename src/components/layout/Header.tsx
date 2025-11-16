@@ -93,11 +93,11 @@ export const Header = () => {
         <div className="hidden min-[500px]:flex absolute left-1/2 -translate-x-1/2 flex-col items-center leading-none pointer-events-none">
           <div className="flex items-center gap-1 md:gap-1.5">
             <Wallet className="h-5 w-5 md:h-6 md:w-6 text-primary" />
-            <span className="font-display text-xl md:text-3xl font-bold text-foreground">
+            <span className="font-display text-2xl md:text-4xl font-semibold text-foreground tracking-tight">
               Prospera!
             </span>
           </div>
-          <span className="text-xs md:text-sm text-muted-foreground font-medium tracking-wide mt-0.5">
+          <span className="font-display text-xs md:text-sm text-muted-foreground font-normal tracking-wider mt-0.5">
             Gestor Financeiro
           </span>
         </div>
