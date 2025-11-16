@@ -33,6 +33,7 @@ import { InvestmentSimulationSettings } from "@/components/admin/InvestmentSimul
 import { GuideTextManager } from "@/components/admin/GuideTextManager";
 import { AiTutorManager } from "@/components/admin/AiTutorManager";
 import { TutorialSettings } from "@/components/admin/TutorialSettings";
+import { StripeSettings } from "@/components/admin/StripeSettings";
 
 const couponSchema = z.object({
   code: z.string().trim().min(3, "Código deve ter no mínimo 3 caracteres").max(50, "Código muito longo"),
@@ -843,6 +844,7 @@ export default function Admin() {
 
         {/* Plan Limits Tab */}
         <TabsContent value="limits" className="space-y-4">
+          <StripeSettings />
           <PlanLimitsManager />
           <InvestmentSimulationSettings />
           <VersionSettings />
@@ -850,6 +852,7 @@ export default function Admin() {
           <GuideTextManager />
           <CookieMessageManager />
           <GeneralMessageManager />
+          <LogRetentionSettings />
         </TabsContent>
 
         {/* Seed Categories Tab */}

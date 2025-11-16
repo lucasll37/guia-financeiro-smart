@@ -19,10 +19,9 @@ serve(async (req) => {
 
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     {
       auth: { persistSession: false },
-      global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
     }
   );
 
@@ -47,6 +46,26 @@ serve(async (req) => {
     if (!userId || !email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId, email });
 
+    // Buscar Price ID das configurações do admin
+    const { data: priceIdConfig, error: configError } = await supabaseClient
+      .from("admin_settings")
+      .select("setting_value")
+      .eq("setting_key", "stripe_pro_price_id")
+      .maybeSingle();
+
+    if (configError) {
+      logStep("Error fetching price ID config", { error: configError });
+      throw new Error("Erro ao buscar configuração do Stripe");
+    }
+
+    const priceId = priceIdConfig?.setting_value as string;
+    if (!priceId || !priceId.startsWith("price_")) {
+      logStep("Invalid or missing price ID", { priceId });
+      throw new Error("Price ID do Stripe não configurado. Entre em contato com o administrador.");
+    }
+
+    logStep("Price ID found", { priceId });
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { 
       apiVersion: "2025-08-27.basil" 
     });
@@ -67,7 +86,7 @@ serve(async (req) => {
       customer_email: customerId ? undefined : email,
       line_items: [
         {
-          price: "price_1SN39tHHQy81N0cFELbk2209",
+          price: priceId,
           quantity: 1,
         },
       ],
