@@ -28,6 +28,7 @@ interface TransactionsTableProps {
   accountType?: string;
   viewMode?: "monthly" | "custom";
   onViewModeChange?: (mode: "monthly" | "custom") => void;
+  yearToDateBalance?: number;
 }
 
 export function TransactionsTable({
@@ -40,6 +41,7 @@ export function TransactionsTable({
   accountType,
   viewMode = "monthly",
   onViewModeChange,
+  yearToDateBalance = 0,
 }: TransactionsTableProps) {
   const [sortField, setSortField] = useState<'date' | 'description' | 'amount' | 'category' | null>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -634,6 +636,28 @@ export function TransactionsTable({
                 </TableCell>
                 <TableCell className="text-right text-destructive">
                   - {maskValue(formatCurrency(totalExpense))}
+                </TableCell>
+                <TableCell />
+              </TableRow>
+              
+              {/* Saldo Mensal */}
+              <TableRow className="bg-primary/10 font-semibold border-t-2">
+                <TableCell colSpan={groupByCategory ? 2 : 3} className="text-right">
+                  Saldo Mensal (Receitas - Despesas):
+                </TableCell>
+                <TableCell className={`text-right ${balance >= 0 ? "text-green-600" : "text-destructive"}`}>
+                  {balance >= 0 ? "+" : ""} {maskValue(formatCurrency(balance))}
+                </TableCell>
+                <TableCell />
+              </TableRow>
+              
+              {/* Saldo Acumulado no Ano */}
+              <TableRow className="bg-primary/5 font-semibold">
+                <TableCell colSpan={groupByCategory ? 2 : 3} className="text-right">
+                  Saldo Acumulado no Ano:
+                </TableCell>
+                <TableCell className={`text-right ${yearToDateBalance >= 0 ? "text-green-600" : "text-destructive"}`}>
+                  {yearToDateBalance >= 0 ? "+" : ""} {maskValue(formatCurrency(yearToDateBalance))}
                 </TableCell>
                 <TableCell />
               </TableRow>

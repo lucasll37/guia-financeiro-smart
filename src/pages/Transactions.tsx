@@ -106,6 +106,31 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
     });
   }, [transactions, filters]);
 
+  // Calculate year-to-date balance
+  const yearToDateBalance = useMemo(() => {
+    if (!transactions) return 0;
+    
+    const currentYear = new Date(filters.endDate).getFullYear();
+    const yearStart = `${currentYear}-01-01`;
+    const yearEnd = filters.endDate;
+    
+    return transactions
+      .filter((t) => {
+        const transactionDate = parseISO(String(t.date));
+        const startDate = parseISO(yearStart);
+        const endDate = parseISO(yearEnd);
+        return transactionDate >= startDate && transactionDate <= endDate;
+      })
+      .reduce((acc, t) => {
+        if (t.categories?.type === "receita") {
+          return acc + t.amount;
+        } else if (t.categories?.type === "despesa") {
+          return acc - t.amount;
+        }
+        return acc;
+      }, 0);
+  }, [transactions, filters.endDate]);
+
   const handleCreateTransaction = () => {
     setSelectedTransaction(null);
     setDialogOpen(true);
@@ -247,6 +272,7 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
           canEdit={canEdit}
           accountType={filters.accountId !== "all" ? accounts?.find(a => a.id === filters.accountId)?.type : undefined}
           viewMode={filters.viewMode}
+          yearToDateBalance={yearToDateBalance}
           onViewModeChange={(mode) => {
             const newFilters = { ...filters, viewMode: mode };
             if (mode === "monthly") {
