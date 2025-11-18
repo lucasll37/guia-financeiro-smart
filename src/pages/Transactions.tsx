@@ -13,6 +13,7 @@ import { useSearchParams } from "react-router-dom";
 import { TransactionFilters } from "@/components/transactions/TransactionFilters";
 import { TransactionsTable } from "@/components/transactions/TransactionsTable";
 import { TransactionDialog } from "@/components/transactions/TransactionDialog";
+import { CopyTransactionDialog } from "@/components/transactions/CopyTransactionDialog";
 import { useAccountEditPermissions } from "@/hooks/useAccountEditPermissions";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -47,6 +48,8 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [copyDialogOpen, setCopyDialogOpen] = useState(false);
+  const [transactionToCopy, setTransactionToCopy] = useState<any>(null);
   
   // Update filters when propAccountId changes
   useEffect(() => {
@@ -159,6 +162,53 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
     });
   };
 
+  const handleCopyTransaction = (transaction: any) => {
+    setTransactionToCopy(transaction);
+    setCopyDialogOpen(true);
+  };
+
+  const handleConfirmCopy = async (newDate: string) => {
+    if (!user || !transactionToCopy) return;
+
+    try {
+      const newTransaction: TransactionInsert = {
+        account_id: transactionToCopy.account_id,
+        category_id: transactionToCopy.category_id,
+        date: newDate,
+        amount: transactionToCopy.amount,
+        description: transactionToCopy.description,
+        is_recurring: transactionToCopy.is_recurring,
+        split_override: transactionToCopy.split_override,
+        credit_card_id: transactionToCopy.credit_card_id,
+        payment_month: transactionToCopy.payment_month,
+        created_by: user.id,
+      };
+
+      await createTransaction.mutateAsync(newTransaction);
+      
+      logAction.mutate({
+        entity: "transactions",
+        entity_id: "",
+        action: "create",
+        diff: newTransaction as any,
+      });
+      
+      toast({
+        title: "Lançamento copiado",
+        description: "O lançamento foi copiado com sucesso.",
+      });
+      
+      setCopyDialogOpen(false);
+      setTransactionToCopy(null);
+    } catch (error: any) {
+      toast({
+        title: "Erro ao copiar",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
 
   if (!user) return null;
 
@@ -192,6 +242,7 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
           transactions={filteredTransactions}
           onEdit={handleEditTransaction}
           onDelete={handleDeleteTransaction}
+          onCopy={handleCopyTransaction}
           categories={categories || []}
           canEdit={canEdit}
           accountType={filters.accountId !== "all" ? accounts?.find(a => a.id === filters.accountId)?.type : undefined}
@@ -224,6 +275,13 @@ export default function Transactions({ accountId: propAccountId }: TransactionsP
         categories={categories || []}
         currentUserId={user.id}
         defaultAccountId={propAccountId}
+      />
+
+      <CopyTransactionDialog
+        open={copyDialogOpen}
+        onOpenChange={setCopyDialogOpen}
+        onCopy={handleConfirmCopy}
+        originalDate={transactionToCopy?.date || new Date().toISOString().split('T')[0]}
       />
 
     </div>

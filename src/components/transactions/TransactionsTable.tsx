@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, CreditCard, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight, FolderTree, List, CalendarIcon } from "lucide-react";
+import { Edit, Trash2, CreditCard, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight, FolderTree, List, CalendarIcon, Copy } from "lucide-react";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMaskValues } from "@/hooks/useMaskValues";
@@ -22,6 +22,7 @@ interface TransactionsTableProps {
   transactions: Transaction[];
   onEdit: (transaction: Transaction) => void;
   onDelete: (id: string) => void;
+  onCopy?: (transaction: Transaction) => void;
   categories?: any[];
   canEdit?: boolean;
   accountType?: string;
@@ -33,6 +34,7 @@ export function TransactionsTable({
   transactions,
   onEdit,
   onDelete,
+  onCopy,
   categories = [],
   canEdit = true,
   accountType,
@@ -392,8 +394,18 @@ export function TransactionsTable({
                           <Button
                             variant="ghost"
                             size="icon"
+                            onClick={() => onCopy?.(transaction)}
+                            disabled={!canEdit}
+                            title="Copiar lançamento"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => onEdit(transaction)}
                             disabled={!canEdit}
+                            title="Editar lançamento"
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -402,6 +414,7 @@ export function TransactionsTable({
                             size="icon"
                             onClick={() => onDelete(transaction.id)}
                             disabled={!canEdit}
+                            title="Deletar lançamento"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
